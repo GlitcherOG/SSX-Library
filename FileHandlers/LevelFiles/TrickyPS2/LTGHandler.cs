@@ -519,7 +519,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.TrickyPS2
                             {
                                 if (NodeInstanceBools[i])
                                 {
-                                    MessageBox.Show("Instance Not Added To LTG " + TempMainBox.instanceIndex[i]);
+                                    //MessageBox.Show("Instance Not Added To LTG " + TempMainBox.instanceIndex[i]);
                                 }
                             }
                         }
@@ -1066,7 +1066,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.TrickyPS2
                             {
                                 if (NodeInstanceBools[i])
                                 {
-                                    MessageBox.Show("Instance Not Added To LTG " + TempMainBox.instanceIndex[i]);
+                                    //MessageBox.Show("Instance Not Added To LTG " + TempMainBox.instanceIndex[i]);
                                 }
                             }
                         }

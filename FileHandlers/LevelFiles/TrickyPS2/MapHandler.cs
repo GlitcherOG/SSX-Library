@@ -75,7 +75,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.TrickyPS2
             //Header
             List<string> FileLines = new List<string>();
             FileLines.Add("");
-            FileLines.Add("SSX Level Extractor V" + Program.Version + " By Archy/GlitcherOG");
+            //FileLines.Add("SSX Level Extractor V" + Program.Version + " By Archy/GlitcherOG");
             FileLines.Add("N/A");
             FileLines.Add("N/A");
             FileLines.Add("N/A");

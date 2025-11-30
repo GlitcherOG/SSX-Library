@@ -562,7 +562,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.TrickyPS2
                 }
                 else
                 {
-                    MessageBox.Show("Missing Type " + NewEffect.MainType.ToString() + "," + NewMainType.SubType.ToString());
+                    //MessageBox.Show("Missing Type " + NewEffect.MainType.ToString() + "," + NewMainType.SubType.ToString());
                     return null;
                 }
                 NewEffect.type0 = NewMainType;
@@ -734,7 +734,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.TrickyPS2
                 }
                 else
                 {
-                    MessageBox.Show("Missing Type " + NewEffect.MainType.ToString() + "," + NewMainType.SubType.ToString());
+                    //MessageBox.Show("Missing Type " + NewEffect.MainType.ToString() + "," + NewMainType.SubType.ToString());
                     return null;
                 }
 
@@ -820,7 +820,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.TrickyPS2
             } //Done
             else
             {
-                MessageBox.Show("Missing Type " + NewEffect.MainType.ToString());
+                //MessageBox.Show("Missing Type " + NewEffect.MainType.ToString());
                 return null;
             }
 
@@ -1003,7 +1003,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.TrickyPS2
                 }
                 else
                 {
-                    MessageBox.Show("ERROR MISSING DATA CANT SAVE SSF EFFECT " + EffectData.MainType + ", " + EffectData.type0.Value.SubType);
+                    //MessageBox.Show("ERROR MISSING DATA CANT SAVE SSF EFFECT " + EffectData.MainType + ", " + EffectData.type0.Value.SubType);
                 }
             }
             else if (EffectData.MainType == 2)
@@ -1160,7 +1160,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.TrickyPS2
                 }
                 else
                 {
-                    MessageBox.Show("ERROR MISSING DATA CANT SAVE SSF EFFECT " + EffectData.MainType + ", " + EffectData.type2.Value.SubType);
+                    //MessageBox.Show("ERROR MISSING DATA CANT SAVE SSF EFFECT " + EffectData.MainType + ", " + EffectData.type2.Value.SubType);
                 }
             }
             else if (EffectData.MainType == 3)
@@ -1223,7 +1223,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.TrickyPS2
             }
             else
             {
-                MessageBox.Show("ERROR MISSING DATA CANT SAVE SSF EFFECT " + EffectData.MainType);
+                //MessageBox.Show("ERROR MISSING DATA CANT SAVE SSF EFFECT " + EffectData.MainType);
             }
 
 

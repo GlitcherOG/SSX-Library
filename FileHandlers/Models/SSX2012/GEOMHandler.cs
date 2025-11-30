@@ -102,7 +102,7 @@ namespace SSXLibrary.FileHandlers.Models.SSX2012
                 }
                 else
                 {
-                    MessageBox.Show("Unknown Index Mode");
+                    //MessageBox.Show("Unknown Index Mode");
                     return;
                 }
                 indxStruct.U2 = StreamUtil.ReadUInt32(stream, true);

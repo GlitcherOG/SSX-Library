@@ -42,7 +42,7 @@ namespace SSXLibrary.FileHandlers
                     }
                     else
                     {
-                        MessageBox.Show(bigHeader.MagicWords + " Unknown Big Format");
+                        //MessageBox.Show(bigHeader.MagicWords + " Unknown Big Format");
                     }
                 }
                 stream.Dispose();
@@ -277,7 +277,7 @@ namespace SSXLibrary.FileHandlers
                 }
                 else
                 {
-                    MessageBox.Show("Unkown format");
+                    //MessageBox.Show("Unkown format");
                 }
 
                 stream.Dispose();
@@ -287,7 +287,7 @@ namespace SSXLibrary.FileHandlers
             }
             catch
             {
-                MessageBox.Show("Unable to Build Big File");
+                //MessageBox.Show("Unable to Build Big File");
             }
         }
 

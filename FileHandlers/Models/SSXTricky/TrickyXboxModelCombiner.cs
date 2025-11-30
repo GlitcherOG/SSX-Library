@@ -340,7 +340,7 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
             }
             else
             {
-                MessageBox.Show("Error Missing Files");
+                ////MessageBox.Show("Error Missing Files");
             }
 
         }
@@ -349,12 +349,12 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
         {
             if (trickyModelCombiner.bones == null)
             {
-                MessageBox.Show("No Bones Detected");
+                //MessageBox.Show("No Bones Detected");
                 return;
             }
             if (trickyModelCombiner.bones.Count != Board.modelHeaders[Selected].boneDatas.Count)
             {
-                MessageBox.Show("Incorrect Ammount of Bones");
+                //MessageBox.Show("Incorrect Ammount of Bones");
                 return;
             }
 
@@ -373,7 +373,7 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
 
             if (!MeshTest)
             {
-                MessageBox.Show("Error Model Not Found. Ensure Name is Correct");
+                //MessageBox.Show("Error Model Not Found. Ensure Name is Correct");
                 return;
             }
 
@@ -382,7 +382,7 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
             {
                 if (!trickyModelCombiner.materials[i].MainTexture.ToLower().Contains("bord"))
                 {
-                    MessageBox.Show("Invalid material " + trickyModelCombiner.materials[i].MainTexture);
+                    //MessageBox.Show("Invalid material " + trickyModelCombiner.materials[i].MainTexture);
                     return;
                 }
             }
@@ -824,7 +824,7 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
             List<TristripGenerator.IndiceTristrip> indiceTristrips = TristripGenerator.GenerateTristripNivda(indiceFaces,10000, true);
             if (indiceTristrips == null)
             {
-                MessageBox.Show("Tristrip Failed to Generate");
+                //MessageBox.Show("Tristrip Failed to Generate");
                 return;
             }
 
@@ -880,7 +880,7 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
         {
             if (trickyModelCombiner.bones == null)
             {
-                MessageBox.Show("No Bones Detected");
+                //MessageBox.Show("No Bones Detected");
                 return;
             }
             bones = new List<TrickyXboxMXF.BoneData>();
@@ -916,7 +916,7 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
 
             if (trickyModelCombiner.bones.Count != bones.Count)
             {
-                MessageBox.Show("Incorrect Ammount of Bones " + trickyModelCombiner.bones.Count + "/" + bones.Count);
+                //MessageBox.Show("Incorrect Ammount of Bones " + trickyModelCombiner.bones.Count + "/" + bones.Count);
                 return;
             }
 
@@ -928,7 +928,7 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
                 (MeshID != 2 && trickyModelCombiner.reassignedMesh[i].MeshName.Contains("750") && !trickyModelCombiner.reassignedMesh[i].MeshName.ToLower().Contains("shdw")) ||
                 (MeshID != 3 && trickyModelCombiner.reassignedMesh[i].MeshName.ToLower().Contains("shdw")))
                 {
-                    MessageBox.Show(trickyModelCombiner.reassignedMesh[i].MeshName + " Non-Matching Mesh Part");
+                    //MessageBox.Show(trickyModelCombiner.reassignedMesh[i].MeshName + " Non-Matching Mesh Part");
                     return;
                 }
             }
@@ -965,7 +965,7 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
                         Reassinged = true;
                         if (TempReMesh.MorphTargetCount != Head.modelHeaders[a].NumMorphs)
                         {
-                            MessageBox.Show("Incorrect ammount of Shapekeys " + Head.modelHeaders[a].NumMorphs + "/" + TempReMesh.MorphTargetCount);
+                            //MessageBox.Show("Incorrect ammount of Shapekeys " + Head.modelHeaders[a].NumMorphs + "/" + TempReMesh.MorphTargetCount);
                             return;
                         }
 
@@ -974,7 +974,7 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
                 }
                 if (!Reassinged)
                 {
-                    MessageBox.Show("Incorrectly Named Or Unneeded mesh part detected \n" + TempReMesh.MeshName);
+                    //MessageBox.Show("Incorrectly Named Or Unneeded mesh part detected \n" + TempReMesh.MeshName);
                 }
 
                 trickyModelCombiner.reassignedMesh[i] = TempReMesh;
@@ -988,7 +988,7 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
                     !trickyModelCombiner.materials[i].MainTexture.ToLower().Contains("head") &&
                     !trickyModelCombiner.materials[i].MainTexture.ToLower().Contains("helm"))
                 {
-                    MessageBox.Show("Invalid material " + trickyModelCombiner.materials[i].MainTexture);
+                    //MessageBox.Show("Invalid material " + trickyModelCombiner.materials[i].MainTexture);
                     return;
                 }
             }
@@ -1513,7 +1513,7 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
 
                 if (indiceTristrips == null)
                 {
-                    MessageBox.Show("Tristrip Failed to Generate");
+                    //MessageBox.Show("Tristrip Failed to Generate");
                     return;
                 }
 
@@ -1573,7 +1573,7 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
                 }
                 trickyModelCombiner.reassignedMesh[i] = TempReMesh;
             }
-            MessageBox.Show("Import Sucessful");
+            //MessageBox.Show("Import Sucessful");
         }
 
         static TrickyXboxMXF.BoneData FindBone(List<TrickyXboxMXF.BoneData> boneData, string BoneName)

@@ -711,7 +711,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.OGPS2
                 }
                 else
                 {
-                    System.Windows.Forms.MessageBox.Show("Missing Type " + TempEffect.MainType.ToString() + "," + TempType0.SubType.ToString());
+                    //System.Windows.Forms.MessageBox.Show("Missing Type " + TempEffect.MainType.ToString() + "," + TempType0.SubType.ToString());
                 }
 
                 TempEffect.type0 = TempType0;
@@ -818,7 +818,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.OGPS2
                 }
                 else
                 {
-                    System.Windows.Forms.MessageBox.Show("Missing Type " + TempEffect.MainType.ToString() + "," + TempType1.SubType.ToString());
+                    //System.Windows.Forms.MessageBox.Show("Missing Type " + TempEffect.MainType.ToString() + "," + TempType1.SubType.ToString());
                 }
 
                 TempEffect.type1 = TempType1;
@@ -891,7 +891,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.OGPS2
             }
             else
             {
-                System.Windows.Forms.MessageBox.Show("Missing Type " + TempEffect.MainType.ToString());
+                //System.Windows.Forms.MessageBox.Show("Missing Type " + TempEffect.MainType.ToString());
             }
 
             return TempEffect;

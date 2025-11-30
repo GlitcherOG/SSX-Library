@@ -436,7 +436,7 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
             }
             else
             {
-                MessageBox.Show("Error Missing Files");
+                //MessageBox.Show("Error Missing Files");
             }
 
         }
@@ -445,12 +445,12 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
         {
             if(trickyModelCombiner.bones==null)
             {
-                MessageBox.Show("No Bones Detected");
+                //MessageBox.Show("No Bones Detected");
                 return;
             }
             if (trickyModelCombiner.bones.Count != Board.ModelList[Selected].boneDatas.Count)
             {
-                MessageBox.Show("Incorrect Ammount of Bones");
+                //MessageBox.Show("Incorrect Ammount of Bones");
                 return;
             }
             
@@ -476,7 +476,7 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
 
             if(!MeshTest)
             {
-                MessageBox.Show("Error Model Not Found. Ensure Name is Correct");
+                //MessageBox.Show("Error Model Not Found. Ensure Name is Correct");
                 return;
             }
 
@@ -485,7 +485,7 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
             {
                 if (!trickyModelCombiner.materials[i].MainTexture.ToLower().Contains("bord"))
                 {
-                    MessageBox.Show("Invalid material " + trickyModelCombiner.materials[i].MainTexture);
+                    //MessageBox.Show("Invalid material " + trickyModelCombiner.materials[i].MainTexture);
                     return;
                 }
             }
@@ -502,7 +502,7 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
                 }
             }
 
-            ErrorUtil.Error = "Error Converting Materials From GLB to Tricky";
+            ErrorManager.ErrorMessage = "Error Converting Materials From GLB to Tricky";
             for (int a = 0; a < MaterialsID.Count; a++)
             {
                 TrickyPS2MPF.MaterialData MaterialData = new TrickyPS2MPF.MaterialData();
@@ -534,7 +534,7 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
                 TempTrickyMesh.materialDatas.Add(MaterialData);
             }
 
-            ErrorUtil.Error = "Miss assigned Material";
+           ErrorManager.ErrorMessage = "Miss assigned Material";
             for (int a = 0; a < ReassignedMesh.faces.Count; a++)
             {
                 int Index = MaterialsID.IndexOf(ReassignedMesh.faces[a].MaterialID);
@@ -547,7 +547,7 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
 
             //Redo Data In Correct Formats IE make Weight List and make faces use the positions.
             TempTrickyMesh.boneWeightHeader = new List<TrickyPS2MPF.BoneWeightHeader>();
-            ErrorUtil.Error = "Error Converting Weights to Tricky Format";
+           ErrorManager.ErrorMessage = "Error Converting Weights to Tricky Format";
 
             //Load Headers into file
             for (int i = 0; i < ReassignedMesh.faces.Count; i++)
@@ -580,7 +580,7 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
                 ReassignedMesh.faces[i] = TempFace;
             }
 
-            ErrorUtil.Error = "Error Correcting BoneIDs";
+           ErrorManager.ErrorMessage = "Error Correcting BoneIDs";
             //Correct Bone File ID
             for (int i = 0; i < TempTrickyMesh.boneWeightHeader.Count; i++)
             {
@@ -601,7 +601,7 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
             List<VectorPoint> VectorPoint = new List<VectorPoint>();
             List<TristripGenerator.IndiceFace> indiceFaces = new List<TristripGenerator.IndiceFace>();
 
-            ErrorUtil.Error = "Error Converting To Vertex List";
+           ErrorManager.ErrorMessage = "Error Converting To Vertex List";
             for (int a = 0; a < ReassignedMesh.faces.Count; a++)
             {
                 TristripGenerator.IndiceFace TempFace = new TristripGenerator.IndiceFace();
@@ -797,13 +797,13 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
                 indiceFaces.Add(TempFace);
             }
 
-            ErrorUtil.Error = "Error Generating Tristrip";
+           ErrorManager.ErrorMessage = "Error Generating Tristrip";
             indiceFaces = TristripGenerator.NeighbourPriority(indiceFaces);
 
             //Send to Tristrip Generator
             List<TristripGenerator.IndiceTristrip> indiceTristrips = TristripGenerator.GenerateTristripNivda(indiceFaces);
 
-            ErrorUtil.Error = "Error Generating Static Mesh";
+           ErrorManager.ErrorMessage = "Error Generating Static Mesh";
             //Static mesh that shit
             TempTrickyMesh.MeshGroups = new List<TrickyPS2MPF.GroupMainHeader>();
             List<TrickyPS2MPF.MeshChunk> meshList = new List<TrickyPS2MPF.MeshChunk>();
@@ -905,7 +905,7 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
                 }
             }
 
-            ErrorUtil.Error = "Error Grouping Static Mesh";
+           ErrorManager.ErrorMessage = "Error Grouping Static Mesh";
             //Group that shit MK2
             while (true)
             {
@@ -1049,7 +1049,7 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
                 }
             }
 
-            ErrorUtil.Error = "Error Generating UV and Weight Refrences";
+           ErrorManager.ErrorMessage = "Error Generating UV and Weight Refrences";
             //Generate Number Ref and correct UV
             //Prephaps Move into static meshing
             TempTrickyMesh.numberListRefs = new List<TrickyPS2MPF.WeightRefList>();
@@ -1107,17 +1107,17 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
             }
 
             //Update IK Points
-            ErrorUtil.Error = "Error Updating IK Points";
+           ErrorManager.ErrorMessage = "Error Updating IK Points";
             TempTrickyMesh.iKPoints = ReassignedMesh.IKPoints;
             Board.ModelList[Selected] = TempTrickyMesh;
-            MessageBox.Show("Import Sucessful");
+            //MessageBox.Show("Import Sucessful");
         }
 
         public void StartRegenMeshCharacter(TrickyPS2ModelCombiner trickyModelCombiner, int MeshID)
         {
             if (trickyModelCombiner.bones == null)
             {
-                MessageBox.Show("No Bones Detected");
+                //MessageBox.Show("No Bones Detected");
                 return;
             }
             bones = new List<TrickyPS2MPF.BoneData>();
@@ -1153,7 +1153,7 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
 
             if (trickyModelCombiner.bones.Count != bones.Count)
             {
-                MessageBox.Show("Incorrect Ammount of Bones " + trickyModelCombiner.bones.Count + "/" + bones.Count);
+                //MessageBox.Show("Incorrect Ammount of Bones " + trickyModelCombiner.bones.Count + "/" + bones.Count);
                 return;
             }
 
@@ -1165,7 +1165,7 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
                 (MeshID != 2 && trickyModelCombiner.reassignedMesh[i].MeshName.Contains("750") && !trickyModelCombiner.reassignedMesh[i].MeshName.ToLower().Contains("shdw")) ||
                 (MeshID != 3 && trickyModelCombiner.reassignedMesh[i].MeshName.ToLower().Contains("shdw")))
                 {
-                    MessageBox.Show(trickyModelCombiner.reassignedMesh[i].MeshName + " Non-Matching Mesh Part");
+                    //MessageBox.Show(trickyModelCombiner.reassignedMesh[i].MeshName + " Non-Matching Mesh Part");
                     return;
                 }
             }
@@ -1202,7 +1202,7 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
                         Reassinged = true;
                         if (TempReMesh.MorphTargetCount!= Head.ModelList[a].MorphKeyCount)
                         {
-                            MessageBox.Show("Incorrect ammount of Shapekeys " + Head.ModelList[a].MorphKeyCount + "/" +TempReMesh.MorphTargetCount);
+                            //MessageBox.Show("Incorrect ammount of Shapekeys " + Head.ModelList[a].MorphKeyCount + "/" +TempReMesh.MorphTargetCount);
                             return;
                         }
 
@@ -1211,7 +1211,7 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
                 }
                 if (!Reassinged)
                 {
-                    MessageBox.Show("Incorrectly Named Or Unneeded mesh part detected \n" + TempReMesh.MeshName);
+                    //MessageBox.Show("Incorrectly Named Or Unneeded mesh part detected \n" + TempReMesh.MeshName);
                 }
 
                 trickyModelCombiner.reassignedMesh[i] = TempReMesh;
@@ -1225,7 +1225,7 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
                     !trickyModelCombiner.materials[i].MainTexture.ToLower().Contains("head") &&
                     !trickyModelCombiner.materials[i].MainTexture.ToLower().Contains("helm"))
                 {
-                    MessageBox.Show("Invalid material " + trickyModelCombiner.materials[i].MainTexture);
+                    //MessageBox.Show("Invalid material " + trickyModelCombiner.materials[i].MainTexture);
                     return;
                 }
             }
@@ -1280,7 +1280,7 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
                 List<int> MaterialsID = new List<int>();
                 List<int> RedoneMaterial = new List<int>();
                 //Regenerate Materials
-                ErrorUtil.Error = "Error Regenerating Materials";
+               ErrorManager.ErrorMessage = "Error Regenerating Materials";
                 TempTrickyMesh.materialDatas = new List<TrickyPS2MPF.MaterialData>();
                 for (int a = 0; a < TempReMesh.faces.Count; a++)
                 {
@@ -1333,7 +1333,7 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
                     TempTrickyMesh.materialDatas.Add(MaterialData);
                 }
 
-                ErrorUtil.Error = "Error Updating Material IDs";
+               ErrorManager.ErrorMessage = "Error Updating Material IDs";
                 for (int a = 0; a < TempReMesh.faces.Count; a++)
                 {
                     int Index = MaterialsID.IndexOf(TempReMesh.faces[a].MaterialID);
@@ -1349,7 +1349,7 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
                 TempTrickyMesh.boneWeightHeader = new List<TrickyPS2MPF.BoneWeightHeader>();
 
                 //Load Headers into file
-                ErrorUtil.Error = "Error Updating Weights";
+               ErrorManager.ErrorMessage = "Error Updating Weights";
                 for (int a = 0; a < TempReMesh.faces.Count; a++)
                 {
                     var TempFace = TempReMesh.faces[a];
@@ -1381,7 +1381,7 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
                 }
 
                 //Fix Bone ID/FileIDs
-                ErrorUtil.Error = "Error fixing BoneIDs and FileIDs";
+               ErrorManager.ErrorMessage = "Error fixing BoneIDs and FileIDs";
                 for (int a = 0; a < TempTrickyMesh.boneWeightHeader.Count; a++)
                 {
                     var TempBoneHeader = TempTrickyMesh.boneWeightHeader[a];
@@ -1402,7 +1402,7 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
                 //Take faces and Generate Indce faces and giant vertex list for each material
                 List<VectorPoint> VectorPoint = new List<VectorPoint>();
                 List<TristripGenerator.IndiceFace> indiceFaces = new List<TristripGenerator.IndiceFace>();
-                ErrorUtil.Error = "Error Generating Vertex List";
+               ErrorManager.ErrorMessage = "Error Generating Vertex List";
                 for (int a = 0; a < TempReMesh.faces.Count; a++)
                 {
                     TristripGenerator.IndiceFace TempFace = new TristripGenerator.IndiceFace();
@@ -1598,7 +1598,7 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
                     indiceFaces.Add(TempFace);
                 }
 
-                ErrorUtil.Error = "Error Generating Tristrip";
+               ErrorManager.ErrorMessage = "Error Generating Tristrip";
 
                 indiceFaces = TristripGenerator.NeighbourPriority(indiceFaces);
 
@@ -1607,14 +1607,14 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
 
                 if(indiceTristrips==null)
                 {
-                    MessageBox.Show("Tristrip Failed to Generate");
+                    //MessageBox.Show("Tristrip Failed to Generate");
                     return;
                 }
 
                 //Static mesh that shit
                 TempTrickyMesh.MeshGroups = new List<TrickyPS2MPF.GroupMainHeader>();
                 List<TrickyPS2MPF.MeshChunk> meshList = new List<TrickyPS2MPF.MeshChunk>();
-                ErrorUtil.Error = "Error Generating Mesh";
+               ErrorManager.ErrorMessage = "Error Generating Mesh";
                 for (int a = 0; a < TempTrickyMesh.materialDatas.Count; a++)
                 {
                     while (true)
@@ -1713,7 +1713,7 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
                 }
 
                 //Group that shit MK2
-                ErrorUtil.Error = "Error Generating Mesh Groups";
+               ErrorManager.ErrorMessage = "Error Generating Mesh Groups";
                 while (true)
                 {
                     bool FirstAdd = true;
@@ -1921,7 +1921,7 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
                 }
                 trickyModelCombiner.reassignedMesh[i] = TempReMesh;
             }
-            MessageBox.Show("Import Sucessful");
+            //MessageBox.Show("Import Sucessful");
         }
 
         static VectorPoint GenerateVectorPoint(TrickyPS2MPF.Face face, int Vertice)

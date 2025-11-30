@@ -255,7 +255,7 @@ namespace SSXLibrary.JsonFiles.Tricky
                 }
                 else
                 {
-                    MessageBox.Show("ERROR Converting to Json Format SSF " + NewEffect.MainType + ", " + NewEffect.type0.Value.SubType);
+                    //MessageBox.Show("ERROR Converting to Json Format SSF " + NewEffect.MainType + ", " + NewEffect.type0.Value.SubType);
                 }
 
                 NewEffect.type0 = NewSubType;
@@ -398,7 +398,7 @@ namespace SSXLibrary.JsonFiles.Tricky
                 }
                 else
                 {
-                    MessageBox.Show("ERROR Converting to Json Format SSF " + NewEffect.MainType + ", " + NewEffect.type2.Value.SubType);
+                    //MessageBox.Show("ERROR Converting to Json Format SSF " + NewEffect.MainType + ", " + NewEffect.type2.Value.SubType);
                 }
 
                 NewEffect.type2 = NewSubType;
@@ -483,7 +483,7 @@ namespace SSXLibrary.JsonFiles.Tricky
             }
             else
             {
-                MessageBox.Show("ERROR Converting to Json Format SSF " + NewEffect.MainType);
+                //MessageBox.Show("ERROR Converting to Json Format SSF " + NewEffect.MainType);
             }
 
             return NewEffect;
@@ -696,7 +696,7 @@ namespace SSXLibrary.JsonFiles.Tricky
                 }
                 else
                 {
-                    MessageBox.Show("ERROR Converting to Json Format SSF " + NewEffect.MainType + ", " + NewEffect.type0.Value.SubType);
+                    //MessageBox.Show("ERROR Converting to Json Format SSF " + NewEffect.MainType + ", " + NewEffect.type0.Value.SubType);
                 }
 
                 NewEffect.type0 = NewSubType;
@@ -839,7 +839,7 @@ namespace SSXLibrary.JsonFiles.Tricky
                 }
                 else
                 {
-                    MessageBox.Show("ERROR Converting to Json Format SSF " + NewEffect.MainType + ", " + NewEffect.type2.Value.SubType);
+                    //MessageBox.Show("ERROR Converting to Json Format SSF " + NewEffect.MainType + ", " + NewEffect.type2.Value.SubType);
                 }
 
                 NewEffect.type2 = NewSubType;
@@ -924,7 +924,7 @@ namespace SSXLibrary.JsonFiles.Tricky
             }
             else
             {
-                MessageBox.Show("ERROR Converting to Json Format SSF " + NewEffect.MainType);
+                //MessageBox.Show("ERROR Converting to Json Format SSF " + NewEffect.MainType);
             }
 
             return NewEffect;
