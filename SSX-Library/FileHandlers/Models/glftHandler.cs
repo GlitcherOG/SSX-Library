@@ -1,6 +1,7 @@
 ﻿using SharpGLTF.Geometry;
 using SharpGLTF.Geometry.VertexTypes;
 using SharpGLTF.Materials;
+using SSX_Library.Utilities;
 using SSXLibrary.FileHandlers.Models.OnTour;
 using SSXLibrary.FileHandlers.Models.SSX3;
 using SSXLibrary.FileHandlers.Models.SSXBlur;
@@ -47,7 +48,7 @@ namespace SSXLibrary.FileHandlers
                 float tempY = modelHeader.bone[i].Radians.Y;
                 float tempZ = modelHeader.bone[i].Radians.Z;
 
-                Binding.WithLocalRotation(MathUtil.ToQuaternion(new Vector3(tempX, tempY, tempZ)));
+                Binding.WithLocalRotation(Euler.ToQuaternion(new Vector3(tempX, tempY, tempZ)));
 
                 Binding.WithLocalTranslation(modelHeader.bone[i].Position);
 
@@ -231,7 +232,7 @@ namespace SSXLibrary.FileHandlers
                 float tempY = Handler.bones[i].Radians.Y;
                 float tempZ = Handler.bones[i].Radians.Z;
 
-                Binding.WithLocalRotation(MathUtil.ToQuaternion(new Vector3(-tempX, -tempY, -tempZ)));
+                Binding.WithLocalRotation(Euler.ToQuaternion(new Vector3(-tempX, -tempY, -tempZ)));
                 Binding.WithLocalTranslation(Handler.bones[i].Position);
 
                 bindings.Add(Binding);
@@ -432,7 +433,7 @@ namespace SSXLibrary.FileHandlers
                 float tempY = Handler.bones[i].Radians.Y;
                 float tempZ = Handler.bones[i].Radians.Z;
 
-                Binding.WithLocalRotation(MathUtil.ToQuaternion(new Vector3(-tempX, -tempY, -tempZ)));
+                Binding.WithLocalRotation(Euler.ToQuaternion(new Vector3(-tempX, -tempY, -tempZ)));
                 Binding.WithLocalTranslation(Handler.bones[i].Position);
 
                 bindings.Add(Binding);
@@ -597,7 +598,7 @@ namespace SSXLibrary.FileHandlers
                 float tempY = Handler.bones[i].Radians.Y;
                 float tempZ = Handler.bones[i].Radians.Z;
 
-                Binding.WithLocalRotation(MathUtil.ToQuaternion(new Vector3(-tempX, -tempY, -tempZ)));
+                Binding.WithLocalRotation(Euler.ToQuaternion(new Vector3(-tempX, -tempY, -tempZ)));
                 Binding.WithLocalTranslation(Handler.bones[i].Position);
 
                 bindings.Add(Binding);
@@ -1467,7 +1468,7 @@ namespace SSXLibrary.FileHandlers
             TrickyPS2ModelCombiner trickyModelCombiner = new TrickyPS2ModelCombiner();
             trickyModelCombiner.materials = new List<TrickyPS2MPF.MaterialData>();
             trickyModelCombiner.reassignedMesh = new List<TrickyPS2ModelCombiner.ReassignedMesh>();
-            ErrorManager.ErrorMessage = "Failed to Load File. (Error with GLB File)";
+            //ErrorManager.ErrorMessage = "Failed to Load File. (Error with GLB File)";
             var Scene = SharpGLTF.Scenes.SceneBuilder.LoadDefaultScene(Path);
             var Instances = Scene.Instances.ToArray();
 
@@ -2679,7 +2680,7 @@ namespace SSXLibrary.FileHandlers
                 TempBoneData.parentName = nodeBuilder.Parent.Name;
             }
             Quaternion quaternion = nodeBuilder.LocalTransform.GetDecomposed().Rotation;
-            Vector3 radians = MathUtil.ToEulerAngles(quaternion);
+            Vector3 radians = Euler.FromQuaternion(quaternion);
             TempBoneData.Radians = radians;
 
             boneDatas.Add(TempBoneData);
@@ -2704,7 +2705,7 @@ namespace SSXLibrary.FileHandlers
                 TempBoneData.parentName = nodeBuilder.Parent.Name;
             }
             Quaternion quaternion = nodeBuilder.LocalTransform.GetDecomposed().Rotation;
-            Vector3 radians = MathUtil.ToEulerAngles(quaternion);
+            Vector3 radians = Euler.FromQuaternion(quaternion);
             TempBoneData.Radians = radians;
 
             boneDatas.Add(TempBoneData);
@@ -2729,7 +2730,7 @@ namespace SSXLibrary.FileHandlers
                 TempBoneData.parentName = nodeBuilder.Parent.Name;
             }
             Quaternion quaternion = nodeBuilder.LocalTransform.GetDecomposed().Rotation;
-            Vector3 radians = MathUtil.ToEulerAngles(quaternion);
+            Vector3 radians = Euler.FromQuaternion(quaternion);
             TempBoneData.Radians = radians;
 
             boneDatas.Add(TempBoneData);
