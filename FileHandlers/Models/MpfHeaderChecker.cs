@@ -10,7 +10,6 @@ namespace SSXLibrary.FileHandlers.Models
 {
     public class MpfHeaderChecker
     {
-
         public static int DetectFileType(string path)
         {
             //3 SSX (2000) PS2
@@ -50,14 +49,12 @@ namespace SSXLibrary.FileHandlers.Models
                     return 4;
                 }
             }
-
-                return -1;
+            return -1;
         }
 
 
         public static string TypeErrorMessage(int type)
         {
-
             if(type==0)
             {
                 return "Failed To Load SSX (2000) Model File Detected";
