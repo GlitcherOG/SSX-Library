@@ -2,6 +2,7 @@
 using System.Text;
 using System.Drawing;
 using System.Drawing.Imaging;
+using SSXLibrary.FileHandlers;
 
 namespace SSX_Library.EATextureLibrary
 {
@@ -32,7 +33,7 @@ namespace SSX_Library.EATextureLibrary
 
                     for (int i = 0; i < ImageCount; i++)
                     {
-                        NewSSHImage tempImage = new NewSSHImage();
+                        ShapeImage tempImage = new ShapeImage();
 
                         tempImage.offset = StreamUtil.ReadUInt32(stream, true);
 
@@ -226,7 +227,7 @@ namespace SSX_Library.EATextureLibrary
             }
         }
 
-        public List<Color> GetColorTable(NewSSHImage newSSHImage)
+        public List<Color> GetColorTable(ShapeImage newSSHImage)
         {
             var colorShape = GetMatrixType(newSSHImage, 33);
             List<Color> colors = new List<Color>();
@@ -245,7 +246,7 @@ namespace SSX_Library.EATextureLibrary
         }
 
 
-        public NewSSHImage AlphaFix(NewSSHImage newSSHImage)
+        public ShapeImage AlphaFix(ShapeImage newSSHImage)
         {
             bool TestAlpha = true;
 
@@ -305,7 +306,7 @@ namespace SSX_Library.EATextureLibrary
             return -1;
         }
 
-        public int GetShapeMatrixType(NewSSHImage tempImage)
+        public int GetShapeMatrixType(ShapeImage tempImage)
         {
             for (int i = 0; i < tempImage.sshShapeHeader.Count; i++)
             {
