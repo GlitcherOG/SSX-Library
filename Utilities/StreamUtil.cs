@@ -286,8 +286,6 @@ namespace SSXLibrary.Utilities
 
             return matrix4X4;
         }
-
-
         #endregion
 
         #region Write

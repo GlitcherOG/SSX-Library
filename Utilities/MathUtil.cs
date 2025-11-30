@@ -56,7 +56,6 @@ namespace SSXLibrary.Utilities
             return angles;
         }
 
-
         public static Vector3 Highest(Vector3 current, Vector3 vector3)
         {
             Vector3 vertex = vector3;
