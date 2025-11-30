@@ -159,8 +159,8 @@ Utilities:
 - [ ] BezierUtil.cs
 - [ ] ByteUtil.cs
 - [x] MathUtil.cs
-- [ ] ConsoleWindow.cs
-- [ ] ErrorManager.cs
+- [x] ConsoleWindow.cs
+- [x] ErrorManager.cs
 - [ ] ImageUtil.cs
 - [ ] StreamUtil.cs
 

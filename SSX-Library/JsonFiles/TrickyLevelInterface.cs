@@ -1472,7 +1472,7 @@ namespace SSXLibrary
                         segments.LowestXYZ = LowestXYZSegment;
                         LowestXYZSpline = Vector3.Min(LowestXYZSpline, LowestXYZSegment);
 
-                        segments.SegmentDisatnce = JsonUtil.GenerateDistance(bezierUtil.RawPoints[0], bezierUtil.RawPoints[1], bezierUtil.RawPoints[2], bezierUtil.RawPoints[3]);
+                        segments.SegmentDisatnce = JsonUtil.GenerateDistance(bezierUtil.RawPoints[..4]);
                         segments.PreviousSegmentsDistance = PreviousSegmentDiffrence;
                         PreviousSegmentDiffrence += segments.SegmentDisatnce;
                         segments.Unknown32 = 4311823;
