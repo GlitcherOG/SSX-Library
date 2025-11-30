@@ -12,6 +12,7 @@ namespace SSX_Library.EATextureLibrary
         //1 (4 Bit, 16 Colour Index)
         //2 (8 Bit, 256 Colour Index)
         //5 (Full Colour)
+        //130 is a header flag, will pull out so we can uncompress data easily
         //130 (8 bit, 256 Colour Index Compressed)
 
         //Xbox 360
