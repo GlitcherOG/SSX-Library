@@ -2,8 +2,9 @@
 using System.Text;
 using System.Drawing;
 using System.Drawing.Imaging;
+using SSXLibrary.FileHandlers;
 
-namespace SSXLibrary.FileHandlers.Textures
+namespace SSX_Library.EATextureLibrary
 {
     public class NewSSHHandler
     {
@@ -471,9 +472,9 @@ namespace SSXLibrary.FileHandlers.Textures
         {
             byte[] TempMatrix = new byte[image.bitmap.Height * image.bitmap.Width];
 
-            for (global::System.Int32 y = 0; y < image.bitmap.Height; y++)
+            for (int y = 0; y < image.bitmap.Height; y++)
             {
-                for (global::System.Int32 x = 0; x < image.bitmap.Width; x++)
+                for (int x = 0; x < image.bitmap.Width; x++)
                 {
                     TempMatrix[y * image.bitmap.Width + x] = (byte)image.colorsTable.IndexOf(image.bitmap.GetPixel(x, y));
                 }
@@ -518,9 +519,9 @@ namespace SSXLibrary.FileHandlers.Textures
 
             byte[] Matrix = new byte[MatrixSize];
 
-            for (global::System.Int32 y = 0; y < image.bitmap.Height; y++)
+            for (int y = 0; y < image.bitmap.Height; y++)
             {
-                for (global::System.Int32 x = 0; x < image.bitmap.Width; x++)
+                for (int x = 0; x < image.bitmap.Width; x++)
                 {
                     Matrix[y* image.bitmap.Width + x] = (byte)image.colorsTable.IndexOf(image.bitmap.GetPixel(x, y));
                 }
@@ -550,19 +551,19 @@ namespace SSXLibrary.FileHandlers.Textures
         {
             int MatrixSize = StreamUtil.AlignbyMath(image.bitmap.Height * image.bitmap.Width * 4, 16);
 
-            MatrixSize = 16 - ((int)MatrixSize % 16);
+            MatrixSize = 16 - MatrixSize % 16;
 
             byte[] Matrix = new byte[MatrixSize];
 
-            for (global::System.Int32 y = 0; y < image.bitmap.Height; y++)
+            for (int y = 0; y < image.bitmap.Height; y++)
             {
-                for (global::System.Int32 x = 0; x < image.bitmap.Width; x++)
+                for (int x = 0; x < image.bitmap.Width; x++)
                 {
                     var Pixel = image.bitmap.GetPixel(x, y);
-                    Matrix[(y * x) + (x * 4)] = Pixel.R;
-                    Matrix[(y * x) + (x * 4)+1] = Pixel.G;
-                    Matrix[(y * x) + (x * 4)+2] = Pixel.B;
-                    Matrix[(y * x) + (x * 4)+3] = Pixel.A;
+                    Matrix[y * x + x * 4] = Pixel.R;
+                    Matrix[y * x + x * 4+1] = Pixel.G;
+                    Matrix[y * x + x * 4+2] = Pixel.B;
+                    Matrix[y * x + x * 4+3] = Pixel.A;
                 }
             }
 
@@ -588,7 +589,7 @@ namespace SSXLibrary.FileHandlers.Textures
         {
             StreamUtil.WriteUInt8(stream, image.MatrixType);
             int Flag1 = 1 + (image.Compressed ? 2 : 0);
-            int Flag2 = (image.SwizzledImage ? 64 : 0);
+            int Flag2 = image.SwizzledImage ? 64 : 0;
             int Flag3 = 0;
             StreamUtil.WriteUInt8(stream, Flag1);
             StreamUtil.WriteUInt8(stream, Flag2);
@@ -614,10 +615,10 @@ namespace SSXLibrary.FileHandlers.Textures
             {
                 var Color = image.colorsTable[i];
 
-                Matrix[i * 4] = (byte)Color.R;
-                Matrix[i * 4 + 1] = (byte)Color.G;
-                Matrix[i * 4 + 2] = (byte)Color.B;
-                Matrix[i * 4 + 3] = (byte)Color.A;
+                Matrix[i * 4] = Color.R;
+                Matrix[i * 4 + 1] = Color.G;
+                Matrix[i * 4 + 2] = Color.B;
+                Matrix[i * 4 + 3] = Color.A;
                 if (image.AlphaFix)
                 {
                     Matrix[i * 4 + 3] = (byte)(Color.A / 2);
@@ -639,7 +640,7 @@ namespace SSXLibrary.FileHandlers.Textures
         {
             StreamUtil.WriteUInt8(stream, 33);
             int Flag1 = 1;
-            int Flag2 = (image.SwizzledColours ? 64 : 0);
+            int Flag2 = image.SwizzledColours ? 64 : 0;
             int Flag3 = 0;
             StreamUtil.WriteUInt8(stream, Flag1); // Probably not right
             StreamUtil.WriteUInt8(stream, Flag2);

@@ -6,10 +6,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using SSXLibrary.FileHandlers.Textures;
 using System.IO;
 using System.Numerics;
 using System.Collections;
+using SSX_Library.EATextureLibrary;
 
 namespace SSXLibrary.JsonFiles
 {

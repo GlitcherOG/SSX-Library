@@ -3,7 +3,7 @@ using BCnEncoder.Encoder;
 using SSXLibrary.Utilities;
 using System.Drawing;
 
-namespace SSXLibrary.FileHandlers.Textures
+namespace SSX_Library.EATextureLibrary
 {
     internal class OldXSHHandler
     {
@@ -94,9 +94,9 @@ namespace SSXLibrary.FileHandlers.Textures
 
                 int post = 0;
 
-                for (global::System.Int32 y = 0; y < tempImageHeader.Height; y++)
+                for (int y = 0; y < tempImageHeader.Height; y++)
                 {
-                    for (global::System.Int32 x = 0; x < tempImageHeader.Width; x++)
+                    for (int x = 0; x < tempImageHeader.Width; x++)
                     {
                         tempImage.bitmap.SetPixel(x, y, Color.FromArgb(Temp[post].a,Temp[post].r, Temp[post].g, Temp[post].b));
                         post++;

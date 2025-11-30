@@ -1,8 +1,9 @@
 ﻿using System.Drawing;
 using System.Drawing.Imaging;
+using SSXLibrary.FileHandlers;
 using SSXLibrary.Utilities;
 
-namespace SSXLibrary.FileHandlers.Textures
+namespace SSX_Library.EATextureLibrary
 {
     public class OldSSHHandler
     {

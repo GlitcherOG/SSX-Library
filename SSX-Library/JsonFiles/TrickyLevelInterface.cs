@@ -4,8 +4,8 @@ using SSXLibrary.Utilities;
 using System.Numerics;
 using System.IO;
 using static SSXLibrary.JsonFiles.Tricky.InstanceJsonHandler;
-using SSXLibrary.FileHandlers.Textures;
 using System.Collections;
+using SSX_Library.EATextureLibrary;
 
 namespace SSXLibrary
 {
