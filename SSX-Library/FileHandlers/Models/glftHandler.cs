@@ -47,7 +47,7 @@ namespace SSXLibrary.FileHandlers
                 float tempY = modelHeader.bone[i].Radians.Y;
                 float tempZ = modelHeader.bone[i].Radians.Z;
 
-                Binding.WithLocalRotation(MathUtil.ToQuaternion(new Vector3(tempX, tempY, tempZ)));
+                Binding.WithLocalRotation(Euler.ToQuaternion(new Vector3(tempX, tempY, tempZ)));
 
                 Binding.WithLocalTranslation(modelHeader.bone[i].Position);
 
@@ -231,7 +231,7 @@ namespace SSXLibrary.FileHandlers
                 float tempY = Handler.bones[i].Radians.Y;
                 float tempZ = Handler.bones[i].Radians.Z;
 
-                Binding.WithLocalRotation(MathUtil.ToQuaternion(new Vector3(-tempX, -tempY, -tempZ)));
+                Binding.WithLocalRotation(Euler.ToQuaternion(new Vector3(-tempX, -tempY, -tempZ)));
                 Binding.WithLocalTranslation(Handler.bones[i].Position);
 
                 bindings.Add(Binding);
@@ -432,7 +432,7 @@ namespace SSXLibrary.FileHandlers
                 float tempY = Handler.bones[i].Radians.Y;
                 float tempZ = Handler.bones[i].Radians.Z;
 
-                Binding.WithLocalRotation(MathUtil.ToQuaternion(new Vector3(-tempX, -tempY, -tempZ)));
+                Binding.WithLocalRotation(Euler.ToQuaternion(new Vector3(-tempX, -tempY, -tempZ)));
                 Binding.WithLocalTranslation(Handler.bones[i].Position);
 
                 bindings.Add(Binding);
@@ -597,7 +597,7 @@ namespace SSXLibrary.FileHandlers
                 float tempY = Handler.bones[i].Radians.Y;
                 float tempZ = Handler.bones[i].Radians.Z;
 
-                Binding.WithLocalRotation(MathUtil.ToQuaternion(new Vector3(-tempX, -tempY, -tempZ)));
+                Binding.WithLocalRotation(Euler.ToQuaternion(new Vector3(-tempX, -tempY, -tempZ)));
                 Binding.WithLocalTranslation(Handler.bones[i].Position);
 
                 bindings.Add(Binding);
@@ -2679,7 +2679,7 @@ namespace SSXLibrary.FileHandlers
                 TempBoneData.parentName = nodeBuilder.Parent.Name;
             }
             Quaternion quaternion = nodeBuilder.LocalTransform.GetDecomposed().Rotation;
-            Vector3 radians = MathUtil.ToEulerAngles(quaternion);
+            Vector3 radians = Euler.FromQuaternion(quaternion);
             TempBoneData.Radians = radians;
 
             boneDatas.Add(TempBoneData);
@@ -2704,7 +2704,7 @@ namespace SSXLibrary.FileHandlers
                 TempBoneData.parentName = nodeBuilder.Parent.Name;
             }
             Quaternion quaternion = nodeBuilder.LocalTransform.GetDecomposed().Rotation;
-            Vector3 radians = MathUtil.ToEulerAngles(quaternion);
+            Vector3 radians = Euler.FromQuaternion(quaternion);
             TempBoneData.Radians = radians;
 
             boneDatas.Add(TempBoneData);
@@ -2729,7 +2729,7 @@ namespace SSXLibrary.FileHandlers
                 TempBoneData.parentName = nodeBuilder.Parent.Name;
             }
             Quaternion quaternion = nodeBuilder.LocalTransform.GetDecomposed().Rotation;
-            Vector3 radians = MathUtil.ToEulerAngles(quaternion);
+            Vector3 radians = Euler.FromQuaternion(quaternion);
             TempBoneData.Radians = radians;
 
             boneDatas.Add(TempBoneData);

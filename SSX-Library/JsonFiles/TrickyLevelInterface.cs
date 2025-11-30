@@ -1317,38 +1317,38 @@ namespace SSXLibrary
                     patch.R4C4 = JsonUtil.Vector3ToVector4(bezierUtil.ProcessedPoints[15]);
 
                     Vector3 HighestXYZ = bezierUtil.RawPoints[0];
-                    HighestXYZ = MathUtil.Highest(HighestXYZ, bezierUtil.RawPoints[1]);
-                    HighestXYZ = MathUtil.Highest(HighestXYZ, bezierUtil.RawPoints[2]);
-                    HighestXYZ = MathUtil.Highest(HighestXYZ, bezierUtil.RawPoints[3]);
-                    HighestXYZ = MathUtil.Highest(HighestXYZ, bezierUtil.RawPoints[4]);
-                    HighestXYZ = MathUtil.Highest(HighestXYZ, bezierUtil.RawPoints[5]);
-                    HighestXYZ = MathUtil.Highest(HighestXYZ, bezierUtil.RawPoints[6]);
-                    HighestXYZ = MathUtil.Highest(HighestXYZ, bezierUtil.RawPoints[7]);
-                    HighestXYZ = MathUtil.Highest(HighestXYZ, bezierUtil.RawPoints[8]);
-                    HighestXYZ = MathUtil.Highest(HighestXYZ, bezierUtil.RawPoints[9]);
-                    HighestXYZ = MathUtil.Highest(HighestXYZ, bezierUtil.RawPoints[10]);
-                    HighestXYZ = MathUtil.Highest(HighestXYZ, bezierUtil.RawPoints[11]);
-                    HighestXYZ = MathUtil.Highest(HighestXYZ, bezierUtil.RawPoints[12]);
-                    HighestXYZ = MathUtil.Highest(HighestXYZ, bezierUtil.RawPoints[13]);
-                    HighestXYZ = MathUtil.Highest(HighestXYZ, bezierUtil.RawPoints[14]);
-                    HighestXYZ = MathUtil.Highest(HighestXYZ, bezierUtil.RawPoints[15]);
+                    HighestXYZ = Vector3.Max(HighestXYZ, bezierUtil.RawPoints[1]);
+                    HighestXYZ = Vector3.Max(HighestXYZ, bezierUtil.RawPoints[2]);
+                    HighestXYZ = Vector3.Max(HighestXYZ, bezierUtil.RawPoints[3]);
+                    HighestXYZ = Vector3.Max(HighestXYZ, bezierUtil.RawPoints[4]);
+                    HighestXYZ = Vector3.Max(HighestXYZ, bezierUtil.RawPoints[5]);
+                    HighestXYZ = Vector3.Max(HighestXYZ, bezierUtil.RawPoints[6]);
+                    HighestXYZ = Vector3.Max(HighestXYZ, bezierUtil.RawPoints[7]);
+                    HighestXYZ = Vector3.Max(HighestXYZ, bezierUtil.RawPoints[8]);
+                    HighestXYZ = Vector3.Max(HighestXYZ, bezierUtil.RawPoints[9]);
+                    HighestXYZ = Vector3.Max(HighestXYZ, bezierUtil.RawPoints[10]);
+                    HighestXYZ = Vector3.Max(HighestXYZ, bezierUtil.RawPoints[11]);
+                    HighestXYZ = Vector3.Max(HighestXYZ, bezierUtil.RawPoints[12]);
+                    HighestXYZ = Vector3.Max(HighestXYZ, bezierUtil.RawPoints[13]);
+                    HighestXYZ = Vector3.Max(HighestXYZ, bezierUtil.RawPoints[14]);
+                    HighestXYZ = Vector3.Max(HighestXYZ, bezierUtil.RawPoints[15]);
 
                     Vector3 LowestXYZ = bezierUtil.RawPoints[0];
-                    LowestXYZ = MathUtil.Lowest(LowestXYZ, bezierUtil.RawPoints[1]);
-                    LowestXYZ = MathUtil.Lowest(LowestXYZ, bezierUtil.RawPoints[2]);
-                    LowestXYZ = MathUtil.Lowest(LowestXYZ, bezierUtil.RawPoints[3]);
-                    LowestXYZ = MathUtil.Lowest(LowestXYZ, bezierUtil.RawPoints[4]);
-                    LowestXYZ = MathUtil.Lowest(LowestXYZ, bezierUtil.RawPoints[5]);
-                    LowestXYZ = MathUtil.Lowest(LowestXYZ, bezierUtil.RawPoints[6]);
-                    LowestXYZ = MathUtil.Lowest(LowestXYZ, bezierUtil.RawPoints[7]);
-                    LowestXYZ = MathUtil.Lowest(LowestXYZ, bezierUtil.RawPoints[8]);
-                    LowestXYZ = MathUtil.Lowest(LowestXYZ, bezierUtil.RawPoints[9]);
-                    LowestXYZ = MathUtil.Lowest(LowestXYZ, bezierUtil.RawPoints[10]);
-                    LowestXYZ = MathUtil.Lowest(LowestXYZ, bezierUtil.RawPoints[11]);
-                    LowestXYZ = MathUtil.Lowest(LowestXYZ, bezierUtil.RawPoints[12]);
-                    LowestXYZ = MathUtil.Lowest(LowestXYZ, bezierUtil.RawPoints[13]);
-                    LowestXYZ = MathUtil.Lowest(LowestXYZ, bezierUtil.RawPoints[14]);
-                    LowestXYZ = MathUtil.Lowest(LowestXYZ, bezierUtil.RawPoints[15]);
+                    LowestXYZ = Vector3.Min(LowestXYZ, bezierUtil.RawPoints[1]);
+                    LowestXYZ = Vector3.Min(LowestXYZ, bezierUtil.RawPoints[2]);
+                    LowestXYZ = Vector3.Min(LowestXYZ, bezierUtil.RawPoints[3]);
+                    LowestXYZ = Vector3.Min(LowestXYZ, bezierUtil.RawPoints[4]);
+                    LowestXYZ = Vector3.Min(LowestXYZ, bezierUtil.RawPoints[5]);
+                    LowestXYZ = Vector3.Min(LowestXYZ, bezierUtil.RawPoints[6]);
+                    LowestXYZ = Vector3.Min(LowestXYZ, bezierUtil.RawPoints[7]);
+                    LowestXYZ = Vector3.Min(LowestXYZ, bezierUtil.RawPoints[8]);
+                    LowestXYZ = Vector3.Min(LowestXYZ, bezierUtil.RawPoints[9]);
+                    LowestXYZ = Vector3.Min(LowestXYZ, bezierUtil.RawPoints[10]);
+                    LowestXYZ = Vector3.Min(LowestXYZ, bezierUtil.RawPoints[11]);
+                    LowestXYZ = Vector3.Min(LowestXYZ, bezierUtil.RawPoints[12]);
+                    LowestXYZ = Vector3.Min(LowestXYZ, bezierUtil.RawPoints[13]);
+                    LowestXYZ = Vector3.Min(LowestXYZ, bezierUtil.RawPoints[14]);
+                    LowestXYZ = Vector3.Min(LowestXYZ, bezierUtil.RawPoints[15]);
 
                     patch.HighestXYZ = HighestXYZ;
                     patch.LowestXYZ = LowestXYZ;
@@ -1457,20 +1457,20 @@ namespace SSXLibrary
                         segments.SplineParent = i;
 
                         Vector3 HighestXYZSegment = bezierUtil.RawPoints[0];
-                        HighestXYZSegment = MathUtil.Highest(HighestXYZSegment, bezierUtil.RawPoints[1]);
-                        HighestXYZSegment = MathUtil.Highest(HighestXYZSegment, bezierUtil.RawPoints[2]);
-                        HighestXYZSegment = MathUtil.Highest(HighestXYZSegment, bezierUtil.RawPoints[3]);
+                        HighestXYZSegment = Vector3.Max(HighestXYZSegment, bezierUtil.RawPoints[1]);
+                        HighestXYZSegment = Vector3.Max(HighestXYZSegment, bezierUtil.RawPoints[2]);
+                        HighestXYZSegment = Vector3.Max(HighestXYZSegment, bezierUtil.RawPoints[3]);
                         segments.HighestXYZ = HighestXYZSegment;
 
-                        HighestXYZSpline = MathUtil.Highest(HighestXYZSpline, HighestXYZSegment);
+                        HighestXYZSpline = Vector3.Max(HighestXYZSpline, HighestXYZSegment);
 
                         Vector3 LowestXYZSegment = bezierUtil.RawPoints[0];
-                        LowestXYZSegment = MathUtil.Lowest(LowestXYZSegment, bezierUtil.RawPoints[1]);
-                        LowestXYZSegment = MathUtil.Lowest(LowestXYZSegment, bezierUtil.RawPoints[2]);
-                        LowestXYZSegment = MathUtil.Lowest(LowestXYZSegment, bezierUtil.RawPoints[3]);
+                        LowestXYZSegment = Vector3.Min(LowestXYZSegment, bezierUtil.RawPoints[1]);
+                        LowestXYZSegment = Vector3.Min(LowestXYZSegment, bezierUtil.RawPoints[2]);
+                        LowestXYZSegment = Vector3.Min(LowestXYZSegment, bezierUtil.RawPoints[3]);
 
                         segments.LowestXYZ = LowestXYZSegment;
-                        LowestXYZSpline = MathUtil.Lowest(LowestXYZSpline, LowestXYZSegment);
+                        LowestXYZSpline = Vector3.Min(LowestXYZSpline, LowestXYZSegment);
 
                         segments.SegmentDisatnce = JsonUtil.GenerateDistance(bezierUtil.RawPoints[0], bezierUtil.RawPoints[1], bezierUtil.RawPoints[2], bezierUtil.RawPoints[3]);
                         segments.PreviousSegmentsDistance = PreviousSegmentDiffrence;
@@ -2261,8 +2261,8 @@ namespace SSXLibrary
                     NewAIPATH.BBoxMin = NewAIPATH.PathPos;
                     for (int a = 0; a < Points.Count; a++)
                     {
-                        NewAIPATH.BBoxMax = MathUtil.Highest(NewAIPATH.BBoxMax, Points[a] + NewAIPATH.PathPos);
-                        NewAIPATH.BBoxMin = MathUtil.Lowest(NewAIPATH.BBoxMin, Points[a] + NewAIPATH.PathPos);
+                        NewAIPATH.BBoxMax = Vector3.Max(NewAIPATH.BBoxMax, Points[a] + NewAIPATH.PathPos);
+                        NewAIPATH.BBoxMin = Vector3.Min(NewAIPATH.BBoxMin, Points[a] + NewAIPATH.PathPos);
                     }
 
                     NewAIPATH.VectorPoints = AIPSOPHandler.GenerateNewVectors(Points);
@@ -2308,8 +2308,8 @@ namespace SSXLibrary
                     NewAIPATH.BBoxMin = NewAIPATH.PathPos;
                     for (int a = 0; a < Points.Count; a++)
                     {
-                        NewAIPATH.BBoxMax = MathUtil.Highest(NewAIPATH.BBoxMax, Points[a] + NewAIPATH.PathPos);
-                        NewAIPATH.BBoxMin = MathUtil.Lowest(NewAIPATH.BBoxMin, Points[a] + NewAIPATH.PathPos);
+                        NewAIPATH.BBoxMax = Vector3.Max(NewAIPATH.BBoxMax, Points[a] + NewAIPATH.PathPos);
+                        NewAIPATH.BBoxMin = Vector3.Min(NewAIPATH.BBoxMin, Points[a] + NewAIPATH.PathPos);
                     }
 
                     NewAIPATH.VectorPoints = AIPSOPHandler.GenerateNewVectors(Points);
@@ -2369,8 +2369,8 @@ namespace SSXLibrary
                     NewAIPATH.BBoxMin = NewAIPATH.PathPos;
                     for (int a = 0; a < Points.Count; a++)
                     {
-                        NewAIPATH.BBoxMax = MathUtil.Highest(NewAIPATH.BBoxMax, Points[a] + NewAIPATH.PathPos);
-                        NewAIPATH.BBoxMin = MathUtil.Lowest(NewAIPATH.BBoxMin, Points[a] + NewAIPATH.PathPos);
+                        NewAIPATH.BBoxMax = Vector3.Max(NewAIPATH.BBoxMax, Points[a] + NewAIPATH.PathPos);
+                        NewAIPATH.BBoxMin = Vector3.Min(NewAIPATH.BBoxMin, Points[a] + NewAIPATH.PathPos);
                     }
 
                     NewAIPATH.VectorPoints = AIPSOPHandler.GenerateNewVectors(Points);
@@ -2417,8 +2417,8 @@ namespace SSXLibrary
                     NewAIPATH.BBoxMin = NewAIPATH.PathPos;
                     for (int a = 0; a < Points.Count; a++)
                     {
-                        NewAIPATH.BBoxMax = MathUtil.Highest(NewAIPATH.BBoxMax, Points[a] + NewAIPATH.PathPos);
-                        NewAIPATH.BBoxMin = MathUtil.Lowest(NewAIPATH.BBoxMin, Points[a] + NewAIPATH.PathPos);
+                        NewAIPATH.BBoxMax = Vector3.Max(NewAIPATH.BBoxMax, Points[a] + NewAIPATH.PathPos);
+                        NewAIPATH.BBoxMin = Vector3.Min(NewAIPATH.BBoxMin, Points[a] + NewAIPATH.PathPos);
                     }
 
                     NewAIPATH.VectorPoints = AIPSOPHandler.GenerateNewVectors(Points);

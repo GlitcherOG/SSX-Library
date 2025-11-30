@@ -158,6 +158,7 @@ JsonFiles\Tricky:
 Utilities:
 - [ ] BezierUtil.cs
 - [ ] ByteUtil.cs
+- [x] MathUtil.cs
 - [ ] ConsoleWindow.cs
 - [ ] ErrorManager.cs
 - [ ] ImageUtil.cs

@@ -1817,8 +1817,8 @@ namespace SSXLibrary.FileHandlers.LevelFiles.TrickyPS2
                                             }
                                             else
                                             {
-                                                LowestXYZ = MathUtil.Lowest(LowestXYZ, TempMeshOffset.FullMesh.meshChunk[i].vertices[a]);
-                                                HighestXYZ = MathUtil.Highest(HighestXYZ, TempMeshOffset.FullMesh.meshChunk[i].vertices[a]);
+                                                LowestXYZ = Vector3.Min(LowestXYZ, TempMeshOffset.FullMesh.meshChunk[i].vertices[a]);
+                                                HighestXYZ = Vector3.Max(HighestXYZ, TempMeshOffset.FullMesh.meshChunk[i].vertices[a]);
                                             }
                                         }
                                     }
@@ -1846,7 +1846,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.TrickyPS2
                 {
                     LowestXYZ.Z = -LowestXYZ.Z;
                 }
-                HighestXYZ = MathUtil.Highest(HighestXYZ, LowestXYZ);
+                HighestXYZ = Vector3.Max(HighestXYZ, LowestXYZ);
 
 
                 //Calculate Scale
@@ -2226,8 +2226,8 @@ namespace SSXLibrary.FileHandlers.LevelFiles.TrickyPS2
                             {
                                 for (int d = 0; d < TempModelObjects.objectData.MeshOffsets[b].FullMesh.meshChunk[c].vertices.Count; d++)
                                 {
-                                    TempModelObjects.objectData.LowestXYZ = MathUtil.Lowest(TempModelObjects.objectData.LowestXYZ, TempModelObjects.objectData.MeshOffsets[b].FullMesh.meshChunk[c].vertices[d]);
-                                    TempModelObjects.objectData.HighestXYZ = MathUtil.Highest(TempModelObjects.objectData.HighestXYZ, TempModelObjects.objectData.MeshOffsets[b].FullMesh.meshChunk[c].vertices[d]);
+                                    TempModelObjects.objectData.LowestXYZ = Vector3.Min(TempModelObjects.objectData.LowestXYZ, TempModelObjects.objectData.MeshOffsets[b].FullMesh.meshChunk[c].vertices[d]);
+                                    TempModelObjects.objectData.HighestXYZ = Vector3.Max(TempModelObjects.objectData.HighestXYZ, TempModelObjects.objectData.MeshOffsets[b].FullMesh.meshChunk[c].vertices[d]);
                                 }
                             }
                         }
@@ -2282,8 +2282,8 @@ namespace SSXLibrary.FileHandlers.LevelFiles.TrickyPS2
 
                                     Vertice = Vector3.Transform(Vertice, TempInstance.matrix4X4);
 
-                                    LowestXYZ = MathUtil.Lowest(LowestXYZ, Vertice);
-                                    HighestXYZ = MathUtil.Highest(HighestXYZ, Vertice);
+                                    LowestXYZ = Vector3.Min(LowestXYZ, Vertice);
+                                    HighestXYZ = Vector3.Max(HighestXYZ, Vertice);
                                 }
                             }
                         }
