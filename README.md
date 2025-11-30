@@ -1,6 +1,6 @@
 # SSX-Library
 
-C#/.NET Library for Extracting and Compressing files from/to SSX games on the PS2.
+C#/.NET Library for Extracting and Compressing files from/to SSX games.
 This library was made to isolate the Utility side from the Windows only [SSX Collection Multitool](https://github.com/GlitcherOG/SSX-Collection-Multitool). In turns this makes the library cross platform for future projects, and will make it easier to maintain.
 
 ## Refactor Checklist
