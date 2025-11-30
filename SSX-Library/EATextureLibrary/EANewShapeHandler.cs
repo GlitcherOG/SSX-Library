@@ -2,23 +2,22 @@
 using System.Text;
 using System.Drawing;
 using System.Drawing.Imaging;
-using SSXLibrary.FileHandlers;
 
 namespace SSX_Library.EATextureLibrary
 {
-    public class NewSSHHandler
+    public class EANewShapeHandler
     {
         public string MagicWord; //4
         public int Size;
         public int ImageCount; //Big 4
         public int U0;
-        public List<NewSSHImage> sshImages = new List<NewSSHImage>();
+        public List<ShapeImage> sshImages = new List<ShapeImage>();
         public string group;
         public string endingstring;
 
         public void LoadSSH(string path)
         {
-            sshImages = new List<NewSSHImage>();
+            sshImages = new List<ShapeImage>();
             using (Stream stream = File.Open(path, FileMode.Open))
             {
                 MagicWord = StreamUtil.ReadString(stream, 4);
@@ -65,14 +64,14 @@ namespace SSX_Library.EATextureLibrary
         {
             for (int i = 0; i < sshImages.Count; i++)
             {
-                NewSSHImage tempImage = sshImages[i];
+                ShapeImage tempImage = sshImages[i];
                 stream.Position = tempImage.offset;
 
-                tempImage.sshShapeHeader = new List<SSHShapeHeader>();
+                tempImage.sshShapeHeader = new List<ShapeHeader>();
 
                 while (stream.Position < tempImage.offset + tempImage.size)
                 {
-                    var shape = new SSHShapeHeader();
+                    var shape = new ShapeHeader();
 
                     shape.MatrixFormat = StreamUtil.ReadUInt8(stream);
                     if (shape.MatrixFormat != 111)
@@ -279,7 +278,7 @@ namespace SSX_Library.EATextureLibrary
             return newSSHImage;
         }
 
-        public SSHShapeHeader GetMatrixType(NewSSHImage newSSHImage,int Type)
+        public ShapeHeader GetMatrixType(ShapeImage newSSHImage,int Type)
         {
             for (int i = 0; i < newSSHImage.sshShapeHeader.Count; i++)
             {
@@ -288,7 +287,7 @@ namespace SSX_Library.EATextureLibrary
                     return newSSHImage.sshShapeHeader[i];
                 }
             }
-            return new SSHShapeHeader();
+            return new ShapeHeader();
         }
 
         public int GetShapeMatrixType(int ImageID)
@@ -468,7 +467,7 @@ namespace SSX_Library.EATextureLibrary
             file.Close();
         }
 
-        public void WriteMatrix1(Stream stream, NewSSHImage image)
+        public void WriteMatrix1(Stream stream, ShapeImage image)
         {
             byte[] TempMatrix = new byte[image.bitmap.Height * image.bitmap.Width];
 
@@ -513,7 +512,7 @@ namespace SSX_Library.EATextureLibrary
 
             StreamUtil.AlignBy16(stream);
         }
-        public void WriteMatrix2(Stream stream, NewSSHImage image)
+        public void WriteMatrix2(Stream stream, ShapeImage image)
         {
             int MatrixSize = StreamUtil.AlignbyMath(image.bitmap.Height * image.bitmap.Width, 16);
 
@@ -547,7 +546,7 @@ namespace SSX_Library.EATextureLibrary
             //Generate Colour Table Matrix
             WriteColourTable(stream, image);
         }
-        public void WriteMatrix5(Stream stream, NewSSHImage image)
+        public void WriteMatrix5(Stream stream, ShapeImage image)
         {
             int MatrixSize = StreamUtil.AlignbyMath(image.bitmap.Height * image.bitmap.Width * 4, 16);
 
@@ -585,7 +584,7 @@ namespace SSX_Library.EATextureLibrary
             StreamUtil.AlignBy16(stream);
         }
 
-        public void WriteImageHeader(Stream stream, NewSSHImage image, int DataSize)
+        public void WriteImageHeader(Stream stream, ShapeImage image, int DataSize)
         {
             StreamUtil.WriteUInt8(stream, image.MatrixType);
             int Flag1 = 1 + (image.Compressed ? 2 : 0);
@@ -605,7 +604,7 @@ namespace SSX_Library.EATextureLibrary
             StreamUtil.WriteInt32(stream, image.bitmap.Height);
         }
 
-        public void WriteColourTable(Stream stream, NewSSHImage image)
+        public void WriteColourTable(Stream stream, ShapeImage image)
         {
             int MatrixSize = StreamUtil.AlignbyMath(4 * image.colorsTable.Count, 16);
 
@@ -636,7 +635,7 @@ namespace SSX_Library.EATextureLibrary
             StreamUtil.WriteBytes(stream, Matrix);
         }
 
-        public void WriteColourHeader(Stream stream, NewSSHImage image, int Size)
+        public void WriteColourHeader(Stream stream, ShapeImage image, int Size)
         {
             StreamUtil.WriteUInt8(stream, 33);
             int Flag1 = 1;
@@ -657,13 +656,13 @@ namespace SSX_Library.EATextureLibrary
         }
 
 
-        public struct NewSSHImage
+        public struct ShapeImage
         {
             public int offset;
             public int size;
             public string shortname;
             public string longname;
-            public List<SSHShapeHeader> sshShapeHeader;
+            public List<ShapeHeader> sshShapeHeader;
 
             //Converted
             public List<Color> colorsTable;
@@ -676,7 +675,7 @@ namespace SSX_Library.EATextureLibrary
             public bool AlphaFix;
         }
 
-        public struct SSHShapeHeader
+        public struct ShapeHeader
         {
             public byte MatrixFormat;
             public int Flags1;
