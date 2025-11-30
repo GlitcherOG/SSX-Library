@@ -502,7 +502,7 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
                 }
             }
 
-            ErrorManager.ErrorMessage = "Error Converting Materials From GLB to Tricky";
+            ////ErrorManager.ErrorMessage = "Error Converting Materials From GLB to Tricky";
             for (int a = 0; a < MaterialsID.Count; a++)
             {
                 TrickyPS2MPF.MaterialData MaterialData = new TrickyPS2MPF.MaterialData();
@@ -534,7 +534,7 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
                 TempTrickyMesh.materialDatas.Add(MaterialData);
             }
 
-           ErrorManager.ErrorMessage = "Miss assigned Material";
+           //ErrorManager.ErrorMessage = "Miss assigned Material";
             for (int a = 0; a < ReassignedMesh.faces.Count; a++)
             {
                 int Index = MaterialsID.IndexOf(ReassignedMesh.faces[a].MaterialID);
@@ -547,7 +547,7 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
 
             //Redo Data In Correct Formats IE make Weight List and make faces use the positions.
             TempTrickyMesh.boneWeightHeader = new List<TrickyPS2MPF.BoneWeightHeader>();
-           ErrorManager.ErrorMessage = "Error Converting Weights to Tricky Format";
+           //ErrorManager.ErrorMessage = "Error Converting Weights to Tricky Format";
 
             //Load Headers into file
             for (int i = 0; i < ReassignedMesh.faces.Count; i++)
@@ -580,7 +580,7 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
                 ReassignedMesh.faces[i] = TempFace;
             }
 
-           ErrorManager.ErrorMessage = "Error Correcting BoneIDs";
+           //ErrorManager.ErrorMessage = "Error Correcting BoneIDs";
             //Correct Bone File ID
             for (int i = 0; i < TempTrickyMesh.boneWeightHeader.Count; i++)
             {
@@ -601,7 +601,7 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
             List<VectorPoint> VectorPoint = new List<VectorPoint>();
             List<TristripGenerator.IndiceFace> indiceFaces = new List<TristripGenerator.IndiceFace>();
 
-           ErrorManager.ErrorMessage = "Error Converting To Vertex List";
+           //ErrorManager.ErrorMessage = "Error Converting To Vertex List";
             for (int a = 0; a < ReassignedMesh.faces.Count; a++)
             {
                 TristripGenerator.IndiceFace TempFace = new TristripGenerator.IndiceFace();
@@ -797,13 +797,13 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
                 indiceFaces.Add(TempFace);
             }
 
-           ErrorManager.ErrorMessage = "Error Generating Tristrip";
+           //ErrorManager.ErrorMessage = "Error Generating Tristrip";
             indiceFaces = TristripGenerator.NeighbourPriority(indiceFaces);
 
             //Send to Tristrip Generator
             List<TristripGenerator.IndiceTristrip> indiceTristrips = TristripGenerator.GenerateTristripNivda(indiceFaces);
 
-           ErrorManager.ErrorMessage = "Error Generating Static Mesh";
+           //ErrorManager.ErrorMessage = "Error Generating Static Mesh";
             //Static mesh that shit
             TempTrickyMesh.MeshGroups = new List<TrickyPS2MPF.GroupMainHeader>();
             List<TrickyPS2MPF.MeshChunk> meshList = new List<TrickyPS2MPF.MeshChunk>();
@@ -905,7 +905,7 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
                 }
             }
 
-           ErrorManager.ErrorMessage = "Error Grouping Static Mesh";
+           //ErrorManager.ErrorMessage = "Error Grouping Static Mesh";
             //Group that shit MK2
             while (true)
             {
@@ -1049,7 +1049,7 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
                 }
             }
 
-           ErrorManager.ErrorMessage = "Error Generating UV and Weight Refrences";
+           //ErrorManager.ErrorMessage = "Error Generating UV and Weight Refrences";
             //Generate Number Ref and correct UV
             //Prephaps Move into static meshing
             TempTrickyMesh.numberListRefs = new List<TrickyPS2MPF.WeightRefList>();
@@ -1107,7 +1107,7 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
             }
 
             //Update IK Points
-           ErrorManager.ErrorMessage = "Error Updating IK Points";
+           //ErrorManager.ErrorMessage = "Error Updating IK Points";
             TempTrickyMesh.iKPoints = ReassignedMesh.IKPoints;
             Board.ModelList[Selected] = TempTrickyMesh;
             //MessageBox.Show("Import Sucessful");
@@ -1280,7 +1280,7 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
                 List<int> MaterialsID = new List<int>();
                 List<int> RedoneMaterial = new List<int>();
                 //Regenerate Materials
-               ErrorManager.ErrorMessage = "Error Regenerating Materials";
+               //ErrorManager.ErrorMessage = "Error Regenerating Materials";
                 TempTrickyMesh.materialDatas = new List<TrickyPS2MPF.MaterialData>();
                 for (int a = 0; a < TempReMesh.faces.Count; a++)
                 {
@@ -1333,7 +1333,7 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
                     TempTrickyMesh.materialDatas.Add(MaterialData);
                 }
 
-               ErrorManager.ErrorMessage = "Error Updating Material IDs";
+               //ErrorManager.ErrorMessage = "Error Updating Material IDs";
                 for (int a = 0; a < TempReMesh.faces.Count; a++)
                 {
                     int Index = MaterialsID.IndexOf(TempReMesh.faces[a].MaterialID);
@@ -1349,7 +1349,7 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
                 TempTrickyMesh.boneWeightHeader = new List<TrickyPS2MPF.BoneWeightHeader>();
 
                 //Load Headers into file
-               ErrorManager.ErrorMessage = "Error Updating Weights";
+               //ErrorManager.ErrorMessage = "Error Updating Weights";
                 for (int a = 0; a < TempReMesh.faces.Count; a++)
                 {
                     var TempFace = TempReMesh.faces[a];
@@ -1381,7 +1381,7 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
                 }
 
                 //Fix Bone ID/FileIDs
-               ErrorManager.ErrorMessage = "Error fixing BoneIDs and FileIDs";
+               //ErrorManager.ErrorMessage = "Error fixing BoneIDs and FileIDs";
                 for (int a = 0; a < TempTrickyMesh.boneWeightHeader.Count; a++)
                 {
                     var TempBoneHeader = TempTrickyMesh.boneWeightHeader[a];
@@ -1402,7 +1402,7 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
                 //Take faces and Generate Indce faces and giant vertex list for each material
                 List<VectorPoint> VectorPoint = new List<VectorPoint>();
                 List<TristripGenerator.IndiceFace> indiceFaces = new List<TristripGenerator.IndiceFace>();
-               ErrorManager.ErrorMessage = "Error Generating Vertex List";
+               //ErrorManager.ErrorMessage = "Error Generating Vertex List";
                 for (int a = 0; a < TempReMesh.faces.Count; a++)
                 {
                     TristripGenerator.IndiceFace TempFace = new TristripGenerator.IndiceFace();
@@ -1598,7 +1598,7 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
                     indiceFaces.Add(TempFace);
                 }
 
-               ErrorManager.ErrorMessage = "Error Generating Tristrip";
+               //ErrorManager.ErrorMessage = "Error Generating Tristrip";
 
                 indiceFaces = TristripGenerator.NeighbourPriority(indiceFaces);
 
@@ -1614,7 +1614,7 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
                 //Static mesh that shit
                 TempTrickyMesh.MeshGroups = new List<TrickyPS2MPF.GroupMainHeader>();
                 List<TrickyPS2MPF.MeshChunk> meshList = new List<TrickyPS2MPF.MeshChunk>();
-               ErrorManager.ErrorMessage = "Error Generating Mesh";
+               //ErrorManager.ErrorMessage = "Error Generating Mesh";
                 for (int a = 0; a < TempTrickyMesh.materialDatas.Count; a++)
                 {
                     while (true)
@@ -1713,7 +1713,7 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
                 }
 
                 //Group that shit MK2
-               ErrorManager.ErrorMessage = "Error Generating Mesh Groups";
+               //ErrorManager.ErrorMessage = "Error Generating Mesh Groups";
                 while (true)
                 {
                     bool FirstAdd = true;

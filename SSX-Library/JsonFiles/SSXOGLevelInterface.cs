@@ -10,6 +10,7 @@ using SSXLibrary.FileHandlers.Textures;
 using System.IO;
 using System.Numerics;
 using System.Collections;
+using SSX_Library.Utilities;
 
 namespace SSXLibrary.JsonFiles
 {

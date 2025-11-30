@@ -7,6 +7,7 @@ using System.IO;
 using System.Threading.Tasks;
 using SSXLibrary.Utilities;
 using System.Net.Http.Headers;
+using SSX_Library.Utilities;
 
 namespace SSXLibrary.FileHandlers.LevelFiles.TrickyPS2
 {
