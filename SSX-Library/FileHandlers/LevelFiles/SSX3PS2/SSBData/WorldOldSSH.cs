@@ -25,8 +25,8 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
 
         public byte[] Matrix;
         public SSHColourTable sshTable;
-        public Bitmap bitmap;
-        public Bitmap metalBitmap;
+        //public Bitmap bitmap;
+        //public Bitmap metalBitmap;
 
         public void Load(byte[] byteArray)
         {
@@ -191,8 +191,8 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
             }
 
             //Create Bitmap Image
-            bitmap = new Bitmap(Width, Height, PixelFormat.Format32bppArgb);
-            metalBitmap = new Bitmap(Width, Height, PixelFormat.Format32bppArgb);
+            //bitmap = new Bitmap(Width, Height, PixelFormat.Format32bppArgb);
+            //metalBitmap = new Bitmap(Width, Height, PixelFormat.Format32bppArgb);
             int post = 0;
             if (MatrixFormat == 1)
             {
@@ -201,11 +201,11 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
                     for (int x = 0; x < Width; x++)
                     {
                         int colorPos = Matrix[post];
-                        bitmap.SetPixel(x, y, sshTable.colorTable[colorPos]);
+                        //bitmap.SetPixel(x, y, sshTable.colorTable[colorPos]);
 
                         if (MetalBin)
                         {
-                            metalBitmap.SetPixel(x, y, MetalColours[colorPos]);
+                            //metalBitmap.SetPixel(x, y, MetalColours[colorPos]);
                         }
                         post++;
                     }
@@ -230,10 +230,10 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
 
                         if (MetalBin)
                         {
-                            metalBitmap.SetPixel(x, y, MetalColours[colorPos]);
+                            //metalBitmap.SetPixel(x, y, MetalColours[colorPos]);
                         }
 
-                        bitmap.SetPixel(x, y, sshTable.colorTable[colorPos]);
+                        //bitmap.SetPixel(x, y, sshTable.colorTable[colorPos]);
                         post++;
                     }
                 }
@@ -255,7 +255,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
                         post++;
                         int A = Matrix[post];
                         post++;
-                        bitmap.SetPixel(x, y, Color.FromArgb(A, R, G, B));
+                        //bitmap.SetPixel(x, y, Color.FromArgb(A, R, G, B));
                         if (!colourTable.colorTable.Contains(Color.FromArgb(A, R, G, B)))
                         {
                             colourTable.colorTable.Add(Color.FromArgb(A, R, G, B));
@@ -273,7 +273,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
 
         public void SaveImage(string path)
         {
-            bitmap.Save(path, ImageFormat.Png);
+            //bitmap.Save(path, ImageFormat.Png);
         }
         public struct SSHColourTable
         {

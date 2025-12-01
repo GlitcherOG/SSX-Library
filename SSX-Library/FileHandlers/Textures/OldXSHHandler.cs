@@ -90,7 +90,7 @@ namespace SSXLibrary.FileHandlers.Textures
 
                 var Temp = bcDecoder.DecodeRaw(tempImageHeader.Matrix, tempImageHeader.Width, tempImageHeader.Height, BCnEncoder.Shared.CompressionFormat.Bc1);
 
-                tempImage.bitmap = new Bitmap(tempImageHeader.Width, tempImageHeader.Height);
+                //tempImage.bitmap = new Bitmap(tempImageHeader.Width, tempImageHeader.Height);
 
                 int post = 0;
 
@@ -98,12 +98,12 @@ namespace SSXLibrary.FileHandlers.Textures
                 {
                     for (global::System.Int32 x = 0; x < tempImageHeader.Width; x++)
                     {
-                        tempImage.bitmap.SetPixel(x, y, Color.FromArgb(Temp[post].a,Temp[post].r, Temp[post].g, Temp[post].b));
+                       // tempImage.bitmap.SetPixel(x, y, Color.FromArgb(Temp[post].a,Temp[post].r, Temp[post].g, Temp[post].b));
                         post++;
                     }
                 }
 
-                tempImage.bitmap.Save("G:\\SSX\\TRicky Stuff\\SSX Tricky\\data\\textures\\crowd.png");
+                //tempImage.bitmap.Save("G:\\SSX\\TRicky Stuff\\SSX Tricky\\data\\textures\\crowd.png");
             }
 
         }
@@ -117,7 +117,7 @@ namespace SSXLibrary.FileHandlers.Textures
             public List<XSHImageHeader> xshShapeHeader;
 
             //Converted
-            public Bitmap bitmap;
+            //public Bitmap bitmap;
         }
 
         public struct XSHImageHeader

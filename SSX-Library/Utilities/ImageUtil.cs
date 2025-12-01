@@ -6,95 +6,95 @@ namespace SSXLibrary.Utilities
 {
     public class ImageUtil
     {
-        public static HashSet<Color> GetBitmapColorsFast(Bitmap bmp)
-        {
-            int width = bmp.Width;
-            int height = bmp.Height;
-            HashSet<Color> result = new HashSet<Color>();
+        //public static HashSet<Color> GetBitmapColorsFast(Bitmap bmp)
+        //{
+        //    int width = bmp.Width;
+        //    int height = bmp.Height;
+        //    HashSet<Color> result = new HashSet<Color>();
 
-            BitmapData data = bmp.LockBits(
-                new Rectangle(0, 0, width, height),
-                ImageLockMode.ReadOnly,
-                PixelFormat.Format32bppArgb); // Assumes 32bppArgb
+        //    BitmapData data = bmp.LockBits(
+        //        new Rectangle(0, 0, width, height),
+        //        ImageLockMode.ReadOnly,
+        //        PixelFormat.Format32bppArgb); // Assumes 32bppArgb
 
-            unsafe
-            {
-                byte* ptr = (byte*)data.Scan0;
+        //    unsafe
+        //    {
+        //        byte* ptr = (byte*)data.Scan0;
 
-                for (int y = 0; y < height; y++)
-                {
-                    byte* row = ptr + (y * data.Stride);
-                    for (int x = 0; x < width; x++)
-                    {
-                        int index = y * width + x;
-                        byte b = row[x * 4];
-                        byte g = row[x * 4 + 1];
-                        byte r = row[x * 4 + 2];
-                        byte a = row[x * 4 + 3];
+        //        for (int y = 0; y < height; y++)
+        //        {
+        //            byte* row = ptr + (y * data.Stride);
+        //            for (int x = 0; x < width; x++)
+        //            {
+        //                int index = y * width + x;
+        //                byte b = row[x * 4];
+        //                byte g = row[x * 4 + 1];
+        //                byte r = row[x * 4 + 2];
+        //                byte a = row[x * 4 + 3];
 
-                        result.Add(Color.FromArgb(a, r, g, b));
-                    }
-                }
-            }
+        //                result.Add(Color.FromArgb(a, r, g, b));
+        //            }
+        //        }
+        //    }
 
-            bmp.UnlockBits(data);
-            return result;
-        }
-        public static Bitmap ReduceBitmapColorsFast(Bitmap bmp, int maxColors)
-        {
-            int width = bmp.Width;
-            int height = bmp.Height;
+        //    bmp.UnlockBits(data);
+        //    return result;
+        //}
+        //public static Bitmap ReduceBitmapColorsFast(Bitmap bmp, int maxColors)
+        //{
+        //    int width = bmp.Width;
+        //    int height = bmp.Height;
 
-            // Step 1: Lock bitmap for fast access
-            var rect = new Rectangle(0, 0, width, height);
-            var bmpData = bmp.LockBits(rect, ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
+        //    // Step 1: Lock bitmap for fast access
+        //    var rect = new Rectangle(0, 0, width, height);
+        //    var bmpData = bmp.LockBits(rect, ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
 
-            int bytesPerPixel = 3;
-            int stride = bmpData.Stride;
-            int byteCount = stride * height;
-            byte[] pixels = new byte[byteCount];
-            Marshal.Copy(bmpData.Scan0, pixels, 0, byteCount);
+        //    int bytesPerPixel = 3;
+        //    int stride = bmpData.Stride;
+        //    int byteCount = stride * height;
+        //    byte[] pixels = new byte[byteCount];
+        //    Marshal.Copy(bmpData.Scan0, pixels, 0, byteCount);
 
-            // Step 2: Extract pixels (sample for speed)
-            var pixelColors = new List<Color>(width * height / 4); // sample 25% pixels
-            for (int y = 0; y < height; y += 2)
-            {
-                int row = y * stride;
-                for (int x = 0; x < width * bytesPerPixel; x += 6)
-                {
-                    byte b = pixels[row + x + 0];
-                    byte g = pixels[row + x + 1];
-                    byte r = pixels[row + x + 2];
-                    pixelColors.Add(Color.FromArgb(r, g, b));
-                }
-            }
+        //    // Step 2: Extract pixels (sample for speed)
+        //    var pixelColors = new List<Color>(width * height / 4); // sample 25% pixels
+        //    for (int y = 0; y < height; y += 2)
+        //    {
+        //        int row = y * stride;
+        //        for (int x = 0; x < width * bytesPerPixel; x += 6)
+        //        {
+        //            byte b = pixels[row + x + 0];
+        //            byte g = pixels[row + x + 1];
+        //            byte r = pixels[row + x + 2];
+        //            pixelColors.Add(Color.FromArgb(r, g, b));
+        //        }
+        //    }
 
-            // Step 3: Compute reduced palette
-            var reducedPalette = ReduceColors(pixelColors, maxColors);
+        //    // Step 3: Compute reduced palette
+        //    var reducedPalette = ReduceColors(pixelColors, maxColors);
 
-            // Step 4: Recolor bitmap using nearest palette color (parallel)
-            Parallel.For(0, height, y =>
-            {
-                int row = y * stride;
-                for (int x = 0; x < width * bytesPerPixel; x += 3)
-                {
-                    byte b = pixels[row + x + 0];
-                    byte g = pixels[row + x + 1];
-                    byte r = pixels[row + x + 2];
+        //    // Step 4: Recolor bitmap using nearest palette color (parallel)
+        //    Parallel.For(0, height, y =>
+        //    {
+        //        int row = y * stride;
+        //        for (int x = 0; x < width * bytesPerPixel; x += 3)
+        //        {
+        //            byte b = pixels[row + x + 0];
+        //            byte g = pixels[row + x + 1];
+        //            byte r = pixels[row + x + 2];
 
-                    var nearest = FindNearestColor(Color.FromArgb(r, g, b), reducedPalette);
+        //            var nearest = FindNearestColor(Color.FromArgb(r, g, b), reducedPalette);
 
-                    pixels[row + x + 0] = nearest.B;
-                    pixels[row + x + 1] = nearest.G;
-                    pixels[row + x + 2] = nearest.R;
-                }
-            });
+        //            pixels[row + x + 0] = nearest.B;
+        //            pixels[row + x + 1] = nearest.G;
+        //            pixels[row + x + 2] = nearest.R;
+        //        }
+        //    });
 
-            Marshal.Copy(pixels, 0, bmpData.Scan0, byteCount);
-            bmp.UnlockBits(bmpData);
+        //    Marshal.Copy(pixels, 0, bmpData.Scan0, byteCount);
+        //    bmp.UnlockBits(bmpData);
 
-            return bmp;
-        }
+        //    return bmp;
+        //}
 
         // --- Helper methods below ---
 

@@ -253,8 +253,8 @@ namespace SSXLibrary.FileHandlers.Textures
                 }
 
                 //Create Bitmap Image
-                tempImage.bitmap = new Bitmap(tempImageHeader.Width, tempImageHeader.Height, PixelFormat.Format32bppArgb);
-                tempImage.metalBitmap = new Bitmap(tempImageHeader.Width, tempImageHeader.Height, PixelFormat.Format32bppArgb);
+                //tempImage.bitmap = new Bitmap(tempImageHeader.Width, tempImageHeader.Height, PixelFormat.Format32bppArgb);
+                //tempImage.metalBitmap = new Bitmap(tempImageHeader.Width, tempImageHeader.Height, PixelFormat.Format32bppArgb);
                 int post = 0;
                 if (tempImageHeader.MatrixFormat == 1)
                 {
@@ -263,11 +263,11 @@ namespace SSXLibrary.FileHandlers.Textures
                         for (int x = 0; x < tempImageHeader.Width; x++)
                         {
                             int colorPos = tempImage.Matrix[post];
-                            tempImage.bitmap.SetPixel(x, y, tempImage.sshTable.colorTable[colorPos]);
+                            //tempImage.bitmap.SetPixel(x, y, tempImage.sshTable.colorTable[colorPos]);
 
                             if (tempImage.MetalBin)
                             {
-                                tempImage.metalBitmap.SetPixel(x, y, MetalColours[colorPos]);
+                                //tempImage.metalBitmap.SetPixel(x, y, MetalColours[colorPos]);
                             }
                             post++;
                         }
@@ -293,10 +293,10 @@ namespace SSXLibrary.FileHandlers.Textures
 
                             if (tempImage.MetalBin)
                             {
-                                tempImage.metalBitmap.SetPixel(x, y, MetalColours[colorPos]);
+                                //tempImage.metalBitmap.SetPixel(x, y, MetalColours[colorPos]);
                             }
 
-                            tempImage.bitmap.SetPixel(x, y, tempImage.sshTable.colorTable[colorPos]);
+                            //tempImage.bitmap.SetPixel(x, y, tempImage.sshTable.colorTable[colorPos]);
                             post++;
                         }
                     }
@@ -318,7 +318,7 @@ namespace SSXLibrary.FileHandlers.Textures
                             post++;
                             int A = tempImage.Matrix[post];
                             post++;
-                            tempImage.bitmap.SetPixel(x, y, Color.FromArgb(A, R, G, B));
+                            //tempImage.bitmap.SetPixel(x, y, Color.FromArgb(A, R, G, B));
                             if (!colourTable.colorTable.Contains(Color.FromArgb(A, R, G, B)))
                             {
                                 colourTable.colorTable.Add(Color.FromArgb(A, R, G, B));
@@ -346,31 +346,31 @@ namespace SSXLibrary.FileHandlers.Textures
             colourTable.colorTable = new List<Color>();
             if (temp.MetalBin)
             {
-                if (sshImages[i].bitmap.Width != sshImages[i].metalBitmap.Width || sshImages[i].bitmap.Height != sshImages[i].metalBitmap.Height)
-                {
-                    Bitmap metalBitmap = new Bitmap(sshImages[i].bitmap.Width, sshImages[i].bitmap.Height, PixelFormat.Format32bppArgb);
-                    temp.metalBitmap = metalBitmap;
-                }
-                for (int y = 0; y < temp.bitmap.Height; y++)
-                {
-                    for (int x = 0; x < temp.bitmap.Width; x++)
-                    {
-                        Color color = temp.bitmap.GetPixel(x, y);
-                        if (temp.MetalBin)
-                        {
-                            color = Color.FromArgb(temp.metalBitmap.GetPixel(x, y).R, color.R, color.G, color.B);
-                        }
+                //if (sshImages[i].bitmap.Width != sshImages[i].metalBitmap.Width || sshImages[i].bitmap.Height != sshImages[i].metalBitmap.Height)
+                //{
+                //    Bitmap metalBitmap = new Bitmap(sshImages[i].bitmap.Width, sshImages[i].bitmap.Height, PixelFormat.Format32bppArgb);
+                //    temp.metalBitmap = metalBitmap;
+                //}
+                //for (int y = 0; y < temp.bitmap.Height; y++)
+                //{
+                //    for (int x = 0; x < temp.bitmap.Width; x++)
+                //    {
+                //        Color color = temp.bitmap.GetPixel(x, y);
+                //        if (temp.MetalBin)
+                //        {
+                //            color = Color.FromArgb(temp.metalBitmap.GetPixel(x, y).R, color.R, color.G, color.B);
+                //        }
 
-                        if (!colourTable.colorTable.Contains(color))
-                        {
-                            colourTable.colorTable.Add(color);
-                        }
-                    }
-                }
+                //        if (!colourTable.colorTable.Contains(color))
+                //        {
+                //            colourTable.colorTable.Add(color);
+                //        }
+                //    }
+                //}
             }
             else
             {
-                colourTable.colorTable = ImageUtil.GetBitmapColorsFast(temp.bitmap).ToList();
+                //colourTable.colorTable = ImageUtil.GetBitmapColorsFast(temp.bitmap).ToList();
             }
 
             colourTable.Total = colourTable.colorTable.Count;
@@ -383,281 +383,281 @@ namespace SSXLibrary.FileHandlers.Textures
         {
             for (int i = 0; i < sshImages.Count; i++)
             {
-                sshImages[i].bitmap.Save(path + "\\" + sshImages[i].shortname + /*"." +*/ i + ".png", ImageFormat.Png);
+                //sshImages[i].bitmap.Save(path + "\\" + sshImages[i].shortname + /*"." +*/ i + ".png", ImageFormat.Png);
             }
         }
 
         public void BMPOneExtract(string path, int i)
         {
-            sshImages[i].bitmap.Save(path, ImageFormat.Png);
+            //sshImages[i].bitmap.Save(path, ImageFormat.Png);
         }
 
         public void BMPOneExtractMetal(string path, int i)
         {
-            sshImages[i].metalBitmap.Save(path, ImageFormat.Png);
+           //sshImages[i].metalBitmap.Save(path, ImageFormat.Png);
         }
 
         public void BMPOneBothExtract(string path, int i)
         {
-            Bitmap newBitmap = new Bitmap(sshImages[i].bitmap.Width, sshImages[i].bitmap.Height, PixelFormat.Format32bppArgb);
-            for (int y = 0; y < sshImages[i].bitmap.Height; y++)
-            {
-                for (int x = 0; x < sshImages[i].bitmap.Width; x++)
-                {
-                    Color tempColor1 = sshImages[i].metalBitmap.GetPixel(x, y);
-                    Color tempColor2 = sshImages[i].bitmap.GetPixel(x, y);
-                    Color tempColor = Color.FromArgb(tempColor1.R, tempColor2.R, tempColor2.G, tempColor2.B);
-                    newBitmap.SetPixel(x, y, tempColor);
-                }
-            }
-            newBitmap.Save(path, ImageFormat.Png);
+            //Bitmap newBitmap = new Bitmap(sshImages[i].bitmap.Width, sshImages[i].bitmap.Height, PixelFormat.Format32bppArgb);
+            //for (int y = 0; y < sshImages[i].bitmap.Height; y++)
+            //{
+            //    for (int x = 0; x < sshImages[i].bitmap.Width; x++)
+            //    {
+            //        Color tempColor1 = sshImages[i].metalBitmap.GetPixel(x, y);
+            //        Color tempColor2 = sshImages[i].bitmap.GetPixel(x, y);
+            //        Color tempColor = Color.FromArgb(tempColor1.R, tempColor2.R, tempColor2.G, tempColor2.B);
+            //        newBitmap.SetPixel(x, y, tempColor);
+            //    }
+            //}
+            //newBitmap.Save(path, ImageFormat.Png);
         }
 
         public void LoadSingleBoth(string path, int i)
         {
-            Stream stream = File.Open(path, FileMode.Open);
-            var ImageTemp = Image.FromStream(stream);
-            stream.Close();
-            stream.Dispose();
-            SSHImage temp = sshImages[i];
-            temp.bitmap = (Bitmap)ImageTemp;
-            SSHColourTable colourTable = new SSHColourTable();
-            colourTable.colorTable = new List<Color>();
-            for (int y = 0; y < temp.bitmap.Height; y++)
-            {
-                for (int x = 0; x < temp.bitmap.Width; x++)
-                {
-                    Color color = temp.bitmap.GetPixel(x, y);
-                    Color AColor = Color.FromArgb(255, color.A, color.A, color.A);
-                    Color ImageColor = Color.FromArgb(255, color.R, color.G, color.B);
-                    temp.metalBitmap.SetPixel(x, y, AColor);
-                    temp.bitmap.SetPixel(x, y, ImageColor);
+            //Stream stream = File.Open(path, FileMode.Open);
+            //var ImageTemp = Image.FromStream(stream);
+            //stream.Close();
+            //stream.Dispose();
+            //SSHImage temp = sshImages[i];
+            ////temp.bitmap = (Bitmap)ImageTemp;
+            //SSHColourTable colourTable = new SSHColourTable();
+            //colourTable.colorTable = new List<Color>();
+            //for (int y = 0; y < temp.bitmap.Height; y++)
+            //{
+            //    for (int x = 0; x < temp.bitmap.Width; x++)
+            //    {
+            //        Color color = temp.bitmap.GetPixel(x, y);
+            //        Color AColor = Color.FromArgb(255, color.A, color.A, color.A);
+            //        Color ImageColor = Color.FromArgb(255, color.R, color.G, color.B);
+            //        temp.metalBitmap.SetPixel(x, y, AColor);
+            //        temp.bitmap.SetPixel(x, y, ImageColor);
 
-                    if (!colourTable.colorTable.Contains(ImageColor))
-                    {
-                        colourTable.colorTable.Add(ImageColor);
-                    }
-                }
-            }
-            temp.sshTable = colourTable;
-            sshImages[i] = temp;
-            SSHColorCalculate(i);
+            //        if (!colourTable.colorTable.Contains(ImageColor))
+            //        {
+            //            colourTable.colorTable.Add(ImageColor);
+            //        }
+            //    }
+            //}
+            //temp.sshTable = colourTable;
+            //sshImages[i] = temp;
+            //SSHColorCalculate(i);
         }
 
         public void LoadSingle(string path, int i)
         {
-            Stream stream = File.Open(path, FileMode.Open);
+            //Stream stream = File.Open(path, FileMode.Open);
 
-            var ImageTemp = Image.FromStream(stream);
-            stream.Close();
-            stream.Dispose();
-            SSHImage temp = sshImages[i];
-            temp.bitmap = (Bitmap)ImageTemp;
-            if (temp.metalBitmap == null)
-            {
-                temp.metalBitmap = new Bitmap(temp.bitmap.Width, temp.bitmap.Height, PixelFormat.Format32bppArgb);
-            }
-            SSHColourTable colourTable = new SSHColourTable();
-            colourTable.colorTable = ImageUtil.GetBitmapColorsFast(temp.bitmap).ToList();
-            colourTable.Total = colourTable.colorTable.Count;
-            colourTable.Format = sshImages[i].sshTable.Format;
-            temp.sshTable = colourTable;
-            sshImages[i] = temp;
-            SSHColorCalculate(i);
+            //var ImageTemp = Image.FromStream(stream);
+            //stream.Close();
+            //stream.Dispose();
+            //SSHImage temp = sshImages[i];
+            //temp.bitmap = (Bitmap)ImageTemp;
+            //if (temp.metalBitmap == null)
+            //{
+            //    temp.metalBitmap = new Bitmap(temp.bitmap.Width, temp.bitmap.Height, PixelFormat.Format32bppArgb);
+            //}
+            //SSHColourTable colourTable = new SSHColourTable();
+            //colourTable.colorTable = ImageUtil.GetBitmapColorsFast(temp.bitmap).ToList();
+            //colourTable.Total = colourTable.colorTable.Count;
+            //colourTable.Format = sshImages[i].sshTable.Format;
+            //temp.sshTable = colourTable;
+            //sshImages[i] = temp;
+            //SSHColorCalculate(i);
         }
 
         public void LoadSingleMetal(string path, int i)
         {
-            Stream stream = File.Open(path, FileMode.Open);
-            var ImageTemp = Image.FromStream(stream);
-            stream.Close();
-            stream.Dispose();
+            //Stream stream = File.Open(path, FileMode.Open);
+            //var ImageTemp = Image.FromStream(stream);
+            //stream.Close();
+            //stream.Dispose();
 
-            SSHImage temp = sshImages[i];
-            temp.metalBitmap = (Bitmap)ImageTemp;
-            sshImages[i] = temp;
-            SSHColorCalculate(i);
+            //SSHImage temp = sshImages[i];
+            //temp.metalBitmap = (Bitmap)ImageTemp;
+            //sshImages[i] = temp;
+            //SSHColorCalculate(i);
         }
 
         public void LoadFolder(string path)
         {
-            MagicWord = "";
-            fileSize = 0;
-            group = "";
-            endingstring = "";
-            sshImages = new List<SSHImage>();
-            string[] paths = Directory.GetFiles(path, "*.png");
+            //MagicWord = "";
+            //fileSize = 0;
+            //group = "";
+            //endingstring = "";
+            //sshImages = new List<SSHImage>();
+            //string[] paths = Directory.GetFiles(path, "*.png");
 
-            for (int i = 1; i < paths.Length; i++)
-            {
-                Stream stream = File.Open(paths[i], FileMode.Open);
-                SSHImage tempImage = new SSHImage();
-                SSHImageHeader imageHeader = new SSHImageHeader();
-                var ImageTemp = Image.FromStream(stream);
-                stream.Close();
-                stream.Dispose();
-                tempImage.bitmap = (Bitmap)ImageTemp;
-                imageHeader.MatrixFormat = 2;
+            //for (int i = 1; i < paths.Length; i++)
+            //{
+            //    Stream stream = File.Open(paths[i], FileMode.Open);
+            //    SSHImage tempImage = new SSHImage();
+            //    SSHImageHeader imageHeader = new SSHImageHeader();
+            //    var ImageTemp = Image.FromStream(stream);
+            //    stream.Close();
+            //    stream.Dispose();
+            //    tempImage.bitmap = (Bitmap)ImageTemp;
+            //    imageHeader.MatrixFormat = 2;
 
-                string name = Path.GetFileName(paths[i].Replace(".png", ""));
-                string[] NameList = name.Split('.');
+            //    string name = Path.GetFileName(paths[i].Replace(".png", ""));
+            //    string[] NameList = name.Split('.');
 
-                if(NameList.Length>1)
-                {
-                    tempImage.longname = NameList[1];
-                }
-                else
-                {
-                    tempImage.longname = NameList[0];
-                }
-                tempImage.shortname = NameList[0];
-                imageHeader.Width = tempImage.bitmap.Width;
-                imageHeader.Height = tempImage.bitmap.Height;
-                SSHColourTable colourTable = new SSHColourTable();
-                colourTable.colorTable = new List<Color>();
+            //    if(NameList.Length>1)
+            //    {
+            //        tempImage.longname = NameList[1];
+            //    }
+            //    else
+            //    {
+            //        tempImage.longname = NameList[0];
+            //    }
+            //    tempImage.shortname = NameList[0];
+            //    imageHeader.Width = tempImage.bitmap.Width;
+            //    imageHeader.Height = tempImage.bitmap.Height;
+            //    SSHColourTable colourTable = new SSHColourTable();
+            //    colourTable.colorTable = new List<Color>();
 
-                for (int y = 0; y < tempImage.bitmap.Height; y++)
-                {
-                    for (int x = 0; x < tempImage.bitmap.Width; x++)
-                    {
-                        Color color = tempImage.bitmap.GetPixel(x, y);
-                        if (!colourTable.colorTable.Contains(color))
-                        {
-                            colourTable.colorTable.Add(color);
-                        }
-                    }
-                }
-                tempImage.metalBitmap = new Bitmap(tempImage.bitmap.Width, tempImage.bitmap.Height);
-                tempImage.sshTable = colourTable;
-                tempImage.sshHeader = imageHeader;
-                sshImages.Add(tempImage);
-            }
+            //    for (int y = 0; y < tempImage.bitmap.Height; y++)
+            //    {
+            //        for (int x = 0; x < tempImage.bitmap.Width; x++)
+            //        {
+            //            Color color = tempImage.bitmap.GetPixel(x, y);
+            //            if (!colourTable.colorTable.Contains(color))
+            //            {
+            //                colourTable.colorTable.Add(color);
+            //            }
+            //        }
+            //    }
+            //    tempImage.metalBitmap = new Bitmap(tempImage.bitmap.Width, tempImage.bitmap.Height);
+            //    tempImage.sshTable = colourTable;
+            //    tempImage.sshHeader = imageHeader;
+            //    sshImages.Add(tempImage);
+            //}
         }
 
         public void BrightenBitmap(int i)
         {
-            Bitmap bitmap = new Bitmap(sshImages[i].bitmap.Width, sshImages[i].bitmap.Height, PixelFormat.Format32bppArgb);
-            for (int y = 0; y < sshImages[i].bitmap.Height; y++)
-            {
-                for (int x = 0; x < sshImages[i].bitmap.Width; x++)
-                {
-                    Color color = sshImages[i].bitmap.GetPixel(x, y);
-                    int A = color.A;
-                    int R = color.R * 2 - 1;
-                    if (R < 0)
-                    {
-                        R = 0;
-                    }
-                    else if (R > 255)
-                    {
-                        R = 255;
-                    }
-                    int G = color.G * 2 - 1;
-                    if (G < 0)
-                    {
-                        G = 0;
-                    }
-                    else if (G > 255)
-                    {
-                        G = 255;
-                    }
-                    int B = color.B * 2 - 1;
-                    if (B < 0)
-                    {
-                        B = 0;
-                    }
-                    else if (B > 255)
-                    {
-                        B = 255;
-                    }
+            //Bitmap bitmap = new Bitmap(sshImages[i].bitmap.Width, sshImages[i].bitmap.Height, PixelFormat.Format32bppArgb);
+            //for (int y = 0; y < sshImages[i].bitmap.Height; y++)
+            //{
+            //    for (int x = 0; x < sshImages[i].bitmap.Width; x++)
+            //    {
+            //        Color color = sshImages[i].bitmap.GetPixel(x, y);
+            //        int A = color.A;
+            //        int R = color.R * 2 - 1;
+            //        if (R < 0)
+            //        {
+            //            R = 0;
+            //        }
+            //        else if (R > 255)
+            //        {
+            //            R = 255;
+            //        }
+            //        int G = color.G * 2 - 1;
+            //        if (G < 0)
+            //        {
+            //            G = 0;
+            //        }
+            //        else if (G > 255)
+            //        {
+            //            G = 255;
+            //        }
+            //        int B = color.B * 2 - 1;
+            //        if (B < 0)
+            //        {
+            //            B = 0;
+            //        }
+            //        else if (B > 255)
+            //        {
+            //            B = 255;
+            //        }
 
-                    color = Color.FromArgb(A, R, G, B);
-                    bitmap.SetPixel(x, y, color);
-                }
-            }
-            var tempimage = sshImages[i];
-            tempimage.bitmap = bitmap;
-            sshImages[i] = tempimage;
+            //        color = Color.FromArgb(A, R, G, B);
+            //        bitmap.SetPixel(x, y, color);
+            //    }
+            //}
+            //var tempimage = sshImages[i];
+            //tempimage.bitmap = bitmap;
+            //sshImages[i] = tempimage;
         }
 
         public void DarkenImage(int i)
         {
-            Bitmap bitmap = new Bitmap(sshImages[i].bitmap.Width, sshImages[i].bitmap.Height, PixelFormat.Format32bppArgb);
-            for (int y = 0; y < sshImages[i].bitmap.Height; y++)
-            {
-                for (int x = 0; x < sshImages[i].bitmap.Width; x++)
-                {
-                    Color color = sshImages[i].bitmap.GetPixel(x, y);
-                    int A = color.A;
-                    int R = color.R;
-                    int G = color.G;
-                    int B = color.B;
+            //Bitmap bitmap = new Bitmap(sshImages[i].bitmap.Width, sshImages[i].bitmap.Height, PixelFormat.Format32bppArgb);
+            //for (int y = 0; y < sshImages[i].bitmap.Height; y++)
+            //{
+            //    for (int x = 0; x < sshImages[i].bitmap.Width; x++)
+            //    {
+            //        Color color = sshImages[i].bitmap.GetPixel(x, y);
+            //        int A = color.A;
+            //        int R = color.R;
+            //        int G = color.G;
+            //        int B = color.B;
 
-                    R = (R + 1) / 2;
-                    G = (G + 1) / 2;
-                    B = (B + 1) / 2;
+            //        R = (R + 1) / 2;
+            //        G = (G + 1) / 2;
+            //        B = (B + 1) / 2;
 
-                    color = Color.FromArgb(A, R, G, B);
-                    bitmap.SetPixel(x, y, color);
-                }
-            }
-            var tempimage = sshImages[i];
-            tempimage.bitmap = bitmap;
-            sshImages[i] = tempimage;
+            //        color = Color.FromArgb(A, R, G, B);
+            //        bitmap.SetPixel(x, y, color);
+            //    }
+            //}
+            //var tempimage = sshImages[i];
+            //tempimage.bitmap = bitmap;
+            //sshImages[i] = tempimage;
         }
 
         public void HalfAlphaImage(int i)
         {
-            Bitmap bitmap = new Bitmap(sshImages[i].bitmap.Width, sshImages[i].bitmap.Height, PixelFormat.Format32bppArgb);
-            for (int y = 0; y < sshImages[i].bitmap.Height; y++)
-            {
-                for (int x = 0; x < sshImages[i].bitmap.Width; x++)
-                {
-                    Color color = sshImages[i].bitmap.GetPixel(x, y);
-                    int A = color.A;
-                    int R = color.R;
-                    int G = color.G;
-                    int B = color.B;
+            //Bitmap bitmap = new Bitmap(sshImages[i].bitmap.Width, sshImages[i].bitmap.Height, PixelFormat.Format32bppArgb);
+            //for (int y = 0; y < sshImages[i].bitmap.Height; y++)
+            //{
+            //    for (int x = 0; x < sshImages[i].bitmap.Width; x++)
+            //    {
+            //        Color color = sshImages[i].bitmap.GetPixel(x, y);
+            //        int A = color.A;
+            //        int R = color.R;
+            //        int G = color.G;
+            //        int B = color.B;
 
-                    A = (A + 1) / 2;
+            //        A = (A + 1) / 2;
 
-                    color = Color.FromArgb(A, R, G, B);
-                    bitmap.SetPixel(x, y, color);
-                }
-            }
-            var tempimage = sshImages[i];
-            tempimage.bitmap = bitmap;
-            sshImages[i] = tempimage;
+            //        color = Color.FromArgb(A, R, G, B);
+            //        bitmap.SetPixel(x, y, color);
+            //    }
+            //}
+            //var tempimage = sshImages[i];
+            //tempimage.bitmap = bitmap;
+            //sshImages[i] = tempimage;
         }
 
         public void DoubleAlphaImage(int i)
         {
-            Bitmap bitmap = new Bitmap(sshImages[i].bitmap.Width, sshImages[i].bitmap.Height, PixelFormat.Format32bppArgb);
-            for (int y = 0; y < sshImages[i].bitmap.Height; y++)
-            {
-                for (int x = 0; x < sshImages[i].bitmap.Width; x++)
-                {
-                    Color color = sshImages[i].bitmap.GetPixel(x, y);
-                    int A = color.A * 2 - 1;
-                    if (A < 0)
-                    {
-                        A = 0;
-                    }
-                    else if (A > 255)
-                    {
-                        A = 255;
-                    }
-                    int R = color.R;
-                    int G = color.G;
-                    int B = color.B;
+            //Bitmap bitmap = new Bitmap(sshImages[i].bitmap.Width, sshImages[i].bitmap.Height, PixelFormat.Format32bppArgb);
+            //for (int y = 0; y < sshImages[i].bitmap.Height; y++)
+            //{
+            //    for (int x = 0; x < sshImages[i].bitmap.Width; x++)
+            //    {
+            //        Color color = sshImages[i].bitmap.GetPixel(x, y);
+            //        int A = color.A * 2 - 1;
+            //        if (A < 0)
+            //        {
+            //            A = 0;
+            //        }
+            //        else if (A > 255)
+            //        {
+            //            A = 255;
+            //        }
+            //        int R = color.R;
+            //        int G = color.G;
+            //        int B = color.B;
 
-                    color = Color.FromArgb(A, R, G, B);
-                    bitmap.SetPixel(x, y, color);
-                }
-            }
-            var tempimage = sshImages[i];
-            tempimage.bitmap = bitmap;
-            sshImages[i] = tempimage;
+            //        color = Color.FromArgb(A, R, G, B);
+            //        bitmap.SetPixel(x, y, color);
+            //    }
+            //}
+            //var tempimage = sshImages[i];
+            //tempimage.bitmap = bitmap;
+            //sshImages[i] = tempimage;
         }
 
         public void RemoveImage(int i)
@@ -667,45 +667,45 @@ namespace SSXLibrary.FileHandlers.Textures
 
         public void AddImage(int imageSize = 64, int MatrixType = 2)
         {
-            var NewSSHImage = new SSHImage();
-            NewSSHImage.sshHeader.MatrixFormat = (byte)MatrixType;
-            NewSSHImage.shortname = "????";
-            NewSSHImage.bitmap = new Bitmap(imageSize, imageSize, PixelFormat.Format32bppArgb);
-            NewSSHImage.sshTable.colorTable = new List<Color>();
-            sshImages.Add(NewSSHImage);
+            //var NewSSHImage = new SSHImage();
+            //NewSSHImage.sshHeader.MatrixFormat = (byte)MatrixType;
+            //NewSSHImage.shortname = "????";
+            //NewSSHImage.bitmap = new Bitmap(imageSize, imageSize, PixelFormat.Format32bppArgb);
+            //NewSSHImage.sshTable.colorTable = new List<Color>();
+            //sshImages.Add(NewSSHImage);
         }
 
         public void SaveSSH(string path, bool TestImages)
         {
-            for (int i = 0; i < sshImages.Count; i++)
-            {
-                if (TestImages)
-                {
-                    var sshImage = sshImages[i];
-                    SSHColorCalculate(i);
+            //for (int i = 0; i < sshImages.Count; i++)
+            //{
+            //    if (TestImages)
+            //    {
+            //        var sshImage = sshImages[i];
+            //        SSHColorCalculate(i);
 
-                    //if metal bin combine images and then reduce
+            //        //if metal bin combine images and then reduce
 
-                    if (sshImage.sshTable.colorTable.Count > 256 && (sshImages[i].sshHeader.MatrixFormat == 2 || sshImages[i].sshHeader.MatrixFormat == 130))
-                    {
-                        sshImage.bitmap = ImageUtil.ReduceBitmapColorsFast(sshImage.bitmap, 256);
-                        //MessageBox.Show(sshImages[i].shortname + " " + i.ToString() + " Exceeds 256 Colours");
-                        //check = true;
-                    }
-                    if (sshImage.sshTable.colorTable.Count > 16 && sshImages[i].sshHeader.MatrixFormat == 1)
-                    {
-                        sshImage.bitmap = ImageUtil.ReduceBitmapColorsFast(sshImage.bitmap, 16);
-                        //MessageBox.Show(sshImage.shortname + " " + i.ToString() + " Exceeds 16 Colours");
-                        //check = true;
-                    }
-                    sshImages[i] = sshImage;
-                }
-                if (sshImages[i].sshHeader.MatrixFormat == 130)
-                {
-                    //MessageBox.Show("Error Unable to write to matrix 130");
-                    return;
-                }
-            }
+            //        if (sshImage.sshTable.colorTable.Count > 256 && (sshImages[i].sshHeader.MatrixFormat == 2 || sshImages[i].sshHeader.MatrixFormat == 130))
+            //        {
+            //            sshImage.bitmap = ImageUtil.ReduceBitmapColorsFast(sshImage.bitmap, 256);
+            //            //MessageBox.Show(sshImages[i].shortname + " " + i.ToString() + " Exceeds 256 Colours");
+            //            //check = true;
+            //        }
+            //        if (sshImage.sshTable.colorTable.Count > 16 && sshImages[i].sshHeader.MatrixFormat == 1)
+            //        {
+            //            sshImage.bitmap = ImageUtil.ReduceBitmapColorsFast(sshImage.bitmap, 16);
+            //            //MessageBox.Show(sshImage.shortname + " " + i.ToString() + " Exceeds 16 Colours");
+            //            //check = true;
+            //        }
+            //        sshImages[i] = sshImage;
+            //    }
+            //    if (sshImages[i].sshHeader.MatrixFormat == 130)
+            //    {
+            //        //MessageBox.Show("Error Unable to write to matrix 130");
+            //        return;
+            //    }
+            //}
 
             byte[] tempByte = new byte[4];
             Stream stream = new MemoryStream();
@@ -748,21 +748,21 @@ namespace SSXLibrary.FileHandlers.Textures
                 //Set SSH Header Info
                 if (sshImages[i].sshHeader.MatrixFormat == 1)
                 {
-                    StreamUtil.WriteInt24(stream, sshImages[i].bitmap.Width * sshImages[i].bitmap.Height / 2 + 16);
+                    StreamUtil.WriteInt24(stream, /*sshImages[i].bitmap.Width * sshImages[i].bitmap.Height /*/ 2 + 16);
                 }
                 else
                 if (sshImages[i].sshHeader.MatrixFormat == 2 || sshImages[i].sshHeader.MatrixFormat == 130)
                 {
-                    StreamUtil.WriteInt24(stream, sshImages[i].bitmap.Width * sshImages[i].bitmap.Height + 16);
+                    StreamUtil.WriteInt24(stream, /*sshImages[i].bitmap.Width * sshImages[i].bitmap.Height + */16);
                 }
                 else if (sshImages[i].sshHeader.MatrixFormat == 5)
                 {
-                    StreamUtil.WriteInt24(stream, sshImages[i].bitmap.Width * sshImages[i].bitmap.Height * 4 + 16);
+                    StreamUtil.WriteInt24(stream, /*sshImages[i].bitmap.Width * sshImages[i].bitmap.Height * 4*/ + 16);
                 }
 
-                StreamUtil.WriteInt16(stream, sshImages[i].bitmap.Width);
+                StreamUtil.WriteInt16(stream, 1/*sshImages[i].bitmap.Width*/);
 
-                StreamUtil.WriteInt16(stream, sshImages[i].bitmap.Height);
+                StreamUtil.WriteInt16(stream, 1/*sshImages[i].bitmap.Height*/);
 
                 StreamUtil.WriteInt16(stream, sshImages[i].sshHeader.Xaxis);
 
@@ -837,46 +837,46 @@ namespace SSXLibrary.FileHandlers.Textures
             byte[] ByteCombine = new byte[2];
             int bytepos = 0;
 
-            for (int y = 0; y < sshImages[i].bitmap.Height; y++)
-            {
-                for (int x = 0; x < sshImages[i].bitmap.Width; x++)
-                {
-                    Color color = sshImages[i].bitmap.GetPixel(x, y);
-                    //Alpha Fix
-                    if (sshImages[i].AlphaFix)
-                    {
-                        int A = (color.A + 1) / 2;
-                        color = Color.FromArgb(A, color.R, color.G, color.B);
-                    }
+            //for (int y = 0; y < sshImages[i].bitmap.Height; y++)
+            //{
+            //    for (int x = 0; x < sshImages[i].bitmap.Width; x++)
+            //    {
+            //        Color color = sshImages[i].bitmap.GetPixel(x, y);
+            //        //Alpha Fix
+            //        if (sshImages[i].AlphaFix)
+            //        {
+            //            int A = (color.A + 1) / 2;
+            //            color = Color.FromArgb(A, color.R, color.G, color.B);
+            //        }
 
 
-                    if (colourTable.colorTable.Contains(color))
-                    {
-                        int index = colourTable.colorTable.IndexOf(color);
-                        tempByte = new byte[4];
-                        BitConverter.GetBytes(index).CopyTo(tempByte, 0);
-                        ByteCombine[bytepos] = tempByte[0];
-                    }
-                    else
-                    {
-                        colourTable.colorTable.Add(color);
-                        int index = colourTable.colorTable.Count - 1;
-                        tempByte = new byte[4];
-                        BitConverter.GetBytes(index).CopyTo(tempByte, 0);
-                        ByteCombine[bytepos] = tempByte[0];
-                    }
-                    bytepos++;
+            //        if (colourTable.colorTable.Contains(color))
+            //        {
+            //            int index = colourTable.colorTable.IndexOf(color);
+            //            tempByte = new byte[4];
+            //            BitConverter.GetBytes(index).CopyTo(tempByte, 0);
+            //            ByteCombine[bytepos] = tempByte[0];
+            //        }
+            //        else
+            //        {
+            //            colourTable.colorTable.Add(color);
+            //            int index = colourTable.colorTable.Count - 1;
+            //            tempByte = new byte[4];
+            //            BitConverter.GetBytes(index).CopyTo(tempByte, 0);
+            //            ByteCombine[bytepos] = tempByte[0];
+            //        }
+            //        bytepos++;
 
-                    if (bytepos == 2)
-                    {
-                        bytepos = 0;
-                        tempByte = new byte[4];
-                        BitConverter.GetBytes(ByteUtil.BitConbineConvert(ByteCombine[0], ByteCombine[1], 0, 4, 4)).CopyTo(tempByte, 0);
-                        ByteCombine = new byte[2];
-                        stream.Write(tempByte, 0, 1);
-                    }
-                }
-            }
+            //        if (bytepos == 2)
+            //        {
+            //            bytepos = 0;
+            //            tempByte = new byte[4];
+            //            BitConverter.GetBytes(ByteUtil.BitConbineConvert(ByteCombine[0], ByteCombine[1], 0, 4, 4)).CopyTo(tempByte, 0);
+            //            ByteCombine = new byte[2];
+            //            stream.Write(tempByte, 0, 1);
+            //        }
+            //    }
+            //}
 
             //Colour Table
             tempByte = new byte[4];
@@ -931,55 +931,55 @@ namespace SSXLibrary.FileHandlers.Textures
             SSHColourTable colourTable = new SSHColourTable();
             colourTable.colorTable = new List<Color>();
 
-            byte[] Matrix = new byte[sshImages[i].bitmap.Height * sshImages[i].bitmap.Width];
+            byte[] Matrix = new byte[/*sshImages[i].bitmap.Height * sshImages[i].bitmap.Width*/1];
             int pos1 = 0;
-            for (int y = 0; y < sshImages[i].bitmap.Height; y++)
-            {
-                for (int x = 0; x < sshImages[i].bitmap.Width; x++)
-                {
-                    Color color = sshImages[i].bitmap.GetPixel(x, y);
+            //for (int y = 0; y < sshImages[i].bitmap.Height; y++)
+            //{
+            //    for (int x = 0; x < sshImages[i].bitmap.Width; x++)
+            //    {
+            //        Color color = sshImages[i].bitmap.GetPixel(x, y);
 
-                    if (sshImages[i].MetalBin)
-                    {
-                        color = Color.FromArgb(sshImages[i].metalBitmap.GetPixel(x, y).R, color.R, color.G, color.B);
-                    }
+            //        if (sshImages[i].MetalBin)
+            //        {
+            //            color = Color.FromArgb(sshImages[i].metalBitmap.GetPixel(x, y).R, color.R, color.G, color.B);
+            //        }
 
-                    if (sshImages[i].AlphaFix)
-                    {
-                        int A = (color.A + 1) / 2;
-                        color = Color.FromArgb(A, color.R, color.G, color.B);
-                    }
+            //        if (sshImages[i].AlphaFix)
+            //        {
+            //            int A = (color.A + 1) / 2;
+            //            color = Color.FromArgb(A, color.R, color.G, color.B);
+            //        }
 
-                    if (colourTable.colorTable.Contains(color))
-                    {
-                        int index = colourTable.colorTable.IndexOf(color);
-                        if (sshImages[i].sshTable.Format != 0)
-                        {
-                            index = ByteUtil.ByteBitSwitch(index);
-                        }
-                        tempByte = new byte[4];
-                        BitConverter.GetBytes(index).CopyTo(tempByte, 0);
-                        Matrix[pos1] = tempByte[0];
-                    }
-                    else
-                    {
-                        colourTable.colorTable.Add(color);
-                        int index = colourTable.colorTable.Count - 1;
-                        if (sshImages[i].sshTable.Format != 0)
-                        {
-                            index = ByteUtil.ByteBitSwitch(index);
-                        }
-                        tempByte = new byte[4];
-                        BitConverter.GetBytes(index).CopyTo(tempByte, 0);
-                        Matrix[pos1] = tempByte[0];
-                    }
-                    pos1++;
-                }
-            }
+            //        if (colourTable.colorTable.Contains(color))
+            //        {
+            //            int index = colourTable.colorTable.IndexOf(color);
+            //            if (sshImages[i].sshTable.Format != 0)
+            //            {
+            //                index = ByteUtil.ByteBitSwitch(index);
+            //            }
+            //            tempByte = new byte[4];
+            //            BitConverter.GetBytes(index).CopyTo(tempByte, 0);
+            //            Matrix[pos1] = tempByte[0];
+            //        }
+            //        else
+            //        {
+            //            colourTable.colorTable.Add(color);
+            //            int index = colourTable.colorTable.Count - 1;
+            //            if (sshImages[i].sshTable.Format != 0)
+            //            {
+            //                index = ByteUtil.ByteBitSwitch(index);
+            //            }
+            //            tempByte = new byte[4];
+            //            BitConverter.GetBytes(index).CopyTo(tempByte, 0);
+            //            Matrix[pos1] = tempByte[0];
+            //        }
+            //        pos1++;
+            //    }
+            //}
 
             if (sshImages[i].sshHeader.LXPos == 2)
             {
-                Matrix = ByteUtil.Swizzle8(Matrix, sshImages[i].bitmap.Width, sshImages[i].bitmap.Height);
+                //Matrix = ByteUtil.Swizzle8(Matrix, sshImages[i].bitmap.Width, sshImages[i].bitmap.Height);
             }
 
             stream.Write(Matrix, 0, Matrix.Length);
@@ -1044,33 +1044,33 @@ namespace SSXLibrary.FileHandlers.Textures
             SSHColourTable colourTable = new SSHColourTable();
             colourTable.colorTable = new List<Color>();
             //colourTable.colorTable.Add(Color.FromArgb(0, 0, 0, 0));
-            for (int y = 0; y < sshImages[i].bitmap.Height; y++)
-            {
-                for (int x = 0; x < sshImages[i].bitmap.Width; x++)
-                {
-                    Color color = sshImages[i].bitmap.GetPixel(x, y);
-                    tempByte = new byte[4];
-                    int R = color.R;
-                    int G = color.G;
-                    int B = color.B;
-                    int A = color.A;
-                    if (sshImages[i].AlphaFix)
-                    {
-                        A = (A + 1) / 2;
-                    }
-                    BitConverter.GetBytes(R).CopyTo(tempByte, 0);
-                    stream.Write(tempByte, 0, 1);
-                    tempByte = new byte[4];
-                    BitConverter.GetBytes(G).CopyTo(tempByte, 0);
-                    stream.Write(tempByte, 0, 1);
-                    tempByte = new byte[4];
-                    BitConverter.GetBytes(B).CopyTo(tempByte, 0);
-                    stream.Write(tempByte, 0, 1);
-                    tempByte = new byte[4];
-                    BitConverter.GetBytes(A).CopyTo(tempByte, 0);
-                    stream.Write(tempByte, 0, 1);
-                }
-            }
+            //for (int y = 0; y < sshImages[i].bitmap.Height; y++)
+            //{
+            //    for (int x = 0; x < sshImages[i].bitmap.Width; x++)
+            //    {
+            //        Color color = sshImages[i].bitmap.GetPixel(x, y);
+            //        tempByte = new byte[4];
+            //        int R = color.R;
+            //        int G = color.G;
+            //        int B = color.B;
+            //        int A = color.A;
+            //        if (sshImages[i].AlphaFix)
+            //        {
+            //            A = (A + 1) / 2;
+            //        }
+            //        BitConverter.GetBytes(R).CopyTo(tempByte, 0);
+            //        stream.Write(tempByte, 0, 1);
+            //        tempByte = new byte[4];
+            //        BitConverter.GetBytes(G).CopyTo(tempByte, 0);
+            //        stream.Write(tempByte, 0, 1);
+            //        tempByte = new byte[4];
+            //        BitConverter.GetBytes(B).CopyTo(tempByte, 0);
+            //        stream.Write(tempByte, 0, 1);
+            //        tempByte = new byte[4];
+            //        BitConverter.GetBytes(A).CopyTo(tempByte, 0);
+            //        stream.Write(tempByte, 0, 1);
+            //    }
+            //}
         }
 
         public struct SSHImage
@@ -1084,8 +1084,8 @@ namespace SSXLibrary.FileHandlers.Textures
             public SSHColourTable sshTable;
             public bool AlphaFix;
             public bool MetalBin;
-            public Bitmap metalBitmap;
-            public Bitmap bitmap;
+            //public Bitmap metalBitmap;
+            //public Bitmap bitmap;
         }
         public struct SSHImageHeader
         {
