@@ -78,13 +78,13 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
             Vector3 Location;
 
             Matrix4x4.Decompose(matrix4X4, out Scale, out Rotation, out Location);
-            bin3File.Position = JsonUtil.Vector3ToArray(Location);
-            bin3File.Rotation = JsonUtil.QuaternionToArray(Rotation);
-            bin3File.Scale = JsonUtil.Vector3ToArray(Scale);
+            bin3File.Position = ArrayConv.Vector3ToArray(Location);
+            bin3File.Rotation = ArrayConv.QuaternionToArray(Rotation);
+            bin3File.Scale = ArrayConv.Vector3ToArray(Scale);
 
-            bin3File.V0 = JsonUtil.Vector4ToArray(V0);
-            bin3File.V1 = JsonUtil.Vector3ToArray(V1);
-            bin3File.V2 = JsonUtil.Vector3ToArray(V2);
+            bin3File.V0 = ArrayConv.Vector4ToArray(V0);
+            bin3File.V1 = ArrayConv.Vector3ToArray(V1);
+            bin3File.V2 = ArrayConv.Vector3ToArray(V2);
 
             bin3File.TrackID = objectID.TrackID;
             bin3File.RID = objectID.RID;

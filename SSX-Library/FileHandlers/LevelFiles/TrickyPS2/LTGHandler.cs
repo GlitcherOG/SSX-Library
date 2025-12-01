@@ -284,7 +284,6 @@ namespace SSXLibrary.FileHandlers.LevelFiles.TrickyPS2
             bool[] LightBools = new bool[pbdHandler.lights.Count];
             bool[] ParticleBools = new bool[pbdHandler.particleInstances.Count];
 
-
             //SetBoxes
             for (int y = 0; y < pointerListCount; y++)
             {
@@ -297,7 +296,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.TrickyPS2
                     {
                         Vector3 MidPoint = Vector3.Lerp(pbdHandler.Patches[i].LowestXYZ, pbdHandler.Patches[i].HighestXYZ, 0.5f);
 
-                        if (JsonUtil.WithinXY(MidPoint, TempMainBox.WorldBounds1, TempMainBox.WorldBounds2) && !Patchbools[i])
+                        if (AABB.IntersectsPoint(MidPoint, TempMainBox.WorldBounds1, TempMainBox.WorldBounds2) && !Patchbools[i])
                         {
                             TempMainBox.Modified = true;
                             Patchbools[i] = true;
@@ -310,7 +309,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.TrickyPS2
                     {
                         Vector3 MidPoint = Vector3.Lerp(pbdHandler.Instances[i].LowestXYZ, pbdHandler.Instances[i].HighestXYZ, 0.5f);
 
-                        if (JsonUtil.WithinXY(MidPoint, TempMainBox.WorldBounds1, TempMainBox.WorldBounds2) && !InstanceBools[i])
+                        if (AABB.IntersectsPoint(MidPoint, TempMainBox.WorldBounds1, TempMainBox.WorldBounds2) && !InstanceBools[i])
                         {
                             TempMainBox.Modified = true;
                             InstanceBools[i] = true;
@@ -323,7 +322,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.TrickyPS2
                     {
                         Vector3 MidPoint = Vector3.Lerp(pbdHandler.splinesSegments[i].LowestXYZ, pbdHandler.splinesSegments[i].HighestXYZ, 0.5f);
 
-                        if (JsonUtil.WithinXY(MidPoint, TempMainBox.WorldBounds1, TempMainBox.WorldBounds2) && !SplineBools[i])
+                        if (AABB.IntersectsPoint(MidPoint, TempMainBox.WorldBounds1, TempMainBox.WorldBounds2) && !SplineBools[i])
                         {
                             TempMainBox.Modified = true;
                             SplineBools[i] = true;
@@ -334,7 +333,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.TrickyPS2
                     TempMainBox.lightIndex = new List<int>();
                     for (int i = 0; i < pbdHandler.lights.Count; i++)
                     {
-                        if (JsonUtil.WithinXY(pbdHandler.lights[i].Position, TempMainBox.WorldBounds1, TempMainBox.WorldBounds2) && !LightBools[i] && pbdHandler.lights[i].spriteRes != 0)
+                        if (AABB.IntersectsPoint(pbdHandler.lights[i].Position, TempMainBox.WorldBounds1, TempMainBox.WorldBounds2) && !LightBools[i] && pbdHandler.lights[i].spriteRes != 0)
                         {
                             TempMainBox.Modified = true;
                             LightBools[i] = true;
@@ -346,7 +345,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.TrickyPS2
                     TempMainBox.lightCrossingIndex = new List<int>();
                     for (int i = 0; i < pbdHandler.lights.Count; i++)
                     {
-                        if (JsonUtil.IntersectingSquares(TempMainBox.WorldBounds1, TempMainBox.WorldBounds2, pbdHandler.lights[i].LowestXYZ, pbdHandler.lights[i].HighestXYZ))
+                        if (AABB.IntersectsAABB(TempMainBox.WorldBounds1, TempMainBox.WorldBounds2, pbdHandler.lights[i].LowestXYZ, pbdHandler.lights[i].HighestXYZ))
                         {
                             TempMainBox.lightCrossingIndex.Add(i);
                         }
@@ -361,7 +360,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.TrickyPS2
                     {
                         Vector3 MidPoint = Vector3.Lerp(pbdHandler.particleInstances[i].LowestXYZ, pbdHandler.particleInstances[i].HighestXYZ, 0.5f);
 
-                        if (JsonUtil.WithinXY(MidPoint, TempMainBox.WorldBounds1, TempMainBox.WorldBounds2) && !ParticleBools[i])
+                        if (AABB.IntersectsPoint(MidPoint, TempMainBox.WorldBounds1, TempMainBox.WorldBounds2) && !ParticleBools[i])
                         {
                             TempMainBox.Modified = true;
                             ParticleBools[i] = true;
@@ -386,7 +385,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.TrickyPS2
                             for (int i = 0; i < TempMainBox.patchIndex.Count; i++)
                             {
                                 Vector3 MidPoint = Vector3.Lerp(pbdHandler.Patches[TempMainBox.patchIndex[i]].LowestXYZ, pbdHandler.Patches[TempMainBox.patchIndex[i]].HighestXYZ, 0.5f);
-                                if (JsonUtil.WithinXY(MidPoint, TempNodeBox.WorldBounds1, TempNodeBox.WorldBounds2) && !NodePatchBools[i])
+                                if (AABB.IntersectsPoint(MidPoint, TempNodeBox.WorldBounds1, TempNodeBox.WorldBounds2) && !NodePatchBools[i])
                                 {
                                     TempNodeBox.Modified = true;
                                     NodePatchBools[i] = true;
@@ -400,7 +399,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.TrickyPS2
                             for (int i = 0; i < TempMainBox.instanceIndex.Count; i++)
                             {
                                 Vector3 MidPoint = Vector3.Lerp(pbdHandler.Instances[TempMainBox.instanceIndex[i]].LowestXYZ, pbdHandler.Instances[TempMainBox.instanceIndex[i]].HighestXYZ, 0.5f);
-                                if (JsonUtil.WithinXY(MidPoint, TempNodeBox.WorldBounds1, TempNodeBox.WorldBounds2) && !NodeInstanceBools[i])
+                                if (AABB.IntersectsPoint(MidPoint, TempNodeBox.WorldBounds1, TempNodeBox.WorldBounds2) && !NodeInstanceBools[i])
                                 {
                                     TempNodeBox.Modified = true;
                                     if (pbdHandler.Instances[TempMainBox.instanceIndex[i]].LTGState == 1 && TempNodeBox.GemIndex.Count == 0)
@@ -430,7 +429,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.TrickyPS2
                             for (int i = 0; i < TempMainBox.splineIndex.Count; i++)
                             {
                                 Vector3 MidPoint = Vector3.Lerp(pbdHandler.splinesSegments[TempMainBox.splineIndex[i]].LowestXYZ, pbdHandler.splinesSegments[TempMainBox.splineIndex[i]].HighestXYZ, 0.5f);
-                                if (JsonUtil.WithinXY(MidPoint, TempNodeBox.WorldBounds1, TempNodeBox.WorldBounds2) && !NodeSplineBools[i])
+                                if (AABB.IntersectsPoint(MidPoint, TempNodeBox.WorldBounds1, TempNodeBox.WorldBounds2) && !NodeSplineBools[i])
                                 {
                                     TempNodeBox.Modified = true;
                                     NodeSplineBools[i] = true;
@@ -442,7 +441,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.TrickyPS2
                             TempNodeBox.LightIndex = new List<int>();
                             for (int i = 0; i < TempMainBox.lightIndex.Count; i++)
                             {
-                                if (JsonUtil.WithinXY(pbdHandler.lights[TempMainBox.lightIndex[i]].Position, TempNodeBox.WorldBounds1, TempNodeBox.WorldBounds2) && !NodeLightBools[i])
+                                if (AABB.IntersectsPoint(pbdHandler.lights[TempMainBox.lightIndex[i]].Position, TempNodeBox.WorldBounds1, TempNodeBox.WorldBounds2) && !NodeLightBools[i])
                                 {
                                     TempNodeBox.Modified = true;
                                     NodeLightBools[i] = true;
@@ -454,7 +453,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.TrickyPS2
                             TempNodeBox.LightCrossingIndex = new List<int>();
                             for (int i = 0; i < TempMainBox.lightCrossingIndex.Count; i++)
                             {
-                                if (JsonUtil.IntersectingSquares(TempNodeBox.WorldBounds1, TempNodeBox.WorldBounds2, pbdHandler.lights[TempMainBox.lightCrossingIndex[i]].LowestXYZ, pbdHandler.lights[TempMainBox.lightCrossingIndex[i]].HighestXYZ))
+                                if (AABB.IntersectsAABB(TempNodeBox.WorldBounds1, TempNodeBox.WorldBounds2, pbdHandler.lights[TempMainBox.lightCrossingIndex[i]].LowestXYZ, pbdHandler.lights[TempMainBox.lightCrossingIndex[i]].HighestXYZ))
                                 {
                                     TempNodeBox.LightCrossingIndex.Add(TempMainBox.lightCrossingIndex[i]);
                                 }
@@ -470,7 +469,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.TrickyPS2
                             for (int i = 0; i < TempMainBox.particleIndex.Count; i++)
                             {
                                 Vector3 MidPoint = Vector3.Lerp(pbdHandler.particleInstances[TempMainBox.particleIndex[i]].LowestXYZ, pbdHandler.particleInstances[TempMainBox.particleIndex[i]].HighestXYZ, 0.5f);
-                                if (JsonUtil.WithinXY(MidPoint, TempNodeBox.WorldBounds1, TempNodeBox.WorldBounds2) && !NodeParticleBools[i])
+                                if (AABB.IntersectsPoint(MidPoint, TempNodeBox.WorldBounds1, TempNodeBox.WorldBounds2) && !NodeParticleBools[i])
                                 {
                                     TempNodeBox.Modified = true;
                                     NodeParticleBools[i] = true;
@@ -844,7 +843,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.TrickyPS2
                     {
                         Vector3 MidPoint = new Vector3(pbdHandler.Patches[i].R1C1.X, pbdHandler.Patches[i].R1C1.Y, pbdHandler.Patches[i].R1C1.Z);
 
-                        if (JsonUtil.WithinXY(MidPoint, TempMainBox.WorldBounds1, TempMainBox.WorldBounds2) && !Patchbools[i])
+                        if (AABB.IntersectsPoint(MidPoint, TempMainBox.WorldBounds1, TempMainBox.WorldBounds2) && !Patchbools[i])
                         {
                             TempMainBox.Modified = true;
                             Patchbools[i] = true;
@@ -857,7 +856,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.TrickyPS2
                     {
                         Vector3 MidPoint = pbdHandler.Instances[i].matrix4X4.Translation;
 
-                        if (JsonUtil.WithinXY(MidPoint, TempMainBox.WorldBounds1, TempMainBox.WorldBounds2) && !InstanceBools[i])
+                        if (AABB.IntersectsPoint(MidPoint, TempMainBox.WorldBounds1, TempMainBox.WorldBounds2) && !InstanceBools[i])
                         {
                             TempMainBox.Modified = true;
                             InstanceBools[i] = true;
@@ -870,7 +869,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.TrickyPS2
                     {
                         Vector3 MidPoint = new Vector3(pbdHandler.splinesSegments[i].ControlPoint.X, pbdHandler.splinesSegments[i].ControlPoint.Y, pbdHandler.splinesSegments[i].ControlPoint.Z);
 
-                        if (JsonUtil.WithinXY(MidPoint, TempMainBox.WorldBounds1, TempMainBox.WorldBounds2) && !SplineBools[i])
+                        if (AABB.IntersectsPoint(MidPoint, TempMainBox.WorldBounds1, TempMainBox.WorldBounds2) && !SplineBools[i])
                         {
                             TempMainBox.Modified = true;
                             SplineBools[i] = true;
@@ -881,7 +880,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.TrickyPS2
                     TempMainBox.lightIndex = new List<int>();
                     for (int i = 0; i < pbdHandler.lights.Count; i++)
                     {
-                        if (JsonUtil.WithinXY(pbdHandler.lights[i].Position, TempMainBox.WorldBounds1, TempMainBox.WorldBounds2) && !LightBools[i] && pbdHandler.lights[i].spriteRes != 0)
+                        if (AABB.IntersectsPoint(pbdHandler.lights[i].Position, TempMainBox.WorldBounds1, TempMainBox.WorldBounds2) && !LightBools[i] && pbdHandler.lights[i].spriteRes != 0)
                         {
                             TempMainBox.Modified = true;
                             LightBools[i] = true;
@@ -893,7 +892,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.TrickyPS2
                     TempMainBox.lightCrossingIndex = new List<int>();
                     for (int i = 0; i < pbdHandler.lights.Count; i++)
                     {
-                        if (JsonUtil.IntersectingSquares(TempMainBox.WorldBounds1, TempMainBox.WorldBounds2, pbdHandler.lights[i].LowestXYZ, pbdHandler.lights[i].HighestXYZ))
+                        if (AABB.IntersectsAABB(TempMainBox.WorldBounds1, TempMainBox.WorldBounds2, pbdHandler.lights[i].LowestXYZ, pbdHandler.lights[i].HighestXYZ))
                         {
                             TempMainBox.lightCrossingIndex.Add(i);
                         }
@@ -908,7 +907,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.TrickyPS2
                     {
                         Vector3 MidPoint = pbdHandler.particleInstances[i].matrix4X4.Translation;
 
-                        if (JsonUtil.WithinXY(MidPoint, TempMainBox.WorldBounds1, TempMainBox.WorldBounds2) && !ParticleBools[i])
+                        if (AABB.IntersectsPoint(MidPoint, TempMainBox.WorldBounds1, TempMainBox.WorldBounds2) && !ParticleBools[i])
                         {
                             TempMainBox.Modified = true;
                             ParticleBools[i] = true;
@@ -933,7 +932,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.TrickyPS2
                             for (int i = 0; i < TempMainBox.patchIndex.Count; i++)
                             {
                                 Vector3 MidPoint = new Vector3(pbdHandler.Patches[TempMainBox.patchIndex[i]].R1C1.X, pbdHandler.Patches[TempMainBox.patchIndex[i]].R1C1.Y, pbdHandler.Patches[TempMainBox.patchIndex[i]].R1C1.Z);
-                                if (JsonUtil.WithinXY(MidPoint, TempNodeBox.WorldBounds1, TempNodeBox.WorldBounds2) && !NodePatchBools[i])
+                                if (AABB.IntersectsPoint(MidPoint, TempNodeBox.WorldBounds1, TempNodeBox.WorldBounds2) && !NodePatchBools[i])
                                 {
                                     TempNodeBox.Modified = true;
                                     NodePatchBools[i] = true;
@@ -947,7 +946,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.TrickyPS2
                             for (int i = 0; i < TempMainBox.instanceIndex.Count; i++)
                             {
                                 Vector3 MidPoint = pbdHandler.Instances[TempMainBox.instanceIndex[i]].matrix4X4.Translation;
-                                if (JsonUtil.WithinXY(MidPoint, TempNodeBox.WorldBounds1, TempNodeBox.WorldBounds2) && !NodeInstanceBools[i])
+                                if (AABB.IntersectsPoint(MidPoint, TempNodeBox.WorldBounds1, TempNodeBox.WorldBounds2) && !NodeInstanceBools[i])
                                 {
                                     TempNodeBox.Modified = true;
                                     if (pbdHandler.Instances[TempMainBox.instanceIndex[i]].LTGState == 1 && TempNodeBox.GemIndex.Count == 0)
@@ -977,7 +976,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.TrickyPS2
                             for (int i = 0; i < TempMainBox.splineIndex.Count; i++)
                             {
                                 Vector3 MidPoint = new Vector3(pbdHandler.splinesSegments[TempMainBox.splineIndex[i]].ControlPoint.X, pbdHandler.splinesSegments[TempMainBox.splineIndex[i]].ControlPoint.Y, pbdHandler.splinesSegments[TempMainBox.splineIndex[i]].ControlPoint.Z);
-                                if (JsonUtil.WithinXY(MidPoint, TempNodeBox.WorldBounds1, TempNodeBox.WorldBounds2) && !NodeSplineBools[i])
+                                if (AABB.IntersectsPoint(MidPoint, TempNodeBox.WorldBounds1, TempNodeBox.WorldBounds2) && !NodeSplineBools[i])
                                 {
                                     TempNodeBox.Modified = true;
                                     NodeSplineBools[i] = true;
@@ -989,7 +988,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.TrickyPS2
                             TempNodeBox.LightIndex = new List<int>();
                             for (int i = 0; i < TempMainBox.lightIndex.Count; i++)
                             {
-                                if (JsonUtil.WithinXY(pbdHandler.lights[TempMainBox.lightIndex[i]].Position, TempNodeBox.WorldBounds1, TempNodeBox.WorldBounds2) && !NodeLightBools[i])
+                                if (AABB.IntersectsPoint(pbdHandler.lights[TempMainBox.lightIndex[i]].Position, TempNodeBox.WorldBounds1, TempNodeBox.WorldBounds2) && !NodeLightBools[i])
                                 {
                                     TempNodeBox.Modified = true;
                                     NodeLightBools[i] = true;
@@ -1001,7 +1000,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.TrickyPS2
                             TempNodeBox.LightCrossingIndex = new List<int>();
                             for (int i = 0; i < TempMainBox.lightCrossingIndex.Count; i++)
                             {
-                                if (JsonUtil.IntersectingSquares(TempNodeBox.WorldBounds1, TempNodeBox.WorldBounds2, pbdHandler.lights[TempMainBox.lightCrossingIndex[i]].LowestXYZ, pbdHandler.lights[TempMainBox.lightCrossingIndex[i]].HighestXYZ))
+                                if (AABB.IntersectsAABB(TempNodeBox.WorldBounds1, TempNodeBox.WorldBounds2, pbdHandler.lights[TempMainBox.lightCrossingIndex[i]].LowestXYZ, pbdHandler.lights[TempMainBox.lightCrossingIndex[i]].HighestXYZ))
                                 {
                                     TempNodeBox.LightCrossingIndex.Add(TempMainBox.lightCrossingIndex[i]);
                                 }
@@ -1017,7 +1016,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.TrickyPS2
                             for (int i = 0; i < TempMainBox.particleIndex.Count; i++)
                             {
                                 Vector3 MidPoint = pbdHandler.particleInstances[TempMainBox.particleIndex[i]].matrix4X4.Translation;
-                                if (JsonUtil.WithinXY(MidPoint, TempNodeBox.WorldBounds1, TempNodeBox.WorldBounds2) && !NodeParticleBools[i])
+                                if (AABB.IntersectsPoint(MidPoint, TempNodeBox.WorldBounds1, TempNodeBox.WorldBounds2) && !NodeParticleBools[i])
                                 {
                                     TempNodeBox.Modified = true;
                                     NodeParticleBools[i] = true;

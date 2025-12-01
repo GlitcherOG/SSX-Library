@@ -64,18 +64,18 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
             bin3File.U2 = U2;
             bin3File.U3 = U3;
 
-            bin3File.U4 = JsonUtil.Vector4ToArray(U4);
-            bin3File.U5 = JsonUtil.Vector4ToArray(U5);
-            bin3File.U6 = JsonUtil.Vector4ToArray(U6);
-            bin3File.U7 = JsonUtil.Vector4ToArray(U7);
+            bin3File.U4 = ArrayConv.Vector4ToArray(U4);
+            bin3File.U5 = ArrayConv.Vector4ToArray(U5);
+            bin3File.U6 = ArrayConv.Vector4ToArray(U6);
+            bin3File.U7 = ArrayConv.Vector4ToArray(U7);
 
-            bin3File.U8 = JsonUtil.Vector4ToArray(U8);
+            bin3File.U8 = ArrayConv.Vector4ToArray(U8);
 
             bin3File.U9 = U9;
             bin3File.U10 = U10;
 
-            bin3File.U11 = JsonUtil.Vector3ToArray(U11);
-            bin3File.U12 = JsonUtil.Vector3ToArray(U12);
+            bin3File.U11 = ArrayConv.Vector3ToArray(U11);
+            bin3File.U12 = ArrayConv.Vector3ToArray(U12);
 
             bin3File.U13 = U13;
             bin3File.U14 = U14;

@@ -64,10 +64,10 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
             bin11File.U2 = U2;
             bin11File.U3 = U3;
 
-            bin11File.Point4 = JsonUtil.Vector4ToArray(Point4);
-            bin11File.Point3 = JsonUtil.Vector4ToArray(Point3);
-            bin11File.Point2 = JsonUtil.Vector4ToArray(Point2);
-            bin11File.ControlPoint = JsonUtil.Vector4ToArray(ControlPoint);
+            bin11File.Point4 = ArrayConv.Vector4ToArray(Point4);
+            bin11File.Point3 = ArrayConv.Vector4ToArray(Point3);
+            bin11File.Point2 = ArrayConv.Vector4ToArray(Point2);
+            bin11File.ControlPoint = ArrayConv.Vector4ToArray(ControlPoint);
 
             bin11File.U4 = U4;
             bin11File.U5 = U5;

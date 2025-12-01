@@ -532,14 +532,14 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
                 Vector3 Location;
 
                 Matrix4x4.Decompose(modelObject.matrix4X4, out Scale, out Rotation, out Location);
-                NewObject.Position = JsonUtil.Vector3ToArray(Location);
-                NewObject.Rotation = JsonUtil.QuaternionToArray(Rotation);
-                NewObject.Scale = JsonUtil.Vector3ToArray(Scale);
+                NewObject.Position = ArrayConv.Vector3ToArray(Location);
+                NewObject.Rotation = ArrayConv.QuaternionToArray(Rotation);
+                NewObject.Scale = ArrayConv.Vector3ToArray(Scale);
 
                 NewObject.unknownS2 = new MDRJsonHandler.UnknownS2();
 
-                NewObject.unknownS2.BboxLow = JsonUtil.Vector3ToArray(modelObject.unknownS2.BboxLow);
-                NewObject.unknownS2.BboxHigh = JsonUtil.Vector3ToArray(modelObject.unknownS2.BboxHigh);
+                NewObject.unknownS2.BboxLow = ArrayConv.Vector3ToArray(modelObject.unknownS2.BboxLow);
+                NewObject.unknownS2.BboxHigh = ArrayConv.Vector3ToArray(modelObject.unknownS2.BboxHigh);
 
                 NewObject.unknownS2.U0 = modelObject.unknownS2.U0;
 
@@ -568,7 +568,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
                         TempModelOffset.U02 = modelObject.unknownS2.ModelHeaderOffset[j].U02;
                         TempModelOffset.U03 = modelObject.unknownS2.ModelHeaderOffset[j].U03;
 
-                        TempModelOffset.U04 = JsonUtil.Vector4ToArray(modelObject.unknownS2.ModelHeaderOffset[j].U04);
+                        TempModelOffset.U04 = ArrayConv.Vector4ToArray(modelObject.unknownS2.ModelHeaderOffset[j].U04);
 
                         NewObject.unknownS2.ModelHeaderOffset.Add(TempModelOffset);
                     }
@@ -576,8 +576,8 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
 
                 NewObject.unknownS3 = new MDRJsonHandler.UnknownS3();
 
-                NewObject.unknownS3.U0 = JsonUtil.Vector3ToArray(modelObject.unknownS3.U0);
-                NewObject.unknownS3.U1 = JsonUtil.Vector3ToArray(modelObject.unknownS3.U1);
+                NewObject.unknownS3.U0 = ArrayConv.Vector3ToArray(modelObject.unknownS3.U0);
+                NewObject.unknownS3.U1 = ArrayConv.Vector3ToArray(modelObject.unknownS3.U1);
 
                 NewObject.unknownS3.U2 = modelObject.unknownS3.U2;
                 NewObject.unknownS3.U3 = modelObject.unknownS3.U3;

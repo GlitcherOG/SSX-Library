@@ -163,7 +163,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
                 newAIPath.U5 = aiPaths[i].U5;
                 newAIPath.U6 = aiPaths[i].U6;
 
-                newAIPath.PathPos = JsonUtil.Vector3ToArray(aiPaths[i].PathPos);
+                newAIPath.PathPos = ArrayConv.Vector3ToArray(aiPaths[i].PathPos);
                 newAIPath.PathPoints = new float[aiPaths[i].PathPoints.Count, 3];
 
                 for (int a = 0; a < aiPaths[i].PathPoints.Count; a++)
@@ -198,7 +198,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
                 newAIPath.U1 = trackPaths[i].U1;
                 newAIPath.U2 = trackPaths[i].U2;
 
-                newAIPath.PathPos = JsonUtil.Vector3ToArray(aiPaths[i].PathPos);
+                newAIPath.PathPos = ArrayConv.Vector3ToArray(aiPaths[i].PathPos);
                 newAIPath.PathPoints = new float[aiPaths[i].PathPoints.Count, 3];
 
                 for (int a = 0; a < aiPaths[i].PathPoints.Count; a++)
@@ -242,8 +242,8 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
 
                 NewU1struct.U0 = u1Structs[i].U0;
                 NewU1struct.U1 = u1Structs[i].U1;
-                NewU1struct.U2 = JsonUtil.Vector3ToArray(u1Structs[i].U2);
-                NewU1struct.U3 = JsonUtil.Vector3ToArray(u1Structs[i].U3);
+                NewU1struct.U2 = ArrayConv.Vector3ToArray(u1Structs[i].U2);
+                NewU1struct.U3 = ArrayConv.Vector3ToArray(u1Structs[i].U3);
                 NewU1struct.U0 = u1Structs[i].U4;
                 NewU1struct.U1 = u1Structs[i].U5;
 

@@ -80,17 +80,17 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
                 var TempJsonSegment = new SplineJsonHandler.SegmentJson();
 
                 BezierUtil bezierUtil = new BezierUtil();
-                bezierUtil.ProcessedPoints[0] = JsonUtil.Vector4ToVector3(splineSegments[i].Point1);
-                bezierUtil.ProcessedPoints[1] = JsonUtil.Vector4ToVector3(splineSegments[i].Point2);
-                bezierUtil.ProcessedPoints[2] = JsonUtil.Vector4ToVector3(splineSegments[i].Point3);
-                bezierUtil.ProcessedPoints[3] = JsonUtil.Vector4ToVector3(splineSegments[i].Point4);
+                bezierUtil.ProcessedPoints[0] = VectorConv.Vector4ToVector3(splineSegments[i].Point1);
+                bezierUtil.ProcessedPoints[1] = VectorConv.Vector4ToVector3(splineSegments[i].Point2);
+                bezierUtil.ProcessedPoints[2] = VectorConv.Vector4ToVector3(splineSegments[i].Point3);
+                bezierUtil.ProcessedPoints[3] = VectorConv.Vector4ToVector3(splineSegments[i].Point4);
                 bezierUtil.GenerateRawPoints();
 
                 TempJsonSegment.Points = new float[4, 3];
 
                 for (int j = 0; j < 4; j++)
                 {
-                    TempJsonSegment.Points = JsonUtil.Vector3ToArray2D(TempJsonSegment.Points, bezierUtil.RawPoints[j], j);
+                    TempJsonSegment.Points = ArrayConv.Vector3ToArray2D(bezierUtil.RawPoints[j], j);
                 }
 
                 TempJsonSegment.E0 = splineSegments[i].E0;
