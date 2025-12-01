@@ -6,6 +6,7 @@ using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using SSX_Library.Utilities;
 using SSXLibrary.FileHandlers.LevelFiles.TrickyPS2;
 using SSXLibrary.Utilities;
 

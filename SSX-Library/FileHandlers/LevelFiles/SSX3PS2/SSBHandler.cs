@@ -103,7 +103,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2
         //}
         public void LoadAndExtractSSBFromSBD(string path, string extractPath, SDBHandler sdbHandler)
         {
-            ConsoleWindow.GenerateConsole();
+            //ConsoleWindow.GenerateConsole();
             using (Stream stream = File.Open(path, FileMode.Open))
             {
                 PatchesJsonHandler patchesJsonHandler = new PatchesJsonHandler();
@@ -349,7 +349,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2
 
             SSX3Config ssx3Config = new SSX3Config();
             ssx3Config.CreateJson(extractPath + "//ConfigSSX3.ssx");
-            ConsoleWindow.CloseConsole();
+            //ConsoleWindow.CloseConsole();
         }
 
         public void PackSSB(string Folder, string BuildPath)
