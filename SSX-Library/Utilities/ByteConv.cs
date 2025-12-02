@@ -46,4 +46,18 @@ public static class ByteConv
         return output;
     }
     
+    /// <summary>
+    /// Converts 2 bytes to an int12. 
+    /// <param name="byteOrder"> The endianess of the input Bytes array </param>
+    /// </summary>
+    public static int BytesToInt12(byte[] Bytes, ByteOrder byteOrder)
+    {
+        Debug.Assert(Bytes.Length >= 2, "Not enough bytes passed");
+        byte[] array = [..Bytes];
+        if (byteOrder == ByteOrder.LittleEndian) Array.Reverse(array);
+        short integer = BitConverter.ToInt16(array);
+        return integer & 0xFFF;
+    }
+
+
 } 

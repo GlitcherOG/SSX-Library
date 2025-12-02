@@ -84,7 +84,7 @@ namespace SSXLibrary.Utilities
         {
             byte[] tempByte = new byte[2];
             stream.Read(tempByte, 0, tempByte.Length);
-            // TODO: Make a bytes to int12 utils function instead of this.
+            // TODO: Use BytesToInt12 instead.
             return ByteUtil.BytesToBitConvert(tempByte, 4, 15);
         }
 
