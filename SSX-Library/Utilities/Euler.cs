@@ -2,6 +2,9 @@
 
 namespace SSX_Library.Utilities;
 
+/// <summary>
+/// Converts Euler angels to/from Quaternion.
+/// </summary>
 public static class Euler
 {
     public static Quaternion ToQuaternion(Vector3 euler)

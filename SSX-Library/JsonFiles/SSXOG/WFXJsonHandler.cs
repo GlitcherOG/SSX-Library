@@ -498,7 +498,7 @@
 //                    NewSubSubType.U1 = TempEffect.type0.Value.Boost.Value.U1;
 //                    NewSubSubType.U2 = TempEffect.type0.Value.Boost.Value.U2;
 //                    NewSubSubType.BoostAmount = TempEffect.type0.Value.Boost.Value.BoostAmount;
-//                    NewSubSubType.BoostDir = JsonUtil.ArrayToVector3(TempEffect.type0.Value.Boost.Value.BoostDir);
+//                    NewSubSubType.BoostDir = ArrayConv.ArrayToVector3(TempEffect.type0.Value.Boost.Value.BoostDir);
 //                    NewSubType.Boost = NewSubSubType;
 //                }
 //                else if (NewSubType.SubType == 10)

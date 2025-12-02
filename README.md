@@ -161,6 +161,7 @@ Utilities:
 - [x] MathUtil.cs
 - [x] ConsoleWindow.cs
 - [x] ErrorManager.cs
+- [x] JsonUtil.cs
 - [ ] ImageUtil.cs
 - [ ] StreamUtil.cs
 

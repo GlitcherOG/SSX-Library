@@ -132,7 +132,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
 
             //patchJson.TexturePath = "0000.png";
 
-            patchJson.LightMapPoint = JsonUtil.Vector4ToArray(Lightmap);
+            patchJson.LightMapPoint = ArrayConv.Vector4ToArray(Lightmap);
             patchJson.UVPoints = new float[4, 2];
 
             patchJson.UVPoints[0, 0] = UV1.X;
@@ -148,22 +148,22 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
             patchJson.UVPoints[3, 1] = UV4.Y;
 
             BezierUtil bezierUtil = new BezierUtil();
-            bezierUtil.ProcessedPoints[0] = JsonUtil.Vector4ToVector3(R1C1);
-            bezierUtil.ProcessedPoints[1] = JsonUtil.Vector4ToVector3(R1C2);
-            bezierUtil.ProcessedPoints[2] = JsonUtil.Vector4ToVector3(R1C3);
-            bezierUtil.ProcessedPoints[3] = JsonUtil.Vector4ToVector3(R1C4);
-            bezierUtil.ProcessedPoints[4] = JsonUtil.Vector4ToVector3(R2C1);
-            bezierUtil.ProcessedPoints[5] = JsonUtil.Vector4ToVector3(R2C2);
-            bezierUtil.ProcessedPoints[6] = JsonUtil.Vector4ToVector3(R2C3);
-            bezierUtil.ProcessedPoints[7] = JsonUtil.Vector4ToVector3(R2C4);
-            bezierUtil.ProcessedPoints[8] = JsonUtil.Vector4ToVector3(R3C1);
-            bezierUtil.ProcessedPoints[9] = JsonUtil.Vector4ToVector3(R3C2);
-            bezierUtil.ProcessedPoints[10] = JsonUtil.Vector4ToVector3(R3C3);
-            bezierUtil.ProcessedPoints[11] = JsonUtil.Vector4ToVector3(R3C4);
-            bezierUtil.ProcessedPoints[12] = JsonUtil.Vector4ToVector3(R4C1);
-            bezierUtil.ProcessedPoints[13] = JsonUtil.Vector4ToVector3(R4C2);
-            bezierUtil.ProcessedPoints[14] = JsonUtil.Vector4ToVector3(R4C3);
-            bezierUtil.ProcessedPoints[15] = JsonUtil.Vector4ToVector3(R4C4);
+            bezierUtil.ProcessedPoints[0] = VectorConv.Vector4ToVector3(R1C1);
+            bezierUtil.ProcessedPoints[1] = VectorConv.Vector4ToVector3(R1C2);
+            bezierUtil.ProcessedPoints[2] = VectorConv.Vector4ToVector3(R1C3);
+            bezierUtil.ProcessedPoints[3] = VectorConv.Vector4ToVector3(R1C4);
+            bezierUtil.ProcessedPoints[4] = VectorConv.Vector4ToVector3(R2C1);
+            bezierUtil.ProcessedPoints[5] = VectorConv.Vector4ToVector3(R2C2);
+            bezierUtil.ProcessedPoints[6] = VectorConv.Vector4ToVector3(R2C3);
+            bezierUtil.ProcessedPoints[7] = VectorConv.Vector4ToVector3(R2C4);
+            bezierUtil.ProcessedPoints[8] = VectorConv.Vector4ToVector3(R3C1);
+            bezierUtil.ProcessedPoints[9] = VectorConv.Vector4ToVector3(R3C2);
+            bezierUtil.ProcessedPoints[10] = VectorConv.Vector4ToVector3(R3C3);
+            bezierUtil.ProcessedPoints[11] = VectorConv.Vector4ToVector3(R3C4);
+            bezierUtil.ProcessedPoints[12] = VectorConv.Vector4ToVector3(R4C1);
+            bezierUtil.ProcessedPoints[13] = VectorConv.Vector4ToVector3(R4C2);
+            bezierUtil.ProcessedPoints[14] = VectorConv.Vector4ToVector3(R4C3);
+            bezierUtil.ProcessedPoints[15] = VectorConv.Vector4ToVector3(R4C4);
 
             bezierUtil.GenerateRawPoints();
 
@@ -171,10 +171,10 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
 
             for (int a = 0; a < 16; a++)
             {
-                patchJson.Points = JsonUtil.Vector3ToArray2D(patchJson.Points, bezierUtil.RawPoints[a], a);
+                patchJson.Points = ArrayConv.Vector3ToArray2D(bezierUtil.RawPoints[a], a);
             }
 
-            patchJson.U7 = JsonUtil.Vector4ToArray(U7);
+            patchJson.U7 = ArrayConv.Vector4ToArray(U7);
 
             patchJson.TrackID = objectID.TrackID;
             patchJson.RID = objectID.RID;

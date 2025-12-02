@@ -92,7 +92,7 @@ namespace SSXLibrary
                 PatchesJsonHandler.PatchJson patch = new PatchesJsonHandler.PatchJson();
                 patch.PatchName = mapHandler.Patchs[i].Name;
 
-                patch.LightMapPoint = JsonUtil.Vector4ToArray(pbdHandler.Patches[i].LightMapPoint);
+                patch.LightMapPoint = ArrayConv.Vector4ToArray(pbdHandler.Patches[i].LightMapPoint);
 
                 patch.UVPoints = new float[4, 2];
 
@@ -109,22 +109,22 @@ namespace SSXLibrary
                 patch.UVPoints[3, 1] = pbdHandler.Patches[i].UVPoint4.Y;
 
                 BezierUtil bezierUtil = new BezierUtil();
-                bezierUtil.ProcessedPoints[0] = JsonUtil.Vector4ToVector3(pbdHandler.Patches[i].R1C1);
-                bezierUtil.ProcessedPoints[1] = JsonUtil.Vector4ToVector3(pbdHandler.Patches[i].R1C2);
-                bezierUtil.ProcessedPoints[2] = JsonUtil.Vector4ToVector3(pbdHandler.Patches[i].R1C3);
-                bezierUtil.ProcessedPoints[3] = JsonUtil.Vector4ToVector3(pbdHandler.Patches[i].R1C4);
-                bezierUtil.ProcessedPoints[4] = JsonUtil.Vector4ToVector3(pbdHandler.Patches[i].R2C1);
-                bezierUtil.ProcessedPoints[5] = JsonUtil.Vector4ToVector3(pbdHandler.Patches[i].R2C2);
-                bezierUtil.ProcessedPoints[6] = JsonUtil.Vector4ToVector3(pbdHandler.Patches[i].R2C3);
-                bezierUtil.ProcessedPoints[7] = JsonUtil.Vector4ToVector3(pbdHandler.Patches[i].R2C4);
-                bezierUtil.ProcessedPoints[8] = JsonUtil.Vector4ToVector3(pbdHandler.Patches[i].R3C1);
-                bezierUtil.ProcessedPoints[9] = JsonUtil.Vector4ToVector3(pbdHandler.Patches[i].R3C2);
-                bezierUtil.ProcessedPoints[10] = JsonUtil.Vector4ToVector3(pbdHandler.Patches[i].R3C3);
-                bezierUtil.ProcessedPoints[11] = JsonUtil.Vector4ToVector3(pbdHandler.Patches[i].R3C4);
-                bezierUtil.ProcessedPoints[12] = JsonUtil.Vector4ToVector3(pbdHandler.Patches[i].R4C1);
-                bezierUtil.ProcessedPoints[13] = JsonUtil.Vector4ToVector3(pbdHandler.Patches[i].R4C2);
-                bezierUtil.ProcessedPoints[14] = JsonUtil.Vector4ToVector3(pbdHandler.Patches[i].R4C3);
-                bezierUtil.ProcessedPoints[15] = JsonUtil.Vector4ToVector3(pbdHandler.Patches[i].R4C4);
+                bezierUtil.ProcessedPoints[0] = VectorConv.Vector4ToVector3(pbdHandler.Patches[i].R1C1);
+                bezierUtil.ProcessedPoints[1] = VectorConv.Vector4ToVector3(pbdHandler.Patches[i].R1C2);
+                bezierUtil.ProcessedPoints[2] = VectorConv.Vector4ToVector3(pbdHandler.Patches[i].R1C3);
+                bezierUtil.ProcessedPoints[3] = VectorConv.Vector4ToVector3(pbdHandler.Patches[i].R1C4);
+                bezierUtil.ProcessedPoints[4] = VectorConv.Vector4ToVector3(pbdHandler.Patches[i].R2C1);
+                bezierUtil.ProcessedPoints[5] = VectorConv.Vector4ToVector3(pbdHandler.Patches[i].R2C2);
+                bezierUtil.ProcessedPoints[6] = VectorConv.Vector4ToVector3(pbdHandler.Patches[i].R2C3);
+                bezierUtil.ProcessedPoints[7] = VectorConv.Vector4ToVector3(pbdHandler.Patches[i].R2C4);
+                bezierUtil.ProcessedPoints[8] = VectorConv.Vector4ToVector3(pbdHandler.Patches[i].R3C1);
+                bezierUtil.ProcessedPoints[9] = VectorConv.Vector4ToVector3(pbdHandler.Patches[i].R3C2);
+                bezierUtil.ProcessedPoints[10] = VectorConv.Vector4ToVector3(pbdHandler.Patches[i].R3C3);
+                bezierUtil.ProcessedPoints[11] = VectorConv.Vector4ToVector3(pbdHandler.Patches[i].R3C4);
+                bezierUtil.ProcessedPoints[12] = VectorConv.Vector4ToVector3(pbdHandler.Patches[i].R4C1);
+                bezierUtil.ProcessedPoints[13] = VectorConv.Vector4ToVector3(pbdHandler.Patches[i].R4C2);
+                bezierUtil.ProcessedPoints[14] = VectorConv.Vector4ToVector3(pbdHandler.Patches[i].R4C3);
+                bezierUtil.ProcessedPoints[15] = VectorConv.Vector4ToVector3(pbdHandler.Patches[i].R4C4);
 
                 bezierUtil.GenerateRawPoints();
 
@@ -132,7 +132,7 @@ namespace SSXLibrary
 
                 for (int a= 0; a < 16; a++)
                 {
-                    patch.Points = JsonUtil.Vector3ToArray2D(patch.Points, bezierUtil.RawPoints[a], a);
+                    patch.Points = ArrayConv.Vector3ToArray2D(bezierUtil.RawPoints[a], a);
                 }
 
                 patch.SurfaceType = pbdHandler.Patches[i].SurfaceType;
@@ -163,19 +163,19 @@ namespace SSXLibrary
                 Vector3 Location;
 
                 Matrix4x4.Decompose(pbdHandler.Instances[i].matrix4X4, out Scale, out Rotation, out Location);
-                instanceJson.Location = JsonUtil.Vector3ToArray(Location);
-                instanceJson.Rotation = JsonUtil.QuaternionToArray(Rotation);
-                instanceJson.Scale = JsonUtil.Vector3ToArray(Scale);
+                instanceJson.Location = ArrayConv.Vector3ToArray(Location);
+                instanceJson.Rotation = ArrayConv.QuaternionToArray(Rotation);
+                instanceJson.Scale = ArrayConv.Vector3ToArray(Scale);
 
-                instanceJson.LightVector1 = JsonUtil.Vector4ToArray(pbdHandler.Instances[i].LightVector1);
-                instanceJson.LightVector2 = JsonUtil.Vector4ToArray(pbdHandler.Instances[i].LightVector2);
-                instanceJson.LightVector3 = JsonUtil.Vector4ToArray(pbdHandler.Instances[i].LightVector3);
-                instanceJson.AmbentLightVector = JsonUtil.Vector4ToArray(pbdHandler.Instances[i].AmbentLightVector);
+                instanceJson.LightVector1 = ArrayConv.Vector4ToArray(pbdHandler.Instances[i].LightVector1);
+                instanceJson.LightVector2 = ArrayConv.Vector4ToArray(pbdHandler.Instances[i].LightVector2);
+                instanceJson.LightVector3 = ArrayConv.Vector4ToArray(pbdHandler.Instances[i].LightVector3);
+                instanceJson.AmbentLightVector = ArrayConv.Vector4ToArray(pbdHandler.Instances[i].AmbentLightVector);
 
-                instanceJson.LightColour1 = JsonUtil.Vector4ToArray(pbdHandler.Instances[i].LightColour1);
-                instanceJson.LightColour2 = JsonUtil.Vector4ToArray(pbdHandler.Instances[i].LightColour2);
-                instanceJson.LightColour3 = JsonUtil.Vector4ToArray(pbdHandler.Instances[i].LightColour3);
-                instanceJson.AmbentLightColour = JsonUtil.Vector4ToArray(pbdHandler.Instances[i].AmbentLightColour);
+                instanceJson.LightColour1 = ArrayConv.Vector4ToArray(pbdHandler.Instances[i].LightColour1);
+                instanceJson.LightColour2 = ArrayConv.Vector4ToArray(pbdHandler.Instances[i].LightColour2);
+                instanceJson.LightColour3 = ArrayConv.Vector4ToArray(pbdHandler.Instances[i].LightColour3);
+                instanceJson.AmbentLightColour = ArrayConv.Vector4ToArray(pbdHandler.Instances[i].AmbentLightColour);
 
                 instanceJson.ModelID = pbdHandler.Instances[i].ModelID;
                 instanceJson.PrevInstance = pbdHandler.Instances[i].PrevInstance;
@@ -291,13 +291,13 @@ namespace SSXLibrary
                 Vector3 Location;
 
                 Matrix4x4.Decompose(pbdHandler.particleInstances[i].matrix4X4, out Scale, out Rotation, out Location);
-                TempParticle.Location = JsonUtil.Vector3ToArray(Location);
-                TempParticle.Rotation = JsonUtil.QuaternionToArray(Rotation);
-                TempParticle.Scale = JsonUtil.Vector3ToArray(Scale);
+                TempParticle.Location = ArrayConv.Vector3ToArray(Location);
+                TempParticle.Rotation = ArrayConv.QuaternionToArray(Rotation);
+                TempParticle.Scale = ArrayConv.Vector3ToArray(Scale);
 
                 TempParticle.UnknownInt1 = pbdHandler.particleInstances[i].UnknownInt1;
-                TempParticle.LowestXYZ = JsonUtil.Vector3ToArray(pbdHandler.particleInstances[i].LowestXYZ);
-                TempParticle.HighestXYZ = JsonUtil.Vector3ToArray(pbdHandler.particleInstances[i].HighestXYZ);
+                TempParticle.LowestXYZ = ArrayConv.Vector3ToArray(pbdHandler.particleInstances[i].LowestXYZ);
+                TempParticle.HighestXYZ = ArrayConv.Vector3ToArray(pbdHandler.particleInstances[i].HighestXYZ);
                 TempParticle.UnknownInt8 = pbdHandler.particleInstances[i].UnknownInt8;
                 TempParticle.UnknownInt9 = pbdHandler.particleInstances[i].UnknownInt9;
                 TempParticle.UnknownInt10 = pbdHandler.particleInstances[i].UnknownInt10;
@@ -363,11 +363,11 @@ namespace SSXLibrary
                 TempLight.SpriteRes = pbdHandler.lights[i].spriteRes;
                 TempLight.UnknownFloat1 = pbdHandler.lights[i].UnknownFloat1;
                 TempLight.UnknownInt1 = pbdHandler.lights[i].UnknownInt1;
-                TempLight.Colour = JsonUtil.Vector3ToArray(pbdHandler.lights[i].Colour);
-                TempLight.Direction = JsonUtil.Vector3ToArray(pbdHandler.lights[i].Direction);
-                TempLight.Position = JsonUtil.Vector3ToArray(pbdHandler.lights[i].Position);
-                TempLight.LowestXYZ = JsonUtil.Vector3ToArray(pbdHandler.lights[i].LowestXYZ);
-                TempLight.HighestXYZ = JsonUtil.Vector3ToArray(pbdHandler.lights[i].HighestXYZ);
+                TempLight.Colour = ArrayConv.Vector3ToArray(pbdHandler.lights[i].Colour);
+                TempLight.Direction = ArrayConv.Vector3ToArray(pbdHandler.lights[i].Direction);
+                TempLight.Position = ArrayConv.Vector3ToArray(pbdHandler.lights[i].Position);
+                TempLight.LowestXYZ = ArrayConv.Vector3ToArray(pbdHandler.lights[i].LowestXYZ);
+                TempLight.HighestXYZ = ArrayConv.Vector3ToArray(pbdHandler.lights[i].HighestXYZ);
                 TempLight.UnknownFloat2 = pbdHandler.lights[i].UnknownFloat2;
                 TempLight.UnknownInt2 = pbdHandler.lights[i].UnknownInt2;
                 TempLight.UnknownFloat3 = pbdHandler.lights[i].UnknownFloat3;
@@ -442,10 +442,10 @@ namespace SSXLibrary
                     SplineJsonHandler.SegmentJson segmentJson = new SplineJsonHandler.SegmentJson();
 
                     BezierUtil bezierUtil = new BezierUtil();
-                    bezierUtil.ProcessedPoints[0] = JsonUtil.Vector4ToVector3(pbdHandler.splinesSegments[a].ControlPoint);
-                    bezierUtil.ProcessedPoints[1] = JsonUtil.Vector4ToVector3(pbdHandler.splinesSegments[a].Point2);
-                    bezierUtil.ProcessedPoints[2] = JsonUtil.Vector4ToVector3(pbdHandler.splinesSegments[a].Point3);
-                    bezierUtil.ProcessedPoints[3] = JsonUtil.Vector4ToVector3(pbdHandler.splinesSegments[a].Point4);
+                    bezierUtil.ProcessedPoints[0] = VectorConv.Vector4ToVector3(pbdHandler.splinesSegments[a].ControlPoint);
+                    bezierUtil.ProcessedPoints[1] = VectorConv.Vector4ToVector3(pbdHandler.splinesSegments[a].Point2);
+                    bezierUtil.ProcessedPoints[2] = VectorConv.Vector4ToVector3(pbdHandler.splinesSegments[a].Point3);
+                    bezierUtil.ProcessedPoints[3] = VectorConv.Vector4ToVector3(pbdHandler.splinesSegments[a].Point4);
 
                     bezierUtil.GenerateRawPoints();
 
@@ -453,7 +453,7 @@ namespace SSXLibrary
 
                     for (int b = 0; b < 4; b++)
                     {
-                        segmentJson.Points = JsonUtil.Vector3ToArray2D(segmentJson.Points, bezierUtil.RawPoints[b], b);
+                        segmentJson.Points = ArrayConv.Vector3ToArray2D(bezierUtil.RawPoints[b], b);
                     }
 
                     //segmentJson.U0 = pbdHandler.splinesSegments[a].Coefficient1;
@@ -511,9 +511,9 @@ namespace SSXLibrary
 
                         Matrix4x4.Decompose(pbdHandler.modelData[i].ModelObjects[a].matrix4X4, out Scale, out Rotation, out Location);
 
-                        TempPrefabObject.Position = JsonUtil.Vector3ToArray(Location);
-                        TempPrefabObject.Rotation = JsonUtil.QuaternionToArray(Rotation);
-                        TempPrefabObject.Scale = JsonUtil.Vector3ToArray(Scale);
+                        TempPrefabObject.Position = ArrayConv.Vector3ToArray(Location);
+                        TempPrefabObject.Rotation = ArrayConv.QuaternionToArray(Rotation);
+                        TempPrefabObject.Scale = ArrayConv.Vector3ToArray(Scale);
                     }
 
                     if(pbdHandler.modelData[i].ModelObjects[a].IncludeAnimation)
@@ -579,8 +579,8 @@ namespace SSXLibrary
                     var NewObjectHeader = new ParticleModelJsonHandler.ParticleObjectHeader();
                     NewObjectHeader.ParticleObject = new ParticleModelJsonHandler.ParticleObject();
 
-                    NewObjectHeader.ParticleObject.LowestXYZ = JsonUtil.Vector3ToArray(pbdHandler.particleModels[i].ParticleObjectHeaders[a].ParticleObject.LowestXYZ);
-                    NewObjectHeader.ParticleObject.HighestXYZ = JsonUtil.Vector3ToArray(pbdHandler.particleModels[i].ParticleObjectHeaders[a].ParticleObject.HighestXYZ);
+                    NewObjectHeader.ParticleObject.LowestXYZ = ArrayConv.Vector3ToArray(pbdHandler.particleModels[i].ParticleObjectHeaders[a].ParticleObject.LowestXYZ);
+                    NewObjectHeader.ParticleObject.HighestXYZ = ArrayConv.Vector3ToArray(pbdHandler.particleModels[i].ParticleObjectHeaders[a].ParticleObject.HighestXYZ);
                     NewObjectHeader.ParticleObject.U1 = pbdHandler.particleModels[i].ParticleObjectHeaders[a].ParticleObject.U1;
 
                     NewObjectHeader.ParticleObject.AnimationFrames = new List<ParticleModelJsonHandler.AnimationFrames>();
@@ -589,8 +589,8 @@ namespace SSXLibrary
                     {
                         var NewAnimationFrame = new ParticleModelJsonHandler.AnimationFrames();
 
-                        NewAnimationFrame.Position = JsonUtil.Vector3ToArray(pbdHandler.particleModels[i].ParticleObjectHeaders[a].ParticleObject.animationFrames[b].Position);
-                        NewAnimationFrame.Rotation = JsonUtil.Vector3ToArray(pbdHandler.particleModels[i].ParticleObjectHeaders[a].ParticleObject.animationFrames[b].Rotation);
+                        NewAnimationFrame.Position = ArrayConv.Vector3ToArray(pbdHandler.particleModels[i].ParticleObjectHeaders[a].ParticleObject.animationFrames[b].Position);
+                        NewAnimationFrame.Rotation = ArrayConv.Vector3ToArray(pbdHandler.particleModels[i].ParticleObjectHeaders[a].ParticleObject.animationFrames[b].Rotation);
                         NewAnimationFrame.Unknown = pbdHandler.particleModels[i].ParticleObjectHeaders[a].ParticleObject.animationFrames[b].Unknown;
 
                         NewObjectHeader.ParticleObject.AnimationFrames.Add(NewAnimationFrame);
@@ -614,18 +614,18 @@ namespace SSXLibrary
 
                 NewCamera.CameraName = mapHandler.Cameras[i].Name;
 
-                NewCamera.Translation = JsonUtil.Vector3ToArray(TempCamera.Translation);
-                NewCamera.Rotation = JsonUtil.Vector3ToArray(TempCamera.Rotation);
+                NewCamera.Translation = ArrayConv.Vector3ToArray(TempCamera.Translation);
+                NewCamera.Rotation = ArrayConv.Vector3ToArray(TempCamera.Rotation);
                 NewCamera.Type = TempCamera.Type;
                 NewCamera.FocalLength = TempCamera.FocalLength;
                 NewCamera.AspectRatio = TempCamera.AspectRatio;
-                NewCamera.Aperture = JsonUtil.Vector2ToArray(TempCamera.Aperture);
-                NewCamera.ClipPlane = JsonUtil.Vector2ToArray(TempCamera.ClipPlane);
-                NewCamera.IntrestPoint = JsonUtil.Vector3ToArray(TempCamera.IntrestPoint);
-                NewCamera.UpVector = JsonUtil.Vector3ToArray(TempCamera.UpVector);
+                NewCamera.Aperture = ArrayConv.Vector2ToArray(TempCamera.Aperture);
+                NewCamera.ClipPlane = ArrayConv.Vector2ToArray(TempCamera.ClipPlane);
+                NewCamera.IntrestPoint = ArrayConv.Vector3ToArray(TempCamera.IntrestPoint);
+                NewCamera.UpVector = ArrayConv.Vector3ToArray(TempCamera.UpVector);
                 NewCamera.AnimTime = TempCamera.AnimTime;
-                NewCamera.InitialPosition = JsonUtil.Vector3ToArray(TempCamera.AnimationInitial.InitialPosition);
-                NewCamera.InitalRotation = JsonUtil.Vector3ToArray(TempCamera.AnimationInitial.InitalRotation);
+                NewCamera.InitialPosition = ArrayConv.Vector3ToArray(TempCamera.AnimationInitial.InitialPosition);
+                NewCamera.InitalRotation = ArrayConv.Vector3ToArray(TempCamera.AnimationInitial.InitalRotation);
                 NewCamera.U0 = TempCamera.AnimationInitial.U0;
 
                 NewCamera.AnimationHeaders = new List<CameraJSONHandler.CameraAnimationHeader>();
@@ -639,8 +639,8 @@ namespace SSXLibrary
                     for (int b = 0; b < TempCamera.AnimationInitial.AnimationHeaders[a].AnimationDatas.Count; b++)
                     {
                         var NewAnimationData = new CameraJSONHandler.CameraAnimationData();
-                        NewAnimationData.Translation = JsonUtil.Vector3ToArray(TempCamera.AnimationInitial.AnimationHeaders[a].AnimationDatas[b].Translation);
-                        NewAnimationData.Rotation = JsonUtil.Vector3ToArray(TempCamera.AnimationInitial.AnimationHeaders[a].AnimationDatas[b].Rotation);
+                        NewAnimationData.Translation = ArrayConv.Vector3ToArray(TempCamera.AnimationInitial.AnimationHeaders[a].AnimationDatas[b].Translation);
+                        NewAnimationData.Rotation = ArrayConv.Vector3ToArray(TempCamera.AnimationInitial.AnimationHeaders[a].AnimationDatas[b].Rotation);
 
                         NewAnimationHeader.AnimationDatas.Add(NewAnimationData);
                     }
@@ -742,7 +742,7 @@ namespace SSXLibrary
 
                     NewAIPath.PathPoints = new float[aip.AIPath.PathAs[i].VectorPoints.Count, 3];
 
-                    NewAIPath.PathPos = JsonUtil.Vector3ToArray(aip.AIPath.PathAs[i].PathPos);
+                    NewAIPath.PathPos = ArrayConv.Vector3ToArray(aip.AIPath.PathAs[i].PathPos);
 
                     for (int a = 0; a < aip.AIPath.PathAs[i].VectorPoints.Count; a++)
                     {
@@ -787,7 +787,7 @@ namespace SSXLibrary
                     NewAIPath.PathPoints = new float[aip.RaceLine.PathBs[i].VectorPoints.Count, 3];
 
 
-                    NewAIPath.PathPos = JsonUtil.Vector3ToArray(aip.RaceLine.PathBs[i].PathPos);
+                    NewAIPath.PathPos = ArrayConv.Vector3ToArray(aip.RaceLine.PathBs[i].PathPos);
 
                     for (int a = 0; a < aip.RaceLine.PathBs[i].VectorPoints.Count; a++)
                     {
@@ -854,7 +854,7 @@ namespace SSXLibrary
 
                     NewAIPath.PathPoints = new float[sop.AIPath.PathAs[i].VectorPoints.Count, 3];
 
-                    NewAIPath.PathPos = JsonUtil.Vector3ToArray(sop.AIPath.PathAs[i].PathPos);
+                    NewAIPath.PathPos = ArrayConv.Vector3ToArray(sop.AIPath.PathAs[i].PathPos);
 
                     for (int a = 0; a < sop.AIPath.PathAs[i].VectorPoints.Count; a++)
                     {
@@ -897,7 +897,7 @@ namespace SSXLibrary
                     NewAIPath.DistanceToFinish = sop.RaceLine.PathBs[i].DistanceToFinish;
 
                     NewAIPath.PathPoints = new float[sop.RaceLine.PathBs[i].VectorPoints.Count, 3];
-                    NewAIPath.PathPos = JsonUtil.Vector3ToArray(sop.RaceLine.PathBs[i].PathPos);
+                    NewAIPath.PathPos = ArrayConv.Vector3ToArray(sop.RaceLine.PathBs[i].PathPos);
                     for (int a = 0; a < sop.RaceLine.PathBs[i].VectorPoints.Count; a++)
                     {
                         NewAIPath.PathPoints[a, 0] = sop.RaceLine.PathBs[i].VectorPoints[a].X * sop.RaceLine.PathBs[i].VectorPoints[a].W;
@@ -1165,9 +1165,9 @@ namespace SSXLibrary
 
                             Matrix4x4.Decompose(skypbdHandler.modelData[i].ModelObjects[a].matrix4X4, out Scale, out Rotation, out Location);
 
-                            TempPrefabObject.Position = JsonUtil.Vector3ToArray(Location);
-                            TempPrefabObject.Rotation = JsonUtil.QuaternionToArray(Rotation);
-                            TempPrefabObject.Scale = JsonUtil.Vector3ToArray(Scale);
+                            TempPrefabObject.Position = ArrayConv.Vector3ToArray(Location);
+                            TempPrefabObject.Rotation = ArrayConv.QuaternionToArray(Rotation);
+                            TempPrefabObject.Scale = ArrayConv.Vector3ToArray(Scale);
                         }
 
                         if (skypbdHandler.modelData[i].ModelObjects[a].IncludeAnimation)
@@ -1284,7 +1284,7 @@ namespace SSXLibrary
                     Console.WriteLine("Patch: " +(i+1)+ "/" + patchPoints.Patches.Count + " " + patchPoints.Patches[i].PatchName);
                     Patch patch = new Patch();
                     var ImportPatch = patchPoints.Patches[i];
-                    patch.LightMapPoint = JsonUtil.ArrayToVector4(ImportPatch.LightMapPoint);
+                    patch.LightMapPoint = ArrayConv.ArrayToVector4(ImportPatch.LightMapPoint);
 
                     patch.UVPoint1 = new Vector4(ImportPatch.UVPoints[0, 0], ImportPatch.UVPoints[0, 1], 1, 1);
                     patch.UVPoint2 = new Vector4(ImportPatch.UVPoints[1, 0], ImportPatch.UVPoints[1, 1], 1, 1);
@@ -1295,27 +1295,27 @@ namespace SSXLibrary
 
                     for (int a = 0; a < 16; a++)
                     {
-                        bezierUtil.RawPoints[a] = JsonUtil.Array2DToVector3(ImportPatch.Points, a);
+                        bezierUtil.RawPoints[a] = ArrayConv.Array2DToVector3(ImportPatch.Points, a);
                     }
 
                     bezierUtil.GenerateProcessedPoints();
 
-                    patch.R1C1 = JsonUtil.Vector3ToVector4(bezierUtil.ProcessedPoints[0]);
-                    patch.R1C2 = JsonUtil.Vector3ToVector4(bezierUtil.ProcessedPoints[1]);
-                    patch.R1C3 = JsonUtil.Vector3ToVector4(bezierUtil.ProcessedPoints[2]);
-                    patch.R1C4 = JsonUtil.Vector3ToVector4(bezierUtil.ProcessedPoints[3]);
-                    patch.R2C1 = JsonUtil.Vector3ToVector4(bezierUtil.ProcessedPoints[4]);
-                    patch.R2C2 = JsonUtil.Vector3ToVector4(bezierUtil.ProcessedPoints[5]);
-                    patch.R2C3 = JsonUtil.Vector3ToVector4(bezierUtil.ProcessedPoints[6]);
-                    patch.R2C4 = JsonUtil.Vector3ToVector4(bezierUtil.ProcessedPoints[7]);
-                    patch.R3C1 = JsonUtil.Vector3ToVector4(bezierUtil.ProcessedPoints[8]);
-                    patch.R3C2 = JsonUtil.Vector3ToVector4(bezierUtil.ProcessedPoints[9]);
-                    patch.R3C3 = JsonUtil.Vector3ToVector4(bezierUtil.ProcessedPoints[10]);
-                    patch.R3C4 = JsonUtil.Vector3ToVector4(bezierUtil.ProcessedPoints[11]);
-                    patch.R4C1 = JsonUtil.Vector3ToVector4(bezierUtil.ProcessedPoints[12]);
-                    patch.R4C2 = JsonUtil.Vector3ToVector4(bezierUtil.ProcessedPoints[13]);
-                    patch.R4C3 = JsonUtil.Vector3ToVector4(bezierUtil.ProcessedPoints[14]);
-                    patch.R4C4 = JsonUtil.Vector3ToVector4(bezierUtil.ProcessedPoints[15]);
+                    patch.R1C1 = VectorConv.Vector3ToVector4(bezierUtil.ProcessedPoints[0]);
+                    patch.R1C2 = VectorConv.Vector3ToVector4(bezierUtil.ProcessedPoints[1]);
+                    patch.R1C3 = VectorConv.Vector3ToVector4(bezierUtil.ProcessedPoints[2]);
+                    patch.R1C4 = VectorConv.Vector3ToVector4(bezierUtil.ProcessedPoints[3]);
+                    patch.R2C1 = VectorConv.Vector3ToVector4(bezierUtil.ProcessedPoints[4]);
+                    patch.R2C2 = VectorConv.Vector3ToVector4(bezierUtil.ProcessedPoints[5]);
+                    patch.R2C3 = VectorConv.Vector3ToVector4(bezierUtil.ProcessedPoints[6]);
+                    patch.R2C4 = VectorConv.Vector3ToVector4(bezierUtil.ProcessedPoints[7]);
+                    patch.R3C1 = VectorConv.Vector3ToVector4(bezierUtil.ProcessedPoints[8]);
+                    patch.R3C2 = VectorConv.Vector3ToVector4(bezierUtil.ProcessedPoints[9]);
+                    patch.R3C3 = VectorConv.Vector3ToVector4(bezierUtil.ProcessedPoints[10]);
+                    patch.R3C4 = VectorConv.Vector3ToVector4(bezierUtil.ProcessedPoints[11]);
+                    patch.R4C1 = VectorConv.Vector3ToVector4(bezierUtil.ProcessedPoints[12]);
+                    patch.R4C2 = VectorConv.Vector3ToVector4(bezierUtil.ProcessedPoints[13]);
+                    patch.R4C3 = VectorConv.Vector3ToVector4(bezierUtil.ProcessedPoints[14]);
+                    patch.R4C4 = VectorConv.Vector3ToVector4(bezierUtil.ProcessedPoints[15]);
 
                     Vector3 HighestXYZ = bezierUtil.RawPoints[0];
                     HighestXYZ = Vector3.Max(HighestXYZ, bezierUtil.RawPoints[1]);
@@ -1354,10 +1354,10 @@ namespace SSXLibrary
                     patch.HighestXYZ = HighestXYZ;
                     patch.LowestXYZ = LowestXYZ;
 
-                    patch.Point1 = JsonUtil.Vector3ToVector4(bezierUtil.RawPoints[0]);
-                    patch.Point2 = JsonUtil.Vector3ToVector4(bezierUtil.RawPoints[12]);
-                    patch.Point3 = JsonUtil.Vector3ToVector4(bezierUtil.RawPoints[3]);
-                    patch.Point4 = JsonUtil.Vector3ToVector4(bezierUtil.RawPoints[15]);
+                    patch.Point1 = VectorConv.Vector3ToVector4(bezierUtil.RawPoints[0]);
+                    patch.Point2 = VectorConv.Vector3ToVector4(bezierUtil.RawPoints[12]);
+                    patch.Point3 = VectorConv.Vector3ToVector4(bezierUtil.RawPoints[3]);
+                    patch.Point4 = VectorConv.Vector3ToVector4(bezierUtil.RawPoints[15]);
 
                     patch.SurfaceType = ImportPatch.SurfaceType;
                     patch.Unknown2 = 41;
@@ -1411,8 +1411,8 @@ namespace SSXLibrary
                     spline.Unknown1 = 0;
                     spline.Unknown2 = -1;
 
-                    Vector3 HighestXYZSpline = JsonUtil.Array2DToVector3(TempSpline.Segments[0].Points, 0);
-                    Vector3 LowestXYZSpline = JsonUtil.Array2DToVector3(TempSpline.Segments[0].Points, 0);
+                    Vector3 HighestXYZSpline = ArrayConv.Array2DToVector3(TempSpline.Segments[0].Points, 0);
+                    Vector3 LowestXYZSpline = ArrayConv.Array2DToVector3(TempSpline.Segments[0].Points, 0);
                     float PreviousSegmentDiffrence = 0f;
                     for (int a = 0; a < TempSpline.Segments.Count; a++)
                     {
@@ -1420,17 +1420,17 @@ namespace SSXLibrary
                         var TempSegment = TempSpline.Segments[a];
                         BezierUtil bezierUtil = new BezierUtil();
 
-                        bezierUtil.RawPoints[0] = JsonUtil.Array2DToVector3(TempSegment.Points, 0);
-                        bezierUtil.RawPoints[1] = JsonUtil.Array2DToVector3(TempSegment.Points, 1);
-                        bezierUtil.RawPoints[2] = JsonUtil.Array2DToVector3(TempSegment.Points, 2);
-                        bezierUtil.RawPoints[3] = JsonUtil.Array2DToVector3(TempSegment.Points, 3);
+                        bezierUtil.RawPoints[0] = ArrayConv.Array2DToVector3(TempSegment.Points, 0);
+                        bezierUtil.RawPoints[1] = ArrayConv.Array2DToVector3(TempSegment.Points, 1);
+                        bezierUtil.RawPoints[2] = ArrayConv.Array2DToVector3(TempSegment.Points, 2);
+                        bezierUtil.RawPoints[3] = ArrayConv.Array2DToVector3(TempSegment.Points, 3);
 
                         bezierUtil.GenerateProcessedPoints();
 
-                        segments.ControlPoint = JsonUtil.Vector3ToVector4(bezierUtil.ProcessedPoints[0]);
-                        segments.Point2 = JsonUtil.Vector3ToVector4(bezierUtil.ProcessedPoints[1], 0);
-                        segments.Point3 = JsonUtil.Vector3ToVector4(bezierUtil.ProcessedPoints[2], 0);
-                        segments.Point4 = JsonUtil.Vector3ToVector4(bezierUtil.ProcessedPoints[3], 0);
+                        segments.ControlPoint = VectorConv.Vector3ToVector4(bezierUtil.ProcessedPoints[0]);
+                        segments.Point2 = VectorConv.Vector3ToVector4(bezierUtil.ProcessedPoints[1], 0);
+                        segments.Point3 = VectorConv.Vector3ToVector4(bezierUtil.ProcessedPoints[2], 0);
+                        segments.Point4 = VectorConv.Vector3ToVector4(bezierUtil.ProcessedPoints[3], 0);
 
                         var TempCoefficient = bezierUtil.CalcCoefficients();
 
@@ -1473,7 +1473,7 @@ namespace SSXLibrary
                         segments.LowestXYZ = LowestXYZSegment;
                         LowestXYZSpline = Vector3.Min(LowestXYZSpline, LowestXYZSegment);
 
-                        segments.SegmentDisatnce = JsonUtil.GenerateDistance(bezierUtil.RawPoints[..4]);
+                        segments.SegmentDisatnce = LineStrip.Distance(bezierUtil.RawPoints[..4]);
                         segments.PreviousSegmentsDistance = PreviousSegmentDiffrence;
                         PreviousSegmentDiffrence += segments.SegmentDisatnce;
                         segments.Unknown32 = 4311823;
@@ -1519,22 +1519,22 @@ namespace SSXLibrary
                     var Oldinstance = instancesJson.Instances[i];
                     Instance NewInstance = new Instance();
 
-                    Matrix4x4 scale = Matrix4x4.CreateScale(JsonUtil.ArrayToVector3(Oldinstance.Scale));
-                    Matrix4x4 Rotation = Matrix4x4.CreateFromQuaternion(JsonUtil.ArrayToQuaternion(Oldinstance.Rotation));
+                    Matrix4x4 scale = Matrix4x4.CreateScale(ArrayConv.ArrayToVector3(Oldinstance.Scale));
+                    Matrix4x4 Rotation = Matrix4x4.CreateFromQuaternion(ArrayConv.ArrayToQuaternion(Oldinstance.Rotation));
                     Matrix4x4 matrix4X4 = Matrix4x4.Multiply(scale, Rotation);
-                    matrix4X4.Translation = JsonUtil.ArrayToVector3(Oldinstance.Location);
+                    matrix4X4.Translation = ArrayConv.ArrayToVector3(Oldinstance.Location);
 
                     NewInstance.matrix4X4 = matrix4X4;
 
-                    NewInstance.LightVector1 = JsonUtil.ArrayToVector4(Oldinstance.LightVector1);
-                    NewInstance.LightVector2 = JsonUtil.ArrayToVector4(Oldinstance.LightVector2);
-                    NewInstance.LightVector3 = JsonUtil.ArrayToVector4(Oldinstance.LightVector3);
-                    NewInstance.AmbentLightVector = JsonUtil.ArrayToVector4(Oldinstance.AmbentLightVector);
+                    NewInstance.LightVector1 = ArrayConv.ArrayToVector4(Oldinstance.LightVector1);
+                    NewInstance.LightVector2 = ArrayConv.ArrayToVector4(Oldinstance.LightVector2);
+                    NewInstance.LightVector3 = ArrayConv.ArrayToVector4(Oldinstance.LightVector3);
+                    NewInstance.AmbentLightVector = ArrayConv.ArrayToVector4(Oldinstance.AmbentLightVector);
 
-                    NewInstance.LightColour1 = JsonUtil.ArrayToVector4(Oldinstance.LightColour1);
-                    NewInstance.LightColour2 = JsonUtil.ArrayToVector4(Oldinstance.LightColour2);
-                    NewInstance.LightColour3 = JsonUtil.ArrayToVector4(Oldinstance.LightColour3);
-                    NewInstance.AmbentLightColour = JsonUtil.ArrayToVector4(Oldinstance.AmbentLightColour);
+                    NewInstance.LightColour1 = ArrayConv.ArrayToVector4(Oldinstance.LightColour1);
+                    NewInstance.LightColour2 = ArrayConv.ArrayToVector4(Oldinstance.LightColour2);
+                    NewInstance.LightColour3 = ArrayConv.ArrayToVector4(Oldinstance.LightColour3);
+                    NewInstance.AmbentLightColour = ArrayConv.ArrayToVector4(Oldinstance.AmbentLightColour);
 
                     NewInstance.ModelID = Oldinstance.ModelID;
                     NewInstance.PrevInstance = Oldinstance.PrevInstance;
@@ -1741,16 +1741,16 @@ namespace SSXLibrary
                     Console.WriteLine("Particle Instance: " +(i+1)+ "/" + particleInstanceJson.Particles.Count + " " + particleInstanceJson.Particles[i].ParticleName);
                     ParticleInstance TempParticle = new ParticleInstance();
 
-                    Matrix4x4 scale = Matrix4x4.CreateScale(JsonUtil.ArrayToVector3(particleInstanceJson.Particles[i].Scale));
-                    Matrix4x4 Rotation = Matrix4x4.CreateFromQuaternion(JsonUtil.ArrayToQuaternion(particleInstanceJson.Particles[i].Rotation));
+                    Matrix4x4 scale = Matrix4x4.CreateScale(ArrayConv.ArrayToVector3(particleInstanceJson.Particles[i].Scale));
+                    Matrix4x4 Rotation = Matrix4x4.CreateFromQuaternion(ArrayConv.ArrayToQuaternion(particleInstanceJson.Particles[i].Rotation));
                     Matrix4x4 matrix4X4 = Matrix4x4.Multiply(scale, Rotation);
-                    matrix4X4.Translation = JsonUtil.ArrayToVector3(particleInstanceJson.Particles[i].Location);
+                    matrix4X4.Translation = ArrayConv.ArrayToVector3(particleInstanceJson.Particles[i].Location);
 
                     TempParticle.matrix4X4 = matrix4X4;
 
                     TempParticle.UnknownInt1 = particleInstanceJson.Particles[i].UnknownInt1;
-                    TempParticle.LowestXYZ = JsonUtil.ArrayToVector3(particleInstanceJson.Particles[i].LowestXYZ);
-                    TempParticle.HighestXYZ = JsonUtil.ArrayToVector3(particleInstanceJson.Particles[i].HighestXYZ);
+                    TempParticle.LowestXYZ = ArrayConv.ArrayToVector3(particleInstanceJson.Particles[i].LowestXYZ);
+                    TempParticle.HighestXYZ = ArrayConv.ArrayToVector3(particleInstanceJson.Particles[i].HighestXYZ);
                     TempParticle.UnknownInt8 = particleInstanceJson.Particles[i].UnknownInt8;
                     TempParticle.UnknownInt9 = particleInstanceJson.Particles[i].UnknownInt9;
                     TempParticle.UnknownInt10 = particleInstanceJson.Particles[i].UnknownInt10;
@@ -1826,11 +1826,11 @@ namespace SSXLibrary
                         if (TempObject.IncludeMatrix)
                         {
                             NewObject.IncludeMatrix = true;
-                            Matrix4x4 scale = Matrix4x4.CreateScale(JsonUtil.ArrayToVector3(TempObject.Scale));
-                            Matrix4x4 Rotation = Matrix4x4.CreateFromQuaternion(JsonUtil.ArrayToQuaternion(TempObject.Rotation));
+                            Matrix4x4 scale = Matrix4x4.CreateScale(ArrayConv.ArrayToVector3(TempObject.Scale));
+                            Matrix4x4 Rotation = Matrix4x4.CreateFromQuaternion(ArrayConv.ArrayToQuaternion(TempObject.Rotation));
                             Matrix4x4 matrix4X4 = Matrix4x4.Multiply(scale, Rotation);
 
-                            matrix4X4.Translation = JsonUtil.ArrayToVector3(TempObject.Position);
+                            matrix4X4.Translation = ArrayConv.ArrayToVector3(TempObject.Position);
                             NewObject.matrix4X4 = matrix4X4;
                         }
 
@@ -2019,11 +2019,11 @@ namespace SSXLibrary
                     TempLight.spriteRes = lightJsonHandler.Lights[i].SpriteRes;
                     TempLight.UnknownFloat1 = lightJsonHandler.Lights[i].UnknownFloat1;
                     TempLight.UnknownInt1 = lightJsonHandler.Lights[i].UnknownInt1;
-                    TempLight.Colour = JsonUtil.ArrayToVector3(lightJsonHandler.Lights[i].Colour);
-                    TempLight.Direction = JsonUtil.ArrayToVector3(lightJsonHandler.Lights[i].Direction);
-                    TempLight.Position = JsonUtil.ArrayToVector3(lightJsonHandler.Lights[i].Position);
-                    TempLight.LowestXYZ = JsonUtil.ArrayToVector3(lightJsonHandler.Lights[i].LowestXYZ);
-                    TempLight.HighestXYZ = JsonUtil.ArrayToVector3(lightJsonHandler.Lights[i].HighestXYZ);
+                    TempLight.Colour = ArrayConv.ArrayToVector3(lightJsonHandler.Lights[i].Colour);
+                    TempLight.Direction = ArrayConv.ArrayToVector3(lightJsonHandler.Lights[i].Direction);
+                    TempLight.Position = ArrayConv.ArrayToVector3(lightJsonHandler.Lights[i].Position);
+                    TempLight.LowestXYZ = ArrayConv.ArrayToVector3(lightJsonHandler.Lights[i].LowestXYZ);
+                    TempLight.HighestXYZ = ArrayConv.ArrayToVector3(lightJsonHandler.Lights[i].HighestXYZ);
                     TempLight.UnknownFloat2 = lightJsonHandler.Lights[i].UnknownFloat2;
                     TempLight.UnknownInt2 = lightJsonHandler.Lights[i].UnknownInt2;
                     TempLight.UnknownFloat3 = lightJsonHandler.Lights[i].UnknownFloat3;
@@ -2068,16 +2068,16 @@ namespace SSXLibrary
                         NewParticleHeader.U4 = -1;
 
                         NewParticleHeader.ParticleObject = new ParticleObject();
-                        NewParticleHeader.ParticleObject.LowestXYZ = JsonUtil.ArrayToVector3(particleModelJsonHandler.ParticlePrefabs[i].ParticleObjectHeaders[a].ParticleObject.LowestXYZ);
-                        NewParticleHeader.ParticleObject.HighestXYZ = JsonUtil.ArrayToVector3(particleModelJsonHandler.ParticlePrefabs[i].ParticleObjectHeaders[a].ParticleObject.HighestXYZ);
+                        NewParticleHeader.ParticleObject.LowestXYZ = ArrayConv.ArrayToVector3(particleModelJsonHandler.ParticlePrefabs[i].ParticleObjectHeaders[a].ParticleObject.LowestXYZ);
+                        NewParticleHeader.ParticleObject.HighestXYZ = ArrayConv.ArrayToVector3(particleModelJsonHandler.ParticlePrefabs[i].ParticleObjectHeaders[a].ParticleObject.HighestXYZ);
                         NewParticleHeader.ParticleObject.U1 = particleModelJsonHandler.ParticlePrefabs[i].ParticleObjectHeaders[a].ParticleObject.U1;
                         NewParticleHeader.ParticleObject.animationFrames = new List<AnimationFrames>();
 
                         for (int b = 0; b < particleModelJsonHandler.ParticlePrefabs[i].ParticleObjectHeaders[a].ParticleObject.AnimationFrames.Count; b++)
                         {
                             var NewAnimation = new AnimationFrames();
-                            NewAnimation.Position = JsonUtil.ArrayToVector3(particleModelJsonHandler.ParticlePrefabs[i].ParticleObjectHeaders[a].ParticleObject.AnimationFrames[b].Position);
-                            NewAnimation.Rotation = JsonUtil.ArrayToVector3(particleModelJsonHandler.ParticlePrefabs[i].ParticleObjectHeaders[a].ParticleObject.AnimationFrames[b].Rotation);
+                            NewAnimation.Position = ArrayConv.ArrayToVector3(particleModelJsonHandler.ParticlePrefabs[i].ParticleObjectHeaders[a].ParticleObject.AnimationFrames[b].Position);
+                            NewAnimation.Rotation = ArrayConv.ArrayToVector3(particleModelJsonHandler.ParticlePrefabs[i].ParticleObjectHeaders[a].ParticleObject.AnimationFrames[b].Rotation);
                             NewAnimation.Unknown = particleModelJsonHandler.ParticlePrefabs[i].ParticleObjectHeaders[a].ParticleObject.AnimationFrames[b].Unknown;
                             NewParticleHeader.ParticleObject.animationFrames.Add(NewAnimation);
                         }
@@ -2110,20 +2110,20 @@ namespace SSXLibrary
                     var TempCamera = cameraJSONHandler.Cameras[i];
                     var NewCameraInstance = new CameraInstance();
 
-                    NewCameraInstance.Translation = JsonUtil.ArrayToVector3(TempCamera.Translation);
-                    NewCameraInstance.Rotation = JsonUtil.ArrayToVector3(TempCamera.Rotation);
+                    NewCameraInstance.Translation = ArrayConv.ArrayToVector3(TempCamera.Translation);
+                    NewCameraInstance.Rotation = ArrayConv.ArrayToVector3(TempCamera.Rotation);
                     NewCameraInstance.Type = TempCamera.Type;
                     NewCameraInstance.FocalLength = TempCamera.FocalLength;
                     NewCameraInstance.AspectRatio = TempCamera.AspectRatio;
-                    NewCameraInstance.Aperture = JsonUtil.ArrayToVector2(TempCamera.Aperture);
-                    NewCameraInstance.ClipPlane = JsonUtil.ArrayToVector2(TempCamera.ClipPlane);
-                    NewCameraInstance.IntrestPoint = JsonUtil.ArrayToVector3(TempCamera.IntrestPoint);
-                    NewCameraInstance.UpVector = JsonUtil.ArrayToVector3(TempCamera.UpVector);
+                    NewCameraInstance.Aperture = ArrayConv.ArrayToVector2(TempCamera.Aperture);
+                    NewCameraInstance.ClipPlane = ArrayConv.ArrayToVector2(TempCamera.ClipPlane);
+                    NewCameraInstance.IntrestPoint = ArrayConv.ArrayToVector3(TempCamera.IntrestPoint);
+                    NewCameraInstance.UpVector = ArrayConv.ArrayToVector3(TempCamera.UpVector);
                     NewCameraInstance.AnimTime = TempCamera.AnimTime;
 
                     NewCameraInstance.AnimationInitial = new CameraAnimationInitial();
-                    NewCameraInstance.AnimationInitial.InitialPosition = JsonUtil.ArrayToVector3(TempCamera.InitialPosition);
-                    NewCameraInstance.AnimationInitial.InitalRotation = JsonUtil.ArrayToVector3(TempCamera.InitalRotation);
+                    NewCameraInstance.AnimationInitial.InitialPosition = ArrayConv.ArrayToVector3(TempCamera.InitialPosition);
+                    NewCameraInstance.AnimationInitial.InitalRotation = ArrayConv.ArrayToVector3(TempCamera.InitalRotation);
                     NewCameraInstance.AnimationInitial.U0 = TempCamera.U0;
 
                     NewCameraInstance.AnimationInitial.AnimationHeaders = new List<CameraAnimationHeader>();
@@ -2139,8 +2139,8 @@ namespace SSXLibrary
                             var TempAnimationData = TempCamera.AnimationHeaders[a].AnimationDatas[b];
                             var NewAnimationData = new CameraAnimationData();
 
-                            NewAnimationData.Translation = JsonUtil.ArrayToVector3(TempAnimationData.Translation);
-                            NewAnimationData.Rotation = JsonUtil.ArrayToVector3(TempAnimationData.Rotation);
+                            NewAnimationData.Translation = ArrayConv.ArrayToVector3(TempAnimationData.Translation);
+                            NewAnimationData.Rotation = ArrayConv.ArrayToVector3(TempAnimationData.Rotation);
 
                             NewAnimHeader.AnimationDatas.Add(NewAnimationData);
                         }
@@ -2249,7 +2249,7 @@ namespace SSXLibrary
                     NewAIPATH.U5 = 4;
                     NewAIPATH.Respawnable = aip.AIPaths[i].Respawnable ? 1 : 0;
 
-                    NewAIPATH.PathPos = JsonUtil.ArrayToVector3(aip.AIPaths[i].PathPos);
+                    NewAIPATH.PathPos = ArrayConv.ArrayToVector3(aip.AIPaths[i].PathPos);
 
                     List<Vector3> Points = new List<Vector3>();
                     Points.Add(new Vector3(0, 0, 0));
@@ -2296,7 +2296,7 @@ namespace SSXLibrary
                     NewAIPATH.U1 = 4;
                     NewAIPATH.DistanceToFinish = aip.RaceLines[i].DistanceToFinish;
 
-                    NewAIPATH.PathPos = JsonUtil.ArrayToVector3(aip.RaceLines[i].PathPos);
+                    NewAIPATH.PathPos = ArrayConv.ArrayToVector3(aip.RaceLines[i].PathPos);
 
                     List<Vector3> Points = new List<Vector3>();
                     Points.Add(new Vector3(0, 0, 0));
@@ -2357,7 +2357,7 @@ namespace SSXLibrary
                     NewAIPATH.U5 = 4;
                     NewAIPATH.Respawnable = sop.AIPaths[i].Respawnable ? 1 : 0;
 
-                    NewAIPATH.PathPos = JsonUtil.ArrayToVector3(sop.AIPaths[i].PathPos);
+                    NewAIPATH.PathPos = ArrayConv.ArrayToVector3(sop.AIPaths[i].PathPos);
 
                     List<Vector3> Points = new List<Vector3>();
                     Points.Add(new Vector3(0, 0, 0));
@@ -2405,7 +2405,7 @@ namespace SSXLibrary
                     NewAIPATH.U1 = 4;
                     NewAIPATH.DistanceToFinish = sop.RaceLines[i].DistanceToFinish;
 
-                    NewAIPATH.PathPos = JsonUtil.ArrayToVector3(sop.RaceLines[i].PathPos);
+                    NewAIPATH.PathPos = ArrayConv.ArrayToVector3(sop.RaceLines[i].PathPos);
 
                     List<Vector3> Points = new List<Vector3>();
                     Points.Add(new Vector3(0, 0, 0));
@@ -2711,11 +2711,11 @@ namespace SSXLibrary
                         if (TempObject.IncludeMatrix)
                         {
                             NewObject.IncludeMatrix = true;
-                            Matrix4x4 scale = Matrix4x4.CreateScale(JsonUtil.ArrayToVector3(TempObject.Scale));
-                            Matrix4x4 Rotation = Matrix4x4.CreateFromQuaternion(JsonUtil.ArrayToQuaternion(TempObject.Rotation));
+                            Matrix4x4 scale = Matrix4x4.CreateScale(ArrayConv.ArrayToVector3(TempObject.Scale));
+                            Matrix4x4 Rotation = Matrix4x4.CreateFromQuaternion(ArrayConv.ArrayToQuaternion(TempObject.Rotation));
                             Matrix4x4 matrix4X4 = Matrix4x4.Multiply(scale, Rotation);
 
-                            matrix4X4.Translation = JsonUtil.ArrayToVector3(TempObject.Position);
+                            matrix4X4.Translation = ArrayConv.ArrayToVector3(TempObject.Position);
                             NewObject.matrix4X4 = matrix4X4;
                         }
 
