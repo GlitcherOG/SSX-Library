@@ -84,9 +84,12 @@ namespace SSXLibrary.Utilities
         {
             byte[] tempByte = new byte[2];
             stream.Read(tempByte, 0, tempByte.Length);
+            // TODO: Make a bytes to int12 utils function instead of this.
             return ByteUtil.BytesToBitConvert(tempByte, 4, 15);
         }
 
+        // TODO: References only call this function to get three 9bit numbers from an int.
+        // Use BytesToInt9Array instead.
         public static int ReadIntCustom(Stream stream, int bytesCount, int Bits, int StartBit, bool BigEndian = false)
         {
             byte[] tempByte = new byte[bytesCount];
@@ -95,6 +98,7 @@ namespace SSXLibrary.Utilities
             //if (BigEndian)
             //    Array.Reverse(tempByte);
 
+            // TODO: Read the todo above. 
             int Value = ByteUtil.BytesToBitConvert(tempByte, StartBit, StartBit + Bits - 1);
 
             if ((Value) >= IntPow(2, (Bits - 1)))
