@@ -99,6 +99,7 @@ public class ByteUtil
         {
             if (End != -1)
             {
+                // Makes sure stream position has not gone over End.
                 if (End <= stream.Position)
                 {
                     return -1;
