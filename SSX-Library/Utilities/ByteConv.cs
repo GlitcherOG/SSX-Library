@@ -10,6 +10,11 @@ public static class ByteConv
     public enum Nibble {High, Low};
     public enum ByteOrder {BigEndian, LittleEndian};
 
+    private const int LowNibbleMask = 0xF; // 0b0000_1111
+    private const int HighNibbleMask = 0xF0; // 0b1111_0000
+    private const int Int9Mask = 0x1FF; //0b1_1111_1111
+    private const int Int12Mask = 0xFFF; //0b1111_1111_1111
+
     /// <summary>
     /// Get the nibble of a byte
     /// </summary>
@@ -18,8 +23,23 @@ public static class ByteConv
     {
         return nibble switch
         {
-            Nibble.High => (byte)((aByte & 0b1111_0000) >> 4),
-            Nibble.Low => (byte)(aByte & 0b1111),
+            Nibble.High => (byte)((aByte & HighNibbleMask) >> 4),
+            Nibble.Low => (byte)(aByte & LowNibbleMask),
+            _ => 0
+        };
+    }
+
+    /// <summary>
+    /// Sets the nibble of a byte.
+    /// </summary>
+    /// <param name="nibbleByte">The nibble value to use (Only uses the first 4 bits)</param>
+    /// <returns>The byte with the new nibble</returns>
+    public static byte SetByteNibble(byte srcByte, byte nibbleByte, Nibble nibble)
+    {
+        return nibble switch
+        {
+            Nibble.High => (byte)((srcByte & LowNibbleMask) | ((nibbleByte & LowNibbleMask) << 4)),
+            Nibble.Low =>  (byte)((srcByte & HighNibbleMask) | (nibbleByte & LowNibbleMask)),
             _ => 0
         };
     }
@@ -40,7 +60,7 @@ public static class ByteConv
         int[] output = new int[3];
         for (int i = 0; i < 3; i++)
         {
-            output[i] = integer & 0b1_1111_1111;
+            output[i] = integer & Int9Mask;
             integer >>= 9;
         }
         return output;
@@ -56,8 +76,7 @@ public static class ByteConv
         byte[] array = [..Bytes];
         if (byteOrder == ByteOrder.LittleEndian) Array.Reverse(array);
         short integer = BitConverter.ToInt16(array);
-        return integer & 0xFFF;
+        return integer & Int12Mask;
     }
-
 
 } 

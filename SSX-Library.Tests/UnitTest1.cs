@@ -17,8 +17,9 @@ public class UnitTest1
 //                                26         18 17          9 8            0
 //                                |            ||            ||            | 
         // byte[] numbers = [0b0000_0001, 0b0000_0100, 0b0000_1100, 0b0000_0000];
-        byte[] numbers = [0b0000_0000, 0b0000_0001];
-        Console.WriteLine(string.Join(", ", ByteConv.BytesToInt12(numbers, ByteConv.ByteOrder.BigEndian)));
+        byte[] numbers = [0b0000_1111, 0b1111_0000];
+        Console.WriteLine(ByteConv.SetByteNibble(numbers[0], 0b0000_1111, ByteConv.Nibble.High));
+        // Console.WriteLine(string.Join(", ", ByteConv.BytesToInt12(numbers, ByteConv.ByteOrder.BigEndian)));
         // Assert.Equal(1, ByteConv.BytesToInt9Array(numbers, ByteConv.ByteOrder.BigEndian)[0]);
     }
 }

@@ -34,6 +34,7 @@ public class ByteUtil
         return Number;
     }
 
+    // TODO: Unused.
     public static byte[] FlipBytes(byte[] bytes)
     {
         for (int i = 0; i < bytes.Length; i++)
@@ -62,13 +63,14 @@ public class ByteUtil
         return bytes;
     }
 
+    [Obsolete("Use SetByteNibble instead.")]
     public static int BitConbineConvert(byte OneByte, byte TwoByte, int StartPoint = 0, int Length = 4, int Inset=4)
     {
         byte[] arrayOne = new byte[1] { OneByte };
         var bitsOne = new BitArray(arrayOne);
         arrayOne = new byte[1] { TwoByte };
         var bitsTwo = new BitArray(arrayOne);
-
+        
         for (int i = StartPoint; i < Length; i++)
         {
             bitsOne[Inset + i] = bitsTwo[i];
@@ -77,13 +79,11 @@ public class ByteUtil
 
         int Point = 1;
         int Number = 0;
-
         for (int i = 0; i < 8; i++)
         {
             Number += (bitsOne[i] ? 1 : 0) * Point;
             Point = Point * 2;
         }
-
         return Number;
     }
 
