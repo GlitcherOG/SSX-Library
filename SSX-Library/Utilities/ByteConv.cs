@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Collections;
 
 namespace SSX_Library.Utilities;
 
@@ -10,10 +11,10 @@ public static class ByteConv
     public enum Nibble {High, Low};
     public enum ByteOrder {BigEndian, LittleEndian};
 
-    private const int LowNibbleMask = 0xF; // 0b0000_1111
+    private const int LowNibbleMask = 0xF;   // 0b0000_1111
     private const int HighNibbleMask = 0xF0; // 0b1111_0000
-    private const int Int9Mask = 0x1FF; //0b1_1111_1111
-    private const int Int12Mask = 0xFFF; //0b1111_1111_1111
+    private const int Int9Mask = 0x1FF;      // 0b1_1111_1111
+    private const int Int12Mask = 0xFFF;     // 0b1111_1111_1111
 
     /// <summary>
     /// Get the nibble of a byte
@@ -118,4 +119,28 @@ public static class ByteConv
         }
         return -1;
     }
-} 
+
+    /// <summary>
+    /// Swaps two bits from a byte.
+    /// </summary>
+    /// <returns>The byte with the bits swapped.</returns>
+    public static byte ByteBitSwap(byte Byte, int BitA = 3, int BitB = 4)
+    {
+        Debug.Assert(BitA >= 0 && BitA <= 7 && BitB >= 0 && BitB <= 7, "Bits out of range.");
+        Debug.Assert(BitA != BitB, "Bits cannot be the same.");
+        int bitAValue = ((1 << BitA) & Byte) >> BitA;
+        int bitBValue = ((1 << BitB) & Byte) >> BitB;
+ 
+        // Clear bits
+        Byte &= (byte)~(1 << BitA);
+        Byte &= (byte)~(1 << BitB);
+
+        // Set bits
+        Byte |= (byte)(bitAValue << BitB);
+        Byte |= (byte)(bitBValue << BitA);
+        return Byte;
+    }
+
+
+
+}

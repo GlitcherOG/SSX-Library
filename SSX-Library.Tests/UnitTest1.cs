@@ -19,9 +19,11 @@ public class UnitTest1
         // byte[] numbers = [0b0000_0001, 0b0000_0100, 0b0000_1100, 0b0000_0000];
         byte[] numbers = [1, 2, 3, 4, 5, 6, 7];
         byte[] numbers2 = [3];
-        MemoryStream stream = new(numbers);
-        Console.WriteLine(ByteConv.FindBytePattern(stream, numbers2, 2));
-        // Console.WriteLine(string.Join(", ", ByteConv.BytesToInt12(numbers, ByteConv.ByteOrder.BigEndian)));
-        // Assert.Equal(1, ByteConv.BytesToInt9Array(numbers, ByteConv.ByteOrder.BigEndian)[0]);
+        byte Byte = 0b1011_0010;
+        var output = ByteConv.ByteBitSwap(Byte, 7, 0);
+        var output1 = ByteConv.ByteBitSwap(output, 4, 2);
+        var output2 = ByteConv.ByteBitSwap(output1, 5, 3);
+
+        Console.WriteLine(Convert.ToString(output2, 2).PadLeft(8, '0'));
     }
 }

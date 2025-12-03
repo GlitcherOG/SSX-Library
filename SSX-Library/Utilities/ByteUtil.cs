@@ -87,6 +87,7 @@ public class ByteUtil
         return Number;
     }
 
+    [Obsolete("Use FindBytePattern instead.")]
     public static long FindPosition(Stream stream, byte[] byteSequence, long Start = -1, long End = -1)
     {
         int b;
@@ -120,6 +121,7 @@ public class ByteUtil
         return -1;
     }
 
+    // TODO: Unused.
     public static int simulateSwitching4th5thBit(int nr)
     {
         bool bit4 = (nr % 16) / 8 >= 1;
@@ -138,6 +140,7 @@ public class ByteUtil
         }
     }
 
+    [Obsolete("Use ByteBitSwap instead")]
     public static int ByteBitSwitch(int Byte, int Bit1 = 3, int Bit2 = 4)
     {
         byte[] array = new byte[1] { (byte)Byte };
