@@ -158,6 +158,7 @@ public class ByteUtil
         return Number;
     }
 
+    // TODO: Unused.
     public static int BytesBitSwitch(byte[] Bytes, int Bit1 = 3, int Bit2 = 4)
     {
         byte[] array = Bytes;
