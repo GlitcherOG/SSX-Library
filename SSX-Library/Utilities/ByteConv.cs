@@ -80,12 +80,12 @@ public static class ByteConv
     }
 
     /// <summary>
-    /// Searches a stream for a byte pattern.
+    /// Searches for a byte pattern inside a stream.
     /// </summary>
     /// <param name="searchLimit"> The max amount of bytes to check before 
     /// stopping. -1 if you want to search the whole stream. </param>
-    /// <returns>The offset from the start of the stream to the
-    /// first byte of the pattern.</returns>
+    /// <returns> The distance from the start of the stream to the first byte of the
+    /// first occurence of the pattern. Returns -1 if not found.</returns>
     public static long FindBytePattern(Stream stream, byte[] pattern, long searchLimit = -1)
     {
         Debug.Assert(pattern.Length >= 1, "Not enough bytes passed");
@@ -101,7 +101,7 @@ public static class ByteConv
         {
             int readByte = stream.ReadByte();
             if (readByte == -1) break;
-            if (stream.Position >= endPosition) break;
+            if (stream.Position > endPosition) break;
 
             if (readByte == pattern[index])
             {
