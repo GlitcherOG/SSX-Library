@@ -101,12 +101,11 @@ namespace SSXLibrary.Utilities
             // TODO: Read the todo above. 
             int Value = ByteUtil.BytesToBitConvert(tempByte, StartBit, StartBit + Bits - 1);
 
-            if ((Value) >= IntPow(2, (Bits - 1)))
+            // Theory: This is never true because 9 bits cant go over 511.
+            if ((Value) >= IntPow(2, Bits - 1))
             {
-                Value -= IntPow(2, (Bits - 1)) * 2;
+                Value -= IntPow(2, Bits - 1) * 2;
             }
-
-
             return Value;
         }
 

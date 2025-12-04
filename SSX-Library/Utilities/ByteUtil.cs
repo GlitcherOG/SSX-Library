@@ -2,6 +2,8 @@
 
 namespace SSXLibrary.Utilities;
 
+
+// Todo: Replace with ByteConv.cs
 public class ByteUtil
 {
     [Obsolete("Use ByteConv.GetByteNibble instead")]

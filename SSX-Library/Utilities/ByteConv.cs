@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using System.Collections;
 
 namespace SSX_Library.Utilities;
 
@@ -142,6 +141,7 @@ public static class ByteConv
     }
     
     // Todo: Document
+    // Morton ordering??? Z-Ordering???
     public static byte[] Swizzle8(byte[] buf, int width, int height)
     {
         byte[] output = new byte[width * height];
