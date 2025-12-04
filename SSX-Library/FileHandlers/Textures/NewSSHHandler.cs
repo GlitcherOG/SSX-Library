@@ -485,6 +485,7 @@ namespace SSXLibrary.FileHandlers.Textures
 
             for (int i = 0; i < TempMatrix.Length / 2; i++)
             {
+                // TODO: Use SetByteNibble instead.
                 Matrix[i] = (byte)ByteUtil.BitConbineConvert(TempMatrix[i*2], TempMatrix[i*2+1], 0, 4, 4);
             }
 

@@ -1,183 +1,147 @@
-﻿using System.Collections;
+using System.Diagnostics;
 
-namespace SSXLibrary.Utilities;
+namespace SSX_Library.Utilities;
 
-
-// Todo: Replace with ByteConv.cs
-public class ByteUtil
+/// <summary>
+/// Converts bytes to other types, and does operations on them.
+/// </summary>
+public static class ByteConv
 {
-    [Obsolete("Use ByteConv.GetByteNibble instead")]
-    public static int ByteToBitConvert(byte Byte, int Start = 0, int End = 3)
+    public enum Nibble {High, Low};
+    public enum ByteOrder {BigEndian, LittleEndian};
+
+    private const int LowNibbleMask = 0xF;   // 0b0000_1111
+    private const int HighNibbleMask = 0xF0; // 0b1111_0000
+    private const int Int9Mask = 0x1FF;      // 0b1_1111_1111
+    private const int Int12Mask = 0xFFF;     // 0b1111_1111_1111
+
+    /// <summary>
+    /// Get the nibble of a byte
+    /// </summary>
+    /// <returns>The nibble as a byte</returns>
+    public static byte GetByteNibble(byte aByte, Nibble nibble)
     {
-        byte[] array = new byte[1] { Byte };
-        var bits = new BitArray(array);
-        int Point = 1;
-        int Number = 0;
-        for (int i = Start; i < End + 1; i++)
+        return nibble switch
         {
-            Number += (bits[i] ? 1 : 0) * Point;
-            Point = Point * 2;
+            Nibble.High => (byte)((aByte & HighNibbleMask) >> 4),
+            Nibble.Low => (byte)(aByte & LowNibbleMask),
+            _ => 0
+        };
+    }
+
+    /// <summary>
+    /// Sets the nibble of a byte.
+    /// </summary>
+    /// <param name="nibbleByte">The nibble value to use (Only uses the first 4 bits)</param>
+    /// <returns>The byte with the new nibble</returns>
+    public static byte SetByteNibble(byte srcByte, byte nibbleByte, Nibble nibble)
+    {
+        return nibble switch
+        {
+            Nibble.High => (byte)((srcByte & LowNibbleMask) | ((nibbleByte & LowNibbleMask) << 4)),
+            Nibble.Low =>  (byte)((srcByte & HighNibbleMask) | (nibbleByte & LowNibbleMask)),
+            _ => 0
+        };
+    }
+
+    /// <summary>
+    /// Converts 4 bytes to an array of 9bit integers. 
+    /// </summary>
+    /// <param name="byteOrder"> The endianess of the input Bytes array </param>
+    /// <returns>An array of three 9bit integers,
+    /// returned from least to most significant. </returns>
+    public static int[] BytesToInt9Array(byte[] Bytes, ByteOrder byteOrder)
+    {
+        Debug.Assert(Bytes.Length >= 4, "Not enough bytes passed");
+        byte[] array = [..Bytes];
+        if (byteOrder == ByteOrder.LittleEndian) Array.Reverse(array);
+        int integer = BitConverter.ToInt32(array);
+
+        int[] output = new int[3];
+        for (int i = 0; i < 3; i++)
+        {
+            output[i] = integer & Int9Mask;
+            integer >>= 9;
         }
-        return Number;
+        return output;
     }
     
-    public static int BytesToBitConvert(byte[] Byte, int Start, int End)
+    /// <summary>
+    /// Converts 2 bytes to an int12. 
+    /// <param name="byteOrder"> The endianess of the input Bytes array </param>
+    /// </summary>
+    public static int BytesToInt12(byte[] Bytes, ByteOrder byteOrder)
     {
-        byte[] array =  Byte;
-        Array.Reverse(Byte);
-        var bits = new BitArray(array);
-        int Point = 1;
-        int Number = 0;
-        for (int i = Start; i < End + 1; i++)
-        {
-            Number += (bits[i] ? 1 : 0) * Point;
-            Point = Point * 2;
-        }
-        return Number;
+        Debug.Assert(Bytes.Length >= 2, "Not enough bytes passed");
+        byte[] array = [..Bytes];
+        if (byteOrder == ByteOrder.LittleEndian) Array.Reverse(array);
+        short integer = BitConverter.ToInt16(array);
+        return integer & Int12Mask;
     }
 
-    // TODO: Unused.
-    public static byte[] FlipBytes(byte[] bytes)
+    /// <summary>
+    /// Searches for a byte pattern inside a stream.
+    /// </summary>
+    /// <param name="searchLimit"> The max amount of bytes to check before 
+    /// stopping. -1 if you want to search the whole stream. </param>
+    /// <returns> The distance from the start of the stream to the first byte of the
+    /// first occurence of the pattern. Returns -1 if not found.</returns>
+    public static long FindBytePattern(Stream stream, byte[] pattern, long searchLimit = -1)
     {
-        for (int i = 0; i < bytes.Length; i++)
+        Debug.Assert(pattern.Length >= 1, "Not enough bytes passed");
+        Debug.Assert(searchLimit >= -1, "maxSearchLength cannot be less than -1");
+        long endPosition = searchLimit switch
         {
-            byte[] tempbyte = new byte[1];
+            -1 => stream.Length,
+            _ => searchLimit
+        };
 
-            tempbyte[0] = bytes[i];
+        long index = 0;
+        while (true)
+        {
+            int readByte = stream.ReadByte();
+            if (readByte == -1) break;
+            if (stream.Position > endPosition) break;
 
-            var bits = new BitArray(tempbyte);
-
-            int length = bits.Length;
-            int mid = (length / 2);
-
-            for (int a = 0; a < mid; a++)
+            if (readByte == pattern[index])
             {
-                bool bit = bits[a];
-                bits[i] = bits[length - a - 1];
-                bits[length - a - 1] = bit;
-            }
-
-            bits.CopyTo(tempbyte, 0);
-
-            bytes[i] = tempbyte[0];
-        }
-
-        return bytes;
-    }
-
-    [Obsolete("Use SetByteNibble instead.")]
-    public static int BitConbineConvert(byte OneByte, byte TwoByte, int StartPoint = 0, int Length = 4, int Inset=4)
-    {
-        byte[] arrayOne = new byte[1] { OneByte };
-        var bitsOne = new BitArray(arrayOne);
-        arrayOne = new byte[1] { TwoByte };
-        var bitsTwo = new BitArray(arrayOne);
-        
-        for (int i = StartPoint; i < Length; i++)
-        {
-            bitsOne[Inset + i] = bitsTwo[i];
-        }
-
-
-        int Point = 1;
-        int Number = 0;
-        for (int i = 0; i < 8; i++)
-        {
-            Number += (bitsOne[i] ? 1 : 0) * Point;
-            Point = Point * 2;
-        }
-        return Number;
-    }
-
-    [Obsolete("Use FindBytePattern instead.")]
-    public static long FindPosition(Stream stream, byte[] byteSequence, long Start = -1, long End = -1)
-    {
-        int b;
-        long i = 0;
-        if (Start != -1)
-        {
-            stream.Position = Start;
-        }
-        while ((b = stream.ReadByte()) != -1)
-        {
-            if (End != -1)
-            {
-                // Makes sure stream position has not gone over End.
-                if (End <= stream.Position)
+                index++;
+                if (index == pattern.Length)
                 {
-                    return -1;
-                }
-            }
-            if (b == byteSequence[i++])
-            {
-                if (i == byteSequence.Length)
-                {
-                    return stream.Position - byteSequence.Length;
+                    return stream.Position - pattern.Length;
                 }
             }
             else
             {
-                i = b == byteSequence[0] ? 1 : 0;
+                index = readByte == pattern[0] ? 1 : 0;
             }
         }
         return -1;
     }
 
-    // TODO: Unused.
-    public static int simulateSwitching4th5thBit(int nr)
+    /// <summary>
+    /// Swaps two bits from a byte.
+    /// </summary>
+    /// <returns>The byte with the bits swapped.</returns>
+    public static byte ByteBitSwap(byte Byte, int BitA = 3, int BitB = 4)
     {
-        bool bit4 = (nr % 16) / 8 >= 1;
-        bool bit5 = (nr % 32) / 16 >= 1;
-        if (bit4 && !bit5)
-        {
-            return nr + 8;
-        }
-        if (!bit4 && bit5)
-        {
-            return nr - 8;
-        }
-        else
-        {
-            return nr;
-        }
-    }
+        Debug.Assert(BitA >= 0 && BitA <= 7 && BitB >= 0 && BitB <= 7, "Bits out of range.");
+        Debug.Assert(BitA != BitB, "Bits cannot be the same.");
+        int bitAValue = ((1 << BitA) & Byte) >> BitA;
+        int bitBValue = ((1 << BitB) & Byte) >> BitB;
+ 
+        // Clear bits
+        Byte &= (byte)~(1 << BitA);
+        Byte &= (byte)~(1 << BitB);
 
-    [Obsolete("Use ByteBitSwap instead")]
-    public static int ByteBitSwitch(int Byte, int Bit1 = 3, int Bit2 = 4)
-    {
-        byte[] array = new byte[1] { (byte)Byte };
-        var bits = new BitArray(array);
-        bool temp1 = bits[Bit2];
-        bits[Bit2] = bits[Bit1];
-        bits[Bit1] = temp1;
-        int Number = 0;
-        int Point = 1;
-        for (int i = 0; i < 8; i++)
-        {
-            Number += (bits[i] ? 1 : 0) * Point;
-            Point = Point * 2;
-        }
-        return Number;
+        // Set bits
+        Byte |= (byte)(bitAValue << BitB);
+        Byte |= (byte)(bitBValue << BitA);
+        return Byte;
     }
-
-    // TODO: Unused.
-    public static int BytesBitSwitch(byte[] Bytes, int Bit1 = 3, int Bit2 = 4)
-    {
-        byte[] array = Bytes;
-        var bits = new BitArray(array);
-        bool temp1 = bits[Bit2];
-        bits[Bit2] = bits[Bit1];
-        bits[Bit1] = temp1;
-        int Number = 0;
-        int Point = 1;
-        for (int i = 0; i < bits.Length; i++)
-        {
-            Number += (bits[i] ? 1 : 0) * Point;
-            Point = Point * 2;
-        }
-        return Number;
-    }
-
+    
+    // Todo: Document
+    // Morton ordering??? Z-Ordering???
     public static byte[] Swizzle8(byte[] buf, int width, int height)
     {
         byte[] output = new byte[width * height];
@@ -204,7 +168,8 @@ public class ByteUtil
 
         return output;
     }
-
+    
+    // Todo: Document
     public static byte[] Unswizzle8(byte[] buf, int width, int height)
     {
         byte[] output = new byte[width * height];
@@ -229,7 +194,8 @@ public class ByteUtil
 
         return output;
     }
-
+    
+    // Todo: Document
     public static byte[] Swizzle4bpp(byte[] linearTexels, int width, int height)
     {
         byte[] swizzledTexels = new byte[width * height / 2];
@@ -299,7 +265,8 @@ public class ByteUtil
 
         return swizzledTexels;
     }
-
+    
+    // Todo: Document
     public static byte[] Unswizzle4bpp(byte[] pInTexels, int width, int height)
     {
         byte[] pSwizTexels = new byte[width * height / 2];
@@ -367,7 +334,8 @@ public class ByteUtil
 
         return pSwizTexels;
     }
-
+    
+    // Todo: Document
     public static byte[] SwizzlePalette(byte[] palBuffer, int width)
     {
         byte[] swizzledPal = new byte[1024];
@@ -383,7 +351,8 @@ public class ByteUtil
 
         return swizzledPal;
     }
-
+    
+    // Todo: Document
     public static byte[] UnswizzlePalette(byte[] palBuffer, int width)
     {
         byte[] newPal = new byte[1024];
@@ -397,33 +366,10 @@ public class ByteUtil
         }
         return newPal;
     }
-    
+   
+    // Todo: Document
     public static float UintByteToFloat(int Int)
     {
-        byte[] bytes = BitConverter.GetBytes(Int);
-        return BitConverter.ToSingle(bytes, 0);
+        return BitConverter.ToSingle(BitConverter.GetBytes(Int), 0);
     }
 }
-
-//public struct Point
-//{
-//    public int x;
-//    public int y;
-//}
-/*Point decodePixelLocation(Dimension imageDimensions, Dimension imageBlockDimensions, Point pxlLocation)
-{
-    final int pixelLocation = pxlLocation.x * imageDimensions.width + pxlLocation.y;
-
-    int result = pixelLocation;
-    if (!rowBit1EqualsRowBit2(imageDimensions, result))
-    {
-        result = toggleBit(result, 2);  // info += " -neq r1,r2 ? ^c2-> " + asBin(result); // 4,0 -> 4,16 (^b2 <<2)
-    }
-    result = swapRowBit0Bit1(imageDimensions, result); // info += " -Sw Ro 0,1-> " + asBin(result); // 1,0 -> 2,0
-
-    result = rotateColumnBlockBitsLeft(imageBlockDimensions, result);  // info += " -RL1 c0_c3-> " + asBin(result); // 0,32 -> 32,0
-
-    result = rotateColumnWithOneBitOfRowLeft(imageDimensions, result);  // info += " -RL1 c0_r1-> " + asBin(result); // 0,32 -> 32,0
-    return new Point(result / imageDimensions.width, result % imageDimensions.width);
-}
-*/

@@ -1,5 +1,5 @@
-using System.Numerics;
-
+using SSX_Library.Utilities;
+using SSXLibrary.Utilities;
 namespace SSX_Library.Tests;
 
 public class UnitTest1
@@ -7,13 +7,18 @@ public class UnitTest1
     [Fact]
     public void Test1()
     {
-        Assert.True(true);
+        // byte number = 0b0011_1010;
+        // Assert.Equal(ByteUtil.ByteToBitConvert(number, 4, 7), ByteConv.GetByteNibble(number, ByteConv.Nibble.High));
     }
 
     [Fact]
     public void Test2()
     {
-        var highest = Vector3.Max(Vector3.Zero, Vector3.One);
-        Console.WriteLine(highest);
+//                                26         18 17          9 8            0
+//                                |            ||            ||            | 
+        // byte[] numbers = [0b0000_0001, 0b0000_0100, 0b0000_1100, 0b0000_0000];
+        byte[] numbers = [1, 2, 3, 4, 5, 6, 7];
+        byte[] numbers2 = [3];
+        // Console.WriteLine(Convert.ToString(output2, 2).PadLeft(8, '0'));
     }
 }
