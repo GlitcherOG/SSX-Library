@@ -1,8 +1,10 @@
 ﻿using SSXLibrary.Utilities;
 using System.Text;
-using System.Drawing;
-using System.Drawing.Imaging;
+using SixLabors.ImageSharp.Drawing;
+using SixLabors.ImageSharp;
 using SSXLibrary.FileHandlers;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Formats;
 
 namespace SSX_Library.EATextureLibrary
 {
@@ -146,14 +148,14 @@ namespace SSX_Library.EATextureLibrary
                     imageMatrix.Matrix = tempByte;
 
                     //Process Image
-                    tempImage.bitmap = new Bitmap(imageMatrix.XSize, imageMatrix.YSize, PixelFormat.Format32bppArgb);
+                    tempImage.Image = new Image<Rgba32>(imageMatrix.XSize, imageMatrix.YSize);
 
                     for (int y = 0; y < imageMatrix.YSize; y++)
                     {
                         for (int x = 0; x < imageMatrix.XSize; x++)
                         {
                             int colorPos = imageMatrix.Matrix[x + imageMatrix.XSize * y];
-                            tempImage.bitmap.SetPixel(x, y, tempImage.colorsTable[colorPos]);
+                            tempImage.Image[x, y] = tempImage.colorsTable[colorPos];
                         }
                     }
                 }
@@ -182,14 +184,14 @@ namespace SSX_Library.EATextureLibrary
                     }
 
                     //Process Image
-                    tempImage.bitmap = new Bitmap(imageMatrix.XSize, imageMatrix.YSize, PixelFormat.Format32bppArgb);
+                    tempImage.Image = new Image<Rgba32>(imageMatrix.XSize, imageMatrix.YSize);
 
                     for (int y = 0; y < imageMatrix.YSize; y++)
                     {
                         for (int x = 0; x < imageMatrix.XSize; x++)
                         {
                             int colorPos = imageMatrix.Matrix[x + imageMatrix.XSize * y];
-                            tempImage.bitmap.SetPixel(x, y, tempImage.colorsTable[colorPos]);
+                            tempImage.Image[x, y] = tempImage.colorsTable[colorPos];
                         }
                     }
                 }
@@ -199,14 +201,16 @@ namespace SSX_Library.EATextureLibrary
                     var imageMatrix = GetMatrixType(tempImage, 5);
 
                     //Process Image
-                    tempImage.bitmap = new Bitmap(imageMatrix.XSize, imageMatrix.YSize, PixelFormat.Format32bppArgb);
+                    tempImage.Image = new Image<Rgba32>(imageMatrix.XSize, imageMatrix.YSize);
 
                     int pos = 0;
                     for (int y = 0; y < imageMatrix.YSize; y++)
                     {
                         for (int x = 0; x < imageMatrix.XSize; x++)
                         {
-                            tempImage.bitmap.SetPixel(x, y, Color.FromArgb(imageMatrix.Matrix[pos * 4 + 3], imageMatrix.Matrix[pos * 4], imageMatrix.Matrix[pos * 4 + 1], imageMatrix.Matrix[pos * 4 + 2]));
+                            Rgba32 rgba32 = new Rgba32(imageMatrix.Matrix[pos * 4], imageMatrix.Matrix[pos * 4 + 1], imageMatrix.Matrix[pos * 4 + 2], imageMatrix.Matrix[pos * 4 + 3]);
+
+                            tempImage.Image[x,y] = rgba32;
                             pos++;
                         }
                     }
@@ -222,15 +226,15 @@ namespace SSX_Library.EATextureLibrary
                     tempImage.longname = Encoding.ASCII.GetString(longNameShape.Matrix).Replace("\0", "");
                 }
 
-                tempImage.colorsTable = ImageUtil.GetBitmapColorsFast(tempImage.bitmap).ToList();
+                tempImage.colorsTable = ImageUtil.GetBitmapColorsFast(tempImage.Image).ToList();
                 sshImages[i] = tempImage;
             }
         }
 
-        public List<Color> GetColorTable(ShapeImage newSSHImage)
+        public List<Rgba32> GetColorTable(ShapeImage newSSHImage)
         {
             var colorShape = GetMatrixType(newSSHImage, 33);
-            List<Color> colors = new List<Color>();
+            List<Rgba32> colors = new List<Rgba32>();
 
             if (colorShape.Flags2 == 64)
             {
@@ -239,7 +243,7 @@ namespace SSX_Library.EATextureLibrary
 
             for (int i = 0; i < colorShape.XSize * colorShape.YSize; i++)
             {
-                colors.Add(Color.FromArgb(colorShape.Matrix[i * 4 + 3], colorShape.Matrix[i * 4], colorShape.Matrix[i * 4 + 1], colorShape.Matrix[i * 4 + 2]));
+                colors.Add(new Rgba32(colorShape.Matrix[i * 4], colorShape.Matrix[i * 4 + 1], colorShape.Matrix[i * 4 + 2], colorShape.Matrix[i * 4 + 3]));
             }
 
             return colors;
@@ -270,7 +274,7 @@ namespace SSX_Library.EATextureLibrary
                     {
                         A = 255;
                     }
-                    TempColour = Color.FromArgb(A, TempColour.R, TempColour.G, TempColour.B);
+                    TempColour = new Rgba32(TempColour.R, TempColour.G, TempColour.B, A);
                     newSSHImage.colorsTable[i] = TempColour;
                 }
             }
@@ -323,25 +327,24 @@ namespace SSX_Library.EATextureLibrary
         {
             for (int i = 0; i < sshImages.Count; i++)
             {
-                sshImages[i].bitmap.Save(Path.Combine(path, sshImages[i].shortname + i + ".png"), ImageFormat.Png);
+                sshImages[i].Image.SaveAsPng(System.IO.Path.Combine(path, sshImages[i].shortname + i + ".png"));
             }
         }
 
         public void BMPOneExtract(string path, int i)
         {
-            sshImages[i].bitmap.Save(path, ImageFormat.Png);
+            sshImages[i].Image.SaveAsPng(path);
         }
 
         public void LoadSingle(string path, int i)
         {
             Stream stream = File.Open(path, FileMode.Open);
-
-            var ImageTemp = Image.FromStream(stream);
+            var ImageTemp = Image<Rgba32>.Load(stream);
             stream.Close();
             stream.Dispose();
             var temp = sshImages[i];
-            temp.bitmap = (Bitmap)ImageTemp;
-            temp.colorsTable = ImageUtil.GetBitmapColorsFast(temp.bitmap).ToList();
+            temp.Image = (Image<Rgba32>)ImageTemp;
+            temp.colorsTable = ImageUtil.GetBitmapColorsFast(temp.Image).ToList();
             temp.MatrixType = sshImages[i].MatrixType;
             sshImages[i] = temp;
         }
@@ -354,21 +357,21 @@ namespace SSX_Library.EATextureLibrary
                 {
                     var sshImage = sshImages[i];
 
-                    sshImage.colorsTable = ImageUtil.GetBitmapColorsFast(sshImage.bitmap).ToList();
+                    sshImage.colorsTable = ImageUtil.GetBitmapColorsFast(sshImage.Image).ToList();
 
                     //if metal bin combine images and then reduce
 
                     if (sshImage.colorsTable.Count > 256 && sshImage.MatrixType == 2)
                     {
                         Console.WriteLine("Over 256 Colour Limit " + sshImage.shortname + " (" + i + "/" + sshImages.Count + ")");
-                        sshImage.bitmap = ImageUtil.ReduceBitmapColorsFast(sshImage.bitmap, 256);
+                        sshImage.Image = ImageUtil.ReduceBitmapColorsFast(sshImage.Image, 256);
                         //MessageBox.Show(sshImages[i].shortname + " " + i.ToString() + " Exceeds 256 Colours");
                         //check = true;
                     }
                     if (sshImage.colorsTable.Count > 16 && sshImage.MatrixType == 1)
                     {
                         Console.WriteLine("Over 16 Colour Limit " + sshImage.shortname + " (" + i + "/" + sshImages.Count + ")");
-                        sshImage.bitmap = ImageUtil.ReduceBitmapColorsFast(sshImage.bitmap, 16);
+                        sshImage.Image = ImageUtil.ReduceBitmapColorsFast(sshImage.Image, 16);
                         //MessageBox.Show(sshImage.shortname + " " + i.ToString() + " Exceeds 16 Colours");
                         //check = true;
                     }
@@ -470,13 +473,13 @@ namespace SSX_Library.EATextureLibrary
 
         public void WriteMatrix1(Stream stream, ShapeImage image)
         {
-            byte[] TempMatrix = new byte[image.bitmap.Height * image.bitmap.Width];
+            byte[] TempMatrix = new byte[image.Image.Height * image.Image.Width];
 
-            for (int y = 0; y < image.bitmap.Height; y++)
+            for (int y = 0; y < image.Image.Height; y++)
             {
-                for (int x = 0; x < image.bitmap.Width; x++)
+                for (int x = 0; x < image.Image.Width; x++)
                 {
-                    TempMatrix[y * image.bitmap.Width + x] = (byte)image.colorsTable.IndexOf(image.bitmap.GetPixel(x, y));
+                    TempMatrix[y * image.Image.Width + x] = (byte)image.colorsTable.IndexOf(image.Image[x,y]);
                 }
             }
 
@@ -493,7 +496,7 @@ namespace SSX_Library.EATextureLibrary
             if (image.SwizzledImage)
             {
                 //Swizzle the Image
-                Matrix = ByteUtil.Swizzle4bpp(Matrix, image.bitmap.Width, image.bitmap.Height);
+                Matrix = ByteUtil.Swizzle4bpp(Matrix, image.Image.Width, image.Image.Height);
             }
 
             if (image.Compressed)
@@ -515,21 +518,21 @@ namespace SSX_Library.EATextureLibrary
         }
         public void WriteMatrix2(Stream stream, ShapeImage image)
         {
-            int MatrixSize = StreamUtil.AlignbyMath(image.bitmap.Height * image.bitmap.Width, 16);
+            int MatrixSize = StreamUtil.AlignbyMath(image.Image.Height * image.Image.Width, 16);
 
             byte[] Matrix = new byte[MatrixSize];
 
-            for (int y = 0; y < image.bitmap.Height; y++)
+            for (int y = 0; y < image.Image.Height; y++)
             {
-                for (int x = 0; x < image.bitmap.Width; x++)
+                for (int x = 0; x < image.Image.Width; x++)
                 {
-                    Matrix[y* image.bitmap.Width + x] = (byte)image.colorsTable.IndexOf(image.bitmap.GetPixel(x, y));
+                    Matrix[y* image.Image.Width + x] = (byte)image.colorsTable.IndexOf(image.Image[x, y]);
                 }
             }
 
             if(image.SwizzledImage)
             {
-                Matrix = ByteUtil.Swizzle8(Matrix, image.bitmap.Width, image.bitmap.Height);
+                Matrix = ByteUtil.Swizzle8(Matrix, image.Image.Width, image.Image.Height);
             }
 
             if(image.Compressed)
@@ -549,17 +552,17 @@ namespace SSX_Library.EATextureLibrary
         }
         public void WriteMatrix5(Stream stream, ShapeImage image)
         {
-            int MatrixSize = StreamUtil.AlignbyMath(image.bitmap.Height * image.bitmap.Width * 4, 16);
+            int MatrixSize = StreamUtil.AlignbyMath(image.Image.Height * image.Image.Width * 4, 16);
 
             MatrixSize = 16 - MatrixSize % 16;
 
             byte[] Matrix = new byte[MatrixSize];
 
-            for (int y = 0; y < image.bitmap.Height; y++)
+            for (int y = 0; y < image.Image.Height; y++)
             {
-                for (int x = 0; x < image.bitmap.Width; x++)
+                for (int x = 0; x < image.Image.Width; x++)
                 {
-                    var Pixel = image.bitmap.GetPixel(x, y);
+                    var Pixel = image.Image[x, y];
                     Matrix[y * x + x * 4] = Pixel.R;
                     Matrix[y * x + x * 4+1] = Pixel.G;
                     Matrix[y * x + x * 4+2] = Pixel.B;
@@ -601,8 +604,8 @@ namespace SSX_Library.EATextureLibrary
 
             StreamUtil.WriteInt32(stream, DataSize);
             StreamUtil.WriteInt32(stream, 0);
-            StreamUtil.WriteInt32(stream, image.bitmap.Width);
-            StreamUtil.WriteInt32(stream, image.bitmap.Height);
+            StreamUtil.WriteInt32(stream, image.Image.Width);
+            StreamUtil.WriteInt32(stream, image.Image.Height);
         }
 
         public void WriteColourTable(Stream stream, ShapeImage image)
@@ -666,8 +669,8 @@ namespace SSX_Library.EATextureLibrary
             public List<ShapeHeader> sshShapeHeader;
 
             //Converted
-            public List<Color> colorsTable;
-            public Bitmap bitmap;
+            public List<Rgba32>colorsTable;
+            public Image<Rgba32> Image;
             public int Unknown;
             public int MatrixType;
             public bool Compressed;

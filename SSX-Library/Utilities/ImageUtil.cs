@@ -1,111 +1,79 @@
 ﻿using System.Runtime.InteropServices;
-using System.Drawing;
-using System.Drawing.Imaging;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Advanced;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace SSXLibrary.Utilities
 {
     public class ImageUtil
     {
-        public static HashSet<Color> GetBitmapColorsFast(Bitmap bmp)
+        public static HashSet<Rgba32> GetBitmapColorsFast(Image<Rgba32> bmp)
         {
             int width = bmp.Width;
             int height = bmp.Height;
-            HashSet<Color> result = new HashSet<Color>();
+            HashSet<Rgba32> result = new HashSet<Rgba32>();
 
-            BitmapData data = bmp.LockBits(
-                new Rectangle(0, 0, width, height),
-                ImageLockMode.ReadOnly,
-                PixelFormat.Format32bppArgb); // Assumes 32bppArgb
-
-            unsafe
+            // Grab raw pixel rows
+            for (int y = 0; y < height; y++)
             {
-                byte* ptr = (byte*)data.Scan0;
+                Span<Rgba32> row = bmp.DangerousGetPixelRowMemory(y).Span;
 
-                for (int y = 0; y < height; y++)
+                for (int x = 0; x < width; x++)
                 {
-                    byte* row = ptr + (y * data.Stride);
-                    for (int x = 0; x < width; x++)
-                    {
-                        int index = y * width + x;
-                        byte b = row[x * 4];
-                        byte g = row[x * 4 + 1];
-                        byte r = row[x * 4 + 2];
-                        byte a = row[x * 4 + 3];
-
-                        result.Add(Color.FromArgb(a, r, g, b));
-                    }
+                    result.Add(row[x]);
                 }
             }
 
-            bmp.UnlockBits(data);
             return result;
         }
-        public static Bitmap ReduceBitmapColorsFast(Bitmap bmp, int maxColors)
+
+        public static Image<Rgba32> ReduceBitmapColorsFast(Image<Rgba32> img, int maxColors)
         {
-            int width = bmp.Width;
-            int height = bmp.Height;
+            int width = img.Width;
+            int height = img.Height;
 
-            // Step 1: Lock bitmap for fast access
-            var rect = new Rectangle(0, 0, width, height);
-            var bmpData = bmp.LockBits(rect, ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
+            // Step 1: Extract sampled pixel colors (25% sampling like your code)
+            var pixelColors = new List<Rgba32>(width * height / 4);
 
-            int bytesPerPixel = 3;
-            int stride = bmpData.Stride;
-            int byteCount = stride * height;
-            byte[] pixels = new byte[byteCount];
-            Marshal.Copy(bmpData.Scan0, pixels, 0, byteCount);
-
-            // Step 2: Extract pixels (sample for speed)
-            var pixelColors = new List<Color>(width * height / 4); // sample 25% pixels
             for (int y = 0; y < height; y += 2)
             {
-                int row = y * stride;
-                for (int x = 0; x < width * bytesPerPixel; x += 6)
+                Span<Rgba32> row = img.DangerousGetPixelRowMemory(y).Span;
+
+                for (int x = 0; x < width; x += 2)
                 {
-                    byte b = pixels[row + x + 0];
-                    byte g = pixels[row + x + 1];
-                    byte r = pixels[row + x + 2];
-                    pixelColors.Add(Color.FromArgb(r, g, b));
+                    pixelColors.Add(row[x]);
                 }
             }
 
-            // Step 3: Compute reduced palette
+            // Step 2: Compute reduced palette
             var reducedPalette = ReduceColors(pixelColors, maxColors);
 
-            // Step 4: Recolor bitmap using nearest palette color (parallel)
+            // Step 3: Recolor image using nearest palette color (parallel)
             Parallel.For(0, height, y =>
             {
-                int row = y * stride;
-                for (int x = 0; x < width * bytesPerPixel; x += 3)
+                Span<Rgba32> row = img.DangerousGetPixelRowMemory(y).Span;
+
+                for (int x = 0; x < width; x++)
                 {
-                    byte b = pixels[row + x + 0];
-                    byte g = pixels[row + x + 1];
-                    byte r = pixels[row + x + 2];
+                    var nearest = FindNearestColor(row[x], reducedPalette);
 
-                    var nearest = FindNearestColor(Color.FromArgb(r, g, b), reducedPalette);
-
-                    pixels[row + x + 0] = nearest.B;
-                    pixels[row + x + 1] = nearest.G;
-                    pixels[row + x + 2] = nearest.R;
+                    row[x] = new Rgba32(nearest.R, nearest.G, nearest.B, nearest.A);
                 }
             });
 
-            Marshal.Copy(pixels, 0, bmpData.Scan0, byteCount);
-            bmp.UnlockBits(bmpData);
-
-            return bmp;
+            return img;
         }
 
         // --- Helper methods below ---
 
-        public static List<Color> ReduceColors(List<Color> inputColors, int maxColors)
+        public static List<Rgba32> ReduceColors(List<Rgba32> inputColors, int maxColors)
         {
             if (inputColors.Count <= maxColors)
                 return inputColors.Distinct().ToList();
 
             var vectors = inputColors.Select(c => new float[] { c.R, c.G, c.B }).ToList();
             var clusters = KMeans(vectors, maxColors);
-            return clusters.Select(v => Color.FromArgb(
+            return clusters.Select(v => new Rgba32(
                 (int)Math.Round(v[0]),
                 (int)Math.Round(v[1]),
                 (int)Math.Round(v[2])
@@ -178,10 +146,10 @@ namespace SSXLibrary.Utilities
             return dr * dr + dg * dg + db * db;
         }
 
-        private static Color FindNearestColor(Color color, List<Color> palette)
+        private static Rgba32 FindNearestColor(Rgba32 color, List<Rgba32> palette)
         {
             int minDist = int.MaxValue;
-            Color nearest = palette[0];
+            Rgba32 nearest = palette[0];
 
             foreach (var p in palette)
             {
