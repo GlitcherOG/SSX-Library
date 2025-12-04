@@ -37,11 +37,11 @@ namespace SSX_Library.EATextureLibrary
                     {
                         ShapeImage tempImage = new ShapeImage();
 
-                        tempImage.offset = StreamUtil.ReadUInt32(stream, true);
+                        tempImage.Offset = StreamUtil.ReadUInt32(stream, true);
 
-                        tempImage.size = StreamUtil.ReadUInt32(stream, true);
+                        tempImage.Size = StreamUtil.ReadUInt32(stream, true);
 
-                        tempImage.shortname = StreamUtil.ReadNullEndString(stream);
+                        tempImage.Shortname = StreamUtil.ReadNullEndString(stream);
 
                         stream.Position++;
 
@@ -68,11 +68,11 @@ namespace SSX_Library.EATextureLibrary
             for (int i = 0; i < sshImages.Count; i++)
             {
                 ShapeImage tempImage = sshImages[i];
-                stream.Position = tempImage.offset;
+                stream.Position = tempImage.Offset;
 
-                tempImage.sshShapeHeader = new List<ShapeHeader>();
+                tempImage.ShapeHeaders = new List<ShapeHeader>();
 
-                while (stream.Position < tempImage.offset + tempImage.size)
+                while (stream.Position < tempImage.Offset + tempImage.Size)
                 {
                     var shape = new ShapeHeader();
 
@@ -112,7 +112,7 @@ namespace SSX_Library.EATextureLibrary
                     }
 
 
-                    tempImage.sshShapeHeader.Add(shape);
+                    tempImage.ShapeHeaders.Add(shape);
                 }
 
                 tempImage.MatrixType  = GetShapeMatrixType(tempImage);
@@ -223,7 +223,7 @@ namespace SSX_Library.EATextureLibrary
                 var longNameShape = GetMatrixType(tempImage, 111);
                 if (longNameShape.MatrixFormat != 0)
                 {
-                    tempImage.longname = Encoding.ASCII.GetString(longNameShape.Matrix).Replace("\0", "");
+                    tempImage.Longname = Encoding.ASCII.GetString(longNameShape.Matrix).Replace("\0", "");
                 }
 
                 tempImage.colorsTable = ImageUtil.GetBitmapColorsFast(tempImage.Image).ToList();
@@ -285,11 +285,11 @@ namespace SSX_Library.EATextureLibrary
 
         public ShapeHeader GetMatrixType(ShapeImage newSSHImage,int Type)
         {
-            for (int i = 0; i < newSSHImage.sshShapeHeader.Count; i++)
+            for (int i = 0; i < newSSHImage.ShapeHeaders.Count; i++)
             {
-                if (newSSHImage.sshShapeHeader[i].MatrixFormat==Type)
+                if (newSSHImage.ShapeHeaders[i].MatrixFormat==Type)
                 {
-                    return newSSHImage.sshShapeHeader[i];
+                    return newSSHImage.ShapeHeaders[i];
                 }
             }
             return new ShapeHeader();
@@ -299,11 +299,11 @@ namespace SSX_Library.EATextureLibrary
         {
             var tempImage = sshImages[ImageID];
 
-            for (int i = 0; i < tempImage.sshShapeHeader.Count; i++)
+            for (int i = 0; i < tempImage.ShapeHeaders.Count; i++)
             {
-                if (tempImage.sshShapeHeader[i].MatrixFormat == 2 || tempImage.sshShapeHeader[i].MatrixFormat == 1 || tempImage.sshShapeHeader[i].MatrixFormat == 5)
+                if (tempImage.ShapeHeaders[i].MatrixFormat == 2 || tempImage.ShapeHeaders[i].MatrixFormat == 1 || tempImage.ShapeHeaders[i].MatrixFormat == 5)
                 {
-                    return tempImage.sshShapeHeader[i].MatrixFormat;
+                    return tempImage.ShapeHeaders[i].MatrixFormat;
                 }
             }
 
@@ -312,11 +312,11 @@ namespace SSX_Library.EATextureLibrary
 
         public int GetShapeMatrixType(ShapeImage tempImage)
         {
-            for (int i = 0; i < tempImage.sshShapeHeader.Count; i++)
+            for (int i = 0; i < tempImage.ShapeHeaders.Count; i++)
             {
-                if (tempImage.sshShapeHeader[i].MatrixFormat == 2 || tempImage.sshShapeHeader[i].MatrixFormat == 1 || tempImage.sshShapeHeader[i].MatrixFormat == 5)
+                if (tempImage.ShapeHeaders[i].MatrixFormat == 2 || tempImage.ShapeHeaders[i].MatrixFormat == 1 || tempImage.ShapeHeaders[i].MatrixFormat == 5)
                 {
-                    return tempImage.sshShapeHeader[i].MatrixFormat;
+                    return tempImage.ShapeHeaders[i].MatrixFormat;
                 }
             }
 
@@ -327,7 +327,7 @@ namespace SSX_Library.EATextureLibrary
         {
             for (int i = 0; i < sshImages.Count; i++)
             {
-                sshImages[i].Image.SaveAsPng(System.IO.Path.Combine(path, sshImages[i].shortname + i + ".png"));
+                sshImages[i].Image.SaveAsPng(System.IO.Path.Combine(path, sshImages[i].Shortname + i + ".png"));
             }
         }
 
@@ -363,14 +363,14 @@ namespace SSX_Library.EATextureLibrary
 
                     if (sshImage.colorsTable.Count > 256 && sshImage.MatrixType == 2)
                     {
-                        Console.WriteLine("Over 256 Colour Limit " + sshImage.shortname + " (" + i + "/" + sshImages.Count + ")");
+                        Console.WriteLine("Over 256 Colour Limit " + sshImage.Shortname + " (" + i + "/" + sshImages.Count + ")");
                         sshImage.Image = ImageUtil.ReduceBitmapColorsFast(sshImage.Image, 256);
                         //MessageBox.Show(sshImages[i].shortname + " " + i.ToString() + " Exceeds 256 Colours");
                         //check = true;
                     }
                     if (sshImage.colorsTable.Count > 16 && sshImage.MatrixType == 1)
                     {
-                        Console.WriteLine("Over 16 Colour Limit " + sshImage.shortname + " (" + i + "/" + sshImages.Count + ")");
+                        Console.WriteLine("Over 16 Colour Limit " + sshImage.Shortname + " (" + i + "/" + sshImages.Count + ")");
                         sshImage.Image = ImageUtil.ReduceBitmapColorsFast(sshImage.Image, 16);
                         //MessageBox.Show(sshImage.shortname + " " + i.ToString() + " Exceeds 16 Colours");
                         //check = true;
@@ -401,7 +401,7 @@ namespace SSX_Library.EATextureLibrary
                 intPos.Add((int)stream.Position);
                 tempByte = new byte[8];
                 stream.Write(tempByte, 0, tempByte.Length);
-                StreamUtil.WriteNullString(stream, sshImages[i].shortname);
+                StreamUtil.WriteNullString(stream, sshImages[i].Shortname);
             }
 
             StreamUtil.WriteString(stream, group, 8);
@@ -415,7 +415,7 @@ namespace SSX_Library.EATextureLibrary
             {
                 var Image = sshImages[i];
 
-                Image.offset = (int)stream.Position;
+                Image.Offset = (int)stream.Position;
 
                 if(Image.MatrixType==1)
                 {
@@ -439,7 +439,7 @@ namespace SSX_Library.EATextureLibrary
 
 
 
-                Image.size = (int)stream.Position - Image.offset;
+                Image.Size = (int)stream.Position - Image.Offset;
 
                 sshImages[i] = Image;
             }
@@ -454,8 +454,8 @@ namespace SSX_Library.EATextureLibrary
             {
                 stream.Position = intPos[i];
 
-                StreamUtil.WriteInt32(stream, sshImages[i].offset, true);
-                StreamUtil.WriteInt32(stream, sshImages[i].size, true);
+                StreamUtil.WriteInt32(stream, sshImages[i].Offset, true);
+                StreamUtil.WriteInt32(stream, sshImages[i].Size, true);
             }
 
 
@@ -662,14 +662,14 @@ namespace SSX_Library.EATextureLibrary
 
         public struct ShapeImage
         {
-            public int offset;
-            public int size;
-            public string shortname;
-            public string longname;
-            public List<ShapeHeader> sshShapeHeader;
+            public int Offset;
+            public int Size;
+            public string Shortname;
+            public string Longname;
+            public List<ShapeHeader> ShapeHeaders;
 
             //Converted
-            public List<Rgba32>colorsTable;
+            public List<Rgba32> colorsTable;
             public Image<Rgba32> Image;
             public int Unknown;
             public int MatrixType;
