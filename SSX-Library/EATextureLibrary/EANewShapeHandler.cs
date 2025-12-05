@@ -490,7 +490,6 @@ namespace SSX_Library.EATextureLibrary
             //Converted
             public List<Rgba32> colorsTable;
             public Image<Rgba32> Image;
-            public int Unknown;
             public int MatrixType;
             public bool Compressed;
             public bool SwizzledImage;
