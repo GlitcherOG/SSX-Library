@@ -1,5 +1,4 @@
-﻿using SixLabors.ImageSharp.Drawing;
-using SixLabors.ImageSharp;
+﻿using SixLabors.ImageSharp;
 
 
 namespace SSX_Library.EATextureLibrary

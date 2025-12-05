@@ -1,10 +1,7 @@
-﻿using SSXLibrary.Utilities;
-using System.Text;
-using SixLabors.ImageSharp.Drawing;
-using SixLabors.ImageSharp;
-using SSXLibrary.FileHandlers;
+﻿using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.ImageSharp.Formats;
+using SSXLibrary.FileHandlers;
+using SSXLibrary.Utilities;
 
 namespace SSX_Library.EATextureLibrary
 {
@@ -18,7 +15,7 @@ namespace SSX_Library.EATextureLibrary
         public string group;
         public string endingstring;
 
-        public void LoadSSH(string path)
+        public void LoadShape(string path)
         {
             sshImages = new List<ShapeImage>();
             using (Stream stream = File.Open(path, FileMode.Open))
@@ -52,7 +49,7 @@ namespace SSX_Library.EATextureLibrary
 
                     endingstring = StreamUtil.ReadString(stream, 8);
 
-                    StandardToBitmap(stream);
+                    ProcessImages(stream);
                 }
                 else
                 {
@@ -63,7 +60,7 @@ namespace SSX_Library.EATextureLibrary
             }
         }
 
-        public void StandardToBitmap(Stream stream)
+        private void ProcessImages(Stream stream)
         {
             for (int i = 0; i < sshImages.Count; i++)
             {
@@ -110,133 +107,69 @@ namespace SSX_Library.EATextureLibrary
 
                         shape.Matrix = StreamUtil.ReadBytes(stream, shape.DataSize);
                     }
-
-
                     tempImage.ShapeHeaders.Add(shape);
                 }
 
+                //Get Matrix Type
                 tempImage.MatrixType  = GetShapeMatrixType(tempImage);
+                var imageMatrix = GetShapeHeader(tempImage, tempImage.MatrixType);
 
-                if (tempImage.MatrixType == 1)
+                tempImage.Compressed = (imageMatrix.Flags1 & 2) == 2;
+                tempImage.SwizzledImage = (imageMatrix.Flags2 & 64) == 64;
+
+                //Uncompress
+                if (tempImage.Compressed)
                 {
-                    //Process Colors
-                    var colorShape = GetMatrixType(tempImage, 33);
+                    imageMatrix.Matrix = RefpackHandler.Decompress(imageMatrix.Matrix);
+                }
+
+                //Process Colors
+                //Todo Check If Type is here instead
+                if (tempImage.MatrixType == 1 || tempImage.MatrixType == 2)
+                {
+                    var colorShape = GetShapeHeader(tempImage, 33);
+                    tempImage.SwizzledColours = (colorShape.Flags2 & 64) == 64;
                     tempImage.colorsTable = GetColorTable(tempImage);
                     tempImage = AlphaFix(tempImage);
+                }
 
-                    //Process Matrix into Image
-                    var imageMatrix = GetMatrixType(tempImage, 1);
 
-                    tempImage.Compressed = (imageMatrix.Flags1 & 2) == 2;
-                    tempImage.SwizzledImage = (imageMatrix.Flags2 & 64) == 64;
-                    tempImage.SwizzledColours = (colorShape.Flags2 & 64) == 64;
-
-                    if (tempImage.SwizzledImage)
-                    {
-                        imageMatrix.Matrix = ByteUtil.Unswizzle4bpp(imageMatrix.Matrix, imageMatrix.XSize, imageMatrix.YSize);
-                    }
-
-                    byte[] tempByte = new byte[imageMatrix.Size * 2];
-                    int posPoint = 0;
-                    for (int a = 0; a < imageMatrix.Matrix.Length; a++)
-                    {
-                        tempByte[posPoint] = (byte)ByteUtil.ByteToBitConvert(imageMatrix.Matrix[a], 0, 3);
-                        posPoint++;
-                        tempByte[posPoint] = (byte)ByteUtil.ByteToBitConvert(imageMatrix.Matrix[a], 4, 7);
-                        posPoint++;
-                    }
-                    imageMatrix.Matrix = tempByte;
-
-                    //Process Image
-                    tempImage.Image = new Image<Rgba32>(imageMatrix.XSize, imageMatrix.YSize);
-
-                    for (int y = 0; y < imageMatrix.YSize; y++)
-                    {
-                        for (int x = 0; x < imageMatrix.XSize; x++)
+                //Process into image
+                switch (tempImage.MatrixType)
+                {
+                    case 1:
+                        if (tempImage.SwizzledImage)
                         {
-                            int colorPos = imageMatrix.Matrix[x + imageMatrix.XSize * y];
-                            tempImage.Image[x, y] = tempImage.colorsTable[colorPos];
+                            imageMatrix.Matrix = ByteUtil.Unswizzle4bpp(imageMatrix.Matrix, imageMatrix.XSize, imageMatrix.YSize);
                         }
-                    }
-                }
-                else if(tempImage.MatrixType == 2)
-                {
-                    //Process Colors
-                    var colorShape = GetMatrixType(tempImage, 33);
-                    tempImage.colorsTable = GetColorTable(tempImage);
-                    tempImage = AlphaFix(tempImage);
-
-                    //Process Matrix into Image
-                    var imageMatrix = GetMatrixType(tempImage, 2);
-
-                    tempImage.Compressed = (imageMatrix.Flags1 & 2) == 2;
-                    tempImage.SwizzledImage = (imageMatrix.Flags2 & 64) == 64;
-                    tempImage.SwizzledColours = (colorShape.Flags2 & 64) == 64;
-
-                    if (tempImage.Compressed)
-                    {
-                        imageMatrix.Matrix = RefpackHandler.Decompress(imageMatrix.Matrix);
-                    }
-
-                    if (tempImage.SwizzledImage)
-                    {
-                        imageMatrix.Matrix = ByteUtil.Unswizzle8(imageMatrix.Matrix, imageMatrix.XSize, imageMatrix.YSize);
-                    }
-
-                    //Process Image
-                    tempImage.Image = new Image<Rgba32>(imageMatrix.XSize, imageMatrix.YSize);
-
-                    for (int y = 0; y < imageMatrix.YSize; y++)
-                    {
-                        for (int x = 0; x < imageMatrix.XSize; x++)
+                        tempImage.Image = EADecode.DecodeMatrix1(imageMatrix.Matrix, tempImage.colorsTable, imageMatrix.XSize, imageMatrix.YSize);
+                        break;
+                    case 2:
+                        if (tempImage.SwizzledImage)
                         {
-                            int colorPos = imageMatrix.Matrix[x + imageMatrix.XSize * y];
-                            tempImage.Image[x, y] = tempImage.colorsTable[colorPos];
+                            imageMatrix.Matrix = ByteUtil.Unswizzle8(imageMatrix.Matrix, imageMatrix.XSize, imageMatrix.YSize);
                         }
-                    }
-                }
-                else if(tempImage.MatrixType == 5)
-                {
-                    //Process Matrix into Image
-                    var imageMatrix = GetMatrixType(tempImage, 5);
-
-                    //Process Image
-                    tempImage.Image = new Image<Rgba32>(imageMatrix.XSize, imageMatrix.YSize);
-
-                    int pos = 0;
-                    for (int y = 0; y < imageMatrix.YSize; y++)
-                    {
-                        for (int x = 0; x < imageMatrix.XSize; x++)
-                        {
-                            Rgba32 rgba32 = new Rgba32(imageMatrix.Matrix[pos * 4], imageMatrix.Matrix[pos * 4 + 1], imageMatrix.Matrix[pos * 4 + 2], imageMatrix.Matrix[pos * 4 + 3]);
-
-                            tempImage.Image[x,y] = rgba32;
-                            pos++;
-                        }
-                    }
-                }
-                else
-                {
-                    Console.WriteLine(tempImage.MatrixType + " Unknown Matrix");
+                        tempImage.Image = EADecode.DecodeMatrix2(imageMatrix.Matrix, tempImage.colorsTable, imageMatrix.XSize, imageMatrix.YSize);
+                        break;
+                    case 3:
+                        tempImage.Image = EADecode.DecodeMatrix5(imageMatrix.Matrix, imageMatrix.XSize, imageMatrix.YSize);
+                        tempImage.colorsTable = ImageUtil.GetBitmapColorsFast(tempImage.Image).ToList();
+                        break;
+                    default:
+                        Console.WriteLine(tempImage.MatrixType + " Unknown Matrix");
+                        break;
                 }
 
-                var longNameShape = GetMatrixType(tempImage, 111);
-                if (longNameShape.MatrixFormat != 0)
-                {
-                    tempImage.Longname = Encoding.ASCII.GetString(longNameShape.Matrix).Replace("\0", "");
-                }
-
-                tempImage.colorsTable = ImageUtil.GetBitmapColorsFast(tempImage.Image).ToList();
                 sshImages[i] = tempImage;
             }
         }
 
-        public List<Rgba32> GetColorTable(ShapeImage newSSHImage)
+        private List<Rgba32> GetColorTable(ShapeImage newSSHImage)
         {
-            var colorShape = GetMatrixType(newSSHImage, 33);
+            var colorShape = GetShapeHeader(newSSHImage, 33);
             List<Rgba32> colors = new List<Rgba32>();
 
-            if (colorShape.Flags2 == 64)
+            if (newSSHImage.SwizzledColours)
             {
                 colorShape.Matrix = ByteUtil.UnswizzlePalette(colorShape.Matrix, colorShape.XSize);
             }
@@ -249,8 +182,7 @@ namespace SSX_Library.EATextureLibrary
             return colors;
         }
 
-
-        public ShapeImage AlphaFix(ShapeImage newSSHImage)
+        private ShapeImage AlphaFix(ShapeImage newSSHImage)
         {
             bool TestAlpha = true;
 
@@ -278,12 +210,10 @@ namespace SSX_Library.EATextureLibrary
                     newSSHImage.colorsTable[i] = TempColour;
                 }
             }
-
-
             return newSSHImage;
         }
 
-        public ShapeHeader GetMatrixType(ShapeImage newSSHImage,int Type)
+        private ShapeHeader GetShapeHeader(ShapeImage newSSHImage, int Type)
         {
             for (int i = 0; i < newSSHImage.ShapeHeaders.Count; i++)
             {
@@ -295,35 +225,25 @@ namespace SSX_Library.EATextureLibrary
             return new ShapeHeader();
         }
 
-        public int GetShapeMatrixType(int ImageID)
+        private int GetShapeMatrixType(int ImageID)
         {
-            var tempImage = sshImages[ImageID];
+            return GetShapeMatrixType(sshImages[ImageID]);
+        }
 
+        private int GetShapeMatrixType(ShapeImage tempImage)
+        {
             for (int i = 0; i < tempImage.ShapeHeaders.Count; i++)
             {
-                if (tempImage.ShapeHeaders[i].MatrixFormat == 2 || tempImage.ShapeHeaders[i].MatrixFormat == 1 || tempImage.ShapeHeaders[i].MatrixFormat == 5)
+                if (tempImage.ShapeHeaders[i].MatrixFormat == 1 || tempImage.ShapeHeaders[i].MatrixFormat == 2 || tempImage.ShapeHeaders[i].MatrixFormat == 5)
                 {
                     return tempImage.ShapeHeaders[i].MatrixFormat;
                 }
             }
 
-            return -1;
+            return tempImage.ShapeHeaders[0].MatrixFormat;
         }
 
-        public int GetShapeMatrixType(ShapeImage tempImage)
-        {
-            for (int i = 0; i < tempImage.ShapeHeaders.Count; i++)
-            {
-                if (tempImage.ShapeHeaders[i].MatrixFormat == 2 || tempImage.ShapeHeaders[i].MatrixFormat == 1 || tempImage.ShapeHeaders[i].MatrixFormat == 5)
-                {
-                    return tempImage.ShapeHeaders[i].MatrixFormat;
-                }
-            }
-
-            return -1;
-        }
-
-        public void BMPExtract(string path)
+        public void ExtractImage(string path)
         {
             for (int i = 0; i < sshImages.Count; i++)
             {
@@ -331,25 +251,21 @@ namespace SSX_Library.EATextureLibrary
             }
         }
 
-        public void BMPOneExtract(string path, int i)
+        public void ExtractSingleImage(string path, int i)
         {
             sshImages[i].Image.SaveAsPng(path);
         }
 
-        public void LoadSingle(string path, int i)
+        public void LoadSingleImage(string path, int i)
         {
-            Stream stream = File.Open(path, FileMode.Open);
-            var ImageTemp = Image<Rgba32>.Load(stream);
-            stream.Close();
-            stream.Dispose();
             var temp = sshImages[i];
-            temp.Image = (Image<Rgba32>)ImageTemp;
+            temp.Image = (Image<Rgba32>)Image.Load(path);
             temp.colorsTable = ImageUtil.GetBitmapColorsFast(temp.Image).ToList();
             temp.MatrixType = sshImages[i].MatrixType;
             sshImages[i] = temp;
         }
 
-        public void SaveSSH(string path, bool TestImages)
+        public void SaveShape(string path, bool TestImages = true)
         {
             for (int i = 0; i < sshImages.Count; i++)
             {
@@ -384,7 +300,7 @@ namespace SSX_Library.EATextureLibrary
             byte[] tempByte = new byte[4];
             Stream stream = new MemoryStream();
 
-            StreamUtil.WriteString(stream, "ShpS");
+            StreamUtil.WriteString(stream, MagicWord,4);
 
             long SizePos = stream.Position;
             tempByte = new byte[4];
@@ -457,8 +373,6 @@ namespace SSX_Library.EATextureLibrary
                 StreamUtil.WriteInt32(stream, sshImages[i].Offset, true);
                 StreamUtil.WriteInt32(stream, sshImages[i].Size, true);
             }
-
-
 
             if (File.Exists(path))
             {
