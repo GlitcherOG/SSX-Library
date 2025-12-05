@@ -2,6 +2,7 @@
 // using SSXLibrary.Utilities;
 using DiscUtils.Iso9660;
 using DiscUtils;
+using System.Text;
 
 namespace SSX_Library.Tests;
 
@@ -10,12 +11,20 @@ public class UnitTest1
     [Fact]
     public void Test1()
     {
-        string path = "/home/eric/Downloads/Tricky.iso";
-        string dest = "/home/eric/Downloads/Extra";
+        // string path = "/home/eric/Downloads/Tricky.iso";
+        // string dest = "/home/eric/Downloads/Extra";
 
-        using FileStream isoStream = File.Open(path, FileMode.Open);
-        CDReader cd = new(isoStream, true);
-        ExtractDirectory(cd.Root, dest);
+        // using FileStream isoStream = File.Open(path, FileMode.Open);
+        // CDReader cd = new(isoStream, true);
+        // ExtractDirectory(cd.Root, dest);
+
+        // CDBuilder builder = new();
+        // builder.UseJoliet = true;
+        // builder.VolumeIdentifier = "A_SAMPLE_DISK";
+        // builder.AddFile("Hello.txt", Encoding.ASCII.GetBytes("Hello World!"));
+        // builder.Build(@"\home\eric\Downloads\sample.iso");
+
+
     }
 
     private static void ExtractDirectory(DiscDirectoryInfo directoryInfo, string destinationPath)
