@@ -12,8 +12,8 @@ namespace SSX_Library.EATextureLibrary
         public int ImageCount; //Big 4
         public int U0;
         public List<ShapeImage> sshImages = new List<ShapeImage>();
-        public string group;
-        public string endingstring;
+        public string Group;
+        public string EndingString;
 
         public void LoadShape(string path)
         {
@@ -45,22 +45,22 @@ namespace SSX_Library.EATextureLibrary
                         sshImages.Add(tempImage);
                     }
 
-                    group = StreamUtil.ReadString(stream, 8);
+                    Group = StreamUtil.ReadString(stream, 8);
 
-                    endingstring = StreamUtil.ReadString(stream, 8);
+                    EndingString = StreamUtil.ReadString(stream, 8);
 
-                    ProcessImages(stream);
+                    LoadImages(stream);
                 }
                 else
                 {
-                    //MessageBox.Show(MagicWord + " Unsupported format");
+                    Console.WriteLine(MagicWord + " Unsupported format");
                 }
                 stream.Dispose();
                 stream.Close();
             }
         }
 
-        private void ProcessImages(Stream stream)
+        private void LoadImages(Stream stream)
         {
             for (int i = 0; i < sshImages.Count; i++)
             {
@@ -74,38 +74,27 @@ namespace SSX_Library.EATextureLibrary
                     var shape = new ShapeHeader();
 
                     shape.MatrixFormat = StreamUtil.ReadUInt8(stream);
+                    shape.Flags1 = StreamUtil.ReadUInt8(stream); //Bit Flags? +1 - Image?, +2 - Compressed,  
+                    shape.Flags2 = StreamUtil.ReadUInt8(stream); //Flags? +64 - Swizzled,
+                    shape.Flags3 = StreamUtil.ReadUInt8(stream);
+                    shape.Size = StreamUtil.ReadUInt32(stream);
+                    shape.U2 = StreamUtil.ReadUInt32(stream);
+                    shape.DataSize = StreamUtil.ReadUInt32(stream);
                     if (shape.MatrixFormat != 111)
                     {
-                        shape.Flags1 = StreamUtil.ReadUInt8(stream); //Bit Flags? +1 - Image?, +2 - Compressed,  
-                        shape.Flags2 = StreamUtil.ReadUInt8(stream); //Flags? +64 - Swizzled,
-                        shape.Flags3 = StreamUtil.ReadUInt8(stream);
-                        shape.Size = StreamUtil.ReadUInt32(stream);
-                        shape.U2 = StreamUtil.ReadUInt32(stream);
-                        shape.DataSize = StreamUtil.ReadUInt32(stream);
                         shape.U4 = StreamUtil.ReadUInt32(stream);
                         shape.U5 = StreamUtil.ReadUInt32(stream);
                         shape.XSize = StreamUtil.ReadUInt32(stream);
                         shape.YSize = StreamUtil.ReadUInt32(stream);
+                    }
 
-                        if (shape.Size == 0)
-                        {
-                            shape.Matrix = StreamUtil.ReadBytes(stream, shape.DataSize);
-                        }
-                        else
-                        {
-                            shape.Matrix = StreamUtil.ReadBytes(stream, shape.Size - 32);
-                        }
+                    if (shape.Size == 0 || shape.MatrixFormat == 111)
+                    {
+                        shape.Matrix = StreamUtil.ReadBytes(stream, shape.DataSize);
                     }
                     else
                     {
-                        shape.Flags1 = StreamUtil.ReadUInt8(stream); //Bit Flags? +1 - Image?, +2 - Compressed,  
-                        shape.Flags2 = StreamUtil.ReadUInt8(stream); //Flags? +64 - Swizzled,
-                        shape.Flags3 = StreamUtil.ReadUInt8(stream);
-                        shape.Size = StreamUtil.ReadUInt32(stream);
-                        shape.U2 = StreamUtil.ReadUInt32(stream);
-                        shape.DataSize = StreamUtil.ReadUInt32(stream);
-
-                        shape.Matrix = StreamUtil.ReadBytes(stream, shape.DataSize);
+                        shape.Matrix = StreamUtil.ReadBytes(stream, shape.Size - 32);
                     }
                     tempImage.ShapeHeaders.Add(shape);
                 }
@@ -320,9 +309,9 @@ namespace SSX_Library.EATextureLibrary
                 StreamUtil.WriteNullString(stream, sshImages[i].Shortname);
             }
 
-            StreamUtil.WriteString(stream, group, 8);
+            StreamUtil.WriteString(stream, Group, 8);
 
-            StreamUtil.WriteString(stream, "Buy ERTS", 8);
+            StreamUtil.WriteString(stream, EndingString, 8);
 
             StreamUtil.AlignBy16(stream);
 
