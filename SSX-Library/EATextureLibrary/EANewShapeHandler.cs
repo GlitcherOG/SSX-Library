@@ -12,9 +12,10 @@ namespace SSX_Library.EATextureLibrary
         private int Size;
         private int ImageCount; //Big 4
         private int U0;
-        public List<ShapeImage> ShapeImages = new List<ShapeImage>();
         public string Group;
         public string EndingString;
+
+        public List<ShapeImage> ShapeImages = new List<ShapeImage>();
 
         public void LoadShape(string path)
         {
@@ -74,14 +75,14 @@ namespace SSX_Library.EATextureLibrary
                 {
                     var shape = new ShapeHeader();
 
-                    shape.MatrixFormat = StreamUtil.ReadUInt8(stream);
+                    shape.MatrixFormat = (MatrixType)StreamUtil.ReadUInt8(stream);
                     shape.Flags1 = StreamUtil.ReadUInt8(stream); //Bit Flags? +1 - Image?, +2 - Compressed,  
                     shape.Flags2 = StreamUtil.ReadUInt8(stream); //Flags? +64 - Swizzled,
                     shape.Flags3 = StreamUtil.ReadUInt8(stream);
                     shape.Size = StreamUtil.ReadUInt32(stream);
                     shape.U2 = StreamUtil.ReadUInt32(stream);
                     shape.DataSize = StreamUtil.ReadUInt32(stream);
-                    if (shape.MatrixFormat != 111)
+                    if (shape.MatrixFormat != MatrixType.LongName)
                     {
                         shape.U4 = StreamUtil.ReadUInt32(stream);
                         shape.U5 = StreamUtil.ReadUInt32(stream);
@@ -89,7 +90,7 @@ namespace SSX_Library.EATextureLibrary
                         shape.YSize = StreamUtil.ReadUInt32(stream);
                     }
 
-                    if (shape.Size == 0 || shape.MatrixFormat == 111)
+                    if (shape.Size == 0 || shape.MatrixFormat == MatrixType.LongName)
                     {
                         shape.Matrix = StreamUtil.ReadBytes(stream, shape.DataSize);
                     }
@@ -213,7 +214,7 @@ namespace SSX_Library.EATextureLibrary
         {
             for (int i = 0; i < newSSHImage.ShapeHeaders.Count; i++)
             {
-                if (newSSHImage.ShapeHeaders[i].MatrixFormat==(int)Type)
+                if (newSSHImage.ShapeHeaders[i].MatrixFormat==Type)
                 {
                     return newSSHImage.ShapeHeaders[i];
                 }
@@ -221,16 +222,12 @@ namespace SSX_Library.EATextureLibrary
             return new ShapeHeader();
         }
 
-        private MatrixType GetShapeMatrixType(int ImageID)
-        {
-            return GetShapeMatrixType(ShapeImages[ImageID]);
-        }
-
         private MatrixType GetShapeMatrixType(ShapeImage tempImage)
         {
             for (int i = 0; i < tempImage.ShapeHeaders.Count; i++)
             {
-                if (tempImage.ShapeHeaders[i].MatrixFormat == 1 || tempImage.ShapeHeaders[i].MatrixFormat == 2 || tempImage.ShapeHeaders[i].MatrixFormat == 5)
+                if (tempImage.ShapeHeaders[i].MatrixFormat == MatrixType.FourBit || tempImage.ShapeHeaders[i].MatrixFormat == MatrixType.EightBit || 
+                    tempImage.ShapeHeaders[i].MatrixFormat == MatrixType.FullColor)
                 {
                     return (MatrixType)tempImage.ShapeHeaders[i].MatrixFormat;
                 }
@@ -506,7 +503,7 @@ namespace SSX_Library.EATextureLibrary
 
         public struct ShapeHeader
         {
-            public byte MatrixFormat;
+            public MatrixType MatrixFormat;
             public int Flags1;
             public int Flags2;
             public int Flags3;
