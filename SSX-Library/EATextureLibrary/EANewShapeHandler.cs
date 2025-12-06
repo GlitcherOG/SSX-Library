@@ -2,15 +2,16 @@
 using SixLabors.ImageSharp.PixelFormats;
 using SSXLibrary.FileHandlers;
 using SSXLibrary.Utilities;
+using System.Text;
 
 namespace SSX_Library.EATextureLibrary
 {
     public class EANewShapeHandler
     {
         public string MagicWord; //4
-        public int Size;
-        public int ImageCount; //Big 4
-        public int U0;
+        private int Size;
+        private int ImageCount; //Big 4
+        private int U0;
         public List<ShapeImage> ShapeImages = new List<ShapeImage>();
         public string Group;
         public string EndingString;
@@ -114,9 +115,9 @@ namespace SSX_Library.EATextureLibrary
 
                 //Process Colors
                 //Todo Check If Type is here instead
-                if (tempImage.MatrixType == 1 || tempImage.MatrixType == 2)
+                if (tempImage.MatrixType == MatrixType.FourBit || tempImage.MatrixType == MatrixType.EightBit)
                 {
-                    var colorShape = GetShapeHeader(tempImage, 33);
+                    var colorShape = GetShapeHeader(tempImage, MatrixType.ColorPallet);
                     tempImage.SwizzledColours = (colorShape.Flags2 & 64) == 64;
                     tempImage.colorsTable = GetColorTable(tempImage);
                     tempImage = AlphaFix(tempImage);
@@ -126,21 +127,21 @@ namespace SSX_Library.EATextureLibrary
                 //Process into image
                 switch (tempImage.MatrixType)
                 {
-                    case 1:
+                    case MatrixType.FourBit:
                         if (tempImage.SwizzledImage)
                         {
                             imageMatrix.Matrix = ByteUtil.Unswizzle4bpp(imageMatrix.Matrix, imageMatrix.XSize, imageMatrix.YSize);
                         }
                         tempImage.Image = EADecode.DecodeMatrix1(imageMatrix.Matrix, tempImage.colorsTable, imageMatrix.XSize, imageMatrix.YSize);
                         break;
-                    case 2:
+                    case MatrixType.EightBit:
                         if (tempImage.SwizzledImage)
                         {
                             imageMatrix.Matrix = ByteUtil.Unswizzle8(imageMatrix.Matrix, imageMatrix.XSize, imageMatrix.YSize);
                         }
                         tempImage.Image = EADecode.DecodeMatrix2(imageMatrix.Matrix, tempImage.colorsTable, imageMatrix.XSize, imageMatrix.YSize);
                         break;
-                    case 3:
+                    case MatrixType.FullColor:
                         tempImage.Image = EADecode.DecodeMatrix5(imageMatrix.Matrix, imageMatrix.XSize, imageMatrix.YSize);
                         tempImage.colorsTable = ImageUtil.GetBitmapColorsFast(tempImage.Image).ToList();
                         break;
@@ -149,13 +150,19 @@ namespace SSX_Library.EATextureLibrary
                         break;
                 }
 
+                var longNameShape = GetShapeHeader(tempImage, MatrixType.LongName);
+                if (longNameShape.MatrixFormat != 0)
+                {
+                    tempImage.Longname = Encoding.ASCII.GetString(longNameShape.Matrix).Replace("\0", "");
+                }
+
                 ShapeImages[i] = tempImage;
             }
         }
 
         private List<Rgba32> GetColorTable(ShapeImage newSSHImage)
         {
-            var colorShape = GetShapeHeader(newSSHImage, 33);
+            var colorShape = GetShapeHeader(newSSHImage, MatrixType.FullColor);
             List<Rgba32> colors = new List<Rgba32>();
 
             if (newSSHImage.SwizzledColours)
@@ -202,11 +209,11 @@ namespace SSX_Library.EATextureLibrary
             return newSSHImage;
         }
 
-        private ShapeHeader GetShapeHeader(ShapeImage newSSHImage, int Type)
+        private ShapeHeader GetShapeHeader(ShapeImage newSSHImage, MatrixType Type)
         {
             for (int i = 0; i < newSSHImage.ShapeHeaders.Count; i++)
             {
-                if (newSSHImage.ShapeHeaders[i].MatrixFormat==Type)
+                if (newSSHImage.ShapeHeaders[i].MatrixFormat==(int)Type)
                 {
                     return newSSHImage.ShapeHeaders[i];
                 }
@@ -214,22 +221,22 @@ namespace SSX_Library.EATextureLibrary
             return new ShapeHeader();
         }
 
-        private int GetShapeMatrixType(int ImageID)
+        private MatrixType GetShapeMatrixType(int ImageID)
         {
             return GetShapeMatrixType(ShapeImages[ImageID]);
         }
 
-        private int GetShapeMatrixType(ShapeImage tempImage)
+        private MatrixType GetShapeMatrixType(ShapeImage tempImage)
         {
             for (int i = 0; i < tempImage.ShapeHeaders.Count; i++)
             {
                 if (tempImage.ShapeHeaders[i].MatrixFormat == 1 || tempImage.ShapeHeaders[i].MatrixFormat == 2 || tempImage.ShapeHeaders[i].MatrixFormat == 5)
                 {
-                    return tempImage.ShapeHeaders[i].MatrixFormat;
+                    return (MatrixType)tempImage.ShapeHeaders[i].MatrixFormat;
                 }
             }
 
-            return tempImage.ShapeHeaders[0].MatrixFormat;
+            return (MatrixType)tempImage.ShapeHeaders[0].MatrixFormat;
         }
 
         public void ExtractImage(string path)
@@ -264,12 +271,12 @@ namespace SSX_Library.EATextureLibrary
                 sshImage.colorsTable = ImageUtil.GetBitmapColorsFast(sshImage.Image).ToList();
 
                 //if metal bin combine images and then reduce
-                if (sshImage.colorsTable.Count > 16 && sshImage.MatrixType == 1)
+                if (sshImage.colorsTable.Count > 16 && sshImage.MatrixType == MatrixType.FourBit)
                 {
                     Console.WriteLine("Over 16 Colour Limit " + sshImage.Shortname + " (" + i + "/" + ShapeImages.Count + ")");
                     sshImage.Image = ImageUtil.ReduceBitmapColorsFast(sshImage.Image, 16);
                 }
-                if (sshImage.colorsTable.Count > 256 && sshImage.MatrixType == 2)
+                if (sshImage.colorsTable.Count > 256 && sshImage.MatrixType == MatrixType.EightBit)
                 {
                     Console.WriteLine("Over 256 Colour Limit " + sshImage.Shortname + " (" + i + "/" + ShapeImages.Count + ")");
                     sshImage.Image = ImageUtil.ReduceBitmapColorsFast(sshImage.Image, 256);
@@ -317,7 +324,7 @@ namespace SSX_Library.EATextureLibrary
                 var Matrix = new byte[0];
                 var Colours = new List<Rgba32>();
 
-                if (Image.MatrixType == 1)
+                if (Image.MatrixType == MatrixType.FourBit)
                 {
                     var EncodedImage = EAEncode.EncodeMatrix1(Image.Image);
                     Matrix = EncodedImage.Matrix;
@@ -328,7 +335,7 @@ namespace SSX_Library.EATextureLibrary
                         Matrix = ByteUtil.Swizzle4bpp(Matrix, Image.Image.Width, Image.Image.Height);
                     }
                 }
-                else if (Image.MatrixType == 2)
+                else if (Image.MatrixType == MatrixType.EightBit)
                 {
                     //WriteMatrix2(stream, Image);
                     var EncodedImage = EAEncode.EncodeMatrix2(Image.Image);
@@ -339,7 +346,7 @@ namespace SSX_Library.EATextureLibrary
                         Matrix = ByteUtil.Swizzle8(Matrix, Image.Image.Width, Image.Image.Height);
                     }
                 }
-                else if (Image.MatrixType == 5)
+                else if (Image.MatrixType == MatrixType.FullColor)
                 {
                     Matrix = EAEncode.EncodeMatrix5(Image.Image);
                     if (Image.SwizzledImage)
@@ -366,7 +373,7 @@ namespace SSX_Library.EATextureLibrary
                 //Might not be needed
                 StreamUtil.AlignBy16(stream);
 
-                if (Image.MatrixType == 1 || Image.MatrixType == 2)
+                if (Image.MatrixType == MatrixType.FourBit || Image.MatrixType == MatrixType.EightBit)
                 {
                     //Generate Colour Table Matrix
                     WriteColourTable(stream, Image);
@@ -409,7 +416,7 @@ namespace SSX_Library.EATextureLibrary
 
         public void WriteImageHeader(Stream stream, ShapeImage image, int DataSize)
         {
-            StreamUtil.WriteUInt8(stream, image.MatrixType);
+            StreamUtil.WriteUInt8(stream, (int)image.MatrixType);
             int Flag1 = 1 + (image.Compressed ? 2 : 0);
             int Flag2 = image.SwizzledImage ? 64 : 0;
             int Flag3 = 0;
@@ -481,16 +488,16 @@ namespace SSX_Library.EATextureLibrary
 
         public struct ShapeImage
         {
-            public int Offset;
-            public int Size;
+            internal int Offset;
+            internal int Size;
             public string Shortname;
             public string Longname;
-            public List<ShapeHeader> ShapeHeaders;
+            internal List<ShapeHeader> ShapeHeaders;
 
             //Converted
             public List<Rgba32> colorsTable;
             public Image<Rgba32> Image;
-            public int MatrixType;
+            public MatrixType MatrixType;
             public bool Compressed;
             public bool SwizzledImage;
             public bool SwizzledColours;
@@ -513,6 +520,17 @@ namespace SSX_Library.EATextureLibrary
             public int YSize;
 
             public byte[] Matrix;
+        }
+
+        public enum MatrixType : byte
+        {
+            Unknown = 0,
+            FourBit = 1,
+            EightBit = 2,
+            FullColor = 5,
+
+            ColorPallet = 33,
+            LongName = 111,
         }
     }
 }
