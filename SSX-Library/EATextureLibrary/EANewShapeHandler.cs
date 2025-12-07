@@ -90,7 +90,12 @@ namespace SSX_Library.EATextureLibrary
                         shape.YSize = StreamUtil.ReadUInt32(stream);
                     }
 
-                    if (shape.Size == 0 || shape.MatrixFormat == MatrixType.LongName)
+                    if (shape.MatrixFormat == MatrixType.LongName)
+                    {
+                        shape.Matrix = StreamUtil.ReadBytes(stream, shape.U2);
+                    }
+                    else
+                    if (shape.Size == 0)
                     {
                         shape.Matrix = StreamUtil.ReadBytes(stream, shape.DataSize);
                     }
@@ -99,7 +104,7 @@ namespace SSX_Library.EATextureLibrary
                         shape.Matrix = StreamUtil.ReadBytes(stream, shape.Size - 32);
                     }
 
-                    StreamUtil.AlignBy16(stream);
+                    //StreamUtil.AlignBy16(stream);
 
                     tempImage.ShapeHeaders.Add(shape);
                 }
