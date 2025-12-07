@@ -194,21 +194,14 @@ namespace SSX_Library.EATextureLibrary
                 }
 
                 //Metal Bin
-
-
-
-                var longNameShape = GetShapeHeader(tempImage, MatrixType.LongName);
-                if (longNameShape.MatrixFormat != 0)
-                {
-                    tempImage.Longname = Encoding.ASCII.GetString(longNameShape.Matrix).Replace("\0", "");
-                }
+                //Need to add check
 
                 ShapeImages[i] = tempImage;
             }
         }
         private List<Rgba32> GetColorTable(ShapeImage newSSHImage)
         {
-            var colorShape = GetShapeHeader(newSSHImage, MatrixType.FullColor);
+            var colorShape = GetShapeHeader(newSSHImage, MatrixType.ColorPallet);
             List<Rgba32> colors = new List<Rgba32>();
 
             for (int i = 0; i < colorShape.Width * colorShape.Height; i++)
@@ -243,7 +236,7 @@ namespace SSX_Library.EATextureLibrary
                     {
                         A = 255;
                     }
-                    TempColour = new Rgba32(TempColour.R, TempColour.G, TempColour.B, A);
+                    TempColour.A = (byte)A;
                     newSSHImage.colorsTable[i] = TempColour;
                 }
             }
