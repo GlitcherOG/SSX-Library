@@ -123,7 +123,7 @@ namespace SSX_Library.EATextureLibrary
                         if (shape.Size == 0 || shape.MatrixFormat == MatrixType.LongName)
                         {
                             int RealSize = shape.Width * shape.Height;
-                            if (shape.MatrixFormat == MatrixType.FullColor)
+                            if (shape.MatrixFormat == MatrixType.ColorPallet || shape.MatrixFormat == MatrixType.ColorPalletXbox)
                             {
                                 RealSize = RealSize * 4;
                             }
@@ -146,7 +146,7 @@ namespace SSX_Library.EATextureLibrary
                         StreamUtil.AlignBy(stream, 16, tempImage.Offset);
                     }
 
-                        tempImage.ShapeHeaders.Add(shape);
+                    tempImage.ShapeHeaders.Add(shape);
                 }
 
                 //Get Matrix Type
@@ -163,11 +163,18 @@ namespace SSX_Library.EATextureLibrary
 
                 //Process Colors
                 //Todo Check If Type is here instead
-                if (tempImage.MatrixType == MatrixType.FourBit || tempImage.MatrixType == MatrixType.EightBit)
+                if (tempImage.MatrixType == MatrixType.FourBit || tempImage.MatrixType == MatrixType.EightBit
+                    || tempImage.MatrixType == MatrixType.EightBitCompressed)
                 {
                     var colorShape = GetShapeHeader(tempImage, MatrixType.ColorPallet);
                     tempImage.colorsTable = GetColorTable(tempImage);
                     tempImage = AlphaFix(tempImage);
+                }
+
+                if(tempImage.MatrixType == MatrixType.EightBitXbox)
+                {
+                    var colorShape = GetShapeHeader(tempImage, MatrixType.ColorPalletXbox);
+                    tempImage.colorsTable = GetColorTable(tempImage);
                 }
 
                 //Process into image
@@ -182,6 +189,7 @@ namespace SSX_Library.EATextureLibrary
                         break;
                     case MatrixType.EightBit:
                     case MatrixType.EightBitCompressed:
+                    case MatrixType.EightBitXbox:
                         if (tempImage.SwizzledImage)
                         {
                             imageMatrix.Matrix = ByteUtil.Unswizzle8(imageMatrix.Matrix, imageMatrix.Width, imageMatrix.Height);
@@ -226,6 +234,13 @@ namespace SSX_Library.EATextureLibrary
         private List<Rgba32> GetColorTable(ShapeImage newSSHImage)
         {
             var colorShape = GetShapeHeader(newSSHImage, MatrixType.ColorPallet);
+            
+            if(colorShape.MatrixFormat == MatrixType.Unknown)
+            {
+                colorShape = GetShapeHeader(newSSHImage, MatrixType.ColorPalletXbox);
+            }
+
+
             List<Rgba32> colors = new List<Rgba32>();
 
             for (int i = 0; i < colorShape.Width * colorShape.Height; i++)
@@ -357,13 +372,14 @@ namespace SSX_Library.EATextureLibrary
             FullColor = 5,
 
             ColorPallet = 33,
+            ColorPalletXbox = 42,
 
             //Xbox
             BC1 = 96,
             BC2 = 97,
             BGRA4444 = 109,
             BGR565 = 120,
-            IndexedImage = 123,
+            EightBitXbox = 123,
             BGRA = 125,
 
             //Other
