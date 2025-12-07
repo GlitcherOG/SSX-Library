@@ -2,10 +2,9 @@
 using SSXLibrary.JsonFiles.Tricky;
 using SSXLibrary.Utilities;
 using System.Numerics;
-using System.IO;
-using static SSXLibrary.JsonFiles.Tricky.InstanceJsonHandler;
 using System.Collections;
 using SSX_Library.EATextureLibrary;
+using SSX_Library.Utilities;
 
 
 namespace SSXLibrary
@@ -76,8 +75,8 @@ namespace SSXLibrary
             pbdHandler.LoadPBD(LoadPath + ".pbd");
 
             Console.WriteLine("Loading SSH File");
-            OldSSHHandler TextureHandler = new OldSSHHandler();
-            TextureHandler.LoadSSH(LoadPath + ".ssh");
+            OldShapeHandler TextureHandler = new OldShapeHandler();
+            TextureHandler.LoadShape(LoadPath + ".ssh");
 
             Console.WriteLine("Loading LTG File");
             LTGHandler ltgHandler = new LTGHandler();
@@ -141,7 +140,7 @@ namespace SSXLibrary
                 {
                     patch.TrickOnlyPatch =true;
                 }
-                patch.TexturePath = TextureHandler.sshImages[pbdHandler.Patches[i].TextureAssigment].shortname + ".png";
+                patch.TexturePath = TextureHandler.ShapeImages[pbdHandler.Patches[i].TextureAssigment].Shortname + ".png";
                 patch.LightmapID = pbdHandler.Patches[i].LightmapID;
                 patchPoints.Patches.Add(patch);
             }
@@ -214,14 +213,14 @@ namespace SSXLibrary
                             ADLTest[a] = true;
 
                             instanceJson.IncludeSound = true;
-                            var NewSound = new SoundData();
+                            var NewSound = new InstanceJsonHandler.SoundData();
 
                             NewSound.CollisonSound = adlHandler.HashSounds[a].Sound.CollisonSound;
-                            NewSound.ExternalSounds = new List<ExternalSound>();
+                            NewSound.ExternalSounds = new List<InstanceJsonHandler.ExternalSound>();
 
                             for (int b = 0; b < adlHandler.HashSounds[a].Sound.ExternalSounds.Count; b++)
                             {
-                                var NewExternalSound = new ExternalSound();
+                                var NewExternalSound = new InstanceJsonHandler.ExternalSound();
                                 NewExternalSound.U0 = adlHandler.HashSounds[a].Sound.ExternalSounds[b].U0;
                                 NewExternalSound.SoundIndex = adlHandler.HashSounds[a].Sound.ExternalSounds[b].SoundIndex;
                                 NewExternalSound.U2 = adlHandler.HashSounds[a].Sound.ExternalSounds[b].U2;
@@ -317,7 +316,7 @@ namespace SSXLibrary
 
                 if (pbdHandler.materials[i].TextureID != -1)
                 {
-                    TempMaterial.TexturePath = TextureHandler.sshImages[pbdHandler.materials[i].TextureID].shortname + ".png";
+                    TempMaterial.TexturePath = TextureHandler.ShapeImages[pbdHandler.materials[i].TextureID].Shortname + ".png";
                 }
                 TempMaterial.UnknownInt2 = pbdHandler.materials[i].UnknownInt2;
                 TempMaterial.UnknownInt3 = pbdHandler.materials[i].UnknownInt3;
@@ -342,7 +341,7 @@ namespace SSXLibrary
                 {
                     for (int a = 0; a < pbdHandler.textureFlipbooks[pbdHandler.materials[i].TextureFlipbookID].ImagePositions.Count; a++)
                     {
-                        TempMaterial.TextureFlipbook.Add(TextureHandler.sshImages[pbdHandler.textureFlipbooks[pbdHandler.materials[i].TextureFlipbookID].ImagePositions[a]].shortname + ".png");
+                        TempMaterial.TextureFlipbook.Add(TextureHandler.ShapeImages[pbdHandler.textureFlipbooks[pbdHandler.materials[i].TextureFlipbookID].ImagePositions[a]].Shortname + ".png");
                     }
                 }
                 TempMaterial.UnknownInt20 = pbdHandler.materials[i].UnknownInt20;
@@ -1052,7 +1051,7 @@ namespace SSXLibrary
             #endregion
 
             //Load and Export Textures
-            OldSSHHandler LightmapHandler = new OldSSHHandler();
+            OldShapeHandler LightmapHandler = new OldShapeHandler();
             Console.WriteLine("Creating Folders for Textures and Models...");
             Directory.CreateDirectory(ExportPath + "/Meshes");
             Directory.CreateDirectory(ExportPath + "/Textures");
@@ -1066,11 +1065,11 @@ namespace SSXLibrary
             Console.WriteLine("Extracting Models...");
             pbdHandler.ExportModels(ExportPath + "/Meshes/");
 
-            for (int i = 0; i < TextureHandler.sshImages.Count; i++)
+            for (int i = 0; i < TextureHandler.ShapeImages.Count; i++)
             {
-                Console.WriteLine("Textures: " + (i + 1) + "/" + TextureHandler.sshImages.Count);
-                TextureHandler.BrightenBitmap(i);
-                TextureHandler.BMPOneExtract(ExportPath + "\\Textures\\" + TextureHandler.sshImages[i].shortname + ".png", i);
+                Console.WriteLine("Textures: " + (i + 1) + "/" + TextureHandler.ShapeImages.Count);
+                TextureHandler.BrightenImage(i);
+                TextureHandler.ExtractSingleImage(ExportPath + "\\Textures\\" + TextureHandler.ShapeImages[i].Shortname + ".png", i);
             }
 
 
@@ -1079,8 +1078,8 @@ namespace SSXLibrary
             if (File.Exists(LoadPath + "_sky.ssh"))
             {
                 Console.WriteLine("Loading Skybox Textures");
-                OldSSHHandler SkyboxHandler = new OldSSHHandler();
-                SkyboxHandler.LoadSSH(LoadPath + "_sky.ssh");
+                OldShapeHandler SkyboxHandler = new OldShapeHandler();
+                SkyboxHandler.LoadShape(LoadPath + "_sky.ssh");
 
                 //Load PBD Sky
                 Console.WriteLine("Loading Skybox PBD File");
@@ -1096,7 +1095,7 @@ namespace SSXLibrary
 
                     TempMaterial.MaterialName = "Skybox Material " + i.ToString();
 
-                    TempMaterial.TexturePath = SkyboxHandler.sshImages[skypbdHandler.materials[i].TextureID].shortname + ".png";
+                    TempMaterial.TexturePath = SkyboxHandler.ShapeImages[skypbdHandler.materials[i].TextureID].Shortname + ".png";
                     TempMaterial.UnknownInt2 = skypbdHandler.materials[i].UnknownInt2;
                     TempMaterial.UnknownInt3 = skypbdHandler.materials[i].UnknownInt3;
                     TempMaterial.UnknownFloat1 = skypbdHandler.materials[i].UnknownFloat1;
@@ -1219,33 +1218,33 @@ namespace SSXLibrary
                 Console.WriteLine("Begining Skybox Model Extraction");
                 skypbdHandler.ExportModels(ExportPath + "/Skybox/Meshes/");
 
-                for (int i = 0; i < SkyboxHandler.sshImages.Count; i++)
+                for (int i = 0; i < SkyboxHandler.ShapeImages.Count; i++)
                 {
-                    Console.WriteLine("Skybox Textures: " + (i + 1) + "/" + SkyboxHandler.sshImages.Count);
-                    SkyboxHandler.BrightenBitmap(i);
-                    SkyboxHandler.BMPOneExtract(ExportPath + "\\Skybox\\Textures\\" + SkyboxHandler.sshImages[i].shortname + ".png", i);
+                    Console.WriteLine("Skybox Textures: " + (i + 1) + "/" + SkyboxHandler.ShapeImages.Count);
+                    SkyboxHandler.BrightenImage(i);
+                    SkyboxHandler.ExtractSingleImage(ExportPath + "\\Skybox\\Textures\\" + SkyboxHandler.ShapeImages[i].Shortname + ".png", i);
                 }
             }
 
             if (File.Exists(LoadPath + "_L.ssh"))
             {
-                LightmapHandler.LoadSSH(LoadPath + "_L.ssh");
+                LightmapHandler.LoadShape(LoadPath + "_L.ssh");
 
-                for (int i = 0; i < LightmapHandler.sshImages.Count; i++)
+                for (int i = 0; i < LightmapHandler.ShapeImages.Count; i++)
                 {
-                    Console.WriteLine("Lightmap Textures: " + (i + 1) + "/" + LightmapHandler.sshImages.Count);
-                    LightmapHandler.BrightenBitmap(i);
-                    LightmapHandler.BMPOneExtract(ExportPath + "\\Lightmaps\\" + LightmapHandler.sshImages[i].shortname + ".png", i);
+                    Console.WriteLine("Lightmap Textures: " + (i + 1) + "/" + LightmapHandler.ShapeImages.Count);
+                    LightmapHandler.BrightenImage(i);
+                    LightmapHandler.ExtractSingleImage(ExportPath + "\\Lightmaps\\" + LightmapHandler.ShapeImages[i].Shortname + ".png", i);
                 }
             }
             else
             {
-                LightmapHandler.LoadSSH(LoadPath.Substring(0, LoadPath.Length - 1) + "_L.ssh");
-                for (int i = 0; i < LightmapHandler.sshImages.Count; i++)
+                LightmapHandler.LoadShape(LoadPath.Substring(0, LoadPath.Length - 1) + "_L.ssh");
+                for (int i = 0; i < LightmapHandler.ShapeImages.Count; i++)
                 {
-                    Console.WriteLine("Lightmap Textures: " + (i+1) + "/" + LightmapHandler.sshImages.Count);
-                    LightmapHandler.BrightenBitmap(i);
-                    LightmapHandler.BMPOneExtract(ExportPath + "\\Lightmaps\\" + LightmapHandler.sshImages[i].shortname + ".png", i);
+                    Console.WriteLine("Lightmap Textures: " + (i+1) + "/" + LightmapHandler.ShapeImages.Count);
+                    LightmapHandler.BrightenImage(i);
+                    LightmapHandler.ExtractSingleImage(ExportPath + "\\Lightmaps\\" + LightmapHandler.ShapeImages[i].Shortname + ".png", i);
                 }
             }
         }
@@ -2445,19 +2444,19 @@ namespace SSXLibrary
             if (SSHGenerate)
             {
                 //Build Textures
-                OldSSHHandler TextureHandler = new OldSSHHandler();
-                TextureHandler.format = "G278";
+                OldShapeHandler TextureHandler = new OldShapeHandler();
+                TextureHandler.Format = "G278";
 
                 for (int i = 0; i < ImageFiles.Count; i++)
                 {
                     Console.WriteLine("Textures: " +(i+1)+ "/" + ImageFiles.Count);
-                    TextureHandler.AddImage();
-                    TextureHandler.LoadSingle(LoadPath + "/Textures/" + ImageFiles[i], i);
+                    //TextureHandler.AddImage();
+                    TextureHandler.LoadSingleImage(LoadPath + "/Textures/" + ImageFiles[i], i);
                     TextureHandler.DarkenImage(i);
-                    var temp = TextureHandler.sshImages[i];
-                    temp.shortname = i.ToString().PadLeft(4, '0');
+                    var temp = TextureHandler.ShapeImages[i];
+                    temp.Shortname = i.ToString().PadLeft(4, '0');
                     temp.AlphaFix = true;
-                    TextureHandler.sshImages[i] = temp;
+                    TextureHandler.ShapeImages[i] = temp;
                 }
                 //ErrorManager.ErrorMessage = "Error with Saving SSH Texture File";
                 Console.WriteLine("Saving Texture File (May take some time if textures havent been processed before hand)");
@@ -2798,19 +2797,19 @@ namespace SSXLibrary
                 if (SkySSHGenerate)
                 {
                     //Build Skybox
-                    OldSSHHandler SkyboxHandler = new OldSSHHandler();
-                    SkyboxHandler.format = "G278";
+                    OldShapeHandler SkyboxHandler = new OldShapeHandler();
+                    SkyboxHandler.Format = "G278";
 
                     for (int i = 0; i < SkyboxImageFiles.Count; i++)
                     {
                         Console.WriteLine("Skybox Textures: " + (i+1) + "/" + SkyboxImageFiles.Count);
-                        SkyboxHandler.AddImage();
-                        SkyboxHandler.LoadSingle(LoadPath + "/Skybox/Textures/" + SkyboxImageFiles[i], i);
+                        //SkyboxHandler.AddImage();
+                        SkyboxHandler.LoadSingleImage(LoadPath + "/Skybox/Textures/" + SkyboxImageFiles[i], i);
                         SkyboxHandler.DarkenImage(i);
-                        var temp = SkyboxHandler.sshImages[i];
-                        temp.shortname = i.ToString().PadLeft(4, '0');
+                        var temp = SkyboxHandler.ShapeImages[i];
+                        temp.Shortname = i.ToString().PadLeft(4, '0');
                         temp.AlphaFix = true;
-                        SkyboxHandler.sshImages[i] = temp;
+                        SkyboxHandler.ShapeImages[i] = temp;
                     }
 
                     SkyboxHandler.SaveSSH(ExportPath + "_sky.ssh", true);
@@ -2820,23 +2819,23 @@ namespace SSXLibrary
 
             if (LSSHGenerate)
             {
-                OldSSHHandler LightmapHandler = new OldSSHHandler();
+                OldShapeHandler LightmapHandler = new OldShapeHandler();
                 //Build Lightmap
                 if (!Unilightmap)
                 {
-                    LightmapHandler.format = "G278";
+                    LightmapHandler.Format = "G278";
 
                     string[] LightmapFiles = Directory.GetFiles(LoadPath + "/Lightmaps", "*.png");
                     for (int i = 0; i < LightmapFiles.Length; i++)
                     {
                         Console.WriteLine("Lightmap Textures: " +(i+1)+ "/" + LightmapFiles.Length);
-                        LightmapHandler.AddImage(64, 5);
-                        LightmapHandler.LoadSingle(LightmapFiles[i], i);
+                        //LightmapHandler.AddImage(64, 5);
+                        LightmapHandler.LoadSingleImage(LightmapFiles[i], i);
                         LightmapHandler.DarkenImage(i);
-                        var temp = LightmapHandler.sshImages[i];
-                        temp.shortname = i.ToString().PadLeft(4, '0');
+                        var temp = LightmapHandler.ShapeImages[i];
+                        temp.Shortname = i.ToString().PadLeft(4, '0');
                         //temp.AlphaFix = true;
-                        LightmapHandler.sshImages[i] = temp;
+                        LightmapHandler.ShapeImages[i] = temp;
                     }
                 }
                 else

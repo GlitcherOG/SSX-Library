@@ -326,8 +326,49 @@ namespace SSX_Library.EATextureLibrary
             var temp = ShapeImages[i];
             temp.Image = (Image<Rgba32>)Image.Load(path);
             temp.colorsTable = ImageUtil.GetBitmapColorsFast(temp.Image).ToList();
-            temp.MatrixType = ShapeImages[i].MatrixType;
             ShapeImages[i] = temp;
+        }
+
+        //Neg 1 possibly not required
+        //test
+        public void BrightenImage(int i)
+        {
+            var TempImage = ShapeImages[i].Image;
+            for (int y = 0; y < TempImage.Height; y++)
+            {
+                for (int x = 0; x < TempImage.Width; x++)
+                {
+                    Rgba32 color = TempImage[x, y];
+                    color.R = (byte)(color.R * 2 - 1);
+                    color.G = (byte)(color.G * 2 - 1);
+                    color.B = (byte)(color.B * 2 - 1);
+
+                    TempImage[x,y] = color;
+                }
+            }
+            var tempimage = ShapeImages[i];
+            tempimage.Image = TempImage;
+            ShapeImages[i] = tempimage;
+        }
+
+        public void DarkenImage(int i)
+        {
+            var TempImage = ShapeImages[i].Image;
+            for (int y = 0; y < TempImage.Height; y++)
+            {
+                for (int x = 0; x < TempImage.Width; x++)
+                {
+                    Rgba32 color = TempImage[x, y];
+                    color.R = (byte)((color.R + 1 )/ 2);
+                    color.G = (byte)((color.G + 1) / 2);
+                    color.B = (byte)((color.B + 1) / 2);
+
+                    TempImage[x, y] = color;
+                }
+            }
+            var tempimage = ShapeImages[i];
+            tempimage.Image = TempImage;
+            ShapeImages[i] = tempimage;
         }
 
         public struct ShapeImage
