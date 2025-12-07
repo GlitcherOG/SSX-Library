@@ -40,6 +40,17 @@ namespace SSX_Library.EATextureLibrary
 
                         tempImage.Offset = StreamUtil.ReadUInt32(stream);
 
+                        //Long Name is also different in terms of header
+
+                        //SSX OG Simple Check onsize should work
+
+                        //SSX Tricky Requires each image being read correctly in terms of offset but for end it has Buy ERTS
+                        //Buy ERTS for group ending
+
+                        //SSX 3
+                        //Mix of no ERTS for group ending and ERTS for group ending
+
+
                         ShapeImages.Add(tempImage);
                     }
 
@@ -266,11 +277,10 @@ namespace SSX_Library.EATextureLibrary
             public List<ShapeHeader> ShapeHeaders;
 
             //Converted
-            public List<Rgba32> colorsTable;
+            public MatrixType MatrixType;
             public Image<Rgba32> Image;
             public Image<A8> Metal;
-            public int Unknown;
-            public MatrixType MatrixType;
+            public List<Rgba32> colorsTable;
             public bool SwizzledImage;
             public bool SwizzledColours;
             public bool AlphaFix;
