@@ -356,7 +356,7 @@ namespace SSX_Library.EATextureLibrary
 
             //Other
             MetalAlpha = 105,
-            LongName = 111,
+            LongName = 112,
 
             EightBitCompressed = 130,
         }
