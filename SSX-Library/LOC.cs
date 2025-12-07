@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
-using System.Buffers.Binary;
 using System.Text;
+using SSX_Library.Utilities;
 
 namespace SSX_Library;
 
@@ -28,6 +28,8 @@ public sealed class LOC
     private LOCT _locT;
     private LOCL _locL;
 
+    // TODO: Replace TextureEntriesCount in Load/Save with the size of the TextEntries list.
+    // The user can change the array while its unsynced to the counter.
     public List<string> TextEntries
     {
         get { return _locL.TextEntries;}
@@ -44,33 +46,31 @@ public sealed class LOC
         _filePath = path;
 
         // Confirm LOCH signature was found
-        var buf4 = new byte[4];
-        stream.Read(buf4);
-        for (int i = 0; i < buf4.Length; i++)
+        var magicLOCH = Reader.ReadBytes(stream, 4);
+        for (int i = 0; i < magicLOCH.Length; i++)
         {
-            if (buf4[i] != _locHMagicWord[i])
+            if (magicLOCH[i] != _locHMagicWord[i])
             {
                 throw new InvalidDataException("Invalid/Corrupt LOC file. LOCH section not found.");
             }
         }
 
         // Create LOCH
-        _locH = new() {MagicWord = [.._locHMagicWord]};
-        stream.Read(buf4);
-        _locH.LOCHSize = BinaryPrimitives.ReadUInt32LittleEndian(buf4);
-        stream.Read(buf4);
-        _locH.Unk0 = BinaryPrimitives.ReadUInt32LittleEndian(buf4);
-        stream.Read(buf4);
-        _locH.Unk1 = BinaryPrimitives.ReadUInt32LittleEndian(buf4);
-        stream.Read(buf4);
-        _locH.LOCLOffset = BinaryPrimitives.ReadUInt32LittleEndian(buf4);
+        _locH = new()
+        {
+            MagicWord = [.. _locHMagicWord],
+            LOCHSize = Reader.ReadUint32(stream, ByteOrder.LittleEndian),
+            Unk0 = Reader.ReadUint32(stream, ByteOrder.LittleEndian),
+            Unk1 = Reader.ReadUint32(stream, ByteOrder.LittleEndian),
+            LOCLOffset = Reader.ReadUint32(stream, ByteOrder.LittleEndian),
+        };
 
         // Check if LOCT signature was found
         _usesLOCT = true;
-        stream.Read(buf4);
-        for (int i = 0; i < buf4.Length; i++)
+        var magicLOCT = Reader.ReadBytes(stream, 4);
+        for (int i = 0; i < magicLOCT.Length; i++)
         {
-            if (buf4[i] != _locTMagicWord[i])
+            if (magicLOCT[i] != _locTMagicWord[i])
             {
                 _usesLOCT = false;
                 break;
@@ -80,10 +80,12 @@ public sealed class LOC
         // Create LOCT
         if (_usesLOCT)
         {
-            _locT = new() {MagicWord = [.._locTMagicWord]};
             uint loctSize = _locH.LOCLOffset - (uint)stream.Position;
-            _locT.Data = new byte[loctSize];
-            stream.Read(_locT.Data);
+            _locT = new()
+            {
+                MagicWord = [.._locTMagicWord],
+                Data = Reader.ReadBytes(stream, (int)loctSize),
+            };
         }
         else
         {
@@ -91,47 +93,45 @@ public sealed class LOC
         }
 
         // Check if LOCL signature was found
-        var locLPosition = (uint)stream.Position;
-        stream.Read(buf4);
-        for (int i = 0; i < buf4.Length; i++)
+        var locLPosition = (uint)stream.Position; // Used later on
+        var magicLOCL = Reader.ReadBytes(stream, 4);
+        for (int i = 0; i < magicLOCL.Length; i++)
         {
-            if (buf4[i] != _locLMagicWord[i])
+            if (magicLOCL[i] != _locLMagicWord[i])
             {
                 throw new InvalidDataException("Invalid/Corrupt LOC file. LOCL section not found.");
             }
         }
 
         // Create LOCL
-        _locL = new() {MagicWord = [.._locLMagicWord]};
-        stream.Read(buf4);
-        _locL.LOCLSize = BinaryPrimitives.ReadUInt32LittleEndian(buf4);
-        stream.Read(buf4);
-        _locL.Unk0 = BinaryPrimitives.ReadUInt32LittleEndian(buf4);
-        stream.Read(buf4);
-        _locL.TextEntryCount = BinaryPrimitives.ReadUInt32LittleEndian(buf4);
-        _locL.TextEntryOffsets = [];
+        _locL = new()
+        {
+            MagicWord = [.._locLMagicWord],
+            LOCLSize = Reader.ReadUint32(stream, ByteOrder.LittleEndian),
+            Unk0 = Reader.ReadUint32(stream, ByteOrder.LittleEndian),
+            TextEntryCount = Reader.ReadUint32(stream, ByteOrder.LittleEndian),
+            TextEntryOffsets = [],
+            TextEntries = [],
+        };
         for (int i = 0; i < _locL.TextEntryCount; i++)
         {
-            stream.Read(buf4);
-            _locL.TextEntryOffsets.Add(BinaryPrimitives.ReadUInt32LittleEndian(buf4));
+            _locL.TextEntryOffsets.Add(Reader.ReadUint32(stream, ByteOrder.LittleEndian));
         }
-        _locL.TextEntries = [];
         foreach (var offset in _locL.TextEntryOffsets)
         {
             stream.Position = locLPosition + offset;
             string text = "";
             while (true)
             {
-                var buf2 = new byte[2];
-                stream.Read(buf2);
+                var letterBytes = Reader.ReadBytes(stream, 2);
 
                 // Check if null teminated
-                if ((buf2[0] | buf2[1]) == 0)
+                if ((letterBytes[0] | letterBytes[1]) == 0)
                 {
                     _locL.TextEntries.Add(text);
                     break;
                 }
-                string character = Encoding.Unicode.GetString(buf2);
+                string character = Encoding.Unicode.GetString(letterBytes);
                 text += character;
             }
         }
