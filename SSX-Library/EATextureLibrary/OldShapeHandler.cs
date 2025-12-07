@@ -123,9 +123,13 @@ namespace SSX_Library.EATextureLibrary
                         if (shape.Size == 0 || shape.MatrixFormat == MatrixType.LongName)
                         {
                             int RealSize = shape.Width * shape.Height;
-                            if (shape.MatrixFormat == MatrixType.LongName)
+                            if (shape.MatrixFormat == MatrixType.FullColor)
                             {
                                 RealSize = RealSize * 4;
+                            }
+                            if (shape.MatrixFormat == MatrixType.BGRA4444 || shape.MatrixFormat == MatrixType.BGR565)
+                            {
+                                RealSize = RealSize * 2;
                             }
 
                             shape.Matrix = StreamUtil.ReadBytes(stream, RealSize);
@@ -194,6 +198,14 @@ namespace SSX_Library.EATextureLibrary
                         break;
                     case MatrixType.BC2:
                         tempImage.Image = EADecode.DecodeMatrix97(imageMatrix.Matrix, imageMatrix.Width, imageMatrix.Height);
+                        tempImage.colorsTable = ImageUtil.GetBitmapColorsFast(tempImage.Image).ToList();
+                        break;
+                    case MatrixType.BGRA4444:
+                        tempImage.Image = EADecode.DecodeMatrix109(imageMatrix.Matrix, imageMatrix.Width, imageMatrix.Height);
+                        tempImage.colorsTable = ImageUtil.GetBitmapColorsFast(tempImage.Image).ToList();
+                        break;
+                    case MatrixType.BGR565:
+                        tempImage.Image = EADecode.DecodeMatrix120(imageMatrix.Matrix, imageMatrix.Width, imageMatrix.Height);
                         tempImage.colorsTable = ImageUtil.GetBitmapColorsFast(tempImage.Image).ToList();
                         break;
                     case MatrixType.BGRA:

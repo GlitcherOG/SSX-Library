@@ -59,17 +59,7 @@ namespace SSX_Library.EATextureLibrary
         public static Image<Rgba32> DecodeMatrix5(byte[] matrix, int width, int height)
         {
             //Process Image
-            Image<Rgba32> NewImage = new Image<Rgba32>(width, height);
-
-            int pos = 0;
-            for (int y = 0; y < height; y++)
-            {
-                for (int x = 0; x < width; x++)
-                {
-                    NewImage[x, y] = new Rgba32(matrix[pos * 4], matrix[pos * 4 + 1], matrix[pos * 4 + 2], matrix[pos * 4 + 3]);
-                    pos++;
-                }
-            }
+            Image<Rgba32> NewImage = Image.LoadPixelData<Rgba32>(matrix ,width, height);
 
             return NewImage;
         }
@@ -126,8 +116,26 @@ namespace SSX_Library.EATextureLibrary
 
 
         //109 - ImageFormats.BGRA4444 https://github.com/bartlomiejduda/EA-Graphics-Manager/blob/c9aec00c005437ddbc2752001913e1e2f46840e7/src/EA_Image/ea_image_decoder.py#L289
+        public static Image<Rgba32> DecodeMatrix109(byte[] matrix, int width, int height)
+        {
+            //Process Image
+            Image<Bgra4444> NewImage = Image.LoadPixelData<Bgra4444>(matrix, width, height);
+
+            return NewImage.CloneAs<Rgba32>();
+        }
+
+
         //120 - ImageFormats.BGR565 https://github.com/bartlomiejduda/EA-Graphics-Manager/blob/c9aec00c005437ddbc2752001913e1e2f46840e7/src/EA_Image/ea_image_decoder.py#L311
+        public static Image<Rgba32> DecodeMatrix120(byte[] matrix, int width, int height)
+        {
+            //Process Image
+            Image<Bgr565> NewImage = Image.LoadPixelData<Bgr565>(matrix, width, height);
+
+            return NewImage.CloneAs<Rgba32>();
+        }
+
         //123 - Indexed Image https://github.com/bartlomiejduda/EA-Graphics-Manager/blob/c9aec00c005437ddbc2752001913e1e2f46840e7/src/EA_Image/ea_image_decoder.py#L334
+
         //125 - BCnEncoder.Shared.CompressionFormat.Bgra
         public static Image<Rgba32> DecodeMatrix125(byte[] matrix, int width, int height)
         {
