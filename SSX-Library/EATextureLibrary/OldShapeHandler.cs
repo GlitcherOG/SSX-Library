@@ -7,7 +7,7 @@ using System.Text;
 
 namespace SSX_Library.EATextureLibrary
 {
-    public class EAOldShapeHandler
+    public class OldShapeHandler
     {
         public string MagicWord;
         public int FileSize;
@@ -17,7 +17,7 @@ namespace SSX_Library.EATextureLibrary
         public string EndingString;
         public List<ShapeImage> ShapeImages = new List<ShapeImage>();
 
-        public void LoadSSH(string path)
+        public void LoadShape(string path)
         {
             ShapeImages = new List<ShapeImage>();
             using (Stream stream = File.Open(path, FileMode.Open))
@@ -51,7 +51,7 @@ namespace SSX_Library.EATextureLibrary
                 }
                 else
                 {
-                    //MessageBox.Show(MagicWord + " Unsupported format");
+                    Console.WriteLine(MagicWord + " Unsupported format");
                 }
                 stream.Dispose();
                 stream.Close();
@@ -67,7 +67,7 @@ namespace SSX_Library.EATextureLibrary
 
                 tempImage.ShapeHeaders = new List<ShapeHeader>();
 
-                while (stream.Position < tempImage.Offset + tempImage.Size)
+                while (stream.Position < tempImage.Offset)
                 {
                     var shape = new ShapeHeader();
 

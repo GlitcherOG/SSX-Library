@@ -6,7 +6,7 @@ using System.Text;
 
 namespace SSX_Library.EATextureLibrary
 {
-    public class EANewShapeHandler
+    public class NewShapeHandler
     {
         public string MagicWord; //4
         private int Size;
