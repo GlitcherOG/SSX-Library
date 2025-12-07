@@ -40,8 +40,6 @@ namespace SSX_Library.EATextureLibrary
 
                         tempImage.Offset = StreamUtil.ReadUInt32(stream);
 
-                        //Long Name is also different in terms of header
-
                         //SSX OG Simple Check onsize should work
 
                         //SSX Tricky Requires each image being read correctly in terms of offset but for end it has Buy ERTS
@@ -52,6 +50,29 @@ namespace SSX_Library.EATextureLibrary
 
 
                         ShapeImages.Add(tempImage);
+                    }
+
+                    for (global::System.Int32 i = 0; i < ShapeImages.Count; i++)
+                    {
+                        var TempImage = ShapeImages[i];
+
+                        if(ShapeImages.Count-1!=i)
+                        {
+                            TempImage.Size = (int)(ShapeImages[i+1].Offset - TempImage.Offset);
+                        }
+                        else
+                        {
+                            TempImage.Size = (int)(stream.Length - TempImage.Offset);
+                        }
+
+                        int NewSize = (int)ByteUtil.FindPosition(stream, Encoding.ASCII.GetBytes("Buy ERTS"), TempImage.Offset, TempImage.Size);
+
+                        if (NewSize != -1)
+                        {
+                            TempImage.Size = NewSize;
+                        }
+
+                        ShapeImages[i] = TempImage;
                     }
 
                     Group = StreamUtil.ReadString(stream, 4);
@@ -78,41 +99,50 @@ namespace SSX_Library.EATextureLibrary
 
                 tempImage.ShapeHeaders = new List<ShapeHeader>();
 
-                while (stream.Position < tempImage.Offset)
+                while (stream.Position < tempImage.Offset + tempImage.Size)
                 {
                     var shape = new ShapeHeader();
 
                     shape.MatrixFormat = (MatrixType)StreamUtil.ReadUInt8(stream);
 
-                    shape.Size = StreamUtil.ReadInt24(stream);
-
-                    shape.Width = StreamUtil.ReadInt16(stream);
-
-                    shape.Height = StreamUtil.ReadInt16(stream);
-
-                    shape.Xaxis = StreamUtil.ReadInt16(stream);
-
-                    shape.Yaxis = StreamUtil.ReadInt16(stream);
-
-                    //Add Other Flags Later
-                    shape.Flags = StreamUtil.ReadInt32(stream);
-
-                    if (shape.Size == 0 || shape.MatrixFormat == MatrixType.LongName)
+                    if (shape.MatrixFormat != MatrixType.LongName)
                     {
-                        int RealSize = shape.Width * shape.Height;
-                        if (shape.MatrixFormat == MatrixType.LongName)
-                        {
-                            RealSize = RealSize * 4;
-                        }
+                        shape.Size = StreamUtil.ReadInt24(stream);
 
-                        shape.Matrix = StreamUtil.ReadBytes(stream, RealSize);
+                        shape.Width = StreamUtil.ReadInt16(stream);
+
+                        shape.Height = StreamUtil.ReadInt16(stream);
+
+                        shape.Xaxis = StreamUtil.ReadInt16(stream);
+
+                        shape.Yaxis = StreamUtil.ReadInt16(stream);
+
+                        //Add Other Flags Later
+                        shape.Flags = StreamUtil.ReadInt32(stream);
+
+                        if (shape.Size == 0 || shape.MatrixFormat == MatrixType.LongName)
+                        {
+                            int RealSize = shape.Width * shape.Height;
+                            if (shape.MatrixFormat == MatrixType.LongName)
+                            {
+                                RealSize = RealSize * 4;
+                            }
+
+                            shape.Matrix = StreamUtil.ReadBytes(stream, RealSize);
+                        }
+                        else
+                        {
+                            shape.Matrix = StreamUtil.ReadBytes(stream, shape.Size - 16);
+                        }
                     }
                     else
                     {
-                        shape.Matrix = StreamUtil.ReadBytes(stream, shape.Size - 16);
+                        stream.Position += 3;
+                        tempImage.Longname = StreamUtil.ReadNullEndString(stream);
+                        StreamUtil.AlignBy(stream, 16, tempImage.Offset);
                     }
 
-                    tempImage.ShapeHeaders.Add(shape);
+                        tempImage.ShapeHeaders.Add(shape);
                 }
 
                 //Get Matrix Type
