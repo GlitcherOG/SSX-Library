@@ -13,7 +13,10 @@ public class UnitTest1
     [Fact]
     public void Test2()
     {
-        var highest = Vector3.Max(Vector3.Zero, Vector3.One);
-        Console.WriteLine(highest);
+        EATextureLibrary.EANewShapeHandler eANewShapeHandler = new EATextureLibrary.EANewShapeHandler();
+
+        eANewShapeHandler.LoadShape("G:\\SSX Modding\\disk\\SSX On Tour\\DATA\\TEXTURES\\Texture\\Full Range.ssh");
+
+        eANewShapeHandler.ExtractImage("G:\\SSX Modding\\disk\\SSX On Tour\\DATA\\TEXTURES\\Texture\\Full Range");
     }
 }

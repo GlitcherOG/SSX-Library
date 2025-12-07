@@ -98,6 +98,9 @@ namespace SSX_Library.EATextureLibrary
                     {
                         shape.Matrix = StreamUtil.ReadBytes(stream, shape.Size - 32);
                     }
+
+                    StreamUtil.AlignBy16(stream);
+
                     tempImage.ShapeHeaders.Add(shape);
                 }
 
@@ -163,7 +166,7 @@ namespace SSX_Library.EATextureLibrary
 
         private List<Rgba32> GetColorTable(ShapeImage newSSHImage)
         {
-            var colorShape = GetShapeHeader(newSSHImage, MatrixType.FullColor);
+            var colorShape = GetShapeHeader(newSSHImage, MatrixType.ColorPallet);
             List<Rgba32> colors = new List<Rgba32>();
 
             if (newSSHImage.SwizzledColours)
@@ -203,7 +206,7 @@ namespace SSX_Library.EATextureLibrary
                     {
                         A = 255;
                     }
-                    TempColour = new Rgba32(TempColour.R, TempColour.G, TempColour.B, A);
+                    TempColour.A = (byte)A;
                     newSSHImage.colorsTable[i] = TempColour;
                 }
             }
