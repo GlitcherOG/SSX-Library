@@ -61,17 +61,15 @@ public class UnitTest1
     [Fact]
     public void Test2()
     {
-        // string path = "/home/eric/Downloads/letter.loc";
+        string path = "/home/eric/Downloads/letter.loc";
         // string path = "/home/eric/Downloads/cramer.loc";
         // string path = "/home/eric/Downloads/FEAMER_Ontour.LOC";
-        string path = "/home/eric/Downloads/american.loc";
+        // string path = "/home/eric/Downloads/letter.loc";
+        string savePath = "/home/eric/Downloads/aahh.loc";
 
         LOC loc = new();
         loc.Load(path);
-
-        // Console.WriteLine(loc.filePath);
-
-
+        loc.Save(savePath);
 
     }
 }

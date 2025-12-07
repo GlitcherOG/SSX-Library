@@ -1,5 +1,6 @@
 using System.Collections.Immutable;
 using System.Buffers.Binary;
+using System.Text;
 
 namespace SSX_Library;
 
@@ -27,13 +28,19 @@ public sealed class LOC
     private LOCT _locT;
     private LOCL _locL;
 
+    public List<string> TextEntries
+    {
+        get { return _locL.TextEntries;}
+        set {_locL.TextEntries = value;}
+    }
+
     /// <summary>
     /// Load an LOC file from disk to memory.
     /// </summary>
     /// <param name="path"> Path to the LOC file on disk.</param>
     public void Load(string path)
     {
-        using Stream stream = File.OpenRead(path);
+        using FileStream stream = File.OpenRead(path);
         _filePath = path;
 
         // Confirm LOCH signature was found
@@ -124,7 +131,7 @@ public sealed class LOC
                     _locL.TextEntries.Add(text);
                     break;
                 }
-                string character = System.Text.Encoding.Unicode.GetString(buf2);
+                string character = Encoding.Unicode.GetString(buf2);
                 text += character;
             }
         }
@@ -133,53 +140,64 @@ public sealed class LOC
     /// <summary>
     /// Save an LOC file from memory to disk.
     /// </summary>
-    /// <param name="path"></param>
+    /// <param name="path">Path to save the LOC. If empty it will save to the same place
+    /// it was loaded from. </param>
     public void Save(string path = "")
     {
-        // if(path == "" || !File.Exists(path)) path = filePath;
+        if(path == "") path = _filePath;
+        using FileStream stream = File.Create(path);
 
-        // MemoryStream stream = new();
-        // stream.Write(headerBytes, 0, headerBytes.Length);
-        // stream.Write(LOCLHeader, 0, LOCLHeader.Length);
-        // //TODO: Refactor WriteInt32
-        // StreamUtil.WriteInt32(stream, TextCount);
-        // //Write Intial Offset
-        // stream.Write(BitConverter.GetBytes(StringOffsets[0]), 0, 4);
+        // Save LOCH
+        stream.Write([.._locHMagicWord]);
+        var buf4 = new byte[4];
+        BinaryPrimitives.WriteUInt32LittleEndian(buf4, _locH.LOCHSize);
+        stream.Write(buf4);
+        BinaryPrimitives.WriteUInt32LittleEndian(buf4, _locH.Unk0);
+        stream.Write(buf4);
+        BinaryPrimitives.WriteUInt32LittleEndian(buf4, _locH.Unk1);
+        stream.Write(buf4);
+        BinaryPrimitives.WriteUInt32LittleEndian(buf4, _locH.LOCLOffset);
+        stream.Write(buf4);
 
-        // //Set New Offsets
-        // for (int i = 0; i < StringList.Count; i++)
-        // {
-        //     string temp = StringList[i];
-        //     MemoryStream stream1 = new();
-        //     byte[] temp1 = System.Text.Encoding.Unicode.GetBytes(temp);
-        //     stream1.Write(temp1, 0, temp1.Length);
-        //     int Diff = (int)stream1.Length + StringOffsets[i] + 4;
-        //     if (i < StringOffsets.Count - 1)
-        //     {
-        //         StringOffsets[i + 1] = Diff;
-        //         stream.Write(BitConverter.GetBytes(Diff), 0, 4);
-        //     }
-        // }
+        // Save LOCT if used
+        if (_usesLOCT)
+        {
+            stream.Write([.._locTMagicWord]);
+            stream.Write(_locT.Data);
+        }
 
-        // //Set strings
-        // for (int i = 0; i < StringList.Count; i++)
-        // {
-        //     byte[] temp;
-        //     temp = System.Text.Encoding.Unicode.GetBytes(StringList[i]);
-        //     stream.Write(temp, 0, temp.Length);
-        //     for (int ai = 0; ai < 4; ai++)
-        //     {
-        //         stream.WriteByte(0x00);
-        //     }
-        // }
-
-        // //Save File
-        // if (File.Exists(path)) File.Delete(path);
-        // var file = File.Create(path);
-        // stream.Position = 0;
-        // stream.CopyTo(file);
-        // file.Close();
-        // return true;
+        // Save LOCL
+        var locLPosition = (uint)stream.Position;
+        stream.Write([.._locLMagicWord]);
+        stream.Write(buf4); // Placeholder LOCLSize
+        BinaryPrimitives.WriteUInt32LittleEndian(buf4, _locL.Unk0);
+        stream.Write(buf4);
+        BinaryPrimitives.WriteUInt32LittleEndian(buf4, _locL.TextEntryCount);
+        stream.Write(buf4);
+        var locLOffsetsPosition = (uint)stream.Position;
+        var offsetsPlaceholder = new byte[_locL.TextEntryCount * sizeof(uint)];
+        stream.Write(offsetsPlaceholder); // Placeholder offsets
+        offsetsPlaceholder = null; // No longer needed
+        List<uint> realOffset = [];
+        foreach (var textEntry in _locL.TextEntries)
+        {
+            realOffset.Add((uint)stream.Position);
+            byte[] text = Encoding.Unicode.GetBytes(textEntry);
+            stream.Write(text);
+            stream.Write([0, 0, 0, 0]); // Null termination with two UTF16 characters
+        }
+        uint realLOCLSize = locLPosition - (uint)stream.Position;
+        // Rewrite the offsets to real ones
+        stream.Position = locLOffsetsPosition;
+        for (int i = 0; i < _locL.TextEntryCount; i++)
+        {
+            BinaryPrimitives.WriteUInt32LittleEndian(buf4, realOffset[i]);
+            stream.Write(buf4);
+        }
+        // Set LOCL size
+        stream.Position = locLPosition + 4;
+        BinaryPrimitives.WriteUInt32LittleEndian(buf4, (uint)stream.Length - locLPosition + _locH.LOCHSize);
+        stream.Write(buf4);
     }
 
     private struct LOCH
@@ -204,6 +222,6 @@ public sealed class LOC
         public uint Unk0;
         public uint TextEntryCount;
         public List<uint> TextEntryOffsets; // Length: TextEntryCount. Relative to LOCL.
-        public List<string> TextEntries; 
+        public List<string> TextEntries; // Length: TextEntryCount
     }
 }
