@@ -1,8 +1,6 @@
-// using SSX_Library.Utilities;
+using SSX_Library;
 // using SSXLibrary.Utilities;
-using DiscUtils.Iso9660;
 using DiscUtils;
-using System.Text;
 
 namespace SSX_Library.Tests;
 
@@ -63,11 +61,17 @@ public class UnitTest1
     [Fact]
     public void Test2()
     {
-//                                26         18 17          9 8            0
-//                                |            ||            ||            | 
-        // byte[] numbers = [0b0000_0001, 0b0000_0100, 0b0000_1100, 0b0000_0000];
-        byte[] numbers = [1, 2, 3, 4, 5, 6, 7];
-        byte[] numbers2 = [3];
-        // Console.WriteLine(Convert.ToString(output2, 2).PadLeft(8, '0'));
+        // string path = "/home/eric/Downloads/letter.loc";
+        // string path = "/home/eric/Downloads/cramer.loc";
+        // string path = "/home/eric/Downloads/FEAMER_Ontour.LOC";
+        string path = "/home/eric/Downloads/american.loc";
+
+        LOC loc = new();
+        loc.Load(path);
+
+        // Console.WriteLine(loc.filePath);
+
+
+
     }
 }
