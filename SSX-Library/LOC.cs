@@ -12,6 +12,9 @@ namespace SSX_Library;
     only using 2 characters for the end of the LOCL section when saving back to disk.
 
     The Load function only reads one null character to detect if a string terminated.
+
+    _locL.TextEntryCount is only updated when calling Save(). This is because the user can
+    modify _locL.TextEntries anytime.
 */
 
 /// <summary>
@@ -28,12 +31,10 @@ public sealed class LOC
     private LOCT _locT;
     private LOCL _locL;
 
-    // TODO: Replace TextureEntriesCount in Load/Save with the size of the TextEntries list.
-    // The user can change the array while its unsynced to the counter.
     public List<string> TextEntries
     {
-        get { return _locL.TextEntries;}
-        set {_locL.TextEntries = value;}
+        get { return _locL.TextEntries; }
+        set { _locL.TextEntries = value; }
     }
 
     /// <summary>
@@ -59,10 +60,10 @@ public sealed class LOC
         _locH = new()
         {
             MagicWord = [.. _locHMagicWord],
-            LOCHSize = Reader.ReadUint32(stream, ByteOrder.LittleEndian),
-            Unk0 = Reader.ReadUint32(stream, ByteOrder.LittleEndian),
-            Unk1 = Reader.ReadUint32(stream, ByteOrder.LittleEndian),
-            LOCLOffset = Reader.ReadUint32(stream, ByteOrder.LittleEndian),
+            LOCHSize = Reader.ReadUInt32(stream, ByteOrder.LittleEndian),
+            Unk0 = Reader.ReadUInt32(stream, ByteOrder.LittleEndian),
+            Unk1 = Reader.ReadUInt32(stream, ByteOrder.LittleEndian),
+            LOCLOffset = Reader.ReadUInt32(stream, ByteOrder.LittleEndian),
         };
 
         // Check if LOCT signature was found
@@ -107,15 +108,15 @@ public sealed class LOC
         _locL = new()
         {
             MagicWord = [.._locLMagicWord],
-            LOCLSize = Reader.ReadUint32(stream, ByteOrder.LittleEndian),
-            Unk0 = Reader.ReadUint32(stream, ByteOrder.LittleEndian),
-            TextEntryCount = Reader.ReadUint32(stream, ByteOrder.LittleEndian),
+            LOCLSize = Reader.ReadUInt32(stream, ByteOrder.LittleEndian),
+            Unk0 = Reader.ReadUInt32(stream, ByteOrder.LittleEndian),
+            TextEntryCount = Reader.ReadUInt32(stream, ByteOrder.LittleEndian),
             TextEntryOffsets = [],
             TextEntries = [],
         };
         for (int i = 0; i < _locL.TextEntryCount; i++)
         {
-            _locL.TextEntryOffsets.Add(Reader.ReadUint32(stream, ByteOrder.LittleEndian));
+            _locL.TextEntryOffsets.Add(Reader.ReadUInt32(stream, ByteOrder.LittleEndian));
         }
         foreach (var offset in _locL.TextEntryOffsets)
         {
@@ -148,56 +149,46 @@ public sealed class LOC
         using FileStream stream = File.Create(path);
 
         // Save LOCH
-        stream.Write([.._locHMagicWord]);
-        var buf4 = new byte[4];
-        BinaryPrimitives.WriteUInt32LittleEndian(buf4, _locH.LOCHSize);
-        stream.Write(buf4);
-        BinaryPrimitives.WriteUInt32LittleEndian(buf4, _locH.Unk0);
-        stream.Write(buf4);
-        BinaryPrimitives.WriteUInt32LittleEndian(buf4, _locH.Unk1);
-        stream.Write(buf4);
-        BinaryPrimitives.WriteUInt32LittleEndian(buf4, _locH.LOCLOffset);
-        stream.Write(buf4);
+        Writer.WriteBytes(stream, [.._locHMagicWord]);
+        Writer.WriteUInt32(stream, _locH.LOCHSize, ByteOrder.LittleEndian);
+        Writer.WriteUInt32(stream, _locH.Unk0, ByteOrder.LittleEndian);
+        Writer.WriteUInt32(stream, _locH.Unk1, ByteOrder.LittleEndian);
+        Writer.WriteUInt32(stream, _locH.LOCLOffset, ByteOrder.LittleEndian);
 
         // Save LOCT if used
         if (_usesLOCT)
         {
-            stream.Write([.._locTMagicWord]);
-            stream.Write(_locT.Data);
+            Writer.WriteBytes(stream, [.._locTMagicWord]);
+            Writer.WriteBytes(stream, _locT.Data);
         }
 
         // Save LOCL
         var locLPosition = (uint)stream.Position;
-        stream.Write([.._locLMagicWord]);
-        stream.Write(buf4); // Placeholder LOCLSize
-        BinaryPrimitives.WriteUInt32LittleEndian(buf4, _locL.Unk0);
-        stream.Write(buf4);
-        BinaryPrimitives.WriteUInt32LittleEndian(buf4, _locL.TextEntryCount);
-        stream.Write(buf4);
-        var locLOffsetsPosition = (uint)stream.Position;
-        var offsetsPlaceholder = new byte[_locL.TextEntryCount * sizeof(uint)];
-        stream.Write(offsetsPlaceholder); // Placeholder offsets
-        offsetsPlaceholder = null; // No longer needed
+        Writer.WriteBytes(stream, [.._locLMagicWord]);
+        Writer.WriteUInt32(stream, 0, ByteOrder.LittleEndian); // Placeholder
+        Writer.WriteUInt32(stream, _locL.Unk0, ByteOrder.LittleEndian);
+        _locL.TextEntryCount = (uint)_locL.TextEntries.Count; // Sync it
+        Writer.WriteUInt32(stream, _locL.TextEntryCount, ByteOrder.LittleEndian);
+        var locLOffsetsPosition = (uint)stream.Position; // Used later
+        Writer.WriteBytes(stream, new byte[_locL.TextEntryCount * sizeof(uint)]); // Placeholder for offsets
         List<uint> realOffset = [];
         foreach (var textEntry in _locL.TextEntries)
         {
             realOffset.Add((uint)stream.Position);
-            byte[] text = Encoding.Unicode.GetBytes(textEntry);
-            stream.Write(text);
-            stream.Write([0, 0, 0, 0]); // Null termination with two UTF16 characters
+            Writer.WriteBytes(stream, Encoding.Unicode.GetBytes(textEntry));
+            Writer.WriteBytes(stream, [0, 0, 0, 0]); // Null termination with two UTF16 characters
         }
-        uint realLOCLSize = locLPosition - (uint)stream.Position;
+        
         // Rewrite the offsets to real ones
+        // uint realLOCLSize = locLPosition - (uint)stream.Position;
         stream.Position = locLOffsetsPosition;
         for (int i = 0; i < _locL.TextEntryCount; i++)
         {
-            BinaryPrimitives.WriteUInt32LittleEndian(buf4, realOffset[i]);
-            stream.Write(buf4);
+            Writer.WriteUInt32(stream, realOffset[i], ByteOrder.LittleEndian);
         }
         // Set LOCL size
-        stream.Position = locLPosition + 4;
-        BinaryPrimitives.WriteUInt32LittleEndian(buf4, (uint)stream.Length - locLPosition + _locH.LOCHSize);
-        stream.Write(buf4);
+        stream.Position = locLPosition + 4; // _locL.LOCLSize
+        Writer.WriteUInt32(stream, (uint)stream.Length - locLPosition + _locH.LOCHSize, ByteOrder.LittleEndian);
     }
 
     private struct LOCH

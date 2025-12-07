@@ -3,7 +3,7 @@ using System.Buffers.Binary;
 namespace SSX_Library.Utilities;
 
 /// <summary>
-/// Reads types from a stream
+/// Reads primitive types from a stream
 /// </summary>
 internal static class Reader
 {
@@ -14,7 +14,7 @@ internal static class Reader
         return buf;
     }
 
-    public static uint ReadUint32(Stream stream, ByteOrder byteOrder)
+    public static uint ReadUInt32(Stream stream, ByteOrder byteOrder)
     {
         var buf = new byte[4];
         stream.Read(buf);

@@ -65,7 +65,7 @@ public class UnitTest1
         // string path = "/home/eric/Downloads/cramer.loc";
         // string path = "/home/eric/Downloads/FEAMER_Ontour.LOC";
         // string path = "/home/eric/Downloads/letter.loc";
-        string savePath = "/home/eric/Downloads/aahh.loc";
+        string savePath = "/home/eric/Downloads/aahh2.loc";
 
         LOC loc = new();
         loc.Load(path);
