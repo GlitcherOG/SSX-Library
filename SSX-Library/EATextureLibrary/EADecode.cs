@@ -1,4 +1,5 @@
-﻿using SixLabors.ImageSharp;
+﻿using BCnEncoder.Decoder;
+using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using SSXLibrary.Utilities;
 
@@ -73,16 +74,83 @@ namespace SSX_Library.EATextureLibrary
             return NewImage;
         }
 
-        //130 is a header flag, will pull out so we can uncompress data easily
-        //130 (8 bit, 256 Colour Index Compressed)
-
-        //Xbox 360
+        //Xbox
         //96 - BCnEncoder.Shared.CompressionFormat.Bc1
+        public static Image<Rgba32> DecodeMatrix96(byte[] matrix, int width, int height)
+        {
+            //Process Image
+            Image<Rgba32> NewImage = new Image<Rgba32>(width, height);
+
+            BcDecoder bcDecoder = new BcDecoder();
+
+            var Temp = bcDecoder.DecodeRaw(matrix, width, height, BCnEncoder.Shared.CompressionFormat.Bc1);
+
+            int post = 0;
+
+            for (global::System.Int32 y = 0; y < height; y++)
+            {
+                for (global::System.Int32 x = 0; x < width; x++)
+                {
+                    NewImage[x, y] = new Rgba32(Temp[post].r, Temp[post].g, Temp[post].b, Temp[post].a);
+                    post++;
+                }
+            }
+
+            return NewImage;
+        }
+
+
         //97 - BCnEncoder.Shared.CompressionFormat.Bc2
+        public static Image<Rgba32> DecodeMatrix97(byte[] matrix, int width, int height)
+        {
+            //Process Image
+            Image<Rgba32> NewImage = new Image<Rgba32>(width, height);
+
+            BcDecoder bcDecoder = new BcDecoder();
+
+            var Temp = bcDecoder.DecodeRaw(matrix, width, height, BCnEncoder.Shared.CompressionFormat.Bc2);
+
+            int post = 0;
+
+            for (global::System.Int32 y = 0; y < height; y++)
+            {
+                for (global::System.Int32 x = 0; x < width; x++)
+                {
+                    NewImage[x, y] = new Rgba32(Temp[post].r, Temp[post].g, Temp[post].b, Temp[post].a);
+                    post++;
+                }
+            }
+
+            return NewImage;
+        }
+
+
         //109 - ImageFormats.BGRA4444 https://github.com/bartlomiejduda/EA-Graphics-Manager/blob/c9aec00c005437ddbc2752001913e1e2f46840e7/src/EA_Image/ea_image_decoder.py#L289
         //120 - ImageFormats.BGR565 https://github.com/bartlomiejduda/EA-Graphics-Manager/blob/c9aec00c005437ddbc2752001913e1e2f46840e7/src/EA_Image/ea_image_decoder.py#L311
         //123 - Indexed Image https://github.com/bartlomiejduda/EA-Graphics-Manager/blob/c9aec00c005437ddbc2752001913e1e2f46840e7/src/EA_Image/ea_image_decoder.py#L334
         //125 - BCnEncoder.Shared.CompressionFormat.Bgra
+        public static Image<Rgba32> DecodeMatrix125(byte[] matrix, int width, int height)
+        {
+            //Process Image
+            Image<Rgba32> NewImage = new Image<Rgba32>(width, height);
+
+            BcDecoder bcDecoder = new BcDecoder();
+
+            var Temp = bcDecoder.DecodeRaw(matrix, width, height, BCnEncoder.Shared.CompressionFormat.Bgra);
+
+            int post = 0;
+
+            for (global::System.Int32 y = 0; y < height; y++)
+            {
+                for (global::System.Int32 x = 0; x < width; x++)
+                {
+                    NewImage[x, y] = new Rgba32(Temp[post].r, Temp[post].g, Temp[post].b, Temp[post].a);
+                    post++;
+                }
+            }
+
+            return NewImage;
+        }
 
         //Nintendo Wii/GC
     }

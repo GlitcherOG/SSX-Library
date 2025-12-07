@@ -24,7 +24,7 @@ namespace SSX_Library.EATextureLibrary
             {
                 MagicWord = StreamUtil.ReadString(stream, 4);
 
-                if (MagicWord == "SHPS")
+                if (MagicWord == "SHPS" || MagicWord == "SHPX")
                 {
                     FileSize = StreamUtil.ReadUInt32(stream);
 
@@ -188,6 +188,18 @@ namespace SSX_Library.EATextureLibrary
                         tempImage.Image = EADecode.DecodeMatrix5(imageMatrix.Matrix, imageMatrix.Width, imageMatrix.Height);
                         tempImage.colorsTable = ImageUtil.GetBitmapColorsFast(tempImage.Image).ToList();
                         break;
+                    case MatrixType.BC1:
+                        tempImage.Image = EADecode.DecodeMatrix96(imageMatrix.Matrix, imageMatrix.Width, imageMatrix.Height);
+                        tempImage.colorsTable = ImageUtil.GetBitmapColorsFast(tempImage.Image).ToList();
+                        break;
+                    case MatrixType.BC2:
+                        tempImage.Image = EADecode.DecodeMatrix97(imageMatrix.Matrix, imageMatrix.Width, imageMatrix.Height);
+                        tempImage.colorsTable = ImageUtil.GetBitmapColorsFast(tempImage.Image).ToList();
+                        break;
+                    case MatrixType.BGRA:
+                        tempImage.Image = EADecode.DecodeMatrix125(imageMatrix.Matrix, imageMatrix.Width, imageMatrix.Height);
+                        tempImage.colorsTable = ImageUtil.GetBitmapColorsFast(tempImage.Image).ToList();
+                        break;
                     default:
                         Console.WriteLine(tempImage.MatrixType + " Unknown Matrix");
                         break;
@@ -325,11 +337,24 @@ namespace SSX_Library.EATextureLibrary
         public enum MatrixType : byte
         {
             Unknown = 0,
+
+            //PS2
+
             FourBit = 1,
             EightBit = 2,
             FullColor = 5,
 
             ColorPallet = 33,
+
+            //Xbox
+            BC1 = 96,
+            BC2 = 97,
+            BGRA4444 = 109,
+            BGR565 = 120,
+            IndexedImage = 123,
+            BGRA = 125,
+
+            //Other
             MetalAlpha = 105,
             LongName = 111,
 
