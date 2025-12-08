@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Immutable;
 using System.Text;
 using SSX_Library.Utilities;
@@ -69,37 +70,21 @@ public sealed class LOC
 
         // Check if LOCT signature was found
         _usesLOCT = true;
-        var magicLOCT = Reader.ReadBytes(stream, 4);
-        for (int i = 0; i < magicLOCT.Length; i++)
+        var magic = Reader.ReadBytes(stream, 4);
+        for (int i = 0; i < magic.Length; i++)
         {
-            if (magicLOCT[i] != _locTMagicWord[i])
+            if (magic[i] != _locTMagicWord[i])
             {
                 _usesLOCT = false;
                 break;
             }
         }
 
-        // Create LOCT
-        if (_usesLOCT)
-        {
-            uint loctSize = _locH.LOCLOffset - (uint)stream.Position;
-            _locT = new()
-            {
-                MagicWord = [.._locTMagicWord],
-                Data = Reader.ReadBytes(stream, (int)loctSize),
-            };
-        }
-        else
-        {
-            stream.Position -= 4; // Go back to re-read the signature for LOCL
-        }
-
         // Check if LOCL signature was found
-        var locLPosition = (uint)stream.Position; // Used later on
-        var magicLOCL = Reader.ReadBytes(stream, 4);
-        for (int i = 0; i < magicLOCL.Length; i++)
+        var locLPosition = _locH.LOCLOffset; // Used later on
+        for (int i = 0; i < magic.Length; i++)
         {
-            if (magicLOCL[i] != _locLMagicWord[i])
+            if (magic[i] != _locLMagicWord[i])
             {
                 throw new InvalidDataException("Invalid/Corrupt LOC file. LOCL section not found.");
             }
@@ -137,6 +122,31 @@ public sealed class LOC
                 text += character;
             }
         }
+
+        // Create LOCT
+        if (_usesLOCT)
+        {
+            _locT = new()
+            {
+                MagicWord = [.. _locTMagicWord],
+                LOCTHeaderSize = Reader.ReadUInt32(stream, ByteOrder.LittleEndian),
+                Unk0 = Reader.ReadFloat(stream, ByteOrder.LittleEndian),
+                Unk1 = Reader.ReadUInt32(stream, ByteOrder.LittleEndian),
+
+                HashTable = new List<HashData>()
+            };
+
+            for (global::System.Int32 i = 0; i < _locL.TextEntryCount; i++)
+            {
+                var NewHashData = new HashData()
+                {
+                    Hash = Reader.ReadUInt32(stream, ByteOrder.LittleEndian),
+                    ID = Reader.ReadUInt32(stream, ByteOrder.LittleEndian)
+                };
+
+                _locT.HashTable.Add(NewHashData);
+            }
+        }
     }
 
     /// <summary>
@@ -159,7 +169,15 @@ public sealed class LOC
         if (_usesLOCT)
         {
             Writer.WriteBytes(stream, [.._locTMagicWord]);
-            Writer.WriteBytes(stream, _locT.Data);
+            Writer.WriteUInt32(stream, 16, ByteOrder.LittleEndian);
+            Writer.WriteFloat(stream, _locT.Unk0, ByteOrder.LittleEndian);
+            Writer.WriteUInt32(stream, _locT.Unk1, ByteOrder.LittleEndian);
+
+            for (global::System.Int32 i = 0; i < _locT.HashTable.Count; i++)
+            {
+                Writer.WriteUInt32(stream, _locT.HashTable[i].Hash, ByteOrder.LittleEndian);
+                Writer.WriteUInt32(stream, _locT.HashTable[i].ID, ByteOrder.LittleEndian);
+            }
         }
 
         // Save LOCL
@@ -203,7 +221,17 @@ public sealed class LOC
     private struct LOCT
     {
         public byte[] MagicWord;
-        public byte[] Data;
+        public uint LOCTHeaderSize;
+        public float Unk0; //Might be uint instead but appears to be a float
+        public uint Unk1;
+
+        public List<HashData> HashTable; //Sorted from lowest to highest hash
+    }
+
+    private struct HashData
+    {
+        public uint Hash;
+        public uint ID; //Links back to Text ID
     }
 
     private struct LOCL

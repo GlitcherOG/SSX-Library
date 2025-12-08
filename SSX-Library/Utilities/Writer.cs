@@ -25,4 +25,18 @@ internal static class Writer
         }
         stream.Write(buf);
     }
+
+    public static void WriteFloat(Stream stream, float value, ByteOrder byteOrder)
+    {
+        var buf = new byte[4];
+        if (byteOrder == ByteOrder.BigEndian)
+        {
+            BinaryPrimitives.WriteSingleBigEndian(buf, value);
+        }
+        else if (byteOrder == ByteOrder.LittleEndian)
+        {
+            BinaryPrimitives.WriteSingleLittleEndian(buf, value);
+        }
+        stream.Write(buf);
+    }
 }
