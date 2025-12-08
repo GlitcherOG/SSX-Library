@@ -142,7 +142,7 @@ public sealed class LOC
                 HashTable = new List<HashData>()
             };
 
-            for (global::System.Int32 i = 0; i < _locL.TextEntryCount; i++)
+            for (int i = 0; i < _locL.TextEntryCount; i++)
             {
                 var NewHashData = new HashData()
                 {
