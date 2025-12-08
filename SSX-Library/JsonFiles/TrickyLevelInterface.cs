@@ -2450,17 +2450,15 @@ namespace SSXLibrary
                 for (int i = 0; i < ImageFiles.Count; i++)
                 {
                     Console.WriteLine("Textures: " +(i+1)+ "/" + ImageFiles.Count);
-                    //TextureHandler.AddImage();
-                    TextureHandler.LoadSingleImage(LoadPath + "/Textures/" + ImageFiles[i], i);
+                    TextureHandler.AddImage(OldShapeHandler.MatrixType.EightBit, i.ToString().PadLeft(4, '0'), LoadPath + "/Textures/" + ImageFiles[i]);
                     TextureHandler.DarkenImage(i);
                     var temp = TextureHandler.ShapeImages[i];
-                    temp.Shortname = i.ToString().PadLeft(4, '0');
                     temp.AlphaFix = true;
                     TextureHandler.ShapeImages[i] = temp;
                 }
                 //ErrorManager.ErrorMessage = "Error with Saving SSH Texture File";
                 Console.WriteLine("Saving Texture File (May take some time if textures havent been processed before hand)");
-                TextureHandler.SaveSSH(ExportPath + ".ssh", true);
+                TextureHandler.SaveShape(ExportPath + ".ssh");
             }
 
             if(SSFGenerate)
@@ -2803,16 +2801,14 @@ namespace SSXLibrary
                     for (int i = 0; i < SkyboxImageFiles.Count; i++)
                     {
                         Console.WriteLine("Skybox Textures: " + (i+1) + "/" + SkyboxImageFiles.Count);
-                        //SkyboxHandler.AddImage();
-                        SkyboxHandler.LoadSingleImage(LoadPath + "/Skybox/Textures/" + SkyboxImageFiles[i], i);
+                        SkyboxHandler.AddImage(OldShapeHandler.MatrixType.EightBit, i.ToString().PadLeft(4, '0'), LoadPath + "/Skybox/Textures/" + SkyboxImageFiles[i]);
                         SkyboxHandler.DarkenImage(i);
                         var temp = SkyboxHandler.ShapeImages[i];
-                        temp.Shortname = i.ToString().PadLeft(4, '0');
                         temp.AlphaFix = true;
                         SkyboxHandler.ShapeImages[i] = temp;
                     }
 
-                    SkyboxHandler.SaveSSH(ExportPath + "_sky.ssh", true);
+                    SkyboxHandler.SaveShape(ExportPath + "_sky.ssh");
                 }
             }
             #endregion
@@ -2829,13 +2825,8 @@ namespace SSXLibrary
                     for (int i = 0; i < LightmapFiles.Length; i++)
                     {
                         Console.WriteLine("Lightmap Textures: " +(i+1)+ "/" + LightmapFiles.Length);
-                        //LightmapHandler.AddImage(64, 5);
-                        LightmapHandler.LoadSingleImage(LightmapFiles[i], i);
+                        LightmapHandler.AddImage(OldShapeHandler.MatrixType.FullColor, i.ToString().PadLeft(4, '0'), LightmapFiles[i]);
                         LightmapHandler.DarkenImage(i);
-                        var temp = LightmapHandler.ShapeImages[i];
-                        temp.Shortname = i.ToString().PadLeft(4, '0');
-                        //temp.AlphaFix = true;
-                        LightmapHandler.ShapeImages[i] = temp;
                     }
                 }
                 else
@@ -2844,7 +2835,7 @@ namespace SSXLibrary
                    //LightmapHandler = LightmapGenerator.GenerateUnlitLightmap(pbdHandler);
                 }
                 //ErrorManager.ErrorMessage = "Error with Saving SSH Lightmap";
-                LightmapHandler.SaveSSH(ExportPath + "_L.ssh", true);
+                LightmapHandler.SaveShape(ExportPath + "_L.ssh");
             }
         }
 

@@ -13,7 +13,6 @@ namespace SSX_Library.EATextureLibrary
         public int FileSize;
         public int ImageCount;
         public string Format;
-        public string Group;
         public string EndingString;
         public List<ShapeImage> ShapeImages = new List<ShapeImage>();
 
@@ -72,12 +71,12 @@ namespace SSX_Library.EATextureLibrary
                             TempImage.Size = NewSize;
                         }
 
+
+
                         ShapeImages[i] = TempImage;
                     }
 
-                    Group = StreamUtil.ReadString(stream, 4);
-
-                    EndingString = StreamUtil.ReadString(stream, 4);
+                    EndingString = StreamUtil.ReadString(stream, 8);
 
                     LoadImages(stream);
                 }
@@ -231,6 +230,40 @@ namespace SSX_Library.EATextureLibrary
                 ShapeImages[i] = tempImage;
             }
         }
+
+        public void SaveShape(string path)
+        {
+
+        }
+
+        public void AddImage(MatrixType matrixType, string name = "", string path = "")
+        {
+            var NewSSHImage = new ShapeImage();
+            NewSSHImage.MatrixType = matrixType;
+            NewSSHImage.Shortname = "????";
+            NewSSHImage.Image = new Image<Rgba32>(1, 1);
+
+            if(name!="")
+            {
+                NewSSHImage.Shortname = name;
+            }
+
+            if(path!="")
+            {
+                if(File.Exists(path))
+                {
+                    NewSSHImage.Image = (Image<Rgba32>)Image.Load(path);
+                }
+                else
+                {
+                    //Give error
+                }
+            }
+
+            NewSSHImage.colorsTable = ImageUtil.GetBitmapColorsFast(NewSSHImage.Image).ToList();
+            ShapeImages.Add(NewSSHImage);
+        }
+
         private List<Rgba32> GetColorTable(ShapeImage newSSHImage)
         {
             var colorShape = GetShapeHeader(newSSHImage, MatrixType.ColorPallet);

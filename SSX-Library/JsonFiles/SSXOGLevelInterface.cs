@@ -1,12 +1,6 @@
 ﻿using SSXLibrary.FileHandlers.LevelFiles.OGPS2;
 using SSXLibrary.JsonFiles.SSXOG;
 using SSXLibrary.Utilities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.IO;
 using System.Numerics;
 using System.Collections;
 using SSX_Library.EATextureLibrary;
