@@ -5,10 +5,9 @@ namespace SSX_Library.Utilities;
 /// <summary>
 /// Converts bytes to other types, and does operations on them.
 /// </summary>
-public static class ByteConv
+internal static class ByteConv
 {
     public enum Nibble {High, Low};
-    public enum ByteOrder {BigEndian, LittleEndian};
 
     private const int LowNibbleMask = 0xF;   // 0b0000_1111
     private const int HighNibbleMask = 0xF0; // 0b1111_0000
