@@ -199,6 +199,10 @@ namespace SSX_Library.EATextureLibrary
                         tempImage.Image = EADecode.DecodeMatrix5(imageMatrix.Matrix, imageMatrix.Width, imageMatrix.Height);
                         tempImage.colorsTable = ImageUtil.GetBitmapColorsFast(tempImage.Image).ToList();
                         break;
+                    case MatrixType.N64:
+                        tempImage.Image = EADecode.DecodeMatrix30(imageMatrix.Matrix, imageMatrix.Width, imageMatrix.Height);
+                        tempImage.colorsTable = ImageUtil.GetBitmapColorsFast(tempImage.Image).ToList();
+                        break;
                     case MatrixType.BC1:
                         tempImage.Image = EADecode.DecodeMatrix96(imageMatrix.Matrix, imageMatrix.Width, imageMatrix.Height);
                         tempImage.colorsTable = ImageUtil.GetBitmapColorsFast(tempImage.Image).ToList();
@@ -642,6 +646,9 @@ namespace SSX_Library.EATextureLibrary
             FourBit = 1,
             EightBit = 2,
             FullColor = 5,
+
+            //N64
+            N64 = 30,
 
             ColorPallet = 33,
             ColorPalletXbox = 42,

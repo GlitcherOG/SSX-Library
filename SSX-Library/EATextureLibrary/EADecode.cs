@@ -1,5 +1,7 @@
 ﻿using BCnEncoder.Decoder;
+using BCnEncoder.Shared;
 using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Advanced;
 using SixLabors.ImageSharp.PixelFormats;
 using SSXLibrary.Utilities;
 
@@ -37,6 +39,7 @@ namespace SSX_Library.EATextureLibrary
 
 
         //2 (8 Bit, 256 Colour Index)
+        //123 Xbox (8 Bit, 256 Colour Index)
         public static Image<Rgba32> DecodeMatrix2(byte[] matrix, List<Rgba32> colour, int width, int height)
         {
             //Process Image
@@ -62,6 +65,70 @@ namespace SSX_Library.EATextureLibrary
             Image<Rgba32> NewImage = Image.LoadPixelData<Rgba32>(matrix ,width, height);
 
             return NewImage;
+        }
+
+        //Nintendo Wii/GC
+        //21
+        //25
+        //30
+        public static Image<Rgba32> DecodeMatrix30(byte[] data, int width, int height)
+        {
+            var decoder = new BcDecoder();
+
+            var img = new Image<Rgba32>(width, height);
+
+            int tileCountX = width / 8;
+            int tileCountY = height / 8;
+
+            int offset = 0;
+
+            for (int ty = 0; ty < tileCountY; ty++)
+            {
+                for (int tx = 0; tx < tileCountX; tx++)
+                {
+                    // four BC1 blocks per tile, each 8 bytes
+                    DecodeBlock(decoder, img, data, ref offset, tx * 8, ty * 8);       // top-left
+                    DecodeBlock(decoder, img, data, ref offset, tx * 8 + 4, ty * 8);   // top-right
+                    DecodeBlock(decoder, img, data, ref offset, tx * 8, ty * 8 + 4);   // bottom-left
+                    DecodeBlock(decoder, img, data, ref offset, tx * 8 + 4, ty * 8 + 4); // bottom-right
+                }
+            }
+
+            return img;
+        }
+
+        private static void DecodeBlock(
+            BcDecoder decoder,
+            Image<Rgba32> output,
+            byte[] data,
+            ref int offset,
+            int px,
+            int py)
+        {
+            Span<byte> block = data.AsSpan(offset, 8);
+            offset += 8;
+
+            // decode BC1 block → ColorRgba32[16]
+            var decoded = decoder.DecodeBlock(block, CompressionFormat.Bc1).Span;
+
+            // Copy 4×4 block into output Memory2D<Rgba32>
+            for (int y = 0; y < decoded.Height; y++)
+            {
+                if (py + y >= output.Height)
+                    continue;
+
+                var srcRow = decoded.GetRow(y);
+                var dstRow = output.DangerousGetPixelRowMemory(py + y).Span;
+
+                for (int x = 0; x < decoded.Width; x++)
+                {
+                    if (px + x >= output.Width)
+                        continue;
+
+                    ColorRgba32 c = srcRow[x];
+                    dstRow[px + x] = new Rgba32(c.r, c.g, c.b, c.a);
+                }
+            }
         }
 
         //Xbox
@@ -115,7 +182,7 @@ namespace SSX_Library.EATextureLibrary
         }
 
 
-        //109 - ImageFormats.BGRA4444 https://github.com/bartlomiejduda/EA-Graphics-Manager/blob/c9aec00c005437ddbc2752001913e1e2f46840e7/src/EA_Image/ea_image_decoder.py#L289
+        //109 - ImageFormats.BGRA4444
         public static Image<Rgba32> DecodeMatrix109(byte[] matrix, int width, int height)
         {
             //Process Image
@@ -125,7 +192,7 @@ namespace SSX_Library.EATextureLibrary
         }
 
 
-        //120 - ImageFormats.BGR565 https://github.com/bartlomiejduda/EA-Graphics-Manager/blob/c9aec00c005437ddbc2752001913e1e2f46840e7/src/EA_Image/ea_image_decoder.py#L311
+        //120 - ImageFormats.BGR565
         public static Image<Rgba32> DecodeMatrix120(byte[] matrix, int width, int height)
         {
             //Process Image
@@ -133,8 +200,6 @@ namespace SSX_Library.EATextureLibrary
 
             return NewImage.CloneAs<Rgba32>();
         }
-
-        //123 - Indexed Image https://github.com/bartlomiejduda/EA-Graphics-Manager/blob/c9aec00c005437ddbc2752001913e1e2f46840e7/src/EA_Image/ea_image_decoder.py#L334
 
         //125 - BCnEncoder.Shared.CompressionFormat.Bgra
         public static Image<Rgba32> DecodeMatrix125(byte[] matrix, int width, int height)
