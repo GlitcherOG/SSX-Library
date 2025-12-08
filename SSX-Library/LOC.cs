@@ -25,12 +25,14 @@ public sealed class LOC
     private readonly ImmutableArray<byte> _locHMagicWord = [0x4C, 0x4F, 0x43, 0x48];
     private readonly ImmutableArray<byte> _locTMagicWord = [0x4C, 0x4F, 0x43, 0x54];
     private readonly ImmutableArray<byte> _locLMagicWord = [0x4C, 0x4F, 0x43, 0x4C];
-    private string _filePath = "";
     private bool _usesLOCT;
     private LOCH _locH;
     private LOCT _locT;
     private LOCL _locL;
 
+    /// <summary>
+    /// Add/Remove/Modify text entries from the LOC.
+    /// </summary>
     public List<string> TextEntries
     {
         get { return _locL.TextEntries; }
@@ -44,7 +46,6 @@ public sealed class LOC
     public void Load(string path)
     {
         using FileStream stream = File.OpenRead(path);
-        _filePath = path;
 
         // Confirm LOCH signature was found
         var magicLOCH = Reader.ReadBytes(stream, 4);
@@ -143,9 +144,8 @@ public sealed class LOC
     /// </summary>
     /// <param name="path">Path to save the LOC. If empty it will save to the same place
     /// it was loaded from. </param>
-    public void Save(string path = "")
+    public void Save(string path)
     {
-        if(path == "") path = _filePath;
         using FileStream stream = File.Create(path);
 
         // Save LOCH
