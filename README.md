@@ -7,7 +7,7 @@ This library was made to isolate the Utility side from the Windows only [SSX Col
 - [ ] BigHandler.cs
 - [ ] DATAudio.cs
 - [ ] HDRHandler.cs
-- [ ] LOCHandler.cs
+- [x] LOCHandler.cs
 - [ ] NewBigHandler.cs
 - [ ] RefpackHandler.cs
 
