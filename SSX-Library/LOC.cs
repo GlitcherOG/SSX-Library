@@ -130,7 +130,7 @@ public sealed class LOC
         // Create LOCT
         if (_usesLOCT)
         {
-            LOCTPos = stream.Position;
+            stream.Position = LOCTPos + 4;
 
             _locT = new()
             {
