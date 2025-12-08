@@ -69,22 +69,26 @@ public sealed class LOC
         };
 
         // Check if LOCT signature was found
+        long LOCTPos = stream.Position;
         _usesLOCT = true;
-        var magic = Reader.ReadBytes(stream, 4);
-        for (int i = 0; i < magic.Length; i++)
+        var magicLOCT = Reader.ReadBytes(stream, 4);
+        for (int i = 0; i < magicLOCT.Length; i++)
         {
-            if (magic[i] != _locTMagicWord[i])
+            if (magicLOCT[i] != _locTMagicWord[i])
             {
                 _usesLOCT = false;
                 break;
             }
         }
 
+        stream.Position = _locH.LOCLOffset;
+        var magicLOCL = Reader.ReadBytes(stream, 4);
+
         // Check if LOCL signature was found
         var locLPosition = _locH.LOCLOffset; // Used later on
-        for (int i = 0; i < magic.Length; i++)
+        for (int i = 0; i < magicLOCL.Length; i++)
         {
-            if (magic[i] != _locLMagicWord[i])
+            if (magicLOCL[i] != _locLMagicWord[i])
             {
                 throw new InvalidDataException("Invalid/Corrupt LOC file. LOCL section not found.");
             }
@@ -126,6 +130,8 @@ public sealed class LOC
         // Create LOCT
         if (_usesLOCT)
         {
+            LOCTPos = stream.Position;
+
             _locT = new()
             {
                 MagicWord = [.. _locTMagicWord],
@@ -163,7 +169,9 @@ public sealed class LOC
         Writer.WriteUInt32(stream, _locH.LOCHSize, ByteOrder.LittleEndian);
         Writer.WriteUInt32(stream, _locH.Unk0, ByteOrder.LittleEndian);
         Writer.WriteUInt32(stream, _locH.Unk1, ByteOrder.LittleEndian);
-        Writer.WriteUInt32(stream, _locH.LOCLOffset, ByteOrder.LittleEndian);
+
+        long LOCLOffsetPos = stream.Position;
+        stream.Position += 4;
 
         // Save LOCT if used
         if (_usesLOCT)
@@ -182,6 +190,13 @@ public sealed class LOC
 
         // Save LOCL
         var locLPosition = (uint)stream.Position;
+
+        //Write LOCL Offset
+        stream.Position = LOCLOffsetPos;
+        Writer.WriteUInt32(stream, locLPosition, ByteOrder.LittleEndian);
+
+        stream.Position = locLPosition;
+
         Writer.WriteBytes(stream, [.._locLMagicWord]);
         Writer.WriteUInt32(stream, 0, ByteOrder.LittleEndian); // Placeholder
         Writer.WriteUInt32(stream, _locL.Unk0, ByteOrder.LittleEndian);
