@@ -241,7 +241,7 @@ namespace SSXLibrary.Models.Tricky
 
                 //Number List Ref
                 streamMatrix.Position = Model.NumberListOffset;
-                Model.numberListRefs = new List<WeightRefList>();
+                Model.weightRefs = new List<WeightRefList>();
                 for (int b = 0; b < Model.NumberListCount; b++)
                 {
                     var NumberListRef = new WeightRefList();
@@ -256,7 +256,7 @@ namespace SSXLibrary.Models.Tricky
                         NumberListRef.WeightIDs.Add(StreamUtil.ReadUInt32(streamMatrix));
                     }
                     streamMatrix.Position = TempPos;
-                    Model.numberListRefs.Add(NumberListRef);
+                    Model.weightRefs.Add(NumberListRef);
                 }
 
                 for (int ax = 0; ax < Model.MeshGroupCount; ax++)
@@ -649,12 +649,12 @@ namespace SSXLibrary.Models.Tricky
 
                 ModelStream.Position = Model.NumberListOffset;
                 //Number Ref List
-                ModelStream.Position += Model.numberListRefs.Count * 8;
-                for (int a = 0; a < Model.numberListRefs.Count; a++)
+                ModelStream.Position += Model.weightRefs.Count * 8;
+                for (int a = 0; a < Model.weightRefs.Count; a++)
                 {
-                    var TempNumberRef = Model.numberListRefs[a];
+                    var TempNumberRef = Model.weightRefs[a];
                     TempNumberRef.Offset = (int)ModelStream.Position;
-                    Model.numberListRefs[a] = TempNumberRef;
+                    Model.weightRefs[a] = TempNumberRef;
 
                     for (int c = 0; c < TempNumberRef.WeightIDs.Count; c++)
                     {
@@ -665,9 +665,9 @@ namespace SSXLibrary.Models.Tricky
                 Model.MeshGroupOffset = (int)ModelStream.Position;
                 ModelStream.Position = Model.NumberListOffset;
 
-                for (int a = 0; a < Model.numberListRefs.Count; a++)
+                for (int a = 0; a < Model.weightRefs.Count; a++)
                 {
-                    var TempNumberRef = Model.numberListRefs[a];
+                    var TempNumberRef = Model.weightRefs[a];
                     StreamUtil.WriteInt32(ModelStream, TempNumberRef.WeightIDs.Count);
                     StreamUtil.WriteInt32(ModelStream, TempNumberRef.Offset);
                 }
@@ -1092,7 +1092,7 @@ namespace SSXLibrary.Models.Tricky
                 stream.Position += 8;
 
                 StreamUtil.WriteInt16(stream, ModelList[i].boneWeightHeader.Count);
-                StreamUtil.WriteInt16(stream, ModelList[i].numberListRefs.Count);
+                StreamUtil.WriteInt16(stream, ModelList[i].weightRefs.Count);
                 StreamUtil.WriteInt16(stream, ModelList[i].MaterialGroup.Count);
                 StreamUtil.WriteInt16(stream, ModelList[i].boneDatas.Count);
                 StreamUtil.WriteInt16(stream, ModelList[i].materialDatas.Count);
@@ -1149,7 +1149,7 @@ namespace SSXLibrary.Models.Tricky
             public List<Vector3> iKPoints;
             public List<MaterialGroup> MaterialGroup;
             public List<BoneWeightHeader> boneWeightHeader;
-            public List<WeightRefList> numberListRefs;
+            public List<WeightRefList> weightRefs;
         }
 
         public struct WeightRefList
