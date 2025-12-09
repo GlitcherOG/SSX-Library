@@ -287,7 +287,7 @@ namespace SSXLibrary.FileHandlers
             for (int i = 0; i < ListCount; i++)
             {
                 var TempCharEntry = characters[i];
-                for (global::System.Int32 j = 0; j < characters.Count; j++)
+                for (int j = 0; j < characters.Count; j++)
                 {
                     var TempEntry = TempCharEntry.unkown2s[i];
 

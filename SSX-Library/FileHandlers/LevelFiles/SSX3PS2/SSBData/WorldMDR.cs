@@ -555,7 +555,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
 
                 if (modelObject.unknownS2.ModelHeaderOffset != null)
                 {
-                    for (global::System.Int32 j = 0; j < modelObject.unknownS2.ModelHeaderOffset.Count; j++)
+                    for (int j = 0; j < modelObject.unknownS2.ModelHeaderOffset.Count; j++)
                     {
                         var TempModelOffset = new MDRJsonHandler.ModelDataHeaderStruct();
 
