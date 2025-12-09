@@ -181,7 +181,7 @@ public sealed class LOC
             Writer.WriteFloat(stream, _locT.Unk0, ByteOrder.LittleEndian);
             Writer.WriteUInt32(stream, _locT.Unk1, ByteOrder.LittleEndian);
 
-            for (global::System.Int32 i = 0; i < _locT.HashTable.Count; i++)
+            for (int i = 0; i < _locT.HashTable.Count; i++)
             {
                 Writer.WriteUInt32(stream, _locT.HashTable[i].Hash, ByteOrder.LittleEndian);
                 Writer.WriteUInt32(stream, _locT.HashTable[i].ID, ByteOrder.LittleEndian);
@@ -246,7 +246,7 @@ public sealed class LOC
     private struct HashData
     {
         public uint Hash;
-        public uint ID; //Links back to Text ID
+        public uint ID; //Links back to Text Index
     }
 
     private struct LOCL
