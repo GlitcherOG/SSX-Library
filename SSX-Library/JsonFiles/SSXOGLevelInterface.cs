@@ -1,16 +1,11 @@
 ﻿using SSXLibrary.FileHandlers.LevelFiles.OGPS2;
 using SSXLibrary.JsonFiles.SSXOG;
 using SSXLibrary.Utilities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using SSXLibrary.FileHandlers.Textures;
-using System.IO;
 using System.Numerics;
 using System.Collections;
+using SSX_Library.EATextureLibrary;
 using SSX_Library.Utilities;
+
 
 namespace SSXLibrary.JsonFiles
 {
@@ -522,33 +517,33 @@ namespace SSXLibrary.JsonFiles
             #endregion
 
             #region Textures
-            OldSSHHandler sshTexture = new OldSSHHandler();
-            sshTexture.LoadSSH(LoadPath + ".ssh");
+            OldShapeHandler sshTexture = new OldShapeHandler();
+            sshTexture.LoadShape(LoadPath + ".ssh");
 
-            for (int i = 0; i < sshTexture.sshImages.Count; i++)
+            for (int i = 0; i < sshTexture.ShapeImages.Count; i++)
             {
-                sshTexture.BrightenBitmap(i);
-                sshTexture.BMPOneExtract(ExtractPath + "\\Textures\\" + i.ToString("0000") + ".png", i);
+                sshTexture.BrightenImage(i);
+                sshTexture.ExtractSingleImage(ExtractPath + "\\Textures\\" + i.ToString("0000") + ".png", i);
             }
 
             if (MapExists)
             {
-                OldSSHHandler sshTextureSky = new OldSSHHandler();
-                sshTextureSky.LoadSSH(LoadPath + "_sky.ssh");
+                OldShapeHandler sshTextureSky = new OldShapeHandler();
+                sshTextureSky.LoadShape(LoadPath + "_sky.ssh");
 
-                for (int i = 0; i < sshTextureSky.sshImages.Count; i++)
+                for (int i = 0; i < sshTextureSky.ShapeImages.Count; i++)
                 {
-                    sshTextureSky.BrightenBitmap(i);
-                    sshTextureSky.BMPOneExtract(ExtractPath + "\\Skybox\\Textures\\" + i.ToString("0000") + ".png", i);
+                    sshTextureSky.BrightenImage(i);
+                    sshTextureSky.ExtractSingleImage(ExtractPath + "\\Skybox\\Textures\\" + i.ToString("0000") + ".png", i);
                 }
 
-                OldSSHHandler sshTextureLight = new OldSSHHandler();
-                sshTextureLight.LoadSSH(LoadPath + "l.ssh");
+                OldShapeHandler sshTextureLight = new OldShapeHandler();
+                sshTextureLight.LoadShape(LoadPath + "l.ssh");
 
-                for (int i = 0; i < sshTextureLight.sshImages.Count; i++)
+                for (int i = 0; i < sshTextureLight.ShapeImages.Count; i++)
                 {
-                    //sshTextureLight.BrightenBitmap(i);
-                    sshTextureLight.BMPOneExtract(ExtractPath + "\\Lightmaps\\" + i.ToString("0000") + ".png", i);
+                    sshTextureLight.BrightenImage(i);
+                    sshTextureLight.ExtractSingleImage(ExtractPath + "\\Lightmaps\\" + i.ToString("0000") + ".png", i);
                 }
             }
             #endregion
