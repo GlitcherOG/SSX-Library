@@ -1,9 +1,6 @@
 ﻿using System.Numerics;
 using SSXLibrary.Utilities;
 using System.Globalization;
-using SharpGLTF.Geometry.VertexTypes;
-using SharpGLTF.Geometry;
-using SharpGLTF.Materials;
 
 namespace SSXLibrary.FileHandlers.LevelFiles.TrickyPS2
 {
@@ -1683,79 +1680,6 @@ namespace SSXLibrary.FileHandlers.LevelFiles.TrickyPS2
             }
         }
 
-        public void ExportModelsGLFT(string path, MapHandler mapHandler)
-        {
-            //Create Base Object
-
-            for (int a = 0; a < modelData.Count; a++)
-            {
-                var scene = new SharpGLTF.Scenes.SceneBuilder();
-                scene.Name = mapHandler.Models[a].Name;
-                //Make Materials
-                List<MaterialBuilder> materialBuilders = new List<MaterialBuilder>();
-
-                for (int i = 0; i < materialBlocks[modelData[a].MaterialBlockID].ints.Count; i++)
-                {
-                    var TempVar = materialBlocks[modelData[a].MaterialBlockID].ints[i];
-                    var material1 = new MaterialBuilder("Mat "+TempVar)
-                    .WithChannelParam(KnownChannel.BaseColor, KnownProperty.RGBA, new Vector4(1, 1, 1, 1));
-                    materialBuilders.Add(material1);
-                }
-
-                List<MeshBuilder<VertexPositionNormal, VertexTexture1>> meshBuilders = new List<MeshBuilder<VertexPositionNormal, VertexTexture1>>();
-                for (int ax = 0; ax < modelData[a].ModelObjects.Count; ax++)
-                {
-                    //Create Object
-                    if (modelData[a].ModelObjects[ax].objectData.MeshOffsets != null)
-                    {
-                        var mesh = new MeshBuilder<VertexPositionNormal, VertexTexture1>(ax.ToString());
-                        for (int i = 0; i < modelData[a].ModelObjects[ax].objectData.MeshOffsets.Count; i++)
-                        {
-                            var TempMesh = modelData[a].ModelObjects[ax].objectData.MeshOffsets[i].FullMesh;
-                            for (int b = 0; b < TempMesh.meshFaces.Count; b++)
-                            {
-                                //Add Mesh to Object
-                                var Face = TempMesh.meshFaces[b];
-
-                                VertexPositionNormal TempPos1 = new VertexPositionNormal();
-                                TempPos1.Position = Face.V1;
-                                TempPos1.Normal = Face.Normal1;
-
-                                VertexPositionNormal TempPos2 = new VertexPositionNormal();
-                                TempPos2.Position = Face.V2;
-                                TempPos2.Normal = Face.Normal2;
-
-                                VertexPositionNormal TempPos3 = new VertexPositionNormal();
-                                TempPos3.Position = Face.V3;
-                                TempPos3.Normal = Face.Normal3;
-
-                                VertexTexture1 TempTexture1 = new VertexTexture1();
-                                TempTexture1.TexCoord.X = (float)Face.UV1.X;
-                                TempTexture1.TexCoord.Y = (float)Face.UV1.Y;
-
-                                VertexTexture1 TempTexture2 = new VertexTexture1();
-                                TempTexture2.TexCoord.X = (float)Face.UV2.X;
-                                TempTexture2.TexCoord.Y = (float)Face.UV2.Y;
-
-                                VertexTexture1 TempTexture3 = new VertexTexture1();
-                                TempTexture3.TexCoord.X = (float)Face.UV3.X;
-                                TempTexture3.TexCoord.Y = (float)Face.UV3.Y;
-
-
-                                mesh.UsePrimitive(materialBuilders[modelData[a].ModelObjects[ax].objectData.MeshOffsets[i].MaterialBlockPos]).AddTriangle((TempPos1, TempTexture1), (TempPos2, TempTexture2), (TempPos3, TempTexture3));
-                            }
-                        }
-                        meshBuilders.Add(mesh);
-                        scene.AddRigidMesh(mesh, Matrix4x4.CreateFromYawPitchRoll(0, 0/*-1.5708f*/, 0));
-                    }
-                }
-
-                // save the model in different formats
-                var model = scene.ToGltf2();
-                model.SaveGLB(a.ToString());
-            }
-        }
-
         //public MeshBuilder<VertexPositionNormal, VertexTexture1> ParentMesh(MeshBuilder<VertexPositionNormal, VertexTexture1> Mesh, 
         //    List<MeshBuilder<VertexPositionNormal, VertexTexture1>> meshBuilders, Prefabs prefabs, int ID)
         //{
@@ -2549,8 +2473,6 @@ namespace SSXLibrary.FileHandlers.LevelFiles.TrickyPS2
         public List<int> MeshOffsetPositions;
 
         public List<MeshOffsets> MeshOffsets;
-
-        public MeshBuilder<VertexPositionNormal, VertexTexture1> GLTFMesh;
     }
 
     public struct MeshOffsets
