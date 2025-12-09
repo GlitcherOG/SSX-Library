@@ -1,6 +1,7 @@
 ﻿using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using SSXLibrary.Utilities;
+using System.Collections.Generic;
 
 namespace SSX_Library.EATextureLibrary
 {
@@ -10,7 +11,7 @@ namespace SSX_Library.EATextureLibrary
         //1 (4 Bit, 16 Colour Index)
         public static (byte[] Matrix, List<Rgba32> ColourTable) EncodeMatrix1(Image<Rgba32> image)
         {
-            List<Rgba32>  colourTable = new List<Rgba32>();
+            List<Rgba32> colourTable = new List<Rgba32>();
 
             byte[] TempMatrix = new byte[image.Height * image.Width];
 
@@ -18,7 +19,15 @@ namespace SSX_Library.EATextureLibrary
             {
                 for (int x = 0; x < image.Width; x++)
                 {
-                    TempMatrix[y * image.Width + x] = (byte)colourTable.IndexOf(image[x, y]);
+                    int index = colourTable.IndexOf(image[x, y]); // Check if the item exists
+
+                    if (index == -1) // If the item is not found
+                    {
+                        colourTable.Add(image[x, y]); // Add the item to the list
+                        index = colourTable.Count - 1; // Get the index of the newly added item
+                    }
+
+                    TempMatrix[y * image.Width + x] = (byte)index;
                 }
             }
 
@@ -44,19 +53,15 @@ namespace SSX_Library.EATextureLibrary
             {
                 for (int x = 0; x < image.Width; x++)
                 {
-                    TempMatrix[y * image.Width + x] = (byte)colourTable.IndexOf(image[x, y]);
-                }
-            }
+                    int index = colourTable.IndexOf(image[x, y]); // Check if the item exists
 
-            int MatrixSize = StreamUtil.AlignbyMath(image.Height * image.Width, 16);
+                    if (index == -1) // If the item is not found
+                    {
+                        colourTable.Add(image[x, y]); // Add the item to the list
+                        index = colourTable.Count - 1; // Get the index of the newly added item
+                    }
 
-            byte[] Matrix = new byte[MatrixSize];
-
-            for (int y = 0; y < image.Height; y++)
-            {
-                for (int x = 0; x < image.Width; x++)
-                {
-                    Matrix[y * image.Width + x] = (byte)colourTable.IndexOf(image[x, y]);
+                    TempMatrix[y * image.Width + x] = (byte)index;
                 }
             }
 

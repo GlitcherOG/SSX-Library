@@ -51,7 +51,7 @@ namespace SSX_Library.EATextureLibrary
                         ShapeImages.Add(tempImage);
                     }
 
-                    for (global::System.Int32 i = 0; i < ShapeImages.Count; i++)
+                    for (int i = 0; i < ShapeImages.Count; i++)
                     {
                         var TempImage = ShapeImages[i];
 
@@ -269,7 +269,7 @@ namespace SSX_Library.EATextureLibrary
             tempByte = new byte[4];
             stream.Write(tempByte, 0, tempByte.Length);
 
-            StreamUtil.WriteInt32(stream, ShapeImages.Count, true);
+            StreamUtil.WriteInt32(stream, ShapeImages.Count);
 
             StreamUtil.WriteString(stream, Format, 4);
 
@@ -277,24 +277,47 @@ namespace SSX_Library.EATextureLibrary
 
             for (int i = 0; i < ShapeImages.Count; i++)
             {
+                StreamUtil.WriteString(stream, ShapeImages[i].Shortname, 4);
                 intPos.Add((int)stream.Position);
                 tempByte = new byte[4];
                 stream.Write(tempByte, 0, tempByte.Length);
-                StreamUtil.WriteString(stream, ShapeImages[i].Shortname, 4);
             }
 
-            StreamUtil.WriteString(stream, EndingString, 8);
+            StreamUtil.WriteString(stream, "Buy ERTS", 8);
 
             StreamUtil.AlignBy16(stream);
 
             for (int i = 0; i < ShapeImages.Count; i++)
             {
+                int TempPos = (int)stream.Position;
+                stream.Position = intPos[i];
+                StreamUtil.WriteInt32(stream, TempPos);
+                stream.Position = TempPos;
+
                 var TempMatrix = ImageWrite(ShapeImages[i]);
 
-                StreamUtil.WriteBytes(stream, tempByte);
+                StreamUtil.WriteBytes(stream, TempMatrix);
 
                 StreamUtil.AlignBy16(stream);
+                StreamUtil.WriteString(stream, "Buy ERTS", 8);
+                StreamUtil.AlignBy16(stream);
             }
+
+            //Go back and write headers idiot
+            int Size = (int)stream.Position;
+
+            stream.Position = SizePos;
+            StreamUtil.WriteInt32(stream, Size);
+
+            if (File.Exists(path))
+            {
+                File.Delete(path);
+            }
+            var file = File.Create(path);
+            stream.Position = 0;
+            stream.CopyTo(file);
+            stream.Dispose();
+            file.Close();
         }
 
         public byte[] ImageWrite(ShapeImage shapeImage)
@@ -317,7 +340,7 @@ namespace SSX_Library.EATextureLibrary
                     Matrix = ByteUtil.Swizzle4bpp(Matrix, shapeImage.Image.Width, shapeImage.Image.Height);
                 }
             }
-            else if (shapeImage.MatrixType == MatrixType.EightBit)
+            else if (shapeImage.MatrixType == MatrixType.EightBit || shapeImage.MatrixType == MatrixType.EightBitXbox || shapeImage.MatrixType == MatrixType.EightBitCompressed)
             {
                 //WriteMatrix2(stream, Image);
                 var EncodedImage = EAEncode.EncodeMatrix2(shapeImage.Image);
@@ -345,9 +368,12 @@ namespace SSX_Library.EATextureLibrary
             if (shapeImage.MatrixType == MatrixType.EightBitCompressed)
             {
                 //Compress Image
+                byte[] TempBytes = new byte[4];
+                RefpackHandler.Compress(Matrix, out TempBytes);
+                Matrix = TempBytes;
             }
 
-            WriteImageHeader(stream, shapeImage, Matrix.Length);
+            WriteImageHeader(stream, shapeImage, Matrix.Length+16);
 
             StreamUtil.WriteBytes(stream, Matrix);
 
@@ -361,7 +387,7 @@ namespace SSX_Library.EATextureLibrary
 
                 StreamUtil.AlignBy16(stream);
             }
-
+            stream.Position = 0;
             return StreamUtil.ReadBytes(stream, (int)stream.Length);
         }
 
@@ -405,7 +431,7 @@ namespace SSX_Library.EATextureLibrary
                 }
             }
 
-            WriteColourHeader(stream, image, Matrix.Length);
+            WriteColourHeader(stream, image, Matrix.Length+16);
 
             if (image.SwizzledColours)
             {
@@ -419,21 +445,18 @@ namespace SSX_Library.EATextureLibrary
         public void WriteColourHeader(Stream stream, ShapeImage image, int Size)
         {
             StreamUtil.WriteUInt8(stream, 33);
-            int Flag1 = 1;
-            int Flag2 = image.SwizzledColours ? 64 : 0;
-            int Flag3 = 0;
-            StreamUtil.WriteUInt8(stream, Flag1); // Probably not right
-            StreamUtil.WriteUInt8(stream, Flag2);
-            StreamUtil.WriteUInt8(stream, Flag3);
 
-            StreamUtil.WriteInt32(stream, Size + 32);
-            StreamUtil.WriteInt32(stream, 32);
-            StreamUtil.WriteInt32(stream, Size);
+            StreamUtil.WriteInt24(stream, Size);
+
+            StreamUtil.WriteInt16(stream, image.colorsTable.Count);
+
+            StreamUtil.WriteInt16(stream, 1);
+
+            StreamUtil.WriteInt16(stream, image.colorsTable.Count);
+
+            StreamUtil.WriteInt16(stream, 0);
 
             StreamUtil.WriteInt32(stream, 0);
-            StreamUtil.WriteInt32(stream, 0);
-            StreamUtil.WriteInt32(stream, image.colorsTable.Count);
-            StreamUtil.WriteInt32(stream, 1);
         }
 
         public void AddImage(MatrixType matrixType, string name = "", string path = "")
