@@ -108,9 +108,9 @@ FileHandlers\SSX3:
 
 FileHandlers\Textures:
 - [ ] GTFHandler.cs
-- [ ] NewSSHHandler.cs
-- [ ] OldSSHHandler.cs
-- [ ] OldXSHHandler.cs
+- [x] NewSSHHandler.cs
+- [x] OldSSHHandler.cs
+- [x] OldXSHHandler.cs
 - [ ] SMPHandler.cs
 
 JsonFiles:
