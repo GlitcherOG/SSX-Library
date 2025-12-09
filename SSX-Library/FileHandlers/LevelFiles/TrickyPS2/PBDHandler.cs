@@ -1712,7 +1712,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.TrickyPS2
                         for (int i = 0; i < modelData[a].ModelObjects[ax].objectData.MeshOffsets.Count; i++)
                         {
                             var TempMesh = modelData[a].ModelObjects[ax].objectData.MeshOffsets[i].FullMesh;
-                            for (global::System.Int32 b = 0; b < TempMesh.meshFaces.Count; b++)
+                            for (int b = 0; b < TempMesh.meshFaces.Count; b++)
                             {
                                 //Add Mesh to Object
                                 var Face = TempMesh.meshFaces[b];

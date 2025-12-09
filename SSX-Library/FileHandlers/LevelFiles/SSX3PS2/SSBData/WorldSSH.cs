@@ -134,7 +134,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
                     Matrix = ByteUtil.UnswizzlePalette(Matrix, sshTable.Total);
                 }
 
-                for (global::System.Int32 i = 0; i < tempSize; i++)
+                for (int i = 0; i < tempSize; i++)
                 {
                     int R = Matrix[i * 4];
                     int G = Matrix[i * 4+1];

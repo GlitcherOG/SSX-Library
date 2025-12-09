@@ -57,7 +57,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
 
                 TempAIPath.PathPoints = new List<Vector4>();
 
-                for (global::System.Int32 j = 0; j < TempAIPath.NumPoints; j++)
+                for (int j = 0; j < TempAIPath.NumPoints; j++)
                 {
                     TempAIPath.PathPoints.Add(StreamUtil.ReadVector4(stream));
                 }

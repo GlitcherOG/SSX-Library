@@ -144,9 +144,9 @@ namespace SSX_Library.EATextureLibrary
 
             int post = 0;
 
-            for (global::System.Int32 y = 0; y < height; y++)
+            for (int y = 0; y < height; y++)
             {
-                for (global::System.Int32 x = 0; x < width; x++)
+                for (int x = 0; x < width; x++)
                 {
                     NewImage[x, y] = new Rgba32(Temp[post].r, Temp[post].g, Temp[post].b, Temp[post].a);
                     post++;
@@ -169,9 +169,9 @@ namespace SSX_Library.EATextureLibrary
 
             int post = 0;
 
-            for (global::System.Int32 y = 0; y < height; y++)
+            for (int y = 0; y < height; y++)
             {
-                for (global::System.Int32 x = 0; x < width; x++)
+                for (int x = 0; x < width; x++)
                 {
                     NewImage[x, y] = new Rgba32(Temp[post].r, Temp[post].g, Temp[post].b, Temp[post].a);
                     post++;
@@ -213,9 +213,9 @@ namespace SSX_Library.EATextureLibrary
 
             int post = 0;
 
-            for (global::System.Int32 y = 0; y < height; y++)
+            for (int y = 0; y < height; y++)
             {
-                for (global::System.Int32 x = 0; x < width; x++)
+                for (int x = 0; x < width; x++)
                 {
                     NewImage[x, y] = new Rgba32(Temp[post].r, Temp[post].g, Temp[post].b, Temp[post].a);
                     post++;

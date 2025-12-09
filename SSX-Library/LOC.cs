@@ -14,8 +14,7 @@ namespace SSX_Library;
 
     The Load function only reads one null character to detect if a string terminated.
 
-    _locL.TextEntryCount is only updated when calling Save(). This is because the user can
-    modify _locL.TextEntries anytime.
+    TextEntryCount is only updated when calling Save().
 */
 
 /// <summary>
@@ -32,13 +31,24 @@ public sealed class LOC
     private LOCL _locL;
 
     /// <summary>
-    /// Add/Remove/Modify text entries from the LOC.
+    /// Does the LOC have an LOCT section.
     /// </summary>
-    public List<string> TextEntries
-    {
-        get { return _locL.TextEntries; }
-        set { _locL.TextEntries = value; }
-    }
+    public bool UsesLOCT { get { return _usesLOCT; }}
+
+    /// <summary>
+    /// Get the number of text entries in the LOCL.
+    /// </summary>
+    public int GetTextCount() => (int)_locL.TextEntryCount;
+
+    /// <summary>
+    /// Get the string of a text entry
+    /// </summary>
+    public string GetText(int id) => _locL.TextEntries[id];
+
+    /// <summary>
+    /// Set the string of a text entry
+    /// </summary>
+    public void SetText(int id, string value) => _locL.TextEntries[id] = value;
 
     /// <summary>
     /// Load an LOC file from disk to memory.
@@ -131,26 +141,22 @@ public sealed class LOC
         if (_usesLOCT)
         {
             stream.Position = LOCTPos + 4;
-
             _locT = new()
             {
                 MagicWord = [.. _locTMagicWord],
                 LOCTHeaderSize = Reader.ReadUInt32(stream, ByteOrder.LittleEndian),
                 Unk0 = Reader.ReadFloat(stream, ByteOrder.LittleEndian),
                 Unk1 = Reader.ReadUInt32(stream, ByteOrder.LittleEndian),
-
-                HashTable = new List<HashData>()
+                HashTable = [],
             };
-
             for (int i = 0; i < _locL.TextEntryCount; i++)
             {
-                var NewHashData = new HashData()
+                var newHashData = new HashData()
                 {
                     Hash = Reader.ReadUInt32(stream, ByteOrder.LittleEndian),
                     ID = Reader.ReadUInt32(stream, ByteOrder.LittleEndian)
                 };
-
-                _locT.HashTable.Add(NewHashData);
+                _locT.HashTable.Add(newHashData);
             }
         }
     }
@@ -180,11 +186,10 @@ public sealed class LOC
             Writer.WriteUInt32(stream, 16, ByteOrder.LittleEndian);
             Writer.WriteFloat(stream, _locT.Unk0, ByteOrder.LittleEndian);
             Writer.WriteUInt32(stream, _locT.Unk1, ByteOrder.LittleEndian);
-
-            for (int i = 0; i < _locT.HashTable.Count; i++)
+            foreach (var hashTable in _locT.HashTable)
             {
-                Writer.WriteUInt32(stream, _locT.HashTable[i].Hash, ByteOrder.LittleEndian);
-                Writer.WriteUInt32(stream, _locT.HashTable[i].ID, ByteOrder.LittleEndian);
+                Writer.WriteUInt32(stream, hashTable.Hash, ByteOrder.LittleEndian);
+                Writer.WriteUInt32(stream, hashTable.ID, ByteOrder.LittleEndian);
             }
         }
 
@@ -194,9 +199,7 @@ public sealed class LOC
         //Write LOCL Offset
         stream.Position = LOCLOffsetPos;
         Writer.WriteUInt32(stream, locLPosition, ByteOrder.LittleEndian);
-
         stream.Position = locLPosition;
-
         Writer.WriteBytes(stream, [.._locLMagicWord]);
         Writer.WriteUInt32(stream, 0, ByteOrder.LittleEndian); // Placeholder
         Writer.WriteUInt32(stream, _locL.Unk0, ByteOrder.LittleEndian);
@@ -213,14 +216,13 @@ public sealed class LOC
         }
         
         // Rewrite the offsets to real ones
-        // uint realLOCLSize = locLPosition - (uint)stream.Position;
         stream.Position = locLOffsetsPosition;
-        for (int i = 0; i < _locL.TextEntryCount; i++)
+        foreach (var offset in realOffset)
         {
-            Writer.WriteUInt32(stream, realOffset[i], ByteOrder.LittleEndian);
+            Writer.WriteUInt32(stream, offset, ByteOrder.LittleEndian);
         }
         // Set LOCL size
-        stream.Position = locLPosition + 4; // _locL.LOCLSize
+        stream.Position = locLPosition + 4; // <- _locL.LOCLSize
         Writer.WriteUInt32(stream, (uint)stream.Length - locLPosition + _locH.LOCHSize, ByteOrder.LittleEndian);
     }
 
@@ -236,17 +238,19 @@ public sealed class LOC
     private struct LOCT
     {
         public byte[] MagicWord;
-        public uint LOCTHeaderSize;
-        public float Unk0; //Might be uint instead but appears to be a float
+        public uint LOCTHeaderSize; // Always 16
+        public float Unk0;
         public uint Unk1;
 
-        public List<HashData> HashTable; //Sorted from lowest to highest hash
+        //Sorted from lowest to highest hash.
+        // Size is LOCL.TextEntryCount.
+        public List<HashData> HashTable; 
     }
 
     private struct HashData
     {
         public uint Hash;
-        public uint ID; //Links back to Text Index
+        public uint ID; // The index of the text entry in LOCL
     }
 
     private struct LOCL
