@@ -15,6 +15,8 @@ namespace SSX_Library;
     The Load function only reads one null character to detect if a string terminated.
 
     TextEntryCount is only updated when calling Save().
+
+More Info: https://ssx.computernewb.com/wiki/Formats/Common:LOC
 */
 
 /// <summary>
