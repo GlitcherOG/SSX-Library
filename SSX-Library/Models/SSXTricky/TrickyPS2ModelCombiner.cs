@@ -1,4 +1,6 @@
-﻿using SSXLibrary.Utilities;
+﻿using SSX_Library.Models;
+using SSXLibrary.Models.Tricky;
+using SSXLibrary.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -168,7 +170,7 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
         {
             reassignedMesh = new List<ReassignedMesh>();
             var TempMesh = new ReassignedMesh();
-            TempMesh.faces = new List<TrickyPS2MPF.Face>();
+            //TempMesh.faces = new List<TrickyPS2MPF.Face>();
             materials = new List<TrickyPS2MPF.MaterialData>();
             bones = new List<TrickyPS2MPF.BoneData>();
 
@@ -309,9 +311,9 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
             }
         }
 
-        public List<TrickyPS2MPF.Face> ReturnFixedFaces(TrickyPS2MPF.MPFModelHeader modelHeader, List<TrickyPS2MPF.BoneData> BoneData)
+        public List<BaseModel.Face> ReturnFixedFaces(TrickyPS2MPF.MPFModelHeader modelHeader, List<TrickyPS2MPF.BoneData> BoneData)
         {
-            List<TrickyPS2MPF.Face> NewFaces = new List<TrickyPS2MPF.Face>();
+            List<BaseModel.Face> NewFaces = new List<BaseModel.Face>();
 
             for (int i = 0; i < modelHeader.boneWeightHeader.Count; i++)
             {
@@ -330,69 +332,69 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
                             int MatId = modelHeader.MeshGroups[a].MaterialID;
                             int WeightRefListID = modelHeader.MeshGroups[a].meshGroupSubs[ab].MeshGroupHeaders[ac].WeightRefGroup;
 
-                            for (int b = 0; b < Data.faces.Count; b++)
-                            {
-                                var Face = Data.faces[b];
-                                var TempList = new TrickyPS2MPF.WeightRefList();
-                                try
-                                {
-                                    TempList = modelHeader.numberListRefs[WeightRefListID];
-                                }
-                                catch
-                                {
-                                    TempList = modelHeader.numberListRefs[0];
-                                }
-                                int WeightId = 0;
+                            //for (int b = 0; b < Data.faces.Count; b++)
+                            //{
+                            //    var Face = Data.faces[b];
+                            //    var TempList = new TrickyPS2MPF.WeightRefList();
+                            //    try
+                            //    {
+                            //        TempList = modelHeader.numberListRefs[WeightRefListID];
+                            //    }
+                            //    catch
+                            //    {
+                            //        TempList = modelHeader.numberListRefs[0];
+                            //    }
+                            //    int WeightId = 0;
 
-                                WeightId = TempList.WeightIDs[Face.Weight1Pos];
-                                Face.Weight1 = modelHeader.boneWeightHeader[WeightId];
+                            //    WeightId = TempList.WeightIDs[Face.Weight1Pos];
+                            //    Face.Weight1 = modelHeader.boneWeightHeader[WeightId];
 
-                                WeightId = TempList.WeightIDs[Face.Weight2Pos];
-                                Face.Weight2 = modelHeader.boneWeightHeader[WeightId];
+                            //    WeightId = TempList.WeightIDs[Face.Weight2Pos];
+                            //    Face.Weight2 = modelHeader.boneWeightHeader[WeightId];
 
-                                WeightId = TempList.WeightIDs[Face.Weight3Pos];
-                                Face.Weight3 = modelHeader.boneWeightHeader[WeightId];
+                            //    WeightId = TempList.WeightIDs[Face.Weight3Pos];
+                            //    Face.Weight3 = modelHeader.boneWeightHeader[WeightId];
 
-                                var TempMat = modelHeader.materialDatas[modelHeader.MeshGroups[a].MaterialID];
-                                int matID = 0;
-                                int focusID = 0;
-                                if (TempMat.MainTexture != "bord")
-                                {
-                                    if (TempMat.MainTexture == "helm")
-                                    {
-                                        matID = 0;
-                                    }
-                                    else if (TempMat.MainTexture == "boot")
-                                    {
-                                        matID = 1;
-                                    }
-                                    else if (TempMat.MainTexture == "head")
-                                    {
-                                        matID = 2;
-                                    }
-                                    else if (TempMat.MainTexture == "suit")
-                                    {
-                                        matID = 3;
-                                    }
+                            //    var TempMat = modelHeader.materialDatas[modelHeader.MeshGroups[a].MaterialID];
+                            //    int matID = 0;
+                            //    int focusID = 0;
+                            //    if (TempMat.MainTexture != "bord")
+                            //    {
+                            //        if (TempMat.MainTexture == "helm")
+                            //        {
+                            //            matID = 0;
+                            //        }
+                            //        else if (TempMat.MainTexture == "boot")
+                            //        {
+                            //            matID = 1;
+                            //        }
+                            //        else if (TempMat.MainTexture == "head")
+                            //        {
+                            //            matID = 2;
+                            //        }
+                            //        else if (TempMat.MainTexture == "suit")
+                            //        {
+                            //            matID = 3;
+                            //        }
 
-                                    if (TempMat.Texture3.EndsWith("_g"))
-                                    {
-                                        focusID = 1;
-                                    }
-                                    else if (TempMat.Texture4 == "envr")
-                                    {
-                                        focusID = 2;
-                                    }
-                                }
+                            //        if (TempMat.Texture3.EndsWith("_g"))
+                            //        {
+                            //            focusID = 1;
+                            //        }
+                            //        else if (TempMat.Texture4 == "envr")
+                            //        {
+                            //            focusID = 2;
+                            //        }
+                            //    }
 
-                                matID = (3 * matID) + focusID;
-                                Face.MaterialID = matID;
+                            //    matID = (3 * matID) + focusID;
+                            //    Face.MaterialID = matID;
 
-                                if ((Face.V1 != Face.V2) && (Face.V2 != Face.V3) && (Face.V3 != Face.V1))
-                                {
-                                    NewFaces.Add(Face);
-                                }
-                            }
+                            //    if ((Face.V1 != Face.V2) && (Face.V2 != Face.V3) && (Face.V3 != Face.V1))
+                            //    {
+                            //        NewFaces.Add(Face);
+                            //    }
+                            //}
 
                         }
                     }
@@ -2066,7 +2068,7 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
             public bool ShadowModel;
             public int MorphTargetCount;
             public List<Vector3> IKPoints;
-            public List<TrickyPS2MPF.Face> faces;
+            public List<BaseModel.Face> faces;
         }
 
         public struct VectorPoint

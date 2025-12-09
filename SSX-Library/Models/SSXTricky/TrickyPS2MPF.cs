@@ -6,8 +6,9 @@ using System.Text;
 using System.Threading.Tasks;
 using SSXLibrary.Utilities;
 using System.Numerics;
+using SSX_Library.Models;
 
-namespace SSXLibrary.FileHandlers.Models.Tricky
+namespace SSXLibrary.Models.Tricky
 {
     public class TrickyPS2MPF
     {
@@ -18,7 +19,7 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
         public List<MPFModelHeader> ModelList = new List<MPFModelHeader>();
 
         public float MorphScale = 12f;
-        public void load(string path)
+        public void Load(string path)
         {
             using (Stream stream = File.Open(path, FileMode.Open))
             {
@@ -171,11 +172,11 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
 
                 //Mesh Group Data
                 streamMatrix.Position = Model.MeshGroupOffset;
-                Model.MeshGroups = new List<GroupMainHeader>();
+                Model.MaterialGroup = new List<MaterialGroup>();
                 int NumberWeightRef = 0;
                 for (int a = 0; a < Model.MeshGroupCount; a++)
                 {
-                    var TempChunkData = new GroupMainHeader();
+                    var TempChunkData = new MaterialGroup();
                     TempChunkData.GroupType = StreamUtil.ReadUInt32(streamMatrix);
                     TempChunkData.MaterialID = StreamUtil.ReadUInt32(streamMatrix);
                     TempChunkData.Unknown = StreamUtil.ReadUInt32(streamMatrix);
@@ -184,7 +185,7 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
 
                     int TempPos = (int)streamMatrix.Position;
                     streamMatrix.Position = TempChunkData.LinkOffset;
-                    TempChunkData.meshGroupSubs = new List<WeightRefGroup>();
+                    TempChunkData.WeightGroup = new List<WeightRefGroup>();
                     for (int b = 0; b < TempChunkData.LinkCount; b++)
                     {
                         var TempSubHeader = new WeightRefGroup();
@@ -204,12 +205,12 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
                         }
                         streamMatrix.Position = TempPos1;
                         NumberWeightRef++;
-                        TempChunkData.meshGroupSubs.Add(TempSubHeader);
+                        TempChunkData.WeightGroup.Add(TempSubHeader);
                     }
 
                     streamMatrix.Position = TempPos;
 
-                    Model.MeshGroups.Add(TempChunkData);
+                    Model.MaterialGroup.Add(TempChunkData);
                 }
 
                 //Bone Weight
@@ -260,10 +261,10 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
 
                 for (int ax = 0; ax < Model.MeshGroupCount; ax++)
                 {
-                    var GroupHeader = Model.MeshGroups[ax];
-                    for (int bx = 0; bx < GroupHeader.meshGroupSubs.Count; bx++)
+                    var GroupHeader = Model.MaterialGroup[ax];
+                    for (int bx = 0; bx < GroupHeader.WeightGroup.Count; bx++)
                     {
-                        var SubGroupHeader = GroupHeader.meshGroupSubs[bx];
+                        var SubGroupHeader = GroupHeader.WeightGroup[bx];
                         for (int cx = 0; cx < SubGroupHeader.MeshGroupHeaders.Count; cx++)
                         {
                             var SubSubGroupHeader = SubGroupHeader.MeshGroupHeaders[cx];
@@ -395,60 +396,61 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
                                     SubSubGroupHeader.MorphKeyList.Add(TempMorphKey);
                                 }
                             }
-
-                            for (int b = 0; b < SubSubGroupHeader.staticMesh.Count; b++)
-                            {
-                                SubSubGroupHeader.staticMesh[b] = GenerateFaces(SubSubGroupHeader.staticMesh[b], SubSubGroupHeader.MorphKeyList);
-                            }
                             SubGroupHeader.MeshGroupHeaders[cx] = SubSubGroupHeader;
                         }
-                        GroupHeader.meshGroupSubs[bx] = SubGroupHeader;
+                        GroupHeader.WeightGroup[bx] = SubGroupHeader;
                     }
-                    Model.MeshGroups[ax] = GroupHeader;
+                    Model.MaterialGroup[ax] = GroupHeader;
                 }
-
-
                 ModelList[i] = Model;
             }
-
         }
 
-        public MeshChunk GenerateFaces(MeshChunk models, List<MorphKey> morphPointData)
+        public BaseModel ConvertToBaseModel()
         {
-            var ModelData = models;
-            //Increment Strips
-            List<int> strip2 = new List<int>();
-            strip2.Add(0);
-            foreach (var item in ModelData.Strips)
-            {
-                strip2.Add(strip2[strip2.Count - 1] + item);
-            }
+            BaseModel baseModel = new BaseModel();
 
-            //Make Faces
-            ModelData.faces = new List<Face>();
-            int localIndex = 0;
-            bool Rotation = false;
-            for (int b = 0; b < ModelData.vertices.Count; b++)
-            {
-                if (InsideSplits(b, strip2))
-                {
-                    Rotation = false;
-                    localIndex = 1;
-                    continue;
-                }
-                if (localIndex < 2)
-                {
-                    localIndex++;
-                    continue;
-                }
 
-                ModelData.faces.Add(CreateFaces(b, ModelData, Rotation, morphPointData));
-                Rotation = !Rotation;
-                localIndex++;
-            }
 
-            return ModelData;
+            return baseModel;
         }
+
+        //public MeshChunk GenerateFaces(MeshChunk models, List<MorphKey> morphPointData)
+        //{
+        //    var ModelData = models;
+        //    //Increment Strips
+        //    List<int> strip2 = new List<int>();
+        //    strip2.Add(0);
+        //    foreach (var item in ModelData.Strips)
+        //    {
+        //        strip2.Add(strip2[strip2.Count - 1] + item);
+        //    }
+
+        //    //Make Faces
+        //    ModelData.faces = new List<Face>();
+        //    int localIndex = 0;
+        //    bool Rotation = false;
+        //    for (int b = 0; b < ModelData.vertices.Count; b++)
+        //    {
+        //        if (InsideSplits(b, strip2))
+        //        {
+        //            Rotation = false;
+        //            localIndex = 1;
+        //            continue;
+        //        }
+        //        if (localIndex < 2)
+        //        {
+        //            localIndex++;
+        //            continue;
+        //        }
+
+        //        ModelData.faces.Add(CreateFaces(b, ModelData, Rotation, morphPointData));
+        //        Rotation = !Rotation;
+        //        localIndex++;
+        //    }
+
+        //    return ModelData;
+        //}
         public bool InsideSplits(int Number, List<int> splits)
         {
             foreach (var item in splits)
@@ -460,9 +462,9 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
             }
             return false;
         }
-        public Face CreateFaces(int Index, MeshChunk ModelData, bool roatation, List<MorphKey> morphPointData)
+        public BaseModel.Face CreateFaces(int Index, MeshChunk ModelData, bool roatation, List<MorphKey> morphPointData)
         {
-            Face face = new Face();
+            BaseModel.Face face = new BaseModel.Face();
             int Index1 = 0;
             int Index2 = 0;
             int Index3 = 0;
@@ -486,27 +488,15 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
             face.V2 = ModelData.vertices[Index2];
             face.V3 = ModelData.vertices[Index3];
 
-            face.V1Pos = Index1;
-            face.V2Pos = Index2;
-            face.V3Pos = Index3;
-
             if (ModelData.uv.Count != 0)
             {
                 face.UV1 = ModelData.uv[Index1];
                 face.UV2 = ModelData.uv[Index2];
                 face.UV3 = ModelData.uv[Index3];
 
-                face.UV1Pos = Index1;
-                face.UV2Pos = Index2;
-                face.UV3Pos = Index3;
-
                 face.Normal1 = ModelData.uvNormals[Index1];
                 face.Normal2 = ModelData.uvNormals[Index2];
                 face.Normal3 = ModelData.uvNormals[Index3];
-
-                face.Normal1Pos = Index1;
-                face.Normal2Pos = Index2;
-                face.Normal3Pos = Index3;
 
                 face.Weight1Pos = (int)((face.UV1.Z - 14) / 4);
                 face.Weight2Pos = (int)((face.UV2.Z - 14) / 4);
@@ -687,12 +677,12 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
 
                 int MathOffset = 0;
                 //Mesh Group
-                for (int a = 0; a < Model.MeshGroups.Count; a++)
+                for (int a = 0; a < Model.MaterialGroup.Count; a++)
                 {
                     MathOffset += 4 * 5;
-                    for (int b = 0; b < Model.MeshGroups[a].meshGroupSubs.Count; b++)
+                    for (int b = 0; b < Model.MaterialGroup[a].WeightGroup.Count; b++)
                     {
-                        MathOffset += 8 + Model.MeshGroups[a].meshGroupSubs[b].MeshGroupHeaders.Count *4* 3;
+                        MathOffset += 8 + Model.MaterialGroup[a].WeightGroup[b].MeshGroupHeaders.Count *4* 3;
                     }
                 }
 
@@ -706,12 +696,12 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
                 //Mesh Data Offset
                 Model.MeshDataOffset = (int)ModelStream.Position;
                 bool FirstChunk = false;
-                for (int a = 0; a < Model.MeshGroups.Count; a++)
+                for (int a = 0; a < Model.MaterialGroup.Count; a++)
                 {
-                    var TempMeshGroup = Model.MeshGroups[a];
-                    for (int b = 0; b < TempMeshGroup.meshGroupSubs.Count; b++)
+                    var TempMeshGroup = Model.MaterialGroup[a];
+                    for (int b = 0; b < TempMeshGroup.WeightGroup.Count; b++)
                     {
-                        var TempSubGroup = TempMeshGroup.meshGroupSubs[b];
+                        var TempSubGroup = TempMeshGroup.WeightGroup[b];
                         for (int c = 0; c < TempSubGroup.MeshGroupHeaders.Count; c++)
                         {
                             var TempGroupHeader = TempSubGroup.MeshGroupHeaders[c];
@@ -950,7 +940,7 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
                                     TempGroupHeader.MorphKeyEntrySize = TempPos - RowCountPos;
                                 }
 
-                                if (a == Model.MeshGroups.Count - 1 && b == TempMeshGroup.meshGroupSubs.Count - 1 && c == TempSubGroup.MeshGroupHeaders.Count - 1)
+                                if (a == Model.MaterialGroup.Count - 1 && b == TempMeshGroup.WeightGroup.Count - 1 && c == TempSubGroup.MeshGroupHeaders.Count - 1)
                                 {
                                     StreamUtil.WriteInt24(ModelStream, 1);
                                     StreamUtil.WriteInt32(ModelStream, 96);
@@ -992,7 +982,7 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
                                 ModelStream.Position -= 1;
                                 StreamUtil.WriteUInt8(ModelStream, 0);
 
-                                if (!FirstChunk || (a == Model.MeshGroups.Count - 1 && b == TempMeshGroup.meshGroupSubs.Count - 1 && c == TempSubGroup.MeshGroupHeaders.Count - 1))
+                                if (!FirstChunk || (a == Model.MaterialGroup.Count - 1 && b == TempMeshGroup.WeightGroup.Count - 1 && c == TempSubGroup.MeshGroupHeaders.Count - 1))
                                 {
                                     StreamUtil.WriteInt24(ModelStream, 1);
                                     StreamUtil.WriteInt32(ModelStream, 96);
@@ -1012,26 +1002,26 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
 
                             TempSubGroup.MeshGroupHeaders[c] = TempGroupHeader;
                         }
-                        TempMeshGroup.meshGroupSubs[b] = TempSubGroup;
+                        TempMeshGroup.WeightGroup[b] = TempSubGroup;
                     }
 
-                    Model.MeshGroups[a] = TempMeshGroup;
+                    Model.MaterialGroup[a] = TempMeshGroup;
                 }
 
                 ModelStream.Position = Model.MeshGroupOffset;
                 //Go to end of structure
-                ModelStream.Position += 4 * 5 * Model.MeshGroups.Count;
-                for (int a = 0; a < Model.MeshGroups.Count; a++)
+                ModelStream.Position += 4 * 5 * Model.MaterialGroup.Count;
+                for (int a = 0; a < Model.MaterialGroup.Count; a++)
                 {
-                    ModelStream.Position += Model.MeshGroups[a].meshGroupSubs.Count*8;
+                    ModelStream.Position += Model.MaterialGroup[a].WeightGroup.Count*8;
                 }
                 //Write End Of structure
-                for (int a = 0; a < Model.MeshGroups.Count; a++)
+                for (int a = 0; a < Model.MaterialGroup.Count; a++)
                 {
-                    var TempMeshGroup = Model.MeshGroups[a];
-                    for (int b = 0; b < TempMeshGroup.meshGroupSubs.Count; b++)
+                    var TempMeshGroup = Model.MaterialGroup[a];
+                    for (int b = 0; b < TempMeshGroup.WeightGroup.Count; b++)
                     {
-                        var TempSubGroup = TempMeshGroup.meshGroupSubs[b];
+                        var TempSubGroup = TempMeshGroup.WeightGroup[b];
                         TempSubGroup.LinkOffset = (int)ModelStream.Position;
                         for (int c = 0; c < TempSubGroup.MeshGroupHeaders.Count; c++)
                         {
@@ -1039,41 +1029,41 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
                             StreamUtil.WriteInt32(ModelStream, TempSubGroup.MeshGroupHeaders[c].MorphKeyOffset);
                             StreamUtil.WriteInt32(ModelStream, TempSubGroup.MeshGroupHeaders[c].MorphKeyEntrySize);
                         }
-                        TempMeshGroup.meshGroupSubs[b] = TempSubGroup;
+                        TempMeshGroup.WeightGroup[b] = TempSubGroup;
                     }
-                    Model.MeshGroups[a] = TempMeshGroup;
+                    Model.MaterialGroup[a] = TempMeshGroup;
                 }
 
 
                 //Goto 2nd part of structure
                 ModelStream.Position = Model.MeshGroupOffset;
-                ModelStream.Position += 4 * 5 * Model.MeshGroups.Count;
+                ModelStream.Position += 4 * 5 * Model.MaterialGroup.Count;
 
                 //Write 2nd part of structure
                 //Write End Of structure
-                for (int a = 0; a < Model.MeshGroups.Count; a++)
+                for (int a = 0; a < Model.MaterialGroup.Count; a++)
                 {
-                    var TempMeshGroup = Model.MeshGroups[a];
+                    var TempMeshGroup = Model.MaterialGroup[a];
                     TempMeshGroup.LinkOffset = (int)ModelStream.Position;
-                    for (int b = 0; b < TempMeshGroup.meshGroupSubs.Count; b++)
+                    for (int b = 0; b < TempMeshGroup.WeightGroup.Count; b++)
                     {
-                        var TempSubGroup = TempMeshGroup.meshGroupSubs[b];
+                        var TempSubGroup = TempMeshGroup.WeightGroup[b];
                         StreamUtil.WriteInt32(ModelStream, TempSubGroup.LinkOffset);
                         StreamUtil.WriteInt32(ModelStream, TempSubGroup.MeshGroupHeaders.Count);
                     }
-                    Model.MeshGroups[a] = TempMeshGroup;
+                    Model.MaterialGroup[a] = TempMeshGroup;
                 }
 
 
                 //Goto start and writestart of structure
                 ModelStream.Position = Model.MeshGroupOffset;
-                for (int a = 0; a < Model.MeshGroups.Count; a++)
+                for (int a = 0; a < Model.MaterialGroup.Count; a++)
                 {
-                    StreamUtil.WriteInt32(ModelStream, Model.MeshGroups[a].GroupType);
-                    StreamUtil.WriteInt32(ModelStream, Model.MeshGroups[a].MaterialID);
-                    StreamUtil.WriteInt32(ModelStream, Model.MeshGroups[a].Unknown);
-                    StreamUtil.WriteInt32(ModelStream, Model.MeshGroups[a].meshGroupSubs.Count);
-                    StreamUtil.WriteInt32(ModelStream, Model.MeshGroups[a].LinkOffset);
+                    StreamUtil.WriteInt32(ModelStream, Model.MaterialGroup[a].GroupType);
+                    StreamUtil.WriteInt32(ModelStream, Model.MaterialGroup[a].MaterialID);
+                    StreamUtil.WriteInt32(ModelStream, Model.MaterialGroup[a].Unknown);
+                    StreamUtil.WriteInt32(ModelStream, Model.MaterialGroup[a].WeightGroup.Count);
+                    StreamUtil.WriteInt32(ModelStream, Model.MaterialGroup[a].LinkOffset);
                 }
                 ModelStream.Position = 0;
                 Model.EntrySize = (int)ModelStream.Length;
@@ -1103,7 +1093,7 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
 
                 StreamUtil.WriteInt16(stream, ModelList[i].boneWeightHeader.Count);
                 StreamUtil.WriteInt16(stream, ModelList[i].numberListRefs.Count);
-                StreamUtil.WriteInt16(stream, ModelList[i].MeshGroups.Count);
+                StreamUtil.WriteInt16(stream, ModelList[i].MaterialGroup.Count);
                 StreamUtil.WriteInt16(stream, ModelList[i].boneDatas.Count);
                 StreamUtil.WriteInt16(stream, ModelList[i].materialDatas.Count);
                 StreamUtil.WriteInt16(stream, ModelList[i].iKPoints.Count);
@@ -1126,7 +1116,6 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
             stream.Dispose();
             file.Close();
         }
-
 
 
         public struct MPFModelHeader
@@ -1158,7 +1147,7 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
             public List<MaterialData> materialDatas;
             public List<BoneData> boneDatas;
             public List<Vector3> iKPoints;
-            public List<GroupMainHeader> MeshGroups;
+            public List<MaterialGroup> MaterialGroup;
             public List<BoneWeightHeader> boneWeightHeader;
             public List<WeightRefList> numberListRefs;
         }
@@ -1213,7 +1202,7 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
         }
 
 
-        public struct GroupMainHeader
+        public struct MaterialGroup
         {
             public int GroupType; //1 Standard, 17 Shadow, 256 Morph
             public int MaterialID;
@@ -1221,7 +1210,7 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
             public int LinkCount;
             public int LinkOffset;
 
-            public List<WeightRefGroup> meshGroupSubs;
+            public List<WeightRefGroup> WeightGroup;
         }
 
         public struct WeightRefGroup
@@ -1286,53 +1275,8 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
             public List<Vector4> uv;
             public List<Vector3> vertices;
             public List<int> Weights;
-            public List<Face> faces;
             public List<Vector3> uvNormals;
             public List<MorphKey> MorphKeys;
-        }
-
-
-        public struct Face
-        {
-            public bool tristripped;
-
-            public Vector3 V1;
-            public Vector3 V2;
-            public Vector3 V3;
-
-            public int V1Pos;
-            public int V2Pos;
-            public int V3Pos;
-
-            public Vector4 UV1;
-            public Vector4 UV2;
-            public Vector4 UV3;
-
-            public int UV1Pos;
-            public int UV2Pos;
-            public int UV3Pos;
-
-            public Vector3 Normal1;
-            public Vector3 Normal2;
-            public Vector3 Normal3;
-
-            public int Normal1Pos;
-            public int Normal2Pos;
-            public int Normal3Pos;
-
-            public BoneWeightHeader Weight1;
-            public BoneWeightHeader Weight2;
-            public BoneWeightHeader Weight3;
-
-            public int Weight1Pos;
-            public int Weight2Pos;
-            public int Weight3Pos;
-
-            public List<Vector3> MorphPoint1;
-            public List<Vector3> MorphPoint2;
-            public List<Vector3> MorphPoint3;
-
-            public int MaterialID;
         }
     }
 }
