@@ -40,11 +40,6 @@ namespace SSX_Library.Models
             public float Unused2Float;
         }
 
-        public struct BoneWeightList
-        {
-            public List<BoneWeight> boneWeights;
-        }
-
         public struct BoneWeight
         {
             public int Weight;
@@ -68,9 +63,9 @@ namespace SSX_Library.Models
             public Vector3 Normal2;
             public Vector3 Normal3;
 
-            public BoneWeightList Weight1;
-            public BoneWeightList Weight2;
-            public BoneWeightList Weight3;
+            public List<BoneWeight> Weight1;
+            public List<BoneWeight> Weight2;
+            public List<BoneWeight> Weight3;
 
             public List<Vector3> MorphPoint1;
             public List<Vector3> MorphPoint2;
