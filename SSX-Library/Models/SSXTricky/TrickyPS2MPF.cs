@@ -1,18 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using SSXLibrary.Utilities;
+﻿using SSXLibrary.Utilities;
 using System.Numerics;
 using SSX_Library.Models;
+using SSX_Library.Utilities;
 
 namespace SSXLibrary.Models.Tricky
 {
     public class TrickyPS2MPF
     {
-        public int U1;
+        public int Version;
         public int HeaderCount;
         public int HeaderOffset;
         public int FileStart;
@@ -23,7 +18,7 @@ namespace SSXLibrary.Models.Tricky
         {
             using (Stream stream = File.Open(path, FileMode.Open))
             {
-                U1 = StreamUtil.ReadUInt32(stream);
+                Version = StreamUtil.ReadUInt32(stream);
                 HeaderCount = StreamUtil.ReadInt16(stream);
                 HeaderOffset = StreamUtil.ReadInt16(stream);
                 FileStart = StreamUtil.ReadUInt32(stream);
@@ -406,51 +401,119 @@ namespace SSXLibrary.Models.Tricky
             }
         }
 
-        public BaseModel ConvertToBaseModel()
+        public BaseModel ConvertToBaseModel(int ModelIndex)
         {
             BaseModel baseModel = new BaseModel();
 
+            var MPFModel = ModelList[ModelIndex];
 
+            baseModel.name = MPFModel.FileName;
+            baseModel.shadowModel = MPFModel.FileName.Contains("Shdw");
+            baseModel.morphCount = MPFModel.MorphKeyCount;
+
+            baseModel.materials = new List<BaseModel.Material>();
+
+            for (int i = 0; i < MPFModel.materialDatas.Count; i++)
+            {
+                var NewMaterial = new BaseModel.Material();
+
+                NewMaterial.Texture1 = MPFModel.materialDatas[i].Texture1;
+                NewMaterial.Texture2 = MPFModel.materialDatas[i].Texture2;
+                NewMaterial.Texture3 = MPFModel.materialDatas[i].Texture3;
+                NewMaterial.Texture4 = MPFModel.materialDatas[i].Texture4;
+
+                NewMaterial.FactorFloat = MPFModel.materialDatas[i].FactorFloat;
+                NewMaterial.Unused1Float = MPFModel.materialDatas[i].Unused1Float;
+                NewMaterial.Unused2Float = MPFModel.materialDatas[i].Unused2Float;
+
+                baseModel.materials.Add(NewMaterial);
+            }
+
+            baseModel.bones = new List<BaseModel.Bones>();
+
+            for (int i = 0; i < MPFModel.boneDatas.Count; i++)
+            {
+                var NewBone = new BaseModel.Bones();
+
+                NewBone.ID = MPFModel.boneDatas[i].BoneID;
+                NewBone.FileID = MPFModel.boneDatas[i].FileID;
+                NewBone.ParentFileID = MPFModel.boneDatas[i].ParentFileID;
+                NewBone.ParentID = MPFModel.boneDatas[i].ParentBone;
+
+                NewBone.Name = MPFModel.boneDatas[i].BoneName;
+                NewBone.Position = MPFModel.boneDatas[i].Position;
+
+                float tempX = MPFModel.boneDatas[i].Radians.X;
+                float tempY = MPFModel.boneDatas[i].Radians.Y;
+                float tempZ = MPFModel.boneDatas[i].Radians.Z;
+
+                NewBone.Quaternion = Euler.ToQuaternion(new Vector3(-tempX, -tempY, -tempZ));
+
+                baseModel.bones.Add(NewBone);
+            }
+
+            baseModel.iKPoints = new List<Vector3>();
+            for (int i = 0; i < MPFModel.iKPoints.Count; i++)
+            {
+                baseModel.iKPoints.Add(MPFModel.iKPoints[i]);
+            }
+
+            baseModel.faces = new List<BaseModel.Face>();
+
+            //Convert Faces
+            foreach (var MatGroup in MPFModel.MaterialGroup)
+            {
+                foreach (var weightGroup in MatGroup.WeightGroup)
+                {
+                    foreach (var meshGroup in weightGroup.MeshGroupHeaders)
+                    {
+                        foreach (var staticMesh in meshGroup.staticMesh)
+                        {
+                            baseModel.faces.AddRange(GenerateFaces(staticMesh, meshGroup.MorphKeyList, MPFModel.boneWeightHeader));
+                        }
+                    }
+                }
+            }
 
             return baseModel;
         }
 
-        //public MeshChunk GenerateFaces(MeshChunk models, List<MorphKey> morphPointData)
-        //{
-        //    var ModelData = models;
-        //    //Increment Strips
-        //    List<int> strip2 = new List<int>();
-        //    strip2.Add(0);
-        //    foreach (var item in ModelData.Strips)
-        //    {
-        //        strip2.Add(strip2[strip2.Count - 1] + item);
-        //    }
+        public List<BaseModel.Face> GenerateFaces(MeshChunk models, List<MorphKey> morphPointData, List<BoneWeightHeader> boneWeightHeaders)
+        {
+            var ModelData = models;
+            //Increment Strips
+            List<int> strip2 = new List<int>();
+            strip2.Add(0);
+            foreach (var item in ModelData.Strips)
+            {
+                strip2.Add(strip2[strip2.Count - 1] + item);
+            }
 
-        //    //Make Faces
-        //    ModelData.faces = new List<Face>();
-        //    int localIndex = 0;
-        //    bool Rotation = false;
-        //    for (int b = 0; b < ModelData.vertices.Count; b++)
-        //    {
-        //        if (InsideSplits(b, strip2))
-        //        {
-        //            Rotation = false;
-        //            localIndex = 1;
-        //            continue;
-        //        }
-        //        if (localIndex < 2)
-        //        {
-        //            localIndex++;
-        //            continue;
-        //        }
+            //Make Faces
+            List<BaseModel.Face> faces = new List<BaseModel.Face>();
+            int localIndex = 0;
+            bool Rotation = false;
+            for (int b = 0; b < ModelData.vertices.Count; b++)
+            {
+                if (InsideSplits(b, strip2))
+                {
+                    Rotation = false;
+                    localIndex = 1;
+                    continue;
+                }
+                if (localIndex < 2)
+                {
+                    localIndex++;
+                    continue;
+                }
 
-        //        ModelData.faces.Add(CreateFaces(b, ModelData, Rotation, morphPointData));
-        //        Rotation = !Rotation;
-        //        localIndex++;
-        //    }
+                faces.Add(CreateFaces(b, ModelData, Rotation, morphPointData, boneWeightHeaders));
+                Rotation = !Rotation;
+                localIndex++;
+            }
 
-        //    return ModelData;
-        //}
+            return faces;
+        }
         public bool InsideSplits(int Number, List<int> splits)
         {
             foreach (var item in splits)
@@ -462,7 +525,7 @@ namespace SSXLibrary.Models.Tricky
             }
             return false;
         }
-        public BaseModel.Face CreateFaces(int Index, MeshChunk ModelData, bool roatation, List<MorphKey> morphPointData)
+        public BaseModel.Face CreateFaces(int Index, MeshChunk ModelData, bool roatation, List<MorphKey> morphPointData, List<BoneWeightHeader> boneWeightHeaders)
         {
             BaseModel.Face face = new BaseModel.Face();
             int Index1 = 0;
@@ -490,23 +553,31 @@ namespace SSXLibrary.Models.Tricky
 
             if (ModelData.uv.Count != 0)
             {
-                //face.UV1 = ModelData.uv[Index1];
-                //face.UV2 = ModelData.uv[Index2];
-                //face.UV3 = ModelData.uv[Index3];
+                face.UV1 = new Vector2(ModelData.uv[Index1].X, ModelData.uv[Index1].Y);
+                face.UV2 = new Vector2(ModelData.uv[Index2].X, ModelData.uv[Index2].Y);
+                face.UV3 = new Vector2(ModelData.uv[Index3].X, ModelData.uv[Index3].Y);
 
                 face.Normal1 = ModelData.uvNormals[Index1];
                 face.Normal2 = ModelData.uvNormals[Index2];
                 face.Normal3 = ModelData.uvNormals[Index3];
 
-                //face.Weight1 = (int)((face.UV1.Z - 14) / 4);
-                //face.Weight2 = (int)((face.UV2.Z - 14) / 4);
-                //face.Weight3 = (int)((face.UV3.Z - 14) / 4);
+                int WeightIndex1 = ModelData.weightsInts[(int)((ModelData.uv[Index1].Z - 14) / 4)];
+                int WeightIndex2 = ModelData.weightsInts[(int)((ModelData.uv[Index1].Z - 14) / 4)];
+                int WeightIndex3 = ModelData.weightsInts[(int)((ModelData.uv[Index1].Z - 14) / 4)];
+
+                face.Weight1 = WeightToStandardWeights(boneWeightHeaders[WeightIndex1]);
+                face.Weight2 = WeightToStandardWeights(boneWeightHeaders[WeightIndex2]);
+                face.Weight3 = WeightToStandardWeights(boneWeightHeaders[WeightIndex3]);
             }
             else
             {
-                //face.Weight1 = (ModelData.Weights[Index1] - 14) /4;
-                //face.Weight2 = (ModelData.Weights[Index2] - 14) / 4;
-                //face.Weight3 = (ModelData.Weights[Index3] - 14) / 4;
+                int WeightIndex1 = ModelData.weightsInts[(ModelData.Weights[Index1] - 14) / 4];
+                int WeightIndex2 = ModelData.weightsInts[(ModelData.Weights[Index2] - 14) / 4];
+                int WeightIndex3 = ModelData.weightsInts[(ModelData.Weights[Index3] - 14) / 4];
+
+                face.Weight1 = WeightToStandardWeights(boneWeightHeaders[WeightIndex1]);
+                face.Weight2 = WeightToStandardWeights(boneWeightHeaders[WeightIndex2]);
+                face.Weight3 = WeightToStandardWeights(boneWeightHeaders[WeightIndex3]);
             }
 
             if(morphPointData!=null)
@@ -524,6 +595,24 @@ namespace SSXLibrary.Models.Tricky
             }
 
             return face;
+        }
+
+        public List<BaseModel.BoneWeight> WeightToStandardWeights(BoneWeightHeader boneWeightHeader)
+        {
+            List<BaseModel.BoneWeight> boneWeights = new List<BaseModel.BoneWeight>();
+
+            for (int i = 0; i < boneWeightHeader.boneWeights.Count; i++)
+            {
+                BaseModel.BoneWeight boneWeight = new BaseModel.BoneWeight();
+
+                boneWeight.Weight = boneWeightHeader.boneWeights[i].Weight;
+                boneWeight.BoneID = boneWeightHeader.boneWeights[i].BoneID;
+                boneWeight.FileID = boneWeightHeader.boneWeights[i].FileID;
+
+                boneWeights.Add(boneWeight);
+            }
+
+            return boneWeights;
         }
 
         //Within the entire saving there are only 2 issues one byte that seems to change what it is when ever it feels like it
@@ -1215,8 +1304,6 @@ namespace SSXLibrary.Models.Tricky
 
         public struct WeightRefGroup
         {
-            public List<int> weights;
-
             public int LinkOffset;
             public int LinkCount;
 

@@ -11,8 +11,8 @@ namespace SSX_Library.Models
     {
         public string name = "";
 
-        public bool ShadowModel;
-        public int MorphCount;
+        public bool shadowModel;
+        public int morphCount;
 
         public List<Material> materials = new List<Material>();
         public List<Bones> bones = new List<Bones>();
@@ -21,13 +21,15 @@ namespace SSX_Library.Models
 
         public struct Bones
         {
+            public int FileID;
             public int ID;
+
+            public int ParentFileID;
             public int ParentID;
+
             public string Name;
             public Vector3 Position;
-            public Vector3 Radians;
-
-            public int FileID;
+            public Quaternion Quaternion;
         }
 
         public struct Material
