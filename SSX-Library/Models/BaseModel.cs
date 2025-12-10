@@ -12,7 +12,7 @@ namespace SSX_Library.Models
         public string name = "";
 
         public bool ShadowModel;
-        public int ShapeCount;
+        public int MorphCount;
 
         public List<Material> materials = new List<Material>();
         public List<Bones> bones = new List<Bones>();
