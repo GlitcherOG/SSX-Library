@@ -11,6 +11,9 @@ namespace SSX_Library.Models
     {
         public string name = "";
 
+        public bool ShadowModel;
+        public int ShapeCount;
+
         public List<Material> materials = new List<Material>();
         public List<Bones> bones = new List<Bones>();
         public List<Vector3> iKPoints = new List<Vector3>();
@@ -55,9 +58,9 @@ namespace SSX_Library.Models
             public Vector3 V2;
             public Vector3 V3;
 
-            public Vector4 UV1;
-            public Vector4 UV2;
-            public Vector4 UV3;
+            public Vector2 UV1;
+            public Vector2 UV2;
+            public Vector2 UV3;
 
             public Vector3 Normal1;
             public Vector3 Normal2;
@@ -73,6 +76,5 @@ namespace SSX_Library.Models
 
             public int MaterialID;
         }
-
     }
 }

@@ -490,9 +490,9 @@ namespace SSXLibrary.Models.Tricky
 
             if (ModelData.uv.Count != 0)
             {
-                face.UV1 = ModelData.uv[Index1];
-                face.UV2 = ModelData.uv[Index2];
-                face.UV3 = ModelData.uv[Index3];
+                //face.UV1 = ModelData.uv[Index1];
+                //face.UV2 = ModelData.uv[Index2];
+                //face.UV3 = ModelData.uv[Index3];
 
                 face.Normal1 = ModelData.uvNormals[Index1];
                 face.Normal2 = ModelData.uvNormals[Index2];
