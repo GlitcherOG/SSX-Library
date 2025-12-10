@@ -498,15 +498,15 @@ namespace SSXLibrary.Models.Tricky
                 face.Normal2 = ModelData.uvNormals[Index2];
                 face.Normal3 = ModelData.uvNormals[Index3];
 
-                face.Weight1Pos = (int)((face.UV1.Z - 14) / 4);
-                face.Weight2Pos = (int)((face.UV2.Z - 14) / 4);
-                face.Weight3Pos = (int)((face.UV3.Z - 14) / 4);
+                //face.Weight1 = (int)((face.UV1.Z - 14) / 4);
+                //face.Weight2 = (int)((face.UV2.Z - 14) / 4);
+                //face.Weight3 = (int)((face.UV3.Z - 14) / 4);
             }
             else
             {
-                face.Weight1Pos = (ModelData.Weights[Index1] - 14) /4;
-                face.Weight2Pos = (ModelData.Weights[Index2] - 14) / 4;
-                face.Weight3Pos = (ModelData.Weights[Index3] - 14) / 4;
+                //face.Weight1 = (ModelData.Weights[Index1] - 14) /4;
+                //face.Weight2 = (ModelData.Weights[Index2] - 14) / 4;
+                //face.Weight3 = (ModelData.Weights[Index3] - 14) / 4;
             }
 
             if(morphPointData!=null)

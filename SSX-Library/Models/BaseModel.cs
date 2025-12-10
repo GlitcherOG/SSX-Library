@@ -9,9 +9,10 @@ namespace SSX_Library.Models
 {
     public class BaseModel
     {
+        public string name = "";
+
         public List<Material> materials = new List<Material>();
         public List<Bones> bones = new List<Bones>();
-        public List<BoneWeightList> boneWeightLists = new List<BoneWeightList>();
         public List<Vector3> iKPoints = new List<Vector3>();
         public List<Face> faces = new List<Face>();
 
@@ -67,9 +68,9 @@ namespace SSX_Library.Models
             public Vector3 Normal2;
             public Vector3 Normal3;
 
-            public int Weight1Pos;
-            public int Weight2Pos;
-            public int Weight3Pos;
+            public BoneWeightList Weight1;
+            public BoneWeightList Weight2;
+            public BoneWeightList Weight3;
 
             public List<Vector3> MorphPoint1;
             public List<Vector3> MorphPoint2;
