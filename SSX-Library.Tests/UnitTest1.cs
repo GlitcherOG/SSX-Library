@@ -1,4 +1,5 @@
-using System.Numerics;
+using SSXLibrary.Models.Tricky;
+using System.Diagnostics;
 
 namespace SSX_Library.Tests;
 
@@ -11,12 +12,21 @@ public class UnitTest1
     }
 
     [Fact]
-    public void Test2()
+    public void ExtractTest()
     {
-        EATextureLibrary.EANewShapeHandler eANewShapeHandler = new EATextureLibrary.EANewShapeHandler();
+        //This going to suck
+        TrickyPS2MPF trickyPS2MPF = new TrickyPS2MPF();
+        trickyPS2MPF.Load("");
 
-        eANewShapeHandler.LoadShape("G:\\SSX Modding\\disk\\SSX On Tour\\DATA\\TEXTURES\\Texture\\Full Range.ssh");
+        var Model = trickyPS2MPF.ConvertToBaseModel(0);
 
-        eANewShapeHandler.ExtractImage("G:\\SSX Modding\\disk\\SSX On Tour\\DATA\\TEXTURES\\Texture\\Full Range");
+        string TestModel = Model.ValidFile();
+
+        if(TestModel!="")
+        {
+            Debug.WriteLine(TestModel);
+            throw new System.Exception(TestModel);
+        }
+
     }
 }
