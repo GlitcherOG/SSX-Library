@@ -38,6 +38,18 @@ internal static class Reader
         };
     }
 
+    public static string ReadNullTerminatedASCIIString(Stream stream)
+    {
+        List<byte> text = [];
+        while (true)
+        {
+            int letter = stream.ReadByte();
+            if (letter <= 0) break;
+            text.Add((byte)letter);
+        }
+        return System.Text.Encoding.ASCII.GetString([..text]);
+    }
+
 
 
 }

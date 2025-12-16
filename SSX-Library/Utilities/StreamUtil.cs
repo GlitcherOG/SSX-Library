@@ -7,6 +7,7 @@ namespace SSXLibrary.Utilities
     class StreamUtil
     {
         #region Read
+        [Obsolete("This function is defective. Use Reader.ReadNullTerminatedASCIIString Instead.")]
         public static string ReadNullEndString(Stream stream)
         {
             bool tillNull = false;

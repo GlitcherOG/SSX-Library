@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Immutable;
 using System.Text;
 using SSX_Library.Utilities;
@@ -16,7 +15,7 @@ namespace SSX_Library;
 
     TextEntryCount is only updated when calling Save().
 
-More Info: https://ssx.computernewb.com/wiki/Formats/Common:LOC
+    More Info: https://ssx.computernewb.com/wiki/Formats/Common:LOC
 */
 
 /// <summary>
