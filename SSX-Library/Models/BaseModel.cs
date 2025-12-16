@@ -14,6 +14,63 @@ namespace SSX_Library.Models
         public List<Vector3> iKPoints = new List<Vector3>();
         public List<Face> faces = new List<Face>();
 
+        public void BoneAdd(List<Bones> NewBones)
+        {
+            bones.AddRange(NewBones);
+
+            ReshuffleBones();
+        }
+
+        public void ReshuffleBones()
+        {
+            List<Bones> TempBoneDatas = new List<Bones>();
+            //Add Bones with no Parents
+            List<int> RemoveInts = new List<int>();
+            for (int i = 0; i < bones.Count; i++)
+            {
+                if (bones[i].ParentFileID == -1 && bones[i].ParentID == -1)
+                {
+                    TempBoneDatas.Add(bones[i]);
+                    RemoveInts.Add(i - RemoveInts.Count);
+                }
+            }
+
+            for (int i = 0; i < RemoveInts.Count; i++)
+            {
+                bones.RemoveAt(RemoveInts[i]);
+            }
+
+            while (true)
+            {
+                for (int i = 0; i < bones.Count; i++)
+                {
+                    bool TestDone = false;
+                    for (int a = 0; a < TempBoneDatas.Count; a++)
+                    {
+                        if (bones[i].ParentFileID == TempBoneDatas[a].FileID && bones[i].ParentID == TempBoneDatas[a].ID)
+                        {
+                            TempBoneDatas.Add(bones[i]);
+                            bones.RemoveAt(i);
+                            TestDone = true;
+                            break;
+                        }
+
+                    }
+                    if (TestDone)
+                    {
+                        break;
+                    }
+                }
+
+                if (bones.Count == 0)
+                {
+                    break;
+                }
+            }
+
+            bones = TempBoneDatas;
+        }
+
         public string ValidFile()
         {
             //Check Bones
