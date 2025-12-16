@@ -26,6 +26,7 @@ namespace SSXLibrary.Utilities
             stream.Position -= a + 1;
             byte[] FilePath = new byte[a];
             stream.Read(FilePath, 0, a);
+            stream.Position++;
             return Encoding.ASCII.GetString(FilePath);
         }
 

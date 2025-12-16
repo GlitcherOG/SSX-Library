@@ -68,7 +68,6 @@ namespace SSXLibrary.FileHandlers
 
                 temp.path = StreamUtil.ReadNullEndString(stream);
                 bigFiles.Add(temp);
-                stream.Position += 1;
             }
 
             bigHeader.footer = new byte[8];
@@ -108,7 +107,6 @@ namespace SSXLibrary.FileHandlers
 
                 temp.path = StreamUtil.ReadNullEndString(stream);
                 bigFiles.Add(temp);
-                stream.Position += 1;
             }
 
             for (int i = 0; i < bigHeader.fileCount; i++)

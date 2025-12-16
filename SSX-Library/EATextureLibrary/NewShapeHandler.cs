@@ -42,8 +42,6 @@ namespace SSX_Library.EATextureLibrary
 
                         tempImage.Shortname = StreamUtil.ReadNullEndString(stream);
 
-                        stream.Position++;
-
                         ShapeImages.Add(tempImage);
                     }
 
