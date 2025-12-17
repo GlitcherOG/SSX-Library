@@ -14,6 +14,30 @@ internal static class Reader
         return buf;
     }
 
+    public static uint ReadUInt16(Stream stream, ByteOrder byteOrder)
+    {
+        var buf = new byte[2];
+        stream.Read(buf);
+        return byteOrder switch
+        {
+            ByteOrder.BigEndian => BinaryPrimitives.ReadUInt16BigEndian(buf),
+            ByteOrder.LittleEndian => BinaryPrimitives.ReadUInt16LittleEndian(buf),
+            _ => 0
+        };
+    }
+
+    public static uint ReadUInt24(Stream stream, ByteOrder byteOrder)
+    {
+        var buf = new byte[3];
+        stream.Read(buf);
+        return byteOrder switch
+        {
+            ByteOrder.BigEndian => (uint)(buf[0] << 16 | buf[1] << 8 | buf[2]),
+            ByteOrder.LittleEndian => (uint)(buf[2] << 16 | buf[1] << 8 | buf[0]),
+            _ => 0
+        };
+    }
+
     public static uint ReadUInt32(Stream stream, ByteOrder byteOrder)
     {
         var buf = new byte[4];

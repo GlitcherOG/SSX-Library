@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using SSXLibrary.Utilities;
+using SSX_Library;
 
 namespace SSXLibrary.FileHandlers
 {
@@ -434,13 +435,6 @@ namespace SSXLibrary.FileHandlers
             public int size;
             public int offset;
             public int UncompressedSize;
-        }
-
-        public enum BigType
-        {
-            BIGF,
-            C0FB,
-            BIG4
         }
     }
 
