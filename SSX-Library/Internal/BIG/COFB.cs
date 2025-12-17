@@ -6,7 +6,6 @@ using SSX_Library.Utilities;
 
 namespace SSX_Library.Internal.BIG;
 
-
 /// <summary>
 /// Handles COFB type big files.
 /// </summary>
@@ -17,6 +16,9 @@ internal sealed class COFB
     private List<MemberFileHeader> _memberFiles = [];
     private List<MemberFileData> _memberFilesData = [];
 
+    /// <summary>
+    /// Load Big from a stream.
+    /// </summary>
     public void LoadFromStream(Stream stream)
     {
         // Confirm magic signature is valid
@@ -60,12 +62,34 @@ internal sealed class COFB
         }
     }
 
-    public void LoadFromFolder()
+    /// <summary>
+    /// Save Big to a stream.
+    /// </summary>
+    public void SaveToStream(Stream stream)
     {
         
     }
 
-    
+    /// <summary>
+    /// Create and load from a folder on disk.
+    /// </summary>
+    public void CreateFromFolder(string folderPath)
+    {
+        
+    }
+
+    /// <summary>
+    /// Extracts member files into the game's folder.
+    /// </summary>
+    /// <param name="gameRootPath"> The folder path to the game 
+    /// (e.g. where the .elf and data folder is)</param>
+    public void ExtractToGameFolder(string gameRootPath)
+    {
+        
+    }
+
+
+
 
     private struct COFBHeader
     {
