@@ -14,7 +14,8 @@ internal sealed class COFB
 {
     private readonly ImmutableArray<byte> _magic = [0xC0, 0xFB];
     private COFBHeader _bigHeader;
-    private List<MemberFIleHeader> _memberFiles = [];
+    private List<MemberFileHeader> _memberFiles = [];
+    private List<MemberFileData> _memberFilesData = [];
 
     public void LoadFromStream(Stream stream)
     {
@@ -34,10 +35,10 @@ internal sealed class COFB
         };
 
         // Read Member file headers
-        _memberFiles = [];
-        for (int i = 0; i <_bigHeader.fileCount; i++)
+        _memberFilesData = [];
+        for (int _ = 0; _ < _bigHeader.fileCount; _++)
         {
-            MemberFIleHeader file = new()
+            MemberFileHeader file = new()
             {
                 offset = Reader.ReadUInt24(stream, ByteOrder.BigEndian),
                 size = Reader.ReadUInt24(stream, ByteOrder.BigEndian),
@@ -45,19 +46,36 @@ internal sealed class COFB
             };
             _memberFiles.Add(file);
         }
+
+        // Read member files data
+        _memberFiles = [];
+        foreach (var file in _memberFiles)
+        {
+            stream.Position = file.offset;
+            MemberFileData data = new()
+            {
+                data = Reader.ReadBytes(stream, (int)file.size)
+            };
+            _memberFilesData.Add(data);
+        }
     }
 
+    public void LoadFromFolder()
+    {
+        
+    }
 
+    
 
     private struct COFBHeader
     {
         public byte[] magic; // Size 2
         public uint footerOffset;  // Relative to this value's end
         public uint fileCount;
-        public MemberFIleHeader[] files;
+        public MemberFileHeader[] files;
     }
 
-    private struct MemberFIleHeader
+    private struct MemberFileHeader
     {
         public uint offset; // Position of file data
         public uint size; // Size of file data

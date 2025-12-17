@@ -54,10 +54,10 @@ public sealed class LOC
     /// <summary>
     /// Load an LOC file from disk to memory.
     /// </summary>
-    /// <param name="path"> Path to the LOC file on disk.</param>
-    public void Load(string path)
+    /// <param name="filePath"> Path to the LOC file on disk.</param>
+    public void Load(string filePath)
     {
-        using FileStream stream = File.OpenRead(path);
+        using FileStream stream = File.OpenRead(filePath);
 
         // Confirm LOCH signature was found
         var magicLOCH = Reader.ReadBytes(stream, 4);
@@ -165,11 +165,11 @@ public sealed class LOC
     /// <summary>
     /// Save an LOC file from memory to disk.
     /// </summary>
-    /// <param name="path">Path to save the LOC. If empty it will save to the same place
+    /// <param name="filePath">Path to save the LOC. If empty it will save to the same place
     /// it was loaded from. </param>
-    public void Save(string path)
+    public void Save(string filePath)
     {
-        using FileStream stream = File.Create(path);
+        using FileStream stream = File.Create(filePath);
 
         // Save LOCH
         Writer.WriteBytes(stream, [.._locHMagicWord]);
