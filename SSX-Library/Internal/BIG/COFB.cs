@@ -9,12 +9,43 @@ namespace SSX_Library.Internal.BIG;
 /// <summary>
 /// Handles COFB type big files.
 /// </summary>
-internal sealed class COFB
+internal static class COFB
 {
-    private readonly ImmutableArray<byte> _magic = [0xC0, 0xFB];
-    private COFBHeader _bigHeader;
-    private List<MemberFileHeader> _memberFiles = [];
-    private List<MemberFileData> _memberFilesData = [];
+    private static readonly ImmutableArray<byte> _magic = [0xC0, 0xFB];
+
+    /// <summary>
+    /// Get a list of info for the member files inside a big file.
+    /// </summary>
+    /// <param name="stream">The file stream to read from.</param>
+    public static List<MemberFileInfo> GetMembersInfo(Stream stream)
+    {
+        // Confirm magic signature is valid
+        byte[] magic = new byte[2];
+        stream.Read(magic);
+        if (magic[0] != _magic[0] || magic[1] != _magic[1])
+        {
+            throw new InvalidDataException("Invalid C0FB signature.");
+        }
+
+        // Read Big Header
+        stream.Position += 2; // footerOffset u16
+        var fileCount = Reader.ReadUInt16(stream, ByteOrder.BigEndian); // fileCount
+
+        // Read Member file headers
+        List<MemberFileInfo> info = [];
+        for (int _ = 0; _ < fileCount; _++)
+        {
+            stream.Position += 3; // offset u24
+            MemberFileInfo file = new()
+            {
+                size = Reader.ReadUInt24(stream, ByteOrder.BigEndian),
+                path = Reader.ReadNullTerminatedASCIIString(stream),
+            };
+            info.Add(file);
+        }
+        return info;
+    }
+
 
     /// <summary>
     /// Load Big from a stream.
@@ -89,7 +120,11 @@ internal sealed class COFB
     }
 
 
-
+    public struct MemberFileInfo
+    {
+        public string path;
+        public uint size;
+    }
 
     private struct COFBHeader
     {
@@ -110,4 +145,6 @@ internal sealed class COFB
     {
         public byte[] data;
     }
+
+
 }
