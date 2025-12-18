@@ -190,12 +190,6 @@ public static class COFB
         public string path;
         public uint size;
     }
-    // <summary>
-    // Extracts member files into the game's folder.
-    // </summary>
-    ///
-    // <param name="gameRootPath"> The folder path to the game 
-    // (i.e. where the .elf and data folder is)</param>
 
     private struct COFBHeader
     {
