@@ -171,13 +171,17 @@ public static class COFB
             }
 
             // Create file
-            string systemPath = Path.Join(folderPath, memberFileHeader.path);
-            if (File.Exists(systemPath))
+            string filename = memberFileHeader.path;
+            string folderDirectory = Path.GetDirectoryName(folderPath) ?? "";
+            string combinedPath = Path.Join(folderDirectory, filename);
+
+            if (!Directory.Exists(Path.GetDirectoryName(combinedPath) ?? ""))
             {
-                var file = File.Create(systemPath);
-                file.Write(data);
-                file.Close();
+                Directory.CreateDirectory(Path.GetDirectoryName(combinedPath) ?? "");
             }
+            var file = File.Create(combinedPath);
+            file.Write(data);
+            file.Close();
         }
     }
 
