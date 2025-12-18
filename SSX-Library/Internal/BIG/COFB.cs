@@ -3,20 +3,21 @@
 
 using System.Collections.Immutable;
 using SSX_Library.Utilities;
+using SSXLibrary.FileHandlers;
 
 namespace SSX_Library.Internal.BIG;
 
 /// <summary>
 /// Handles COFB type big files.
 /// </summary>
-internal static class COFB
+public static class COFB
 {
     private static readonly ImmutableArray<byte> _magic = [0xC0, 0xFB];
 
     /// <summary>
     /// Get a list of info for the member files inside a big file.
     /// </summary>
-    /// <param name="stream">The file stream to read from.</param>
+    /// <param name="stream">The big file stream to read from.</param>
     public static List<MemberFileInfo> GetMembersInfo(Stream stream)
     {
         // Confirm magic signature is valid
@@ -50,7 +51,71 @@ internal static class COFB
     /// <summary>
     /// Load Big from a stream.
     /// </summary>
-    public void LoadFromStream(Stream stream)
+    // public void LoadFromStream(Stream stream)
+    // {
+    //     // Confirm magic signature is valid
+    //     byte[] magic = new byte[2];
+    //     stream.Read(magic);
+    //     if (magic[0] != _magic[0] || magic[1] != _magic[1])
+    //     {
+    //         throw new InvalidDataException("Invalid C0FB signature.");
+    //     }
+
+    //     // Read Big Header
+    //     _bigHeader = new()
+    //     {
+    //         footerOffset = Reader.ReadUInt16(stream, ByteOrder.BigEndian),
+    //         fileCount = Reader.ReadUInt16(stream, ByteOrder.BigEndian),
+    //     };
+
+    //     // Read Member file headers
+    //     _memberFilesData = [];
+    //     for (int _ = 0; _ < _bigHeader.fileCount; _++)
+    //     {
+    //         MemberFileHeader file = new()
+    //         {
+    //             offset = Reader.ReadUInt24(stream, ByteOrder.BigEndian),
+    //             size = Reader.ReadUInt24(stream, ByteOrder.BigEndian),
+    //             path = Reader.ReadNullTerminatedASCIIString(stream),
+    //         };
+    //         _memberFiles.Add(file);
+    //     }
+
+    //     // Read member files data
+    //     _memberFiles = [];
+    //     foreach (var file in _memberFiles)
+    //     {
+    //         stream.Position = file.offset;
+    //         MemberFileData data = new()
+    //         {
+    //             data = Reader.ReadBytes(stream, (int)file.size)
+    //         };
+    //         _memberFilesData.Add(data);
+    //     }
+    // }
+
+    // /// <summary>
+    // /// Save Big to a stream.
+    // /// </summary>
+    // public void SaveToStream(Stream stream)
+    // {
+        
+    // }
+
+    /// <summary>
+    /// Create and load from a folder on disk.
+    /// </summary>
+    // public void CreateFromFolder(string folderPath)
+    // {
+        
+    // }
+
+    /// <summary>
+    /// Extracts member files next to the big file.
+    /// </summary>
+    /// <param name="stream">The big file stream to read from.</param>
+    /// <param name="folderPath">The folder path to extract to.</param>
+    public static void Extract(Stream stream, string folderPath)
     {
         // Confirm magic signature is valid
         byte[] magic = new byte[2];
@@ -61,15 +126,15 @@ internal static class COFB
         }
 
         // Read Big Header
-        _bigHeader = new()
+        COFBHeader header = new()
         {
             footerOffset = Reader.ReadUInt16(stream, ByteOrder.BigEndian),
             fileCount = Reader.ReadUInt16(stream, ByteOrder.BigEndian),
         };
 
         // Read Member file headers
-        _memberFilesData = [];
-        for (int _ = 0; _ < _bigHeader.fileCount; _++)
+        List<MemberFileHeader> memberFileHeaders = [];
+        for (int _ = 0; _ < header.fileCount; _++)
         {
             MemberFileHeader file = new()
             {
@@ -77,46 +142,36 @@ internal static class COFB
                 size = Reader.ReadUInt24(stream, ByteOrder.BigEndian),
                 path = Reader.ReadNullTerminatedASCIIString(stream),
             };
-            _memberFiles.Add(file);
+            memberFileHeaders.Add(file);
         }
 
-        // Read member files data
-        _memberFiles = [];
-        foreach (var file in _memberFiles)
+        // Read and create member files
+        foreach (var memberFileHeader in memberFileHeaders)
         {
-            stream.Position = file.offset;
-            MemberFileData data = new()
+            // Validate files
+            if (memberFileHeader.offset == 0 || memberFileHeader.path.Contains('*')) continue;
+
+            // Read memberFileHeader data
+            stream.Position = memberFileHeader.offset;
+            byte[] data = Reader.ReadBytes(stream, (int)memberFileHeader.size);
+
+            // Check if compressed. If so then decompress
+            stream.Position = memberFileHeader.offset;
+            if (Reader.ReadBytes(stream, 2)[1] == 0xFB) // Read second byte of the refpacj flag
             {
-                data = Reader.ReadBytes(stream, (int)file.size)
-            };
-            _memberFilesData.Add(data);
+                data = RefpackHandler.Decompress(data); 
+            }
+
+            // Create file
+            string filename = Path.GetFileName(memberFileHeader.path);
+            string folderDirectory = Path.GetDirectoryName(folderPath) ?? "";
+            if (!Directory.Exists(folderDirectory))
+            {
+                Directory.CreateDirectory(folderDirectory);
+            }
+            var file = File.Create(Path.Join(folderDirectory, filename));
+            file.Write(data);
         }
-    }
-
-    /// <summary>
-    /// Save Big to a stream.
-    /// </summary>
-    public void SaveToStream(Stream stream)
-    {
-        
-    }
-
-    /// <summary>
-    /// Create and load from a folder on disk.
-    /// </summary>
-    public void CreateFromFolder(string folderPath)
-    {
-        
-    }
-
-    /// <summary>
-    /// Extracts member files into the game's folder.
-    /// </summary>
-    /// <param name="gameRootPath"> The folder path to the game 
-    /// (e.g. where the .elf and data folder is)</param>
-    public void ExtractToGameFolder(string gameRootPath)
-    {
-        
     }
 
 
@@ -125,6 +180,12 @@ internal static class COFB
         public string path;
         public uint size;
     }
+    // <summary>
+    // Extracts member files into the game's folder.
+    // </summary>
+    ///
+    // <param name="gameRootPath"> The folder path to the game 
+    // (i.e. where the .elf and data folder is)</param>
 
     private struct COFBHeader
     {
