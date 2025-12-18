@@ -157,7 +157,9 @@ public static class COFB
 
             // Check if compressed. If so then decompress
             stream.Position = memberFileHeader.offset;
-            if (Reader.ReadBytes(stream, 2)[1] == 0xFB) // Read second byte of the refpacj flag
+
+            var RefCheck = Reader.ReadBytes(stream, 2);
+            if (RefCheck[1] != 0xFB || RefCheck[0] != 0x10) // Read second byte of the refpacj flag
             {
                 data = RefpackHandler.Decompress(data); 
             }
