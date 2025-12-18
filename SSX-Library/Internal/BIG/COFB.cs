@@ -20,6 +20,9 @@ public static class COFB
     /// <param name="stream">The big file stream to read from.</param>
     public static List<MemberFileInfo> GetMembersInfo(Stream stream)
     {
+        //Ensure Start Of File
+        stream.Position = 0;
+
         // Confirm magic signature is valid
         byte[] magic = new byte[2];
         stream.Read(magic);
@@ -117,6 +120,9 @@ public static class COFB
     /// <param name="folderPath">The folder path to extract to.</param>
     public static void Extract(Stream stream, string folderPath)
     {
+        //Ensure Start Of File
+        stream.Position = 0;
+
         // Confirm magic signature is valid
         byte[] magic = new byte[2];
         stream.Read(magic);
@@ -165,13 +171,15 @@ public static class COFB
             }
 
             // Create file
-            string filename = Path.GetFileName(memberFileHeader.path);
+            string filename = memberFileHeader.path;
             string folderDirectory = Path.GetDirectoryName(folderPath) ?? "";
-            if (!Directory.Exists(folderDirectory))
+            string combinedPath = Path.Join(folderDirectory, filename);
+
+            if (!Directory.Exists(Path.GetDirectoryName(combinedPath) ?? ""))
             {
-                Directory.CreateDirectory(folderDirectory);
+                Directory.CreateDirectory(Path.GetDirectoryName(combinedPath) ?? "");
             }
-            var file = File.Create(Path.Join(folderDirectory, filename));
+            var file = File.Create(combinedPath);
             file.Write(data);
         }
     }
