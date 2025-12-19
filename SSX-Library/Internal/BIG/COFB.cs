@@ -47,6 +47,7 @@ public static class COFB
             };
             info.Add(file);
         }
+        stream.Position = 0; // Restore position
         return info;
     }
 
@@ -163,18 +164,15 @@ public static class COFB
 
             // Check if compressed. If so then decompress
             stream.Position = memberFileHeader.offset;
-
             var RefCheck = Reader.ReadBytes(stream, 2);
-            if (RefCheck[1] != 0xFB || RefCheck[0] != 0x10) // Read second byte of the refpacj flag
+            if (RefCheck[1] != 0xFB || RefCheck[0] != 0x10) // Refpack flags
             {
                 data = RefpackHandler.Decompress(data); 
             }
 
             // Create file
-            string filename = memberFileHeader.path;
             string folderDirectory = Path.GetDirectoryName(folderPath) ?? "";
-            string combinedPath = Path.Join(folderDirectory, filename);
-
+            string combinedPath = Path.Join(folderDirectory, memberFileHeader.path);
             if (!Directory.Exists(Path.GetDirectoryName(combinedPath) ?? ""))
             {
                 Directory.CreateDirectory(Path.GetDirectoryName(combinedPath) ?? "");
@@ -183,6 +181,7 @@ public static class COFB
             file.Write(data);
             file.Close();
         }
+        stream.Position = 0; // Restore position
     }
 
 
