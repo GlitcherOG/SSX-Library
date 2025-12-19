@@ -17,49 +17,47 @@ public static class COFB
     /// <summary>
     /// Get a list of info for the member files inside a big file.
     /// </summary>
-    /// <param name="stream">The big file stream to read from.</param>
-    public static List<MemberFileInfo> GetMembersInfo(Stream stream)
+    public static List<MemberFileInfo> GetMembersInfo(string bigPath)
     {
-        //Ensure Start Of File
-        stream.Position = 0;
+        //Open the big file
+        using var bigStream = File.OpenRead(bigPath);
 
         // Confirm magic signature is valid
         byte[] magic = new byte[2];
-        stream.Read(magic);
+        bigStream.Read(magic);
         if (magic[0] != _magic[0] || magic[1] != _magic[1])
         {
             throw new InvalidDataException("Invalid C0FB signature.");
         }
 
         // Read Big Header
-        stream.Position += 2; // footerOffset u16
-        var fileCount = Reader.ReadUInt16(stream, ByteOrder.BigEndian); // fileCount
+        bigStream.Position += 2; // footerOffset u16
+        var fileCount = Reader.ReadUInt16(bigStream, ByteOrder.BigEndian); // fileCount
 
         // Read Member file headers
         List<MemberFileInfo> info = [];
         for (int _ = 0; _ < fileCount; _++)
         {
-            stream.Position += 3; // offset u24
+            bigStream.Position += 3; // offset u24
             MemberFileInfo file = new()
             {
-                size = Reader.ReadUInt24(stream, ByteOrder.BigEndian),
-                path = Reader.ReadNullTerminatedASCIIString(stream),
+                size = Reader.ReadUInt24(bigStream, ByteOrder.BigEndian),
+                path = Reader.ReadNullTerminatedASCIIString(bigStream),
             };
             info.Add(file);
         }
-        stream.Position = 0; // Restore position
         return info;
     }
 
 
     /// <summary>
-    /// Load Big from a stream.
+    /// Load Big from a bigStream.
     /// </summary>
-    // public void LoadFromStream(Stream stream)
+    // public void LoadFromStream(Stream bigStream)
     // {
     //     // Confirm magic signature is valid
     //     byte[] magic = new byte[2];
-    //     stream.Read(magic);
+    //     bigStream.Read(magic);
     //     if (magic[0] != _magic[0] || magic[1] != _magic[1])
     //     {
     //         throw new InvalidDataException("Invalid C0FB signature.");
@@ -68,8 +66,8 @@ public static class COFB
     //     // Read Big Header
     //     _bigHeader = new()
     //     {
-    //         footerOffset = Reader.ReadUInt16(stream, ByteOrder.BigEndian),
-    //         fileCount = Reader.ReadUInt16(stream, ByteOrder.BigEndian),
+    //         footerOffset = Reader.ReadUInt16(bigStream, ByteOrder.BigEndian),
+    //         fileCount = Reader.ReadUInt16(bigStream, ByteOrder.BigEndian),
     //     };
 
     //     // Read Member file headers
@@ -78,9 +76,9 @@ public static class COFB
     //     {
     //         MemberFileHeader file = new()
     //         {
-    //             offset = Reader.ReadUInt24(stream, ByteOrder.BigEndian),
-    //             size = Reader.ReadUInt24(stream, ByteOrder.BigEndian),
-    //             path = Reader.ReadNullTerminatedASCIIString(stream),
+    //             offset = Reader.ReadUInt24(bigStream, ByteOrder.BigEndian),
+    //             size = Reader.ReadUInt24(bigStream, ByteOrder.BigEndian),
+    //             path = Reader.ReadNullTerminatedASCIIString(bigStream),
     //         };
     //         _memberFiles.Add(file);
     //     }
@@ -89,19 +87,19 @@ public static class COFB
     //     _memberFiles = [];
     //     foreach (var file in _memberFiles)
     //     {
-    //         stream.Position = file.offset;
+    //         bigStream.Position = file.offset;
     //         MemberFileData data = new()
     //         {
-    //             data = Reader.ReadBytes(stream, (int)file.size)
+    //             data = Reader.ReadBytes(bigStream, (int)file.size)
     //         };
     //         _memberFilesData.Add(data);
     //     }
     // }
 
     // /// <summary>
-    // /// Save Big to a stream.
+    // /// Save Big to a bigStream.
     // /// </summary>
-    // public void SaveToStream(Stream stream)
+    // public void SaveToStream(Stream bigStream)
     // {
         
     // }
@@ -115,18 +113,16 @@ public static class COFB
     // }
 
     /// <summary>
-    /// Extracts member files next to the big file.
+    /// Extracts member files into a folder.
     /// </summary>
-    /// <param name="stream">The big file stream to read from.</param>
-    /// <param name="folderPath">The folder path to extract to.</param>
-    public static void Extract(Stream stream, string folderPath)
+    public static void Extract(string bigPath, string extractionPath)
     {
-        //Ensure Start Of File
-        stream.Position = 0;
+        //Open the big file
+        using var bigStream = File.OpenRead(bigPath);
 
         // Confirm magic signature is valid
         byte[] magic = new byte[2];
-        stream.Read(magic);
+        bigStream.Read(magic);
         if (magic[0] != _magic[0] || magic[1] != _magic[1])
         {
             throw new InvalidDataException("Invalid C0FB signature.");
@@ -135,8 +131,8 @@ public static class COFB
         // Read Big Header
         COFBHeader header = new()
         {
-            footerOffset = Reader.ReadUInt16(stream, ByteOrder.BigEndian),
-            fileCount = Reader.ReadUInt16(stream, ByteOrder.BigEndian),
+            footerOffset = Reader.ReadUInt16(bigStream, ByteOrder.BigEndian),
+            fileCount = Reader.ReadUInt16(bigStream, ByteOrder.BigEndian),
         };
 
         // Read Member file headers
@@ -145,9 +141,9 @@ public static class COFB
         {
             MemberFileHeader file = new()
             {
-                offset = Reader.ReadUInt24(stream, ByteOrder.BigEndian),
-                size = Reader.ReadUInt24(stream, ByteOrder.BigEndian),
-                path = Reader.ReadNullTerminatedASCIIString(stream),
+                offset = Reader.ReadUInt24(bigStream, ByteOrder.BigEndian),
+                size = Reader.ReadUInt24(bigStream, ByteOrder.BigEndian),
+                path = Reader.ReadNullTerminatedASCIIString(bigStream),
             };
             memberFileHeaders.Add(file);
         }
@@ -159,20 +155,19 @@ public static class COFB
             if (memberFileHeader.offset == 0 || memberFileHeader.path.Contains('*')) continue;
 
             // Read memberFileHeader data
-            stream.Position = memberFileHeader.offset;
-            byte[] data = Reader.ReadBytes(stream, (int)memberFileHeader.size);
+            bigStream.Position = memberFileHeader.offset;
+            byte[] data = Reader.ReadBytes(bigStream, (int)memberFileHeader.size);
 
             // Check if compressed. If so then decompress
-            stream.Position = memberFileHeader.offset;
-            var RefCheck = Reader.ReadBytes(stream, 2);
+            bigStream.Position = memberFileHeader.offset;
+            var RefCheck = Reader.ReadBytes(bigStream, 2);
             if (RefCheck[1] != 0xFB || RefCheck[0] != 0x10) // Refpack flags
             {
                 data = RefpackHandler.Decompress(data); 
             }
 
             // Create file
-            string folderDirectory = Path.GetDirectoryName(folderPath) ?? "";
-            string combinedPath = Path.Join(folderDirectory, memberFileHeader.path);
+            string combinedPath = Path.Join(extractionPath, memberFileHeader.path);
             if (!Directory.Exists(Path.GetDirectoryName(combinedPath) ?? ""))
             {
                 Directory.CreateDirectory(Path.GetDirectoryName(combinedPath) ?? "");
@@ -181,7 +176,6 @@ public static class COFB
             file.Write(data);
             file.Close();
         }
-        stream.Position = 0; // Restore position
     }
 
 

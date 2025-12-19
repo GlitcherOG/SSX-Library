@@ -8,16 +8,13 @@ public class UnitTest1
     public void Test1()
     {
         // string path = "/home/eric/Downloads/anm.big";
-        // string outPath = "/home/eric/Downloads/extra/";
-        // var file = File.OpenRead(path);
-        // var info = COFB.GetMembersInfo(file);
+        // string outPath = "/home/eric/Downloads/extra";
+        // var info = COFB.GetMembersInfo(path);
         // foreach (var inf in info)
         // {
         //     Console.WriteLine(inf.path);            
         // }
-        // file.Position = 0;
-        // COFB.Extract(file, outPath);
-        // file.Close();
+        // COFB.Extract(path, outPath);
     }
 
     [Fact]
