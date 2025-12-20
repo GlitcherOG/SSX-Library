@@ -131,10 +131,16 @@ public static class COFB
         long footerPosition = bigStream.Position;
         Writer.WriteUInt16(bigStream, 0, ByteOrder.BigEndian);
 
+        var sus = Directory.GetFiles(folderPath, "*.*", SearchOption.AllDirectories);
+        foreach (var file in sus)
+        {
+            Console.WriteLine(file);
+        }
 
 
 
-        // var sus = Directory.GetFiles(folderPath, "*.*", SearchOption.AllDirectories);
+
+
 
     }
 

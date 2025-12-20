@@ -15,29 +15,30 @@ internal static class Writer
     public static void WriteUInt16(Stream stream, ushort value, ByteOrder byteOrder)
     {
         var buf = new byte[2];
-        switch (byteOrder)
+        if (byteOrder == ByteOrder.BigEndian)
         {
-            case ByteOrder.BigEndian:
-                BinaryPrimitives.WriteUInt16BigEndian(buf, value);
-                break;
-            case ByteOrder.LittleEndian:
-                BinaryPrimitives.WriteUInt16LittleEndian(buf, value);
-                break;
+            BinaryPrimitives.WriteUInt16BigEndian(buf, value);
+        }
+        else if(byteOrder == ByteOrder.LittleEndian)
+        {
+            BinaryPrimitives.WriteUInt16LittleEndian(buf, value);
         }
         stream.Write(buf);
     }
 
-    // public static uint ReadUInt24(Stream stream, ByteOrder byteOrder)
-    // {
-    //     var buf = new byte[3];
-    //     stream.Read(buf);
-    //     return byteOrder switch
-    //     {
-    //         ByteOrder.BigEndian => (uint)(buf[0] << 16 | buf[1] << 8 | buf[2]),
-    //         ByteOrder.LittleEndian => (uint)(buf[2] << 16 | buf[1] << 8 | buf[0]),
-    //         _ => 0
-    //     };
-    // }
+    public static void WriteUInt24(Stream stream, uint value, ByteOrder byteOrder)
+    {
+        var buf = new byte[3];
+        if (byteOrder == ByteOrder.BigEndian)
+        {
+            BinaryPrimitives.WriteUInt32BigEndian(buf, value & 0xFFFFFF);
+        }
+        else if(byteOrder == ByteOrder.LittleEndian)
+        {
+            BinaryPrimitives.WriteUInt32LittleEndian(buf, value & 0xFFFFFF);
+        }
+        stream.Write(buf);
+    }
 
     public static void WriteUInt32(Stream stream, uint value, ByteOrder byteOrder)
     {

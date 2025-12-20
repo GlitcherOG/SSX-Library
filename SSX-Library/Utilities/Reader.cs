@@ -14,7 +14,7 @@ internal static class Reader
         return buf;
     }
 
-    public static uint ReadUInt16(Stream stream, ByteOrder byteOrder)
+    public static ushort ReadUInt16(Stream stream, ByteOrder byteOrder)
     {
         var buf = new byte[2];
         stream.Read(buf);
