@@ -31,11 +31,15 @@ internal static class Writer
         var buf = new byte[3];
         if (byteOrder == ByteOrder.BigEndian)
         {
-            BinaryPrimitives.WriteUInt32BigEndian(buf, value & 0xFFFFFF);
+            buf[0] = (byte)(value >> 16 & 0xFF);
+            buf[1] = (byte)(value >> 8 & 0xFF);
+            buf[2] = (byte)(value & 0xFF);
         }
         else if(byteOrder == ByteOrder.LittleEndian)
         {
-            BinaryPrimitives.WriteUInt32LittleEndian(buf, value & 0xFFFFFF);
+            buf[0] = (byte)(value & 0xFF);
+            buf[1] = (byte)(value >> 8 & 0xFF);
+            buf[2] = (byte)(value >> 16 & 0xFF);
         }
         stream.Write(buf);
     }
@@ -66,5 +70,11 @@ internal static class Writer
             BinaryPrimitives.WriteSingleLittleEndian(buf, value);
         }
         stream.Write(buf);
+    }
+
+    public static void WriteNullTerminatedASCIIString(Stream stream, string text)
+    {
+        stream.Write(System.Text.Encoding.ASCII.GetBytes(text));
+        stream.Write([0]); // Null
     }
 }

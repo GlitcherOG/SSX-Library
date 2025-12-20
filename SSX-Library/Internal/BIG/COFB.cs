@@ -1,6 +1,3 @@
-// using SSX_Library.Utilities;
-
-
 using System.Collections.Immutable;
 using SSX_Library.Utilities;
 using SSXLibrary.FileHandlers;
@@ -13,6 +10,7 @@ namespace SSX_Library.Internal.BIG;
 public static class COFB
 {
     private static readonly ImmutableArray<byte> _magic = [0xC0, 0xFB];
+    private const int _footerLength = 8;
 
     /// <summary>
     /// Get a list of info for the member files inside a big file.
@@ -128,22 +126,63 @@ public static class COFB
         Writer.WriteBytes(bigStream, [.._magic]);
 
         // Store footer position for setting later. Set to zero for now.
-        long footerPosition = bigStream.Position;
+        long headerFooterPosition = bigStream.Position;
         Writer.WriteUInt16(bigStream, 0, ByteOrder.BigEndian);
 
-        var sus = Directory.GetFiles(folderPath, "*.*", SearchOption.AllDirectories);
-        foreach (var file in sus)
+        // Get the path for all the member files relative to the input folder.
+        // And replace slashes.
+        string[] absoluteFilePaths = Directory.GetFiles(folderPath, "*.*", SearchOption.AllDirectories);
+        string[] relativeFilePaths = [.. absoluteFilePaths.Select(path => Path.GetRelativePath(folderPath, path))];
+
+        // Write File count
+        int fileCount = relativeFilePaths.Length;
+        Writer.WriteUInt16(bigStream, (ushort)fileCount, ByteOrder.BigEndian);
+
+        // Store member file header positions for second pass. Set values to zero for now
+        // except for the file paths.
+        List<long> memberHeaderPositions = [];
+        for (int i = 0; i < fileCount; i++)
         {
-            Console.WriteLine(file);
+            memberHeaderPositions.Add(bigStream.Position);
+            Writer.WriteUInt24(bigStream, 0, ByteOrder.BigEndian); // offset
+            Writer.WriteUInt24(bigStream, 0, ByteOrder.BigEndian); // size
+
+            // Select slash type
+            string path = useBackslashes switch
+            {
+                true => relativeFilePaths[i].Replace('/', '\\'),
+                false => relativeFilePaths[i].Replace('\\', '/'),
+            };
+            Writer.WriteNullTerminatedASCIIString(bigStream, path);
         }
 
+        // Write Footer offset to the header and write the footer
+        long footerOffset = bigStream.Position;
+        bigStream.Position = headerFooterPosition;
+        Writer.WriteUInt16(bigStream, (ushort)footerOffset, ByteOrder.BigEndian);
+        bigStream.Position = footerOffset; // Restore back to footer position
+        Writer.WriteBytes(bigStream, new byte[_footerLength]);
 
+        // Write file data
+        for (int i = 0; i < absoluteFilePaths.Length; i++)
+        {
+            string path = absoluteFilePaths[i];
+            byte[] data = File.ReadAllBytes(path);
+            if (useCompression)
+            {
+                RefpackHandler.Compress(data, out data, CompressionLevel.Max);
+            }
+            long dataOffset = bigStream.Position;
+            Writer.WriteBytes(bigStream, data);
 
-
-
-
+            // Update header
+            long dataEndOffset = bigStream.Position;
+            bigStream.Position = memberHeaderPositions[i];
+            Writer.WriteUInt24(bigStream, (uint)dataOffset, ByteOrder.BigEndian); // offset
+            Writer.WriteUInt24(bigStream, (uint)data.Length, ByteOrder.BigEndian); // size
+            bigStream.Position = dataEndOffset; // Restore to last position
+        }
     }
-
 
     public struct MemberFileInfo
     {
