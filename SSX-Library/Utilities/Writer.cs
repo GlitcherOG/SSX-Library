@@ -12,6 +12,33 @@ internal static class Writer
         stream.Write(buffer);
     }
 
+    public static void WriteUInt16(Stream stream, ushort value, ByteOrder byteOrder)
+    {
+        var buf = new byte[2];
+        switch (byteOrder)
+        {
+            case ByteOrder.BigEndian:
+                BinaryPrimitives.WriteUInt16BigEndian(buf, value);
+                break;
+            case ByteOrder.LittleEndian:
+                BinaryPrimitives.WriteUInt16LittleEndian(buf, value);
+                break;
+        }
+        stream.Write(buf);
+    }
+
+    // public static uint ReadUInt24(Stream stream, ByteOrder byteOrder)
+    // {
+    //     var buf = new byte[3];
+    //     stream.Read(buf);
+    //     return byteOrder switch
+    //     {
+    //         ByteOrder.BigEndian => (uint)(buf[0] << 16 | buf[1] << 8 | buf[2]),
+    //         ByteOrder.LittleEndian => (uint)(buf[2] << 16 | buf[1] << 8 | buf[0]),
+    //         _ => 0
+    //     };
+    // }
+
     public static void WriteUInt32(Stream stream, uint value, ByteOrder byteOrder)
     {
         var buf = new byte[4];

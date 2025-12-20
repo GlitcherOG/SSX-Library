@@ -49,69 +49,6 @@ public static class COFB
         return info;
     }
 
-
-    /// <summary>
-    /// Load Big from a bigStream.
-    /// </summary>
-    // public void LoadFromStream(Stream bigStream)
-    // {
-    //     // Confirm magic signature is valid
-    //     byte[] magic = new byte[2];
-    //     bigStream.Read(magic);
-    //     if (magic[0] != _magic[0] || magic[1] != _magic[1])
-    //     {
-    //         throw new InvalidDataException("Invalid C0FB signature.");
-    //     }
-
-    //     // Read Big Header
-    //     _bigHeader = new()
-    //     {
-    //         footerOffset = Reader.ReadUInt16(bigStream, ByteOrder.BigEndian),
-    //         fileCount = Reader.ReadUInt16(bigStream, ByteOrder.BigEndian),
-    //     };
-
-    //     // Read Member file headers
-    //     _memberFilesData = [];
-    //     for (int _ = 0; _ < _bigHeader.fileCount; _++)
-    //     {
-    //         MemberFileHeader file = new()
-    //         {
-    //             offset = Reader.ReadUInt24(bigStream, ByteOrder.BigEndian),
-    //             size = Reader.ReadUInt24(bigStream, ByteOrder.BigEndian),
-    //             path = Reader.ReadNullTerminatedASCIIString(bigStream),
-    //         };
-    //         _memberFiles.Add(file);
-    //     }
-
-    //     // Read member files data
-    //     _memberFiles = [];
-    //     foreach (var file in _memberFiles)
-    //     {
-    //         bigStream.Position = file.offset;
-    //         MemberFileData data = new()
-    //         {
-    //             data = Reader.ReadBytes(bigStream, (int)file.size)
-    //         };
-    //         _memberFilesData.Add(data);
-    //     }
-    // }
-
-    // /// <summary>
-    // /// Save Big to a bigStream.
-    // /// </summary>
-    // public void SaveToStream(Stream bigStream)
-    // {
-        
-    // }
-
-    /// <summary>
-    /// Create and load from a folder on disk.
-    /// </summary>
-    // public void CreateFromFolder(string folderPath)
-    // {
-        
-    // }
-
     /// <summary>
     /// Extracts member files into a folder.
     /// </summary>
@@ -167,7 +104,7 @@ public static class COFB
             }
 
             // Create file
-            string combinedPath = Path.Join(extractionPath, memberFileHeader.path);
+            string combinedPath = Path.Join(extractionPath, memberFileHeader.path).Replace('\\', '/');
             if (!Directory.Exists(Path.GetDirectoryName(combinedPath) ?? ""))
             {
                 Directory.CreateDirectory(Path.GetDirectoryName(combinedPath) ?? "");
@@ -176,6 +113,29 @@ public static class COFB
             file.Write(data);
             file.Close();
         }
+    }
+
+    /// <summary>
+    /// Create a big file from a folder.
+    /// </summary>
+    /// <param name="useCompression">Should compress all files with refpack.</param>
+    /// <param name="useBackslashes">Should member files store their paths using backslash.</param>
+    public static void Create(string folderPath, string bigOutputPath, bool useCompression, bool useBackslashes = false)
+    {
+        using var bigStream = File.Create(bigOutputPath);
+
+        // Magic
+        Writer.WriteBytes(bigStream, [.._magic]);
+
+        // Store footer position for setting later. Set to zero for now.
+        long footerPosition = bigStream.Position;
+        Writer.WriteUInt16(bigStream, 0, ByteOrder.BigEndian);
+
+
+
+
+        // var sus = Directory.GetFiles(folderPath, "*.*", SearchOption.AllDirectories);
+
     }
 
 
@@ -199,11 +159,4 @@ public static class COFB
         public uint size; // Size of file data
         public string path; // null terminated
     }
-
-    private struct MemberFileData
-    {
-        public byte[] data;
-    }
-
-
 }
