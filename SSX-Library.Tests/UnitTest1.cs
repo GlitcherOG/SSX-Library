@@ -5,7 +5,7 @@ namespace SSX_Library.Tests;
 public class UnitTest1
 {
     [Fact]
-    public void Test1()
+    public void COFB()
     {
         // string path = "/home/eric/Downloads/anm.big";
         // string outPath = "/home/eric/Downloads/extra";
@@ -22,7 +22,25 @@ public class UnitTest1
     }
 
     [Fact]
-    public void Test2()
+    public void BIGF4()
+    {
+        // string path = "/home/eric/Downloads/ssx3BigF.big";
+        // string outPath = "/home/eric/Downloads/extra";
+        // var info = BIGF4.GetMembersInfo(path);
+        // foreach (var inf in info)
+        // {
+        //     Console.WriteLine(inf.path);            
+        // }
+
+        // BIGF4.Extract(path, outPath);
+
+        // string folderPath = "/home/eric/Downloads/extra";
+        // string outBigPath = "/home/eric/Downloads/AAAHHHMY_FILLEEE.big";
+        // BIGF4.Create(BigType.BIGF, folderPath, outBigPath, false);
+    }
+
+    [Fact]
+    public void Test3()
     {
         // EATextureLibrary.EANewShapeHandler eANewShapeHandler = new EATextureLibrary.EANewShapeHandler();
 
@@ -31,9 +49,5 @@ public class UnitTest1
         // eANewShapeHandler.ExtractImage("G:\\SSX Modding\\disk\\SSX On Tour\\DATA\\TEXTURES\\Texture\\Full Range");
     }
 
-    [Fact]
-    public void Test3()
-    {
-        
-    }
+
 }

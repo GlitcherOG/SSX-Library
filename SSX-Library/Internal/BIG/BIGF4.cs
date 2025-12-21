@@ -1,15 +1,17 @@
 using System.Collections.Immutable;
+using System.ComponentModel;
 using SSX_Library.Utilities;
 using SSXLibrary.FileHandlers;
 
 namespace SSX_Library.Internal.BIG;
 
 /// <summary>
-/// Handles COFB type big files.
+/// Handles BIGF and BIG4 type big files.
 /// </summary>
-internal static class COFB
+public static class BIGF4
 {
-    private static readonly ImmutableArray<byte> _magic = [0xC0, 0xFB];
+    private static readonly ImmutableArray<byte> _magicBigF = [0x42, 0x49, 0x47, 0x46];
+    private static readonly ImmutableArray<byte> _magicBig4 = [0x42, 0x49, 0x47, 0x34];
     private const int _footerLength = 8;
 
     /// <summary>
@@ -21,25 +23,26 @@ internal static class COFB
         using var bigStream = File.OpenRead(bigPath);
 
         // Confirm magic signature is valid
-        byte[] magic = new byte[2];
+        byte[] magic = new byte[4];
         bigStream.Read(magic);
-        if (magic[0] != _magic[0] || magic[1] != _magic[1])
+        if (!magic.SequenceEqual(_magicBigF) && !magic.SequenceEqual(_magicBig4))
         {
-            throw new InvalidDataException("Invalid C0FB signature.");
+            throw new InvalidDataException("Invalid Big signature.");
         }
 
         // Read Big Header
-        bigStream.Position += 2; // footerOffset u16
-        var fileCount = Reader.ReadUInt16(bigStream, ByteOrder.BigEndian);
+        bigStream.Position += 4; // fileSize u32
+        var fileCount = Reader.ReadUInt32(bigStream, ByteOrder.BigEndian);
+        bigStream.Position += 4; // footerOffset u32
 
         // Read Member file headers
         List<MemberFileInfo> info = [];
         for (int _ = 0; _ < fileCount; _++)
         {
-            bigStream.Position += 3; // offset u24
+            bigStream.Position += 4; // offset u24
             MemberFileInfo file = new()
             {
-                size = Reader.ReadUInt24(bigStream, ByteOrder.BigEndian),
+                size = Reader.ReadUInt32(bigStream, ByteOrder.BigEndian),
                 path = Reader.ReadNullTerminatedASCIIString(bigStream),
             };
             info.Add(file);
@@ -56,18 +59,19 @@ internal static class COFB
         using var bigStream = File.OpenRead(bigPath);
 
         // Confirm magic signature is valid
-        byte[] magic = new byte[2];
+        byte[] magic = new byte[4];
         bigStream.Read(magic);
-        if (magic[0] != _magic[0] || magic[1] != _magic[1])
+        if (!magic.SequenceEqual(_magicBigF) && !magic.SequenceEqual(_magicBig4))
         {
-            throw new InvalidDataException("Invalid C0FB signature.");
+            throw new InvalidDataException("Invalid Big signature.");
         }
 
         // Read Big Header
-        COFBHeader header = new()
+        BIGF4Header header = new()
         {
-            footerOffset = Reader.ReadUInt16(bigStream, ByteOrder.BigEndian),
-            fileCount = Reader.ReadUInt16(bigStream, ByteOrder.BigEndian),
+            fileSize = Reader.ReadUInt32(bigStream, ByteOrder.LittleEndian),
+            fileCount = Reader.ReadUInt32(bigStream, ByteOrder.BigEndian),
+            footerOffset = Reader.ReadUInt32(bigStream, ByteOrder.BigEndian),
         };
 
         // Read Member file headers
@@ -76,8 +80,8 @@ internal static class COFB
         {
             MemberFileHeader file = new()
             {
-                offset = Reader.ReadUInt24(bigStream, ByteOrder.BigEndian),
-                size = Reader.ReadUInt24(bigStream, ByteOrder.BigEndian),
+                offset = Reader.ReadUInt32(bigStream, ByteOrder.BigEndian),
+                size = Reader.ReadUInt32(bigStream, ByteOrder.BigEndian),
                 path = Reader.ReadNullTerminatedASCIIString(bigStream),
             };
             memberFileHeaders.Add(file);
@@ -116,18 +120,30 @@ internal static class COFB
     /// <summary>
     /// Create a big file from a folder.
     /// </summary>
+    /// /// <param name="bigType">The signature type for the file. In this case BigF or Big4.</param>
     /// <param name="useCompression">Should compress all files with refpack.</param>
     /// <param name="useBackslashes">Should member files store their paths using backslash.</param>
-    public static void Create(string folderPath, string bigOutputPath, bool useCompression, bool useBackslashes = false)
+    public static void Create(BigType bigType, string folderPath, string bigOutputPath, bool useCompression, bool useBackslashes = false)
     {
         using var bigStream = File.Create(bigOutputPath);
 
         // Magic
-        Writer.WriteBytes(bigStream, [.._magic]);
+        if (bigType == BigType.BIGF)
+        {
+            Writer.WriteBytes(bigStream, [.._magicBigF]);
+        } 
+        else if (bigType == BigType.BIG4)
+        {
+            Writer.WriteBytes(bigStream, [.._magicBig4]);
+        }
+        else
+        {
+            throw new InvalidEnumArgumentException("Did not pass BigF or Big4 enum types");
+        }
 
-        // Store footer position for setting later. Set to zero for now.
-        long headerFooterPosition = bigStream.Position;
-        Writer.WriteUInt16(bigStream, 0, ByteOrder.BigEndian);
+        // Store fileSize position for setting later. Set to zero for now.
+        long fileSizePosition = bigStream.Position;
+        Writer.WriteUInt32(bigStream, 0, ByteOrder.LittleEndian);
 
         // Get the path for all the member files relative to the input folder.
         // And replace slashes.
@@ -136,7 +152,11 @@ internal static class COFB
 
         // Write File count
         int fileCount = relativeFilePaths.Length;
-        Writer.WriteUInt16(bigStream, (ushort)fileCount, ByteOrder.BigEndian);
+        Writer.WriteUInt32(bigStream, (uint)fileCount, ByteOrder.BigEndian);
+
+        // Store footer position for setting later. Set to zero for now.
+        long headerFooterPosition = bigStream.Position;
+        Writer.WriteUInt32(bigStream, 0, ByteOrder.BigEndian);
 
         // Store member file header positions for second pass. Set values to zero for now
         // except for the file paths.
@@ -144,8 +164,8 @@ internal static class COFB
         for (int i = 0; i < fileCount; i++)
         {
             memberHeaderPositions.Add(bigStream.Position);
-            Writer.WriteUInt24(bigStream, 0, ByteOrder.BigEndian); // offset
-            Writer.WriteUInt24(bigStream, 0, ByteOrder.BigEndian); // size
+            Writer.WriteUInt32(bigStream, 0, ByteOrder.BigEndian); // offset
+            Writer.WriteUInt32(bigStream, 0, ByteOrder.BigEndian); // size
 
             // Select slash type
             string path = useBackslashes switch
@@ -159,7 +179,7 @@ internal static class COFB
         // Write Footer offset to the header and write the footer
         long footerOffset = bigStream.Position;
         bigStream.Position = headerFooterPosition;
-        Writer.WriteUInt16(bigStream, (ushort)footerOffset, ByteOrder.BigEndian);
+        Writer.WriteUInt32(bigStream, (uint)footerOffset, ByteOrder.BigEndian);
         bigStream.Position = footerOffset; // Restore back to footer position
         Writer.WriteBytes(bigStream, new byte[_footerLength]);
 
@@ -178,17 +198,24 @@ internal static class COFB
             // Update header
             long dataEndOffset = bigStream.Position;
             bigStream.Position = memberHeaderPositions[i];
-            Writer.WriteUInt24(bigStream, (uint)dataOffset, ByteOrder.BigEndian); // offset
-            Writer.WriteUInt24(bigStream, (uint)data.Length, ByteOrder.BigEndian); // size
+            Writer.WriteUInt32(bigStream, (uint)dataOffset, ByteOrder.BigEndian); // offset
+            Writer.WriteUInt32(bigStream, (uint)data.Length, ByteOrder.BigEndian); // size
             bigStream.Position = dataEndOffset; // Restore to last position
+            Console.WriteLine($"FINISHED {i}/{absoluteFilePaths.Length}");
         }
+
+        // Set file size
+        long fileSize = bigStream.Seek(0, SeekOrigin.End);
+        bigStream.Position = fileSizePosition;
+        Writer.WriteUInt32(bigStream, (uint)fileSize, ByteOrder.LittleEndian);
     }
 
-    private struct COFBHeader
+    private struct BIGF4Header
     {
-        public byte[] magic; // Size 2
-        public uint footerOffset;  // Relative to this value's end
+        public byte[] magic; // Size 4. Can be BigF or Big4
+        public uint fileSize;
         public uint fileCount;
+        public uint footerOffset;  // Relative to this value's end
         public MemberFileHeader[] files;
     }
 
