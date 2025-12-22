@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using SSX_Library.Internal.Extensions;
 using SSX_Library.Utilities;
 
 namespace SSX_Library.Internal.BIG;
@@ -9,7 +10,6 @@ namespace SSX_Library.Internal.BIG;
 public static class NewBig
 {
     private static readonly ImmutableArray<byte> _magic = [0x45, 0x42]; // "EB"
-    private const int _footerLength = 8;
 
     /// <summary>
     /// Get a list of info for the member files inside a big file.
@@ -47,8 +47,51 @@ public static class NewBig
         // Footer
         bigStream.Position += 16;
 
+        // Read File Indices
+        List<FileIndex> files = [];
+        for (int i = 0; i < header.FileCount; i++)
+        {
+            FileIndex fileIndex = new()
+            {
+                Offset = Reader.ReadUInt32(bigStream, ByteOrder.BigEndian),
+                zSize = Reader.ReadUInt32(bigStream, ByteOrder.BigEndian),
+                Size = Reader.ReadUInt32(bigStream, ByteOrder.BigEndian),
+                Hash = Reader.ReadUInt32(bigStream, ByteOrder.BigEndian)
+            };
+            files.Add(fileIndex);
+        }
 
+        // Read file names and paths
+        bigStream.Position = header.BaseHeaderSize;
+        List<PathEntry> pathEntries = [];
+        for (int i = 0; i < files.Count; i++)
+        {
+            PathEntry pathEntry = new()
+            {
+                DirectoryIndex = Reader.ReadUInt16(bigStream, ByteOrder.BigEndian),
+                Filename = Reader.ReadASCIIStringWithLength(bigStream, header.NameLength-2)
+            };
+            pathEntries.Add(pathEntry);
+        }
+        bigStream.AlignBy(16);
+        List<string> paths = [];
+        for (int i = 0; i < header.NumPath; i++)
+        {
+            paths.Add(Reader.ReadASCIIStringWithLength(bigStream, header.PathLength));
+        }
 
+        List<MemberFileInfo> fileInfos = [];
+        for (int i = 0; i < files.Count; i++)
+        {
+            string path = Path.Join(paths[pathEntries[i].DirectoryIndex], pathEntries[i].Filename);
+            MemberFileInfo fileInfo = new()
+            {
+                path = path,
+                size = files[i].Size,
+            };
+            fileInfos.Add(fileInfo);
+        }
+        return fileInfos;
     }
 
     private struct Header
@@ -69,10 +112,10 @@ public static class NewBig
 
     public struct FileIndex
     {
-        public int Offset;
-        public int zSize; //Uncompressed only used for refpack
-        public int Size;
-        public int Hash;
+        public uint Offset;
+        public uint zSize; //Uncompressed only used for refpack
+        public uint Size;
+        public uint Hash;
     }
 
     private struct PathEntry

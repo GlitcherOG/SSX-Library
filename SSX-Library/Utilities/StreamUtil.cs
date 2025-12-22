@@ -510,6 +510,7 @@ namespace SSXLibrary.Utilities
 
         #endregion
 
+        [Obsolete("Use StreamExtensions.AlignBy instead.")]
         public static void AlignBy16(Stream stream)
         {
             int Num = 16 - ((int)stream.Position % 16);
