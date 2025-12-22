@@ -1,4 +1,5 @@
 using System.Buffers.Binary;
+using System.Text;
 
 namespace SSX_Library.Utilities;
 
@@ -50,6 +51,18 @@ internal static class Reader
         };
     }
 
+    public static ulong ReadUInt64(Stream stream, ByteOrder byteOrder)
+    {
+        var buf = new byte[8];
+        stream.Read(buf);
+        return byteOrder switch
+        {
+            ByteOrder.BigEndian => BinaryPrimitives.ReadUInt64BigEndian(buf),
+            ByteOrder.LittleEndian => BinaryPrimitives.ReadUInt64LittleEndian(buf),
+            _ => 0
+        };
+    }
+
     public static float ReadFloat(Stream stream, ByteOrder byteOrder)
     {
         var buf = new byte[4];
@@ -71,8 +84,16 @@ internal static class Reader
             if (letter <= 0) break;
             text.Add((byte)letter);
         }
-        return System.Text.Encoding.ASCII.GetString([..text]);
+        return Encoding.ASCII.GetString([..text]);
     }
+
+    public static string ReadASCIIStringWithLength(Stream stream, int length)
+    {
+        var buf = new byte[length];
+        stream.Read(buf);
+        return Encoding.ASCII.GetString(buf);
+    }
+
 
 
 
