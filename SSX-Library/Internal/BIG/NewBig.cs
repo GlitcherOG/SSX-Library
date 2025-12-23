@@ -16,6 +16,35 @@ public static class NewBig
     /// </summary>
     public static List<MemberFileInfo> GetMembersInfo(string bigPath)
     {
+        // Load header information
+        LoadedInformation headerInfo = LoadHeaderInfo(bigPath);
+
+        // Get member file information
+        List<MemberFileInfo> fileInfos = [];
+        for (int i = 0; i < headerInfo.FileIndices.Count; i++)
+        {
+            string path = Path.Join(headerInfo.Paths[headerInfo.PathEntries[i].DirectoryIndex], headerInfo.PathEntries[i].Filename);
+            MemberFileInfo fileInfo = new()
+            {
+                Path = path,
+                Size = headerInfo.FileIndices[i].Size,
+            };
+            fileInfos.Add(fileInfo);
+        }
+        return fileInfos;
+    }
+
+    /// <summary>
+    /// Extracts member files into a folder.
+    /// </summary>
+    public static void Extract(string bigPath, string extractionPath)
+    {
+        // Load header information
+        LoadedInformation headerInfo = LoadHeaderInfo(bigPath);
+    }
+
+    private static LoadedInformation LoadHeaderInfo(string bigPath)
+    {
         //Open the big file
         using var bigStream = File.OpenRead(bigPath);
 
@@ -80,18 +109,22 @@ public static class NewBig
             paths.Add(Reader.ReadASCIIStringWithLength(bigStream, header.PathLength));
         }
 
-        List<MemberFileInfo> fileInfos = [];
-        for (int i = 0; i < files.Count; i++)
+        LoadedInformation information = new()
         {
-            string path = Path.Join(paths[pathEntries[i].DirectoryIndex], pathEntries[i].Filename);
-            MemberFileInfo fileInfo = new()
-            {
-                Path = path,
-                Size = files[i].Size,
-            };
-            fileInfos.Add(fileInfo);
-        }
-        return fileInfos;
+            BigHeader = header,
+            FileIndices = files,
+            PathEntries = pathEntries,
+            Paths = paths,
+        };
+        return information;
+    }
+
+    private struct LoadedInformation
+    {
+        public Header BigHeader;
+        public List<FileIndex> FileIndices;
+        public List<PathEntry> PathEntries;
+        public List<string> Paths;
     }
 
     private struct Header

@@ -42,11 +42,14 @@ public class UnitTest1
     [Fact]
     public void Test3()
     {
-        // EATextureLibrary.EANewShapeHandler eANewShapeHandler = new EATextureLibrary.EANewShapeHandler();
-
-        // eANewShapeHandler.LoadShape("G:\\SSX Modding\\disk\\SSX On Tour\\DATA\\TEXTURES\\Texture\\Full Range.ssh");
-
-        // eANewShapeHandler.ExtractImage("G:\\SSX Modding\\disk\\SSX On Tour\\DATA\\TEXTURES\\Texture\\Full Range");
+        string path = "/home/eric/Downloads/memresident.big";
+        // string outPath = "/home/eric/Downloads/extra";
+        var infos = NewBig.GetMembersInfo(path);
+        foreach (var info in infos)
+        {
+            Console.WriteLine(info.Path);            
+            Console.WriteLine(info.Size);            
+        }
     }
 
 
