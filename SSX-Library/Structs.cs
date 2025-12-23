@@ -6,6 +6,6 @@ namespace SSX_Library;
 
 public struct MemberFileInfo
 {
-    public string path;
-    public uint size;
+    public string Path;
+    public uint Size;
 }

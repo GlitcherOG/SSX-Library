@@ -42,8 +42,8 @@ public static class BIGF4
             bigStream.Position += 4; // offset u24
             MemberFileInfo file = new()
             {
-                size = Reader.ReadUInt32(bigStream, ByteOrder.BigEndian),
-                path = Reader.ReadNullTerminatedASCIIString(bigStream),
+                Size = Reader.ReadUInt32(bigStream, ByteOrder.BigEndian),
+                Path = Reader.ReadNullTerminatedASCIIString(bigStream),
             };
             info.Add(file);
         }
@@ -69,20 +69,20 @@ public static class BIGF4
         // Read Big Header
         BIGF4Header header = new()
         {
-            fileSize = Reader.ReadUInt32(bigStream, ByteOrder.LittleEndian),
-            fileCount = Reader.ReadUInt32(bigStream, ByteOrder.BigEndian),
-            footerOffset = Reader.ReadUInt32(bigStream, ByteOrder.BigEndian),
+            FileSize = Reader.ReadUInt32(bigStream, ByteOrder.LittleEndian),
+            FileCount = Reader.ReadUInt32(bigStream, ByteOrder.BigEndian),
+            FooterOffset = Reader.ReadUInt32(bigStream, ByteOrder.BigEndian),
         };
 
         // Read Member file headers
         List<MemberFileHeader> memberFileHeaders = [];
-        for (int _ = 0; _ < header.fileCount; _++)
+        for (int _ = 0; _ < header.FileCount; _++)
         {
             MemberFileHeader file = new()
             {
-                offset = Reader.ReadUInt32(bigStream, ByteOrder.BigEndian),
-                size = Reader.ReadUInt32(bigStream, ByteOrder.BigEndian),
-                path = Reader.ReadNullTerminatedASCIIString(bigStream),
+                Offset = Reader.ReadUInt32(bigStream, ByteOrder.BigEndian),
+                Size = Reader.ReadUInt32(bigStream, ByteOrder.BigEndian),
+                Path = Reader.ReadNullTerminatedASCIIString(bigStream),
             };
             memberFileHeaders.Add(file);
         }
@@ -91,14 +91,14 @@ public static class BIGF4
         foreach (var memberFileHeader in memberFileHeaders)
         {
             // Validate files
-            if (memberFileHeader.offset == 0 || memberFileHeader.path.Contains('*')) continue;
+            if (memberFileHeader.Offset == 0 || memberFileHeader.Path.Contains('*')) continue;
 
             // Read memberFileHeader data
-            bigStream.Position = memberFileHeader.offset;
-            byte[] data = Reader.ReadBytes(bigStream, (int)memberFileHeader.size);
+            bigStream.Position = memberFileHeader.Offset;
+            byte[] data = Reader.ReadBytes(bigStream, (int)memberFileHeader.Size);
 
             // Check if compressed. If so then decompress
-            bigStream.Position = memberFileHeader.offset;
+            bigStream.Position = memberFileHeader.Offset;
             var RefCheck = Reader.ReadBytes(bigStream, 2);
             if (RefCheck[1] == 0xFB && RefCheck[0] == 0x10) // Refpack flags
             {
@@ -106,7 +106,7 @@ public static class BIGF4
             }
 
             // Create file
-            string combinedPath = Path.Join(extractionPath, memberFileHeader.path).Replace('\\', '/');
+            string combinedPath = Path.Join(extractionPath, memberFileHeader.Path).Replace('\\', '/');
             if (!Directory.Exists(Path.GetDirectoryName(combinedPath) ?? ""))
             {
                 Directory.CreateDirectory(Path.GetDirectoryName(combinedPath) ?? "");
@@ -212,17 +212,17 @@ public static class BIGF4
 
     private struct BIGF4Header
     {
-        public byte[] magic; // Size 4. Can be BigF or Big4
-        public uint fileSize;
-        public uint fileCount;
-        public uint footerOffset;  // Relative to this value's end
-        public MemberFileHeader[] files;
+        public byte[] Magic; // Size 4. Can be BigF or Big4
+        public uint FileSize;
+        public uint FileCount;
+        public uint FooterOffset;  // Relative to this value's end
+        public MemberFileHeader[] Files;
     }
 
     private struct MemberFileHeader
     {
-        public uint offset; // Position of file data
-        public uint size; // Size of file data
-        public string path; // null terminated
+        public uint Offset; // Position of file data
+        public uint Size; // Size of file data
+        public string Path; // null terminated
     }
 }

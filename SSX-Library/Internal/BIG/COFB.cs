@@ -39,8 +39,8 @@ internal static class COFB
             bigStream.Position += 3; // offset u24
             MemberFileInfo file = new()
             {
-                size = Reader.ReadUInt24(bigStream, ByteOrder.BigEndian),
-                path = Reader.ReadNullTerminatedASCIIString(bigStream),
+                Size = Reader.ReadUInt24(bigStream, ByteOrder.BigEndian),
+                Path = Reader.ReadNullTerminatedASCIIString(bigStream),
             };
             info.Add(file);
         }
@@ -66,19 +66,19 @@ internal static class COFB
         // Read Big Header
         COFBHeader header = new()
         {
-            footerOffset = Reader.ReadUInt16(bigStream, ByteOrder.BigEndian),
-            fileCount = Reader.ReadUInt16(bigStream, ByteOrder.BigEndian),
+            FooterOffset = Reader.ReadUInt16(bigStream, ByteOrder.BigEndian),
+            FileCount = Reader.ReadUInt16(bigStream, ByteOrder.BigEndian),
         };
 
         // Read Member file headers
         List<MemberFileHeader> memberFileHeaders = [];
-        for (int _ = 0; _ < header.fileCount; _++)
+        for (int _ = 0; _ < header.FileCount; _++)
         {
             MemberFileHeader file = new()
             {
-                offset = Reader.ReadUInt24(bigStream, ByteOrder.BigEndian),
-                size = Reader.ReadUInt24(bigStream, ByteOrder.BigEndian),
-                path = Reader.ReadNullTerminatedASCIIString(bigStream),
+                Offset = Reader.ReadUInt24(bigStream, ByteOrder.BigEndian),
+                Size = Reader.ReadUInt24(bigStream, ByteOrder.BigEndian),
+                Path = Reader.ReadNullTerminatedASCIIString(bigStream),
             };
             memberFileHeaders.Add(file);
         }
@@ -87,14 +87,14 @@ internal static class COFB
         foreach (var memberFileHeader in memberFileHeaders)
         {
             // Validate files
-            if (memberFileHeader.offset == 0 || memberFileHeader.path.Contains('*')) continue;
+            if (memberFileHeader.Offset == 0 || memberFileHeader.Path.Contains('*')) continue;
 
             // Read memberFileHeader data
-            bigStream.Position = memberFileHeader.offset;
-            byte[] data = Reader.ReadBytes(bigStream, (int)memberFileHeader.size);
+            bigStream.Position = memberFileHeader.Offset;
+            byte[] data = Reader.ReadBytes(bigStream, (int)memberFileHeader.Size);
 
             // Check if compressed. If so then decompress
-            bigStream.Position = memberFileHeader.offset;
+            bigStream.Position = (int)memberFileHeader.Offset;
             var RefCheck = Reader.ReadBytes(bigStream, 2);
             if (RefCheck[1] == 0xFB && RefCheck[0] == 0x10) // Refpack flags
             {
@@ -102,7 +102,7 @@ internal static class COFB
             }
 
             // Create file
-            string combinedPath = Path.Join(extractionPath, memberFileHeader.path).Replace('\\', '/');
+            string combinedPath = Path.Join(extractionPath, memberFileHeader.Path).Replace('\\', '/');
             if (!Directory.Exists(Path.GetDirectoryName(combinedPath) ?? ""))
             {
                 Directory.CreateDirectory(Path.GetDirectoryName(combinedPath) ?? "");
@@ -186,16 +186,16 @@ internal static class COFB
 
     private struct COFBHeader
     {
-        public byte[] magic; // Size 2
-        public uint footerOffset;  // Relative to this value's end
-        public uint fileCount;
-        public MemberFileHeader[] files;
+        public byte[] Magic; // Size 2
+        public uint FooterOffset;  // Relative to this value's end
+        public uint FileCount;
+        public MemberFileHeader[] Files;
     }
 
     private struct MemberFileHeader
     {
-        public uint offset; // Position of file data
-        public uint size; // Size of file data
-        public string path; // null terminated
+        public uint Offset; // Position of file data
+        public uint Size; // Size of file data
+        public string Path; // null terminated
     }
 }

@@ -86,8 +86,8 @@ public static class NewBig
             string path = Path.Join(paths[pathEntries[i].DirectoryIndex], pathEntries[i].Filename);
             MemberFileInfo fileInfo = new()
             {
-                path = path,
-                size = files[i].Size,
+                Path = path,
+                Size = files[i].Size,
             };
             fileInfos.Add(fileInfo);
         }
