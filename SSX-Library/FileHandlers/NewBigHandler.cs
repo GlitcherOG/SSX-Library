@@ -1,4 +1,5 @@
 ﻿using ICSharpCode.SharpZipLib.Zip.Compression;
+using SSX_Library.Internal.Extensions;
 using SSXLibrary.Utilities;
 using System.Diagnostics;
 
@@ -119,6 +120,9 @@ namespace SSXLibrary.FileHandlers
                                 ChunkZipHeader chunkZipHeader = new ChunkZipHeader();
 
                                 chunkZipHeader.Header = StreamUtil.ReadString(stream, 8);
+
+                                long AfterMagic = stream.Position;
+
                                 chunkZipHeader.VersionNumber = StreamUtil.ReadUInt32(stream, true);
                                 chunkZipHeader.FullSize = StreamUtil.ReadUInt32(stream, true);
 
@@ -129,18 +133,8 @@ namespace SSXLibrary.FileHandlers
                                 for (int a = 0; a < chunkZipHeader.NumSegments; a++)
                                 {
                                     MemoryStream InputStream = new MemoryStream();
-                                    long OldPos = stream.Position;
-                                    StreamUtil.AlignBy16(stream);
-                                    long CurPos = stream.Position;
 
-                                    if (CurPos - OldPos < 8)
-                                    {
-                                        stream.Position += 8;
-                                    }
-                                    else
-                                    {
-                                        stream.Position -= 8;
-                                    }
+                                    StreamExtensions.AlignBy(stream, 16, AfterMagic);
 
                                     Chunk chunk = new Chunk();
 
