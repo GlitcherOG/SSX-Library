@@ -147,7 +147,7 @@ public static class NewBig
             };
             pathEntries.Add(pathEntry);
         }
-        bigStream.AlignBy(16);
+        bigStream.AlignBy16();
         List<string> paths = [];
         for (int i = 0; i < header.NumPath; i++)
         {

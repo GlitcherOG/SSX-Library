@@ -1,6 +1,8 @@
+using SSX_Library.Internal.Extensions;
 using SSX_Library.Utilities;
 using System.Collections.Immutable;
 using System.Text;
+using System.IO.Compression;
 
 namespace SSX_Library.Internal;
 
@@ -42,13 +44,32 @@ internal static class ChunkZip
         };
 
         // Read chunks
+        using MemoryStream outputStream = new();
         for (int a = 0; a < header.NumSegments; a++)
         {
+            // Do some weird alignment so that the chunk's data is aligned by 16.
+            // This makes the Chunk header not aligned as a small trade off. 
+            dataStream.AlignBy(16, 8);
+
+            // Read chunk header
+            ChunkHeader chunkHeader = new()
+            {
+                Size = Reader.ReadUInt32(dataStream, ByteOrder.BigEndian),
+                CompressionType = Reader.ReadUInt32(dataStream, ByteOrder.BigEndian),
+            };
             
+            // Read chunk data and put it into a stream in
+            // order to use System.IO.Compression.DeflateStream.
+            byte[] chunkData = Reader.ReadBytes(dataStream, (int)chunkHeader.Size);
+            using MemoryStream inputStream = new(chunkData);
+            var decompressedStream = new DeflateStream(inputStream, CompressionMode.Decompress);
+
+            // Copy the chunk data to the output stream
+            decompressedStream.CopyTo(outputStream);
         }
 
-
-
+        // return the decompressed data
+        return Reader.ReadBytes(outputStream, (int)outputStream.Length);
     }
 
     private struct ChunkZipHeader
@@ -61,9 +82,9 @@ internal static class ChunkZip
         public uint Alignment;
     }
 
-    private struct Chunk
+    private struct ChunkHeader
     {
-        public uint ChunkSize;
+        public uint Size;
         public uint CompressionType;
     }
 }
