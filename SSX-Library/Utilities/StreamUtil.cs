@@ -31,6 +31,7 @@ namespace SSXLibrary.Utilities
             return Encoding.ASCII.GetString(FilePath);
         }
 
+        [Obsolete("Use Reader.ReadASCIIStringWithLength instead")]
         public static string ReadString(Stream stream, int Length, bool FixNull = true)
         {
             byte[] tempByte = new byte[Length];

@@ -95,8 +95,8 @@ internal static class COFB
 
             // Check if compressed. If so then decompress
             bigStream.Position = (int)memberFileHeader.Offset;
-            var RefCheck = Reader.ReadBytes(bigStream, 2);
-            if (RefCheck[1] == 0xFB && RefCheck[0] == 0x10) // Refpack flags
+            var refCheck = Reader.ReadBytes(bigStream, 2);
+            if (refCheck[1] == 0xFB && refCheck[0] == 0x10) // Refpack flags
             {
                 data = RefpackHandler.Decompress(data); 
             }

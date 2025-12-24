@@ -1,6 +1,7 @@
 using System.Collections.Immutable;
 using SSX_Library.Internal.Extensions;
 using SSX_Library.Utilities;
+using SSXLibrary.FileHandlers;
 
 namespace SSX_Library.Internal.BIG;
 
@@ -16,7 +17,7 @@ public static class NewBig
     /// </summary>
     public static List<MemberFileInfo> GetMembersInfo(string bigPath)
     {
-        // Load header information
+        // Load header information for the Big and it's members
         LoadedInformation headerInfo = LoadHeaderInfo(bigPath);
 
         // Get member file information
@@ -39,8 +40,52 @@ public static class NewBig
     /// </summary>
     public static void Extract(string bigPath, string extractionPath)
     {
-        // Load header information
+        // Load header information for the Big and it's members
         LoadedInformation headerInfo = LoadHeaderInfo(bigPath);
+        
+        //Open the big file
+        using var bigStream = File.OpenRead(bigPath);
+
+        // Create each member file
+        for (int i = 0; i < headerInfo.FileIndices.Count; i++)
+        {
+            // Generate the path and directory to put on disk
+            string relativeDirectory = headerInfo.Paths[headerInfo.PathEntries[i].DirectoryIndex];
+            string filename = headerInfo.PathEntries[i].Filename;
+            string absoluteDirectory = Path.Join(extractionPath, relativeDirectory).Replace('\\', '/');
+            string absolutePath = Path.Join(absoluteDirectory, filename).Replace('\\', '/');
+
+            // Create directory if it doesnt exist
+            if (!Directory.Exists(absoluteDirectory))
+            {
+                Directory.CreateDirectory(absoluteDirectory);
+            }
+
+            // Create file
+            using var outputStream = File.Create(absolutePath);
+
+            // Read the member file data, decompress it if needed,
+            // and write it to the output file.
+            bigStream.Position = headerInfo.FileIndices[i].Offset * 16;
+            byte[] buf = Reader.ReadBytes(bigStream, 2);
+            bigStream.Position -= 2;
+            if (buf[0] == 0x10 && buf[1] == 0xFB) // Refpack flags
+            {
+                byte[] data = Reader.ReadBytes(bigStream, (int)headerInfo.FileIndices[i].zSize);
+                Writer.WriteBytes(outputStream, RefpackHandler.Decompress(data));
+            }
+            else if (ChunkZip.HasChunkZipSignature(bigStream))
+            {
+                byte[] data = Reader.ReadBytes(bigStream, (int)headerInfo.FileIndices[i].zSize);
+                Writer.WriteBytes(outputStream, ChunkZip.Decompress(data));
+            }
+            else
+            {
+                // No compression. Write raw data.
+                byte[] data = Reader.ReadBytes(bigStream, (int)headerInfo.FileIndices[i].Size);
+                Writer.WriteBytes(outputStream, data);
+            }
+        }
     }
 
     private static LoadedInformation LoadHeaderInfo(string bigPath)
@@ -153,7 +198,7 @@ public static class NewBig
 
     private struct PathEntry
     {
-        public int DirectoryIndex;
+        public int DirectoryIndex; // i.e. an index to List<string> Paths; from LoadedInformation
         public string Filename;
     }
 }

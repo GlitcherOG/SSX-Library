@@ -7,8 +7,9 @@ namespace SSX_Library.Internal.Extensions;
 internal static class StreamExtensions
 {
     /// <summary>
-    /// Aligns the stream position to the next multiple of the specified alignment.
+    /// Advanced the stream position to the next multiple of the specified alignment.
     /// </summary>
+    /// <param name="alignment">How many bytes to align by</param>
     public static void AlignBy(this Stream stream, int alignment)
     {
         int offset = alignment - ((int)stream.Position % alignment);

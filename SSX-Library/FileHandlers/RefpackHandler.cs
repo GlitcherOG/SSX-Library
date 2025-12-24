@@ -8,6 +8,10 @@ using System.Text;
 using System.Threading.Tasks;
 using SSXLibrary.Utilities;
 
+/*
+    Would be nice to have a HasRefpackSignature function similar to HasChunkZipSignature. 
+*/
+
 namespace SSXLibrary.FileHandlers
 {
     internal class RefpackHandler
