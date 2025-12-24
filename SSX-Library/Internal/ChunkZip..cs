@@ -15,7 +15,7 @@ internal static class ChunkZip
 
     /// <summary>
     /// Peeks at the current stream position to check for a ChunkZip signature, 
-    /// restoring the original position before returning.
+    /// restoring the stream position before returning.
     /// </summary>
     public static bool HasChunkZipSignature(Stream stream)
     {

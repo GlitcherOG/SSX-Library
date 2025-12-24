@@ -7,15 +7,26 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using SSXLibrary.Utilities;
-
-/*
-    Would be nice to have a HasRefpackSignature function similar to HasChunkZipSignature. 
-*/
+using SSX_Library.Utilities;
+using System.Collections.Immutable;
 
 namespace SSXLibrary.FileHandlers
 {
     internal class RefpackHandler
     {
+        private static readonly ImmutableArray<byte> _magic = [0x10, 0xFB];
+
+        /// <summary>
+        /// Peeks at the current stream position to check for a Refpack signature, 
+        /// restoring the stream position before returning.
+        /// </summary>
+        public static bool HasRefpackSignature(Stream stream)
+        {
+            byte[] buf = Reader.ReadBytes(stream, _magic.Length);
+            stream.Position -= _magic.Length;
+            return buf.SequenceEqual(_magic);
+        }
+
         public static int GetDecompressSize(byte[] bytes)
         {
             byte[] Signature = new byte[2];

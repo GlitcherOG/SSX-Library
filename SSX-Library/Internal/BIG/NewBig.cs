@@ -67,9 +67,7 @@ public static class NewBig
             // Read the member file data, decompress it if needed,
             // and write it to the output file.
             bigStream.Position = headerInfo.FileIndices[i].Offset * 16;
-            byte[] buf = Reader.ReadBytes(bigStream, 2);
-            bigStream.Position -= 2;
-            if (buf[0] == 0x10 && buf[1] == 0xFB) // Refpack flags
+            if (RefpackHandler.HasRefpackSignature(bigStream))
             {
                 byte[] data = Reader.ReadBytes(bigStream, (int)headerInfo.FileIndices[i].zSize);
                 Writer.WriteBytes(outputStream, RefpackHandler.Decompress(data));
