@@ -20,6 +20,7 @@ internal static class StreamExtensions
 
     /// <summary>
     /// Advanced the stream position to the next multiple of the specified alignment.
+    /// Along with including a possible start offset if the start of the alignment shouldnt be based on begining of file
     /// </summary>
     /// <param name="alignment">How many bytes to align by</param>
     public static void AlignBy(this Stream stream, int alignment, long startOffset = 0)
