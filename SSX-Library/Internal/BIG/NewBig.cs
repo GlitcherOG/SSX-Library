@@ -69,19 +69,26 @@ public static class NewBig
             bigStream.Position = headerInfo.FileIndices[i].Offset * 16;
             if (RefpackHandler.HasRefpackSignature(bigStream))
             {
+                Console.WriteLine($"Refpack compressed: {absolutePath}");
                 byte[] data = Reader.ReadBytes(bigStream, (int)headerInfo.FileIndices[i].zSize);
                 Writer.WriteBytes(outputStream, RefpackHandler.Decompress(data));
+                Console.WriteLine($"Data Size: {data.Length}\n");
             }
             else if (ChunkZip.HasChunkZipSignature(bigStream))
             {
-                byte[] data = Reader.ReadBytes(bigStream, (int)headerInfo.FileIndices[i].zSize);
+                Console.WriteLine($"ChunkZip compressed: {absolutePath}");
+                byte[] data = Reader.ReadBytes(bigStream, (int)headerInfo.FileIndices[i].Size);
                 Writer.WriteBytes(outputStream, ChunkZip.Decompress(data));
+                Console.WriteLine($"Data Size: {data.Length}\n");
             }
             else
             {
+                Console.WriteLine($"Raw Data: {absolutePath}");
                 // No compression. Write raw data.
                 byte[] data = Reader.ReadBytes(bigStream, (int)headerInfo.FileIndices[i].Size);
                 Writer.WriteBytes(outputStream, data);
+                Console.WriteLine($"Data Size: {data.Length}\n");
+
             }
         }
     }
@@ -167,7 +174,7 @@ public static class NewBig
         public Header BigHeader;
         public List<FileIndex> FileIndices;
         public List<PathEntry> PathEntries;
-        public List<string> Paths;
+        public List<string> Paths; // Null terminated ASCII, 45 bytes max.
     }
 
     private struct Header
@@ -197,7 +204,7 @@ public static class NewBig
     private struct PathEntry
     {
         public int DirectoryIndex; // i.e. an index to List<string> Paths; from LoadedInformation
-        public string Filename;
+        public string Filename; // Null terminated ASCII, 38 bytes max.
     }
 }
     

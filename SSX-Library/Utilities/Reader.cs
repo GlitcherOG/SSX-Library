@@ -87,10 +87,14 @@ internal static class Reader
         return Encoding.ASCII.GetString([..text]);
     }
 
-    public static string ReadASCIIStringWithLength(Stream stream, int length)
+    public static string ReadASCIIStringWithLength(Stream stream, int length, bool removeNullChars = true)
     {
         var buf = new byte[length];
         stream.Read(buf);
+        if (removeNullChars)
+        {
+            return Encoding.ASCII.GetString([..buf.Where(x => x != '\0')]);
+        }
         return Encoding.ASCII.GetString(buf);
     }
 
