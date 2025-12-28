@@ -69,26 +69,19 @@ public static class NewBig
             bigStream.Position = headerInfo.FileIndices[i].Offset * 16;
             if (RefpackHandler.HasRefpackSignature(bigStream))
             {
-                Console.WriteLine($"Refpack compressed: {absolutePath}");
                 byte[] data = Reader.ReadBytes(bigStream, (int)headerInfo.FileIndices[i].zSize);
                 Writer.WriteBytes(outputStream, RefpackHandler.Decompress(data));
-                Console.WriteLine($"Data Size: {data.Length}\n");
             }
             else if (ChunkZip.HasChunkZipSignature(bigStream))
             {
-                Console.WriteLine($"ChunkZip compressed: {absolutePath}");
                 byte[] data = Reader.ReadBytes(bigStream, (int)headerInfo.FileIndices[i].Size);
                 Writer.WriteBytes(outputStream, ChunkZip.Decompress(data));
-                Console.WriteLine($"Data Size: {data.Length}\n");
             }
             else
             {
-                Console.WriteLine($"Raw Data: {absolutePath}");
                 // No compression. Write raw data.
                 byte[] data = Reader.ReadBytes(bigStream, (int)headerInfo.FileIndices[i].Size);
                 Writer.WriteBytes(outputStream, data);
-                Console.WriteLine($"Data Size: {data.Length}\n");
-
             }
         }
     }

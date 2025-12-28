@@ -42,8 +42,8 @@ public class UnitTest1
     [Fact]
     public void Test3()
     {
-        string path = "/home/eric/Downloads/memresident.big";
-        string outPath = "/home/eric/Downloads/extra";
+        // string path = "/home/eric/Downloads/memresident.big";
+        // string outPath = "/home/eric/Downloads/extra";
         // var infos = NewBig.GetMembersInfo(path);
         // foreach (var info in infos)
         // {
@@ -51,7 +51,7 @@ public class UnitTest1
         //     Console.WriteLine(info.Size);            
         // }
 
-        NewBig.Extract(path, outPath);
+        // NewBig.Extract(path, outPath);
 
     }
 

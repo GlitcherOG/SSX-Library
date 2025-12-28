@@ -59,15 +59,16 @@ internal static class ChunkZip
             };
             
             // Read chunk data and put it into a stream in
-            // order to use System.IO.Compression.DeflateStream.
+            // order to use System.IO.Compression.DeflateStream,
+            // Then copy it to the output stream.
             byte[] chunkData = Reader.ReadBytes(dataStream, (int)chunkHeader.Size);
             using MemoryStream inputStream = new(chunkData);
             var decompressedStream = new DeflateStream(inputStream, CompressionMode.Decompress);
-            // Copy the chunk data to the output stream
             decompressedStream.CopyTo(outputStream);
         }
-        outputStream.Position = 0;
+
         // return the decompressed data
+        outputStream.Position = 0;
         return Reader.ReadBytes(outputStream, (int)outputStream.Length);
     }
 
