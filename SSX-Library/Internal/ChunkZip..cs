@@ -63,11 +63,10 @@ internal static class ChunkZip
             byte[] chunkData = Reader.ReadBytes(dataStream, (int)chunkHeader.Size);
             using MemoryStream inputStream = new(chunkData);
             var decompressedStream = new DeflateStream(inputStream, CompressionMode.Decompress);
-
             // Copy the chunk data to the output stream
             decompressedStream.CopyTo(outputStream);
         }
-
+        outputStream.Position = 0;
         // return the decompressed data
         return Reader.ReadBytes(outputStream, (int)outputStream.Length);
     }
