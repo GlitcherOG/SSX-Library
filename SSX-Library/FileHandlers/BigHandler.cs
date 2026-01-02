@@ -83,7 +83,7 @@ namespace SSXLibrary.FileHandlers
                 if (bytes[1] == 0xFB && bytes[0] == 0x10)
                 {
                     tempFile.Compressed = true;
-                    tempFile.UncompressedSize = StreamUtil.ReadInt24(stream, true);
+                    tempFile.UncompressedSize = StreamUtil.ReadUInt24(stream, true);
                     bigFiles[i] = tempFile;
                 }
             }
@@ -102,9 +102,9 @@ namespace SSXLibrary.FileHandlers
             {
                 BIGFFiles temp = new BIGFFiles();
 
-                temp.offset = StreamUtil.ReadInt24(stream, true);
+                temp.offset = StreamUtil.ReadUInt24(stream, true);
 
-                temp.size = StreamUtil.ReadInt24(stream, true);
+                temp.size = StreamUtil.ReadUInt24(stream, true);
 
                 temp.path = StreamUtil.ReadNullEndString(stream);
                 bigFiles.Add(temp);
@@ -120,7 +120,7 @@ namespace SSXLibrary.FileHandlers
                 if (bytes[1] == 0xFB)
                 {
                     tempFile.Compressed = true;
-                    tempFile.UncompressedSize = StreamUtil.ReadInt24(stream, true);
+                    tempFile.UncompressedSize = StreamUtil.ReadUInt24(stream, true);
                     bigFiles[i] = tempFile;
                 }
             }
