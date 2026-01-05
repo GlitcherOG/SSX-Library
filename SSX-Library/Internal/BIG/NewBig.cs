@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using System.Text;
 using SSX_Library.Internal.Extensions;
 using SSX_Library.Utilities;
 using SSXLibrary.FileHandlers;
@@ -162,12 +163,25 @@ public static class NewBig
         return information;
     }
 
+    /// <summary>
+    /// djb2 algorithm by Daniel J. Bernstein
+    /// </summary>
+    private static int Hash(string str) 
+    {
+        int hash = 5381;
+        foreach (char character in str)
+        {
+            hash = (hash * 33) + character;
+        }
+        return hash;
+    }
+
     private struct LoadedInformation
     {
         public Header BigHeader;
         public List<FileIndex> FileIndices;
         public List<PathEntry> PathEntries;
-        public List<string> Paths; // Null terminated ASCII, 45 bytes max.
+        public List<string> Paths; // Null terminated ASCII, NameHeaderSize bytes max.
     }
 
     private struct Header
@@ -186,7 +200,7 @@ public static class NewBig
         public ulong FileSize;       // total size of the bigfile
     }
 
-    public struct FileIndex
+    private struct FileIndex
     {
         public uint Offset;
         public uint zSize; //Uncompressed only used for refpack
@@ -200,4 +214,3 @@ public static class NewBig
         public string Filename; // Null terminated ASCII, 38 bytes max.
     }
 }
-    

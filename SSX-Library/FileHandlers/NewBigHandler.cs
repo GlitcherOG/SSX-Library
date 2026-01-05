@@ -185,16 +185,19 @@ namespace SSXLibrary.FileHandlers
             file.Close();
             using (Stream OutputStream = File.Open(FilePath, FileMode.Open))
             {
+                // Get the path of all the files
                 string[] paths = Directory.GetFiles(LoadPath, "*.*", SearchOption.AllDirectories);
 
                 //Make Space For Header
                 OutputStream.Position = 16 * 3;
 
+                // Each file index takes 16 bytes
                 OutputStream.Position += 16 * paths.Length;
 
                 NameLength = 0;
                 PathLength = 0;
 
+                // For each path
                 for (int i = 0; i < paths.Length; i++)
                 {
                     //Write File or If Compressed

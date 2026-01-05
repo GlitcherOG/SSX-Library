@@ -2,7 +2,7 @@ namespace SSX_Library.Internal.Extensions;
 
 /*
     Provides extension methods for the Stream class.
-    Functions that dont fit neatly into the Reader & Writer Util classes.
+    For functions that dont fit neatly into the Reader & Writer Utillity classes.
 */
 internal static class StreamExtensions
 {
