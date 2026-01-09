@@ -11,6 +11,7 @@ namespace SSX_Library.Internal;
 /// </summary>
 internal static class ChunkZip
 {
+    const int DefaultBlockSize = 128 * 1024; // 128KB in KiB
     private static readonly ImmutableArray<byte> _magic = [..Encoding.ASCII.GetBytes("chunkzip")];
 
     /// <summary>
@@ -45,14 +46,14 @@ internal static class ChunkZip
 
         // Read chunks
         using MemoryStream outputStream = new();
-        for (int a = 0; a < header.NumSegments; a++)
+        for (int _ = 0; _ < header.NumSegments; _++)
         {
             // Do some weird alignment so that the chunk's data is aligned by 16.
             // This makes the Chunk header not aligned as a small trade off. 
             dataStream.AlignBy(16, 8);
 
             // Read chunk header
-            ChunkHeader chunkHeader = new()
+            Chunk chunk = new()
             {
                 Size = Reader.ReadUInt32(dataStream, ByteOrder.BigEndian),
                 CompressionType = Reader.ReadUInt32(dataStream, ByteOrder.BigEndian),
@@ -61,7 +62,7 @@ internal static class ChunkZip
             // Read chunk data and put it into a stream in
             // order to use System.IO.Compression.DeflateStream,
             // Then copy it to the output stream.
-            byte[] chunkData = Reader.ReadBytes(dataStream, (int)chunkHeader.Size);
+            byte[] chunkData = Reader.ReadBytes(dataStream, (int)chunk.Size);
             using MemoryStream inputStream = new(chunkData);
             var decompressedStream = new DeflateStream(inputStream, CompressionMode.Decompress);
             decompressedStream.CopyTo(outputStream);
@@ -71,6 +72,49 @@ internal static class ChunkZip
         outputStream.Position = 0;
         return Reader.ReadBytes(outputStream, (int)outputStream.Length);
     }
+
+    /// <summary>
+    /// Compress an array of bytes
+    /// </summary>
+    public static byte[] Compress(byte[] data)
+    {
+        using var outputStream = new MemoryStream();
+
+        // Write header
+        Writer.WriteBytes(outputStream, [.. _magic]); // magic 
+        Writer.WriteUInt32(outputStream, 2, ByteOrder.BigEndian); // version
+        Writer.WriteUInt32(outputStream, (uint)data.Length, ByteOrder.BigEndian); // fullSize
+        Writer.WriteUInt32(outputStream, DefaultBlockSize, ByteOrder.BigEndian); // blockSize
+        Writer.WriteUInt32(outputStream, GetNumberOfSegments(data.Length), ByteOrder.BigEndian); // numSegments
+        Writer.WriteUInt32(outputStream, 16, ByteOrder.BigEndian); // alignment
+
+        // Compress data into chunks
+        List<byte[]> compressedBlocks = [];
+        using (MemoryStream dataStream = new(data))
+        {
+            for (int _ = 0; _ < GetNumberOfSegments(data.Length); _++)
+            {
+                int distanceToEndOfData = (int)(dataStream.Length - dataStream.Position);
+                byte[] blockData = Reader.ReadBytes(dataStream, Math.Min(DefaultBlockSize, distanceToEndOfData));
+                using MemoryStream blockDataStream = new(blockData);
+                using DeflateStream compressedData = new(blockDataStream, CompressionLevel.Optimal);
+                compressedBlocks.Add(Reader.ReadBytes(compressedData, (int)compressedData.Length));
+            }
+        }
+
+        // Create the chunks
+        foreach (byte[] block in compressedBlocks)
+        {
+            outputStream.AlignBy(16, 8);
+            Writer.WriteUInt32(outputStream, (uint)block.Length, ByteOrder.BigEndian); // size
+            Writer.WriteUInt32(outputStream, 1, ByteOrder.BigEndian); // compressionType
+            Writer.WriteBytes(outputStream, block); // compressedChunkData
+        }
+
+        return Reader.ReadBytes(outputStream, (int)outputStream.Length);
+    }
+
+    private static uint GetNumberOfSegments(int fullSize) => (uint)MathF.Round(fullSize / DefaultBlockSize);
 
     private struct ChunkZipHeader
     {
@@ -82,7 +126,7 @@ internal static class ChunkZip
         public uint Alignment;
     }
 
-    private struct ChunkHeader
+    private struct Chunk
     {
         public uint Size;
         public uint CompressionType;
