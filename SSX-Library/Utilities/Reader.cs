@@ -8,6 +8,8 @@ namespace SSX_Library.Utilities;
 /// </summary>
 internal static class Reader
 {
+    public static byte ReadByte(Stream stream) => ReadBytes(stream, 1)[0];
+
     public static byte[] ReadBytes(Stream stream, int length)
     {
         var buf = new byte[length];
@@ -75,6 +77,9 @@ internal static class Reader
         };
     }
 
+    /// <remarks>
+    /// Does not include the null character
+    /// </remarks>
     public static string ReadNullTerminatedASCIIString(Stream stream)
     {
         List<byte> text = [];

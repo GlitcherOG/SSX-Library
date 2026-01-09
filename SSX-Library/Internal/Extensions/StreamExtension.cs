@@ -18,7 +18,7 @@ internal static class StreamExtensions
     }
 
     /// <summary>
-    /// Advanced the stream position to the next multiple of the specified alignment.
+    /// Advances the stream position to the next multiple of the specified alignment.
     /// Along with including a possible start offset if the start of the alignment
     /// shouldn't be based on beginning of the stream.
     /// </summary>
@@ -26,7 +26,6 @@ internal static class StreamExtensions
     public static void AlignBy(this Stream stream, int alignment, long startOffset = 0)
     {
         long streamOffset = stream.Position - startOffset;
-
         int offset = alignment - ((int)streamOffset % alignment);
         if (offset != alignment)
         {

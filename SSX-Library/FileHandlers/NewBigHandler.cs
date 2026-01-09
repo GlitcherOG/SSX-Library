@@ -197,7 +197,8 @@ namespace SSXLibrary.FileHandlers
                 NameLength = 0;
                 PathLength = 0;
 
-                // For each path
+                // For each file path, get the largest length of the directory
+                // and the file name. Then push it to the FileIndex list.
                 for (int i = 0; i < paths.Length; i++)
                 {
                     //Write File or If Compressed
@@ -227,16 +228,14 @@ namespace SSXLibrary.FileHandlers
                     {
                         Paths.Add(DataFolder);
                     }
-
                     FileIndex fileIndex = new FileIndex();
-
                     fileIndex.FileName = DataPath;
                     fileIndex.PathIndex = Paths.IndexOf(DataFolder);
                     fileIndex.Hash = hash(DataFolder + "/"+DataPath);
-
                     Files.Add(fileIndex);
                 }
-                //Gap is file count alligned by 16
+
+                //Gap is file count aligned by 16
                 OutputStream.Position += paths.Length;
                 StreamUtil.AlignBy16(OutputStream);
 
@@ -610,6 +609,8 @@ namespace SSXLibrary.FileHandlers
             return hash;
         }
 
+
+        // Uneeded
         public static UInt32 bxStringHash(string stringInput)
         {
             char[] input = stringInput.ToCharArray();
