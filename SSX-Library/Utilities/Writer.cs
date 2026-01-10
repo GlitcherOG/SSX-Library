@@ -58,6 +58,20 @@ internal static class Writer
         stream.Write(buf);
     }
 
+    public static void WriteUInt64(Stream stream, ulong value, ByteOrder byteOrder)
+    {
+        var buf = new byte[8];
+        if (byteOrder == ByteOrder.BigEndian)
+        {
+            BinaryPrimitives.WriteUInt64BigEndian(buf, value);
+        }
+        else if(byteOrder == ByteOrder.LittleEndian)
+        {
+            BinaryPrimitives.WriteUInt64LittleEndian(buf, value);
+        }
+        stream.Write(buf);
+    }
+
     public static void WriteFloat(Stream stream, float value, ByteOrder byteOrder)
     {
         var buf = new byte[4];

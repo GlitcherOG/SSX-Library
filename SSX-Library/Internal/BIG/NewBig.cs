@@ -106,6 +106,7 @@ internal static class NewBig
         // Write flags. Set all to zero.
         Writer.WriteBytes(bigStream, [.. Enumerable.Repeat(0, relativeFilePaths.Length).Select(x => (byte)x)]); 
         bigStream.AlignBy16();
+        long baseHeaderSize = bigStream.Position;
 
         int longestDirectoryStringLength = 1; // Including null character
         int longestFilenameStringLength = 1; // Including null character
@@ -179,6 +180,7 @@ internal static class NewBig
             }
         }
         bigStream.AlignBy16();
+        long nameHeaderSize = bigStream.Position - baseHeaderSize;
 
         // Write HashIndices and file data
         for (int i = 0; i < hashPathBundles.Count; i++)
@@ -203,6 +205,20 @@ internal static class NewBig
             Writer.WriteBytes(bigStream, data);
             bigStream.AlignBy16();
         }
+
+        // Update the header placeholder
+        bigStream.Position = 0;
+        Writer.WriteBytes(bigStream, [.. _magic]);
+        Writer.WriteUInt16(bigStream, 3, ByteOrder.BigEndian); // version
+        Writer.WriteUInt32(bigStream, (uint)hashPathBundles.Count, ByteOrder.BigEndian); // fileCount
+        Writer.WriteUInt16(bigStream, 16, ByteOrder.BigEndian); // flags
+        Writer.WriteBytes(bigStream, [4]); // alignment
+        Writer.WriteBytes(bigStream, [0]); // reserved
+        Writer.WriteUInt32(bigStream, (uint)baseHeaderSize, ByteOrder.BigEndian); // baseHeaderSize
+        Writer.WriteUInt32(bigStream, (uint)nameHeaderSize, ByteOrder.BigEndian); // nameHeaderSize
+        Writer.WriteUInt32(bigStream, (uint)longestFilenameStringLength + 2, ByteOrder.BigEndian); // pathEntrySize
+        Writer.WriteUInt32(bigStream, (uint)longestDirectoryStringLength, ByteOrder.BigEndian); // directoryEntrySize
+        Writer.WriteUInt64(bigStream, (ulong)bigStream.Length, ByteOrder.BigEndian); // fileSize
     }
 
     private static LoadedInformation LoadHeaderInfo(string bigPath)
