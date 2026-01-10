@@ -72,6 +72,9 @@ internal static class Writer
         stream.Write(buf);
     }
 
+    /// <remarks>
+    /// Includes null char
+    /// </remarks>
     public static void WriteNullTerminatedASCIIString(Stream stream, string text)
     {
         stream.Write(System.Text.Encoding.ASCII.GetBytes(text));

@@ -89,76 +89,120 @@ internal static class NewBig
     /// <summary>
     /// Create a NewBig file from a folder.
     /// </summary>
-    /// <param name="useCompression">Should compress all files with refpack.</param>
+    /// <param name="useCompression">Should compress all files with ChunkZip.</param>
     public static void Create(string folderPath, string bigOutputPath, bool useCompression)
     {
         using var bigStream = File.Create(bigOutputPath);
-        string[] filePaths = Directory.GetFiles(folderPath, "*.*", SearchOption.AllDirectories);
-        
-        // Skip header and FileIndices for now
+
+        // Get the path for all the member files relative to the input folder.
+        // And replace slashes.
+        string[] absoluteFilePaths = Directory.GetFiles(folderPath, "*.*", SearchOption.AllDirectories);
+        string[] relativeFilePaths = [.. absoluteFilePaths.Select(path => Path.GetRelativePath(folderPath, path))];
+
+        // Skip header and HashIndices for now
         bigStream.Position = 48;
-        bigStream.Position += 16 * filePaths.Length;
-        
-        int longestNameLength = 0;
-        int longestDirectoryLength = 0;
-        List<string> directories = [];
-        List<FileIndex> filesIndices = [];
-        List<FileIndexData> filesIndicesData = [];
-        Header header = new();
-        foreach (string filePath in filePaths)
+        bigStream.Position += 16 * relativeFilePaths.Length;
+
+        // Write flags. Set all to zero.
+        Writer.WriteBytes(bigStream, [.. Enumerable.Repeat(0, relativeFilePaths.Length).Select(x => (byte)x)]); 
+        bigStream.AlignBy16();
+
+        int longestDirectoryStringLength = 1; // Including null character
+        int longestFilenameStringLength = 1; // Including null character
+        List<string> uniqueDirectories = []; // Excludes null character
+        List<HashPathBundle> hashPathBundles = [];
+        for (int i = 0; i < absoluteFilePaths.Length; i++)
         {
-            string name = Path.GetFileName(filePath);
-            string directory = Path.GetDirectoryName(filePath) ?? "";
-            
-            // Get the size of the largest filename and directory string.
-            if (longestNameLength < name.Length)
+            string absolutePath = absoluteFilePaths[i];
+            string relativePath = relativeFilePaths[i];
+            string name = Path.GetFileName(relativePath);
+            string? directory = Path.GetDirectoryName(relativePath) ?? throw new InvalidDataException($"File path {relativePath} is invalid.");
+
+            // Get every unique directory, put it on a list,
+            if (!uniqueDirectories.Contains(directory))
             {
-                longestNameLength = name.Length + 2;
-            }
-            if (longestDirectoryLength < directory.Length)
-            {
-                longestDirectoryLength = directory.Length + 1;
+                uniqueDirectories.Add(directory);
             }
 
-            // Create the array of directories.
-            if (!directories.Contains(directory))
+            // Get the longest directory string length.
+            if (directory.Length + 1 > longestDirectoryStringLength)
             {
-                directories.Add(directory);
+                longestDirectoryStringLength = directory.Length + 1;
             }
 
-            // And Create FileIndices and FileData for the member files.
-            FileIndex fileIndex = new()
+            // Get the longest filename string length.
+            if (name.Length + 1 > longestFilenameStringLength)
             {
-                Hash = Hash(filePath),
-            };
-            filesIndices.Add(fileIndex);
-            FileIndexData fileIndexData = new()
+                longestFilenameStringLength = name.Length + 1;
+            }
+
+            // Create a bundle
+            HashPathBundle bundle = new()
             {
-                DirectoryIndex = (ushort)directories.IndexOf(directory),
-                Filename = name,
+                HashIndexField = new()
+                {
+                    Hash = HashAlgo(directory + "/" + name)      
+                },
+                PathEntryField = new()
+                {
+                    DirectoryIndex = (ushort)uniqueDirectories.IndexOf(directory),
+                    Filename = name, // Excludes null character
+                },
+                AbsolutePath = absolutePath,
             };
-            filesIndicesData.Add(fileIndexData);
         }
 
-        //Gap is file count alligned by 16
-        bigStream.Position += filePaths.Length;
+        // Sort the bundles based on hash number
+        hashPathBundles.Sort((x, y) => x.HashIndexField.Hash.CompareTo(y.HashIndexField.Hash));
+
+        // Write PatchEntries
+        foreach (HashPathBundle bundle in hashPathBundles)
+        {
+            Writer.WriteUInt16(bigStream, bundle.PathEntryField.DirectoryIndex, ByteOrder.BigEndian);
+            Writer.WriteNullTerminatedASCIIString(bigStream, bundle.PathEntryField.Filename);
+            if (bundle.PathEntryField.Filename.Length + 1 < longestFilenameStringLength)
+            {
+                // Padding
+                bigStream.Position += longestFilenameStringLength - bundle.PathEntryField.Filename.Length + 1;
+            }
+        }
         bigStream.AlignBy16();
 
-        long baseHeaderSize = bigStream.Position;
-
-        //Make Space for paths
-        long tempNameLength = bigStream.Position;
-        bigStream.Position += (longestNameLength + 2) * filePaths.Length;
+        // Write Directory entries
+        foreach (string directory in uniqueDirectories)
+        {
+            Writer.WriteNullTerminatedASCIIString(bigStream, directory);
+            if (directory.Length + 1 < longestDirectoryStringLength)
+            {
+                // Padding
+                bigStream.Position += longestDirectoryStringLength - directory.Length + 1;
+            }
+        }
         bigStream.AlignBy16();
-        bigStream.Position += longestDirectoryLength * filePaths.Length;
-        bigStream.AlignBy16();
 
+        // Write HashIndices and file data
+        for (int i = 0; i < hashPathBundles.Count; i++)
+        {
+            const long HashIndicesPosition = 0x30;
+            byte[] data = File.ReadAllBytes(hashPathBundles[i].AbsolutePath);
+            if (useCompression)
+            {
+                data = ChunkZip.Compress(data);
+            }
+            uint dataOffset = (uint)bigStream.Length / 16;
 
+            // Update the hash index placeholder
+            bigStream.Position = HashIndicesPosition + (i * 16);
+            Writer.WriteUInt32(bigStream, dataOffset, ByteOrder.BigEndian);
+            Writer.WriteUInt32(bigStream, 0, ByteOrder.BigEndian);
+            Writer.WriteUInt32(bigStream, (uint)data.Length, ByteOrder.BigEndian);
+            Writer.WriteUInt32(bigStream, hashPathBundles[i].HashIndexField.Hash, ByteOrder.BigEndian);
 
-
-
-
-
+            // Write the data
+            bigStream.Position = bigStream.Length;
+            Writer.WriteBytes(bigStream, data);
+            bigStream.AlignBy16();
+        }
     }
 
     private static LoadedInformation LoadHeaderInfo(string bigPath)
@@ -241,7 +285,7 @@ internal static class NewBig
     /// <summary>
     /// djb2 algorithm by Daniel J. Bernstein
     /// </summary>
-    private static uint Hash(string str) 
+    private static uint HashAlgo(string str) 
     {
         uint hash = 5381;
         foreach (char character in str)
@@ -249,6 +293,16 @@ internal static class NewBig
             hash = (hash * 33) + character;
         }
         return hash;
+    }
+
+    /// <remarks>
+    /// Bundles HashIndex and PathEntry for sorting
+    /// </remarks>
+    private struct HashPathBundle
+    {
+        public HashIndex HashIndexField;
+        public PathEntry PathEntryField;
+        public string AbsolutePath;
     }
 
     private struct LoadedInformation
@@ -293,7 +347,7 @@ internal static class NewBig
     /// </remarks>
     private struct PathEntry
     {
-        public ushort DirectoryIndex; // i.e. an index to List<string> Paths; from LoadedInformation
+        public ushort DirectoryIndex;
         public string Filename;
     }
 }
