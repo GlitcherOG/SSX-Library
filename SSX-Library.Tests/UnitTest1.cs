@@ -42,7 +42,7 @@ public class UnitTest1
     [Fact]
     public void Test3()
     {
-        string path = "/home/eric/Downloads/NewBig/memresident.big";
+        // string path = "/home/eric/Downloads/NewBig/memresident.big";
         string newOutPath = "/home/eric/Downloads/NewBig/MyBig.big";
         string outPath = "/home/eric/Downloads/NewBig/extra";
         // var infos = NewBig.GetMembersInfo(path);
@@ -53,8 +53,6 @@ public class UnitTest1
         // }
         // NewBig.Extract(path, outPath);
         NewBig.Create(outPath, newOutPath, true);
-
-
     }
 
 

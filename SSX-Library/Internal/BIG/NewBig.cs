@@ -161,10 +161,11 @@ public static class NewBig
         {
             Writer.WriteUInt16(bigStream, bundle.PathEntryField.DirectoryIndex, ByteOrder.BigEndian);
             Writer.WriteNullTerminatedASCIIString(bigStream, bundle.PathEntryField.Filename);
-            if (bundle.PathEntryField.Filename.Length + 1 < longestFilenameStringLength)
+            int stringSizeWithNull = bundle.PathEntryField.Filename.Length + 1;
+            if (stringSizeWithNull < longestFilenameStringLength)
             {
                 // Padding
-                bigStream.Position += longestFilenameStringLength - bundle.PathEntryField.Filename.Length + 1;
+                bigStream.Position += longestFilenameStringLength - stringSizeWithNull;
             }
         }
         bigStream.AlignBy16();
@@ -173,10 +174,11 @@ public static class NewBig
         foreach (string directory in uniqueDirectories)
         {
             Writer.WriteNullTerminatedASCIIString(bigStream, directory);
-            if (directory.Length + 1 < longestDirectoryStringLength)
+            int stringSizeWithNull = directory.Length + 1;
+            if (stringSizeWithNull < longestDirectoryStringLength)
             {
                 // Padding
-                bigStream.Position += longestDirectoryStringLength - directory.Length + 1;
+                bigStream.Position += longestDirectoryStringLength - stringSizeWithNull;
             }
         }
         bigStream.AlignBy16();
@@ -191,22 +193,21 @@ public static class NewBig
             {
                 data = ChunkZip.Compress(data);
             }
-            uint dataOffset = (uint)bigStream.Length / 16;
+            long endOfStream = bigStream.Position;
+            uint dataOffset = (uint)endOfStream / 16;
 
             // Update the hash index placeholder
             bigStream.Position = HashIndicesPosition + (i * 16);
-            Writer.WriteUInt32(bigStream, dataOffset, ByteOrder.BigEndian);
-            Writer.WriteUInt32(bigStream, 0, ByteOrder.BigEndian);
-            Writer.WriteUInt32(bigStream, (uint)data.Length, ByteOrder.BigEndian);
-            Writer.WriteUInt32(bigStream, hashPathBundles[i].HashIndexField.Hash, ByteOrder.BigEndian);
+            Writer.WriteUInt32(bigStream, dataOffset, ByteOrder.BigEndian); // Offset
+            Writer.WriteUInt32(bigStream, 0, ByteOrder.BigEndian); // zSize
+            Writer.WriteUInt32(bigStream, (uint)data.Length, ByteOrder.BigEndian); // Sizze
+            Writer.WriteUInt32(bigStream, hashPathBundles[i].HashIndexField.Hash, ByteOrder.BigEndian); // Hash
 
             // Write the data
-            bigStream.Position = bigStream.Length;
+            bigStream.Position = endOfStream;
             Writer.WriteBytes(bigStream, data);
             bigStream.AlignBy16();
         }
-
-        // Console.WriteLine(hashPathBundles.Count);
 
         // Update the header placeholder
         bigStream.Position = 0;

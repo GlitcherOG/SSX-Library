@@ -97,11 +97,13 @@ internal static class ChunkZip
                 int distanceToEndOfData = (int)(dataStream.Length - dataStream.Position);
                 byte[] blockData = Reader.ReadBytes(dataStream, Math.Min(DefaultBlockSize, distanceToEndOfData));
                 using MemoryStream compressedDataStream = new();
-                using (DeflateStream compressedDataDeflateStream = new(compressedDataStream, CompressionLevel.Optimal))
+                using DeflateStream compressedDataDeflateStream = new(compressedDataStream, CompressionLevel.Optimal);
+                compressedDataDeflateStream.Write(blockData, 0, blockData.Length);
+                compressedBlocks.Add(compressedDataStream.ToArray());
+                // compressedBlocks.Add(blockData); // Debug: Works fine
+                if (compressedDataStream.ToArray().Length == 0)
                 {
-                    compressedDataDeflateStream.Write(blockData, 0, blockData.Length);
-                    compressedDataStream.Position = 0;
-                    compressedBlocks.Add(Reader.ReadBytes(compressedDataStream, (int)compressedDataStream.Length));
+                    Console.WriteLine("Compression size is 0");
                 }
             }
         }
@@ -115,10 +117,10 @@ internal static class ChunkZip
             Writer.WriteBytes(outputStream, block); // compressedChunkData
         }
 
-        return Reader.ReadBytes(outputStream, (int)outputStream.Length);
+        return outputStream.ToArray();
     }
 
-    private static uint GetNumberOfSegments(int fullSize) => (uint)MathF.Round(fullSize / DefaultBlockSize);
+    private static uint GetNumberOfSegments(int fullSize) => (uint)MathF.Ceiling((float)fullSize / DefaultBlockSize);
 
     private struct ChunkZipHeader
     {
