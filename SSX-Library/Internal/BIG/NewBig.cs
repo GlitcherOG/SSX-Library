@@ -8,7 +8,7 @@ namespace SSX_Library.Internal.BIG;
 /// <summary>
 /// Handles NewBig type big files.
 /// </summary>
-internal static class NewBig
+public static class NewBig
 {
     private static readonly ImmutableArray<byte> _magic = [0x45, 0x42]; // "EB"
 
@@ -25,8 +25,7 @@ internal static class NewBig
         for (int i = 0; i < headerInfo.HashIndices.Count; i++)
         {
             string path = Path.Join(headerInfo.Directories[headerInfo.PathEntries[i].DirectoryIndex], headerInfo.PathEntries[i].Filename);
-            
-            fileInfos.Add(new MemberFileInfo()
+            fileInfos.Add(new()
             {
                 Path = path,
                 Size = headerInfo.HashIndices[i].Size,
@@ -151,6 +150,7 @@ internal static class NewBig
                 },
                 AbsolutePath = absolutePath,
             };
+            hashPathBundles.Add(bundle);
         }
 
         // Sort the bundles based on hash number
@@ -206,6 +206,8 @@ internal static class NewBig
             bigStream.AlignBy16();
         }
 
+        // Console.WriteLine(hashPathBundles.Count);
+
         // Update the header placeholder
         bigStream.Position = 0;
         Writer.WriteBytes(bigStream, [.. _magic]);
@@ -216,8 +218,9 @@ internal static class NewBig
         Writer.WriteBytes(bigStream, [0]); // reserved
         Writer.WriteUInt32(bigStream, (uint)baseHeaderSize, ByteOrder.BigEndian); // baseHeaderSize
         Writer.WriteUInt32(bigStream, (uint)nameHeaderSize, ByteOrder.BigEndian); // nameHeaderSize
-        Writer.WriteUInt32(bigStream, (uint)longestFilenameStringLength + 2, ByteOrder.BigEndian); // pathEntrySize
-        Writer.WriteUInt32(bigStream, (uint)longestDirectoryStringLength, ByteOrder.BigEndian); // directoryEntrySize
+        Writer.WriteBytes(bigStream, [(byte)(longestFilenameStringLength + 2)]); // pathEntrySize
+        Writer.WriteBytes(bigStream, [(byte)longestDirectoryStringLength]); // directoryEntrySize
+        Writer.WriteUInt16(bigStream, (ushort)uniqueDirectories.Count, ByteOrder.BigEndian); // fileSize
         Writer.WriteUInt64(bigStream, (ulong)bigStream.Length, ByteOrder.BigEndian); // fileSize
     }
 
@@ -258,14 +261,13 @@ internal static class NewBig
         List<HashIndex> hashIndices = [];
         for (int i = 0; i < header.FileCount; i++)
         {
-            HashIndex fileIndex = new()
+            hashIndices.Add(new()
             {
                 Offset = Reader.ReadUInt32(bigStream, ByteOrder.BigEndian),
                 zSize = Reader.ReadUInt32(bigStream, ByteOrder.BigEndian),
                 Size = Reader.ReadUInt32(bigStream, ByteOrder.BigEndian),
                 Hash = Reader.ReadUInt32(bigStream, ByteOrder.BigEndian)
-            };
-            hashIndices.Add(fileIndex);
+            });
         }
 
         // Read path entries
@@ -273,20 +275,19 @@ internal static class NewBig
         List<PathEntry> pathEntries = [];
         for (int i = 0; i < header.FileCount; i++)
         {
-            PathEntry pathEntry = new()
+            pathEntries.Add(new()
             {
                 DirectoryIndex = Reader.ReadUInt16(bigStream, ByteOrder.BigEndian),
-                Filename = Reader.ReadNullTerminatedASCIIString(bigStream),
-            };
-            pathEntries.Add(pathEntry);
+                Filename = Reader.ReadASCIIStringWithLength(bigStream, header.PathEntrySize - 2),
+            });
         }
+        bigStream.AlignBy16();
 
        // Read directories
-        bigStream.AlignBy16();
         List<string> directories = [];
         for (int i = 0; i < header.UniqueDirectoryEntryCount; i++)
         {
-            directories.Add(Reader.ReadNullTerminatedASCIIString(bigStream));
+            directories.Add(Reader.ReadASCIIStringWithLength(bigStream, header.DirectoryEntrySize));
         }
 
         return new LoadedInformation()
