@@ -102,11 +102,6 @@ internal static class ChunkZip
                     compressedDataDeflateStream.Write(blockData, 0, blockData.Length);
                 }
                 compressedBlocks.Add(compressedDataStream.ToArray());
-                // compressedBlocks.Add(blockData); // Debug: Works fine
-                if (compressedDataStream.ToArray().Length == 0)
-                {
-                    Console.WriteLine("Compression size is 0");
-                }
             }
         }
 
