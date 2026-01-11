@@ -42,19 +42,19 @@ public class UnitTest1
     [Fact]
     public void Test3()
     {
-        string inputFile = "/home/eric/Downloads/NewBig/memresident.big";
-        string outputFile = "/home/eric/Downloads/NewBig/MyBigUncompressed.big";
-        string outputFileCompressed = "/home/eric/Downloads/NewBig/MyBigCompressed.big";
-        string intermediateFolder = "/home/eric/Downloads/NewBig/MyExtra";;
+        // string inputFile = "/home/eric/Downloads/NewBig/memresident.big";
+        // string outputFile = "/home/eric/Downloads/NewBig/MyBigUncompressed.big";
+        // string outputFileCompressed = "/home/eric/Downloads/NewBig/MyBigCompressed.big";
+        // string intermediateFolder = "/home/eric/Downloads/NewBig/MyExtra";;
         // var infos = NewBig.GetMembersInfo(path);
         // foreach (var info in infos)
         // {
         //     Console.WriteLine(info.Path);            
         //     Console.WriteLine(info.Size);            
         // }
-        NewBig.Extract(inputFile, intermediateFolder);
-        NewBig.Create(intermediateFolder, outputFile, false);
-        NewBig.Create(intermediateFolder, outputFileCompressed, true);
+        // NewBig.Extract(inputFile, intermediateFolder);
+        // NewBig.Create(intermediateFolder, outputFile, false);
+        // NewBig.Create(intermediateFolder, outputFileCompressed, true);
     }
 
 

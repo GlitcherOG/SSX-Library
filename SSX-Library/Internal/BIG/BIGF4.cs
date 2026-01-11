@@ -8,11 +8,27 @@ namespace SSX_Library.Internal.BIG;
 /// <summary>
 /// Handles BIGF and BIG4 type big files.
 /// </summary>
-public static class BIGF4
+internal static class BIGF4
 {
     private static readonly ImmutableArray<byte> _magicBigF = [0x42, 0x49, 0x47, 0x46];
     private static readonly ImmutableArray<byte> _magicBig4 = [0x42, 0x49, 0x47, 0x34];
     private const int _footerLength = 8;
+
+    public static bool IsStreamBIGF(Stream stream)
+    {
+        byte[] magic = new byte[_magicBigF.Length];
+        stream.Read(magic);
+        stream.Position = 0;
+        return magic.SequenceEqual(_magicBigF);
+    }
+
+    public static bool IsStreamBIG4(Stream stream)
+    {
+        byte[] magic = new byte[_magicBig4.Length];
+        stream.Read(magic);
+        stream.Position = 0;
+        return magic.SequenceEqual(_magicBig4);
+    }
 
     /// <summary>
     /// Get a list of info for the member files inside a big file.

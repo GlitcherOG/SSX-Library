@@ -12,6 +12,14 @@ internal static class COFB
     private static readonly ImmutableArray<byte> _magic = [0xC0, 0xFB];
     private const int _footerLength = 8;
 
+    public static bool IsStreamCOFB(Stream stream)
+    {
+        byte[] magic = new byte[_magic.Length];
+        stream.Read(magic);
+        stream.Position = 0;
+        return magic.SequenceEqual(_magic);
+    }
+
     /// <summary>
     /// Get a list of info for the member files inside a big file.
     /// </summary>

@@ -8,9 +8,17 @@ namespace SSX_Library.Internal.BIG;
 /// <summary>
 /// Handles NewBig type big files.
 /// </summary>
-public static class NewBig
+internal static class NewBig
 {
     private static readonly ImmutableArray<byte> _magic = [0x45, 0x42]; // "EB"
+
+    public static bool IsStreamNewBig(Stream stream)
+    {
+        byte[] magic = new byte[_magic.Length];
+        stream.Read(magic);
+        stream.Position = 0;
+        return magic.SequenceEqual(_magic);
+    }
 
     /// <summary>
     /// Get a list of info for the member files inside a big file.
