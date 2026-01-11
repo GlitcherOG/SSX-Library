@@ -96,11 +96,13 @@ internal static class ChunkZip
             {
                 int distanceToEndOfData = (int)(dataStream.Length - dataStream.Position);
                 byte[] blockData = Reader.ReadBytes(dataStream, Math.Min(DefaultBlockSize, distanceToEndOfData));
-                using MemoryStream blockDataStream = new(blockData);
-                using DeflateStream compressedDataDeflateStream = new(blockDataStream, CompressionLevel.Optimal);
                 using MemoryStream compressedDataStream = new();
-                compressedDataDeflateStream.CopyTo(compressedDataStream);
-                compressedBlocks.Add(Reader.ReadBytes(compressedDataDeflateStream, (int)compressedDataDeflateStream.Length));
+                using (DeflateStream compressedDataDeflateStream = new(compressedDataStream, CompressionLevel.Optimal))
+                {
+                    compressedDataDeflateStream.Write(blockData, 0, blockData.Length);
+                    compressedDataStream.Position = 0;
+                    compressedBlocks.Add(Reader.ReadBytes(compressedDataStream, (int)compressedDataStream.Length));
+                }
             }
         }
 
