@@ -63,19 +63,25 @@ public static class BIG
     public static void Extract(string bigPath, string extractionFolder)
     {
         using var bigStream = File.OpenRead(bigPath);
+
+        //Should probably be a switch instead
+
         if (COFB.IsStreamCOFB(bigStream))
         {
             COFB.Extract(bigPath, extractionFolder);
         }
-        if (NewBig.IsStreamNewBig(bigStream))
+        else if (NewBig.IsStreamNewBig(bigStream))
         {
             NewBig.Extract(bigPath, extractionFolder);
         }
-        if (BIGF4.IsStreamBIGF(bigStream) || BIGF4.IsStreamBIG4(bigStream))
+        else if(BIGF4.IsStreamBIGF(bigStream) || BIGF4.IsStreamBIG4(bigStream))
         {
             BIGF4.Extract(bigPath, extractionFolder);
-        } 
-        throw new InvalidDataException("Big signature not found");
+        }
+        else
+        {
+            throw new InvalidDataException("Big signature not found");
+        }
     }
 
     /// <summary>
