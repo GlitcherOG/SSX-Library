@@ -4,7 +4,7 @@ using System.Collections.Immutable;
 using System.Text;
 using System.IO.Compression;
 
-namespace SSX_Library.Internal;
+namespace SSX_Library.Internal.BIG;
 
 /// <summary>
 /// Helper class for dealing with ChunkZip compression
