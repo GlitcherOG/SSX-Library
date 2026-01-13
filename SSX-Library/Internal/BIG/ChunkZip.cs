@@ -12,7 +12,7 @@ namespace SSX_Library.Internal.BIG;
 internal static class ChunkZip
 {
     const int DefaultBlockSize = 128 * 1024; // 128KB in KiB
-    private static readonly ImmutableArray<byte> _magic = [..Encoding.ASCII.GetBytes("chunkzip")];
+    private static readonly ImmutableArray<byte> _magic = [.. Encoding.ASCII.GetBytes("chunkzip")];
 
     /// <summary>
     /// Peeks at the current stream position to check for a ChunkZip signature, 
@@ -58,7 +58,7 @@ internal static class ChunkZip
                 Size = Reader.ReadUInt32(dataStream, ByteOrder.BigEndian),
                 CompressionType = Reader.ReadUInt32(dataStream, ByteOrder.BigEndian),
             };
-            
+
             // Read chunk data and put it into a stream in
             // order to use System.IO.Compression.DeflateStream,
             // Then copy it to the output stream.
@@ -96,12 +96,17 @@ internal static class ChunkZip
             {
                 int distanceToEndOfData = (int)(dataStream.Length - dataStream.Position);
                 byte[] blockData = Reader.ReadBytes(dataStream, Math.Min(DefaultBlockSize, distanceToEndOfData));
-                using MemoryStream compressedDataStream = new();
-                using (DeflateStream compressedDataDeflateStream = new(compressedDataStream, CompressionLevel.Optimal))
-                {
-                    compressedDataDeflateStream.Write(blockData, 0, blockData.Length);
-                }
-                compressedBlocks.Add(compressedDataStream.ToArray());
+                var deflater = new ICSharpCode.SharpZipLib.Zip.Compression.Deflater(
+                    6,     // level
+                    true   // true = RAW DEFLATE (NO zlib header)
+                );
+
+                deflater.SetInput(blockData);
+                deflater.Finish();
+                var outBuf = new byte[blockData.Length * 2];
+                int size = deflater.Deflate(outBuf);
+
+                compressedBlocks.Add(outBuf.Take(size).ToArray());
             }
         }
 
@@ -125,7 +130,7 @@ internal static class ChunkZip
         public uint VersionNumber;
         public uint FullSize;
         public uint BlockSize;
-        public uint NumSegments; 
+        public uint NumSegments;
         public uint Alignment;
     }
 
