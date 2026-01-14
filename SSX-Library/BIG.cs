@@ -64,8 +64,6 @@ public static class BIG
     {
         using var bigStream = File.OpenRead(bigPath);
 
-        //Should probably be a switch instead
-
         if (COFB.IsStreamCOFB(bigStream))
         {
             COFB.Extract(bigPath, extractionFolder);
