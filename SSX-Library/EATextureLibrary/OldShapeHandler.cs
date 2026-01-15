@@ -106,7 +106,7 @@ namespace SSX_Library.EATextureLibrary
 
                     if (shape.MatrixFormat != MatrixType.LongName)
                     {
-                        shape.Size = StreamUtil.ReadInt24(stream);
+                        shape.Size = StreamUtil.ReadUInt24(stream);
 
                         shape.Width = StreamUtil.ReadInt16(stream);
 

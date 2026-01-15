@@ -60,14 +60,14 @@ namespace SSXLibrary.FileHandlers
                     }
                     if (EntryTypes == 3)
                     {
-                        TempHeader.OffsetInt = StreamUtil.ReadInt24(stream, true);
+                        TempHeader.OffsetInt = StreamUtil.ReadUInt24(stream, true);
                         TempHeader.Unknown2 = StreamUtil.ReadInt8(stream);
                         TempHeader.EventID = StreamUtil.ReadInt8(stream);
                     }
                     if (EntryTypes == 4)
                     {
                         TempHeader.Unknown = StreamUtil.ReadUInt8(stream);
-                        TempHeader.OffsetInt = StreamUtil.ReadInt24(stream, true);
+                        TempHeader.OffsetInt = StreamUtil.ReadUInt24(stream, true);
                         TempHeader.Unknown2 = StreamUtil.ReadInt8(stream);
                         TempHeader.EventID = StreamUtil.ReadInt8(stream);
                     }

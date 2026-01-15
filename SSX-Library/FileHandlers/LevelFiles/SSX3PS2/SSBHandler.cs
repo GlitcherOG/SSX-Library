@@ -151,9 +151,9 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2
                         {
                             MemoryStream memoryStream1 = new MemoryStream();
                             int ID = StreamUtil.ReadUInt8(memoryStream);
-                            int ChunkSize = StreamUtil.ReadInt24(memoryStream);
+                            int ChunkSize = StreamUtil.ReadUInt24(memoryStream);
                             int TrackID = StreamUtil.ReadUInt8(memoryStream);
-                            int RID = StreamUtil.ReadInt24(memoryStream);
+                            int RID = StreamUtil.ReadUInt24(memoryStream);
 
                             byte[] NewData = StreamUtil.ReadBytes(memoryStream, ChunkSize);
                             StreamUtil.WriteBytes(memoryStream1, NewData);

@@ -36,7 +36,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
 
             MatrixFormat = StreamUtil.ReadUInt8(stream);
 
-            Size = StreamUtil.ReadInt24(stream);
+            Size = StreamUtil.ReadUInt24(stream);
 
             Width = StreamUtil.ReadInt16(stream);
 
@@ -109,7 +109,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
                 }
                 SSHColourTable sshTable = new SSHColourTable();
 
-                sshTable.Size = StreamUtil.ReadInt24(stream);
+                sshTable.Size = StreamUtil.ReadUInt24(stream);
 
                 sshTable.Width = StreamUtil.ReadInt16(stream);
 

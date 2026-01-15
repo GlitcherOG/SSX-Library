@@ -102,7 +102,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
 
                         TempS5.U0 = StreamUtil.ReadInt16(stream);
                         TempS5.U1 = StreamUtil.ReadInt16(stream);
-                        TempS5.ModelDataOffset = StreamUtil.ReadInt24(stream);
+                        TempS5.ModelDataOffset = StreamUtil.ReadUInt24(stream);
                         TempS5.U4 = StreamUtil.ReadInt8(stream);
 
                         TempS5.ModelOffsetHeaders = new List<ModelData>();
@@ -113,9 +113,9 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
                         {
                             ModelData TempS7 = new ModelData();
 
-                            TempS7.LineCount = StreamUtil.ReadInt24(stream);
+                            TempS7.LineCount = StreamUtil.ReadUInt24(stream);
                             TempS7.U1 = StreamUtil.ReadUInt8(stream);
-                            TempS7.ModelOffset = StreamUtil.ReadInt24(stream);
+                            TempS7.ModelOffset = StreamUtil.ReadUInt24(stream);
                             TempS7.U2 = StreamUtil.ReadUInt8(stream);
                             if (TempS7.U2 != 0)
                             {
