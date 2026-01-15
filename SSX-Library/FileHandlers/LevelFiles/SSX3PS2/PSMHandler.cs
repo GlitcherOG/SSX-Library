@@ -32,7 +32,6 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2
                     for (int a = 0; a < TempNameList.NumStrings; a++)
                     {
                         TempNameList.strings.Add(StreamUtil.ReadNullEndString(stream));
-                        stream.Position++;
                     }
                     stream.Position++;
                     if(test)

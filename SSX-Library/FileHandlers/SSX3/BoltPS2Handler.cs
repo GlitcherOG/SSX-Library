@@ -145,7 +145,6 @@ namespace SSXLibrary.FileHandlers
                     string tempstring = StreamUtil.ReadNullEndString(stream);
                     StringList.Add(tempstring);
                     StringPos.Add(pos);
-                    stream.Position++;
                 }
 
                 //Grab strings based on offsets

@@ -7,6 +7,7 @@ namespace SSXLibrary.Utilities
     class StreamUtil
     {
         #region Read
+        [Obsolete("This function is defective. Use Reader.ReadNullTerminatedASCIIString Instead.")]
         public static string ReadNullEndString(Stream stream)
         {
             bool tillNull = false;
@@ -26,9 +27,11 @@ namespace SSXLibrary.Utilities
             stream.Position -= a + 1;
             byte[] FilePath = new byte[a];
             stream.Read(FilePath, 0, a);
+            stream.Position++;
             return Encoding.ASCII.GetString(FilePath);
         }
 
+        [Obsolete("Use Reader.ReadASCIIStringWithLength instead")]
         public static string ReadString(Stream stream, int Length, bool FixNull = true)
         {
             byte[] tempByte = new byte[Length];
@@ -538,6 +541,7 @@ namespace SSXLibrary.Utilities
 
         #endregion
 
+        [Obsolete("Use StreamExtensions.AlignBy16 instead.")]
         public static void AlignBy16(Stream stream)
         {
             int Num = 16 - ((int)stream.Position % 16);
