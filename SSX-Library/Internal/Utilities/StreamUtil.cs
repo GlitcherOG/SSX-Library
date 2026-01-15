@@ -2,9 +2,9 @@
 using System.Numerics;
 using System.Drawing;
 
-namespace SSXLibrary.Utilities
+namespace SSX_Library.Internal.Utilities
 {
-    class StreamUtil
+    internal class StreamUtil
     {
         #region Read
         [Obsolete("This function is defective. Use Reader.ReadNullTerminatedASCIIString Instead.")]

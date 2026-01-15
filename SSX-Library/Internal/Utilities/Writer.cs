@@ -1,6 +1,6 @@
 using System.Buffers.Binary;
 
-namespace SSX_Library.Utilities;
+namespace SSX_Library.Internal.Utilities;
 
 /// <summary>
 /// Writes primitive types to a stream

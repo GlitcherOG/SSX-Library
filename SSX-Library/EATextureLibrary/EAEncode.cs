@@ -1,6 +1,6 @@
 ﻿using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
-using SSXLibrary.Utilities;
+using SSX_Library.Internal.Utilities;
 using System.Collections.Generic;
 
 namespace SSX_Library.EATextureLibrary

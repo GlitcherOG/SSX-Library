@@ -1,4 +1,4 @@
-﻿using SSXLibrary.Utilities;
+﻿using SSX_Library.Internal.Utilities;
 
 namespace SSXLibrary.FileHandlers.Models
 {

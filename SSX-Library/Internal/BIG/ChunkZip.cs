@@ -1,5 +1,5 @@
 using SSX_Library.Internal.Extensions;
-using SSX_Library.Utilities;
+using SSX_Library.Internal.Utilities;
 using System.Collections.Immutable;
 using System.Text;
 using System.IO.Compression;

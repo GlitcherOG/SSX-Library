@@ -1,4 +1,4 @@
-﻿using SSXLibrary.Utilities;
+﻿using SSX_Library.Internal.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;

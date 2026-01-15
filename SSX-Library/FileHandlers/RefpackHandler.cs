@@ -6,8 +6,8 @@ using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
-using SSXLibrary.Utilities;
-using SSX_Library.Utilities;
+using SSX_Library.Internal.Utilities;
+using SSX_Library.Internal.Utilities;
 using System.Collections.Immutable;
 
 namespace SSXLibrary.FileHandlers

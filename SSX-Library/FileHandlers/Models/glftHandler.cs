@@ -1,13 +1,13 @@
 ﻿using SharpGLTF.Geometry;
 using SharpGLTF.Geometry.VertexTypes;
 using SharpGLTF.Materials;
-using SSX_Library.Utilities;
+using SSX_Library.Internal.Utilities;
 using SSXLibrary.FileHandlers.Models.OnTour;
 using SSXLibrary.FileHandlers.Models.SSX3;
 using SSXLibrary.FileHandlers.Models.SSXBlur;
 using SSXLibrary.FileHandlers.Models.SSXOG;
 using SSXLibrary.FileHandlers.Models.Tricky;
-using SSXLibrary.Utilities;
+using SSX_Library.Internal.Utilities;
 using System.Numerics;
 
 //https://github.com/vpenades/SharpGLTF/blob/master/src/SharpGLTF.Toolkit/Geometry/readme.md

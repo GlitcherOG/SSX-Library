@@ -1,11 +1,11 @@
 using System.Numerics;
 
-namespace SSX_Library.Utilities;
+namespace SSX_Library.Internal.Utilities;
 
 /// <summary>
 /// Utilities for line strips.
 /// </summary>
-public static class LineStrip
+internal static class LineStrip
 {
     /// <summary>
     /// Get the Distance of a line strip
