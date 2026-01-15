@@ -1,5 +1,5 @@
 using System.Collections.Immutable;
-using SSX_Library.Utilities;
+using SSX_Library.Internal.Utilities;
 using SSXLibrary.FileHandlers;
 
 namespace SSX_Library.Internal.BIG;
@@ -74,6 +74,7 @@ internal static class COFB
         // Read Big Header
         COFBHeader header = new()
         {
+            Magic = magic,
             FooterOffset = Reader.ReadUInt16(bigStream, ByteOrder.BigEndian),
             FileCount = Reader.ReadUInt16(bigStream, ByteOrder.BigEndian),
         };
@@ -197,7 +198,6 @@ internal static class COFB
         public byte[] Magic; // Size 2
         public uint FooterOffset;  // Relative to this value's end
         public uint FileCount;
-        public MemberFileHeader[] Files;
     }
 
     private struct MemberFileHeader

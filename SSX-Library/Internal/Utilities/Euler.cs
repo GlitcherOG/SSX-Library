@@ -1,11 +1,11 @@
 ﻿using System.Numerics;
 
-namespace SSX_Library.Utilities;
+namespace SSX_Library.Internal.Utilities;
 
 /// <summary>
 /// Converts Euler angels to/from Quaternion.
 /// </summary>
-public static class Euler
+internal static class Euler
 {
     public static Quaternion ToQuaternion(Vector3 euler)
     {

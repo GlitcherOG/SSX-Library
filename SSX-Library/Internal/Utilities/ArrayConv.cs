@@ -1,12 +1,12 @@
 using System.Diagnostics;
 using System.Numerics;
 
-namespace SSX_Library.Utilities;
+namespace SSX_Library.Internal.Utilities;
 
 /// <summary>
 /// Converts values to/from arrays.
 /// </summary>
-public static class ArrayConv
+internal static class ArrayConv
 {
     public static float[] Vector4ToArray(Vector4 vector4)
     {

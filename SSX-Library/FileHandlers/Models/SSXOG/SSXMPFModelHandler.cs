@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using SSXLibrary.Utilities;
+using SSX_Library.Internal.Utilities;
 using System.Numerics;
 
 namespace SSXLibrary.FileHandlers.Models.SSXOG

@@ -1,10 +1,10 @@
 ﻿using SSXLibrary.FileHandlers.LevelFiles.TrickyPS2;
 using SSXLibrary.JsonFiles.Tricky;
-using SSXLibrary.Utilities;
+using SSX_Library.Internal.Utilities;
 using System.Numerics;
 using System.Collections;
 using SSX_Library.EATextureLibrary;
-using SSX_Library.Utilities;
+using SSX_Library.Internal.Utilities;
 
 
 namespace SSXLibrary

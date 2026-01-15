@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using SSXLibrary.Utilities;
+using SSX_Library.Internal.Utilities;
 using SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData;
 using System.Diagnostics;
 using SSXLibrary.JsonFiles.SSX3;

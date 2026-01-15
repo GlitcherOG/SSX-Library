@@ -1,11 +1,11 @@
 using System.Numerics;
 
-namespace SSX_Library.Utilities;
+namespace SSX_Library.Internal.Utilities;
 
 /// <summary>
 /// Converts between Vector3 and Vector4.
 /// </summary>
-public static class VectorConv
+internal static class VectorConv
 {
     public static Vector3 Vector4ToVector3(Vector4 vector4)
     {

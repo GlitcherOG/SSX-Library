@@ -1,6 +1,6 @@
 using System.Diagnostics;
 
-namespace SSX_Library.Utilities;
+namespace SSX_Library.Internal.Utilities;
 
 /// <summary>
 /// Converts bytes to other types, and does operations on them.

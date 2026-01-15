@@ -1,10 +1,9 @@
 ﻿using System.Collections;
 
-namespace SSXLibrary.Utilities;
-
+namespace SSX_Library.Internal.Utilities;
 
 // Todo: Replace with ByteConv.cs
-public class ByteUtil
+internal class ByteUtil
 {
     [Obsolete("Use ByteConv.GetByteNibble instead")]
     public static int ByteToBitConvert(byte Byte, int Start = 0, int End = 3)

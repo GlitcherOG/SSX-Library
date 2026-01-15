@@ -3,7 +3,7 @@ using BCnEncoder.Shared;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Advanced;
 using SixLabors.ImageSharp.PixelFormats;
-using SSXLibrary.Utilities;
+using SSX_Library.Internal.Utilities;
 
 namespace SSX_Library.EATextureLibrary
 {

@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
 using System.Text;
-using SSX_Library.Utilities;
+using SSX_Library.Internal.Utilities;
 
 namespace SSX_Library;
 

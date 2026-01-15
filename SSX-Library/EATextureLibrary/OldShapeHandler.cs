@@ -1,7 +1,7 @@
 ﻿using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using SSXLibrary.FileHandlers;
-using SSXLibrary.Utilities;
+using SSX_Library.Internal.Utilities;
 using System.Text;
 
 

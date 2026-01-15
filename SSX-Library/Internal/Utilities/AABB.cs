@@ -1,11 +1,11 @@
 using System.Numerics;
 
-namespace SSX_Library.Utilities;
+namespace SSX_Library.Internal.Utilities;
 
 /// <summary>
 /// Utilities for Bounding Boxes.
 /// </summary>
-public static class AABB
+internal static class AABB
 {
     /// <summary>
     /// Is point inside Bunding box

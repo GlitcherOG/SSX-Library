@@ -1,7 +1,7 @@
 ﻿using System.Globalization;
 using System.IO;
 using System.Numerics;
-using SSXLibrary.Utilities;
+using SSX_Library.Internal.Utilities;
 
 namespace SSXLibrary.FileHandlers.LevelFiles.TrickyPS2
 {
