@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
 using SSX_Library.Internal.Extensions;
-using SSX_Library.Utilities;
+using SSX_Library.Internal.Utilities;
 using SSXLibrary.FileHandlers;
 
 namespace SSX_Library.Internal.BIG;

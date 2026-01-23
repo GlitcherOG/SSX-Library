@@ -1,11 +1,10 @@
-﻿using System.Runtime.InteropServices;
-using SixLabors.ImageSharp;
+﻿using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Advanced;
 using SixLabors.ImageSharp.PixelFormats;
 
-namespace SSXLibrary.Utilities
+namespace SSX_Library.Internal.Utilities
 {
-    public class ImageUtil
+    internal class ImageUtil
     {
 
         public static HashSet<Rgba32> GetBitmapColorsFast(Image<Rgba32> bmp)

@@ -1,5 +1,5 @@
 ﻿using System.Numerics;
-using SSXLibrary.Utilities;
+using SSX_Library.Internal.Utilities;
 using System.Globalization;
 using SharpGLTF.Geometry.VertexTypes;
 using SharpGLTF.Geometry;

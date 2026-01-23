@@ -1,11 +1,11 @@
 ﻿using System.Numerics;
 
-namespace SSX_Library.Utilities;
+namespace SSX_Library.Internal.Utilities;
 
 /// <summary>
 /// Idk
 /// </summary>
-public class BezierUtil
+internal class BezierUtil
 {
     public Vector3[] ProcessedPoints = new Vector3[16];
     public Vector3[] MidTablePoints = new Vector3[16];

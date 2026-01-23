@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
 using System.ComponentModel;
-using SSX_Library.Utilities;
+using SSX_Library.Internal.Utilities;
 using SSXLibrary.FileHandlers;
 
 namespace SSX_Library.Internal.BIG;
@@ -85,6 +85,7 @@ internal static class BIGF4
         // Read Big Header
         BIGF4Header header = new()
         {
+            Magic = magic,
             FileSize = Reader.ReadUInt32(bigStream, ByteOrder.LittleEndian),
             FileCount = Reader.ReadUInt32(bigStream, ByteOrder.BigEndian),
             FooterOffset = Reader.ReadUInt32(bigStream, ByteOrder.BigEndian),
@@ -232,7 +233,6 @@ internal static class BIGF4
         public uint FileSize;
         public uint FileCount;
         public uint FooterOffset;  // Relative to this value's end
-        public MemberFileHeader[] Files;
     }
 
     private struct MemberFileHeader
