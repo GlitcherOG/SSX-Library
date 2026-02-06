@@ -1,7 +1,6 @@
-﻿using System.Globalization;
-using System.IO;
+﻿using SSX_Library.Internal.Utilities;
+using System.Globalization;
 using System.Numerics;
-using SSX_Library.Internal.Utilities;
 
 namespace SSXLibrary.FileHandlers.LevelFiles.TrickyPS2
 {
@@ -1727,7 +1726,6 @@ namespace SSXLibrary.FileHandlers.LevelFiles.TrickyPS2
             public int MainType;
             public int ByteSize;
 
-
             //4 - Wait
             //13 - Reset
             //14 - Multiplyer
@@ -2171,3 +2169,20 @@ namespace SSXLibrary.FileHandlers.LevelFiles.TrickyPS2
 //257: # "AnimDelta"
 //258: # "AnimCombo"
 //259: # "AnimTexFlip"
+
+//Unused
+//0:
+//   8 - "Timer"
+//   9 - "Rail"
+//  16 - "RandomBoost"
+//  19 - "UVScrollTexFlip"
+//  21 - "TrickTrigger"
+//  22 - "Particle"
+//  259 - "AnimTexFlip"
+//1: "Camera"
+//6: Boost meter fill (showoff modes) (works)
+//10: Stubbed
+//11: Stubbed
+//15: Boost meter fill (showoff modes) (works)
+//16: Time bonus(best in showoff) (works)
+//23: Camera related(kinda works)
