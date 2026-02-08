@@ -135,6 +135,9 @@ public static class Refpack
         return outputData;
     }
 
+    /// <summary>
+    /// Compresses an array of bytes to Refpack.
+    /// </summary>
     public static byte[] Compress(byte[] inputData)
     {
         if (inputData.Length == 0)
@@ -146,7 +149,7 @@ public static class Refpack
 
         // Write Header
         bool isLarge = inputData.Length > 0xFFFFFF;
-        int magicFlags = isLarge ? 0x90 : 0x10; // 0x80 (isLarge) | 0x10 (unknown/default)
+        int magicFlags = isLarge ? 0x90 : 0x10; // 0x80 (isLarge) | 0x10 (default)
         Writer.WriteByte(outStream, (byte)magicFlags);
         Writer.WriteByte(outStream, 0xFB); // Signature
 

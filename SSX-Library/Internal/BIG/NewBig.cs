@@ -74,10 +74,10 @@ internal static class NewBig
             // Read the member file data, decompress it if needed,
             // and write it to the output file.
             bigStream.Position = headerInfo.HashIndices[i].Offset * 16;
-            if (RefpackHandler.HasRefpackSignature(bigStream))
+            if (Refpack.HasRefpackSignature(bigStream))
             {
                 byte[] data = Reader.ReadBytes(bigStream, (int)headerInfo.HashIndices[i].zSize);
-                Writer.WriteBytes(outputStream, RefpackHandler.Decompress(data));
+                Writer.WriteBytes(outputStream, Refpack.Decompress(data));
             }
             else if (ChunkZip.HasChunkZipSignature(bigStream))
             {

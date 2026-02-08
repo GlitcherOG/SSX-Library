@@ -1,4 +1,5 @@
 ﻿using SSX_Library.Internal.Utilities;
+using SSX_Library.Internal;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -81,7 +82,7 @@ namespace SSXLibrary.FileHandlers.Models.SSX3
                     }
 
                     modelHandler.Matrix = StreamUtil.ReadBytes(stream, EntrySize);
-                    modelHandler.Matrix = RefpackHandler.Decompress(modelHandler.Matrix);
+                    modelHandler.Matrix = Refpack.Decompress(modelHandler.Matrix);
                     ModelList[i] = modelHandler;
                 }
 

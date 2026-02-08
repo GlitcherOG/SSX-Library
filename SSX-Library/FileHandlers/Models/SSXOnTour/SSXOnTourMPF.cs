@@ -6,6 +6,7 @@ using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 using SSX_Library.Internal.Utilities;
+using SSX_Library.Internal;
 
 namespace SSXLibrary.FileHandlers.Models.OnTour
 {
@@ -84,8 +85,7 @@ namespace SSXLibrary.FileHandlers.Models.OnTour
 
 
                     MPFHeader modelHandler = ModelList[i];
-                    modelHandler.Matrix = StreamUtil.ReadBytes(stream, EntrySize);
-                    modelHandler.Matrix = RefpackHandler.Decompress(modelHandler.Matrix);
+                    modelHandler.Matrix = Refpack.Decompress(modelHandler.Matrix);
                     ModelList[i] = modelHandler;
                 }
 

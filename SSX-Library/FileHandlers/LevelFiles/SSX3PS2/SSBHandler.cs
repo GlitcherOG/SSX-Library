@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using SSX_Library.Internal.Utilities;
 using SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData;
 using System.Diagnostics;
+using SSX_Library.Internal;
 using SSXLibrary.JsonFiles.SSX3;
 
 namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2

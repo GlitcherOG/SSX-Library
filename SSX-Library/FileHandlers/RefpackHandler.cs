@@ -3,6 +3,7 @@ using System.Collections.Immutable;
 
 namespace SSXLibrary.FileHandlers
 {
+    [Obsolete("Use Refpack.cs instead")]
     public class RefpackHandler
     {
         private static readonly ImmutableArray<byte> _magic = [0x10, 0xFB];

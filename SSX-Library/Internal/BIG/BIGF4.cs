@@ -119,7 +119,7 @@ internal static class BIGF4
             var RefCheck = Reader.ReadBytes(bigStream, 2);
             if (RefCheck[1] == 0xFB && RefCheck[0] == 0x10) // Refpack flags
             {
-                data = RefpackHandler.Decompress(data); 
+                data = Refpack.Decompress(data); 
             }
 
             // Create file
@@ -207,7 +207,7 @@ internal static class BIGF4
             byte[] data = File.ReadAllBytes(path);
             if (useCompression)
             {
-                RefpackHandler.Compress(data, out data, CompressionLevel.Max);
+                data = Refpack.Compress(data);
             }
             long dataOffset = bigStream.Position;
             Writer.WriteBytes(bigStream, data);

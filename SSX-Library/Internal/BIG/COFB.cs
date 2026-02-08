@@ -107,7 +107,7 @@ internal static class COFB
             var refCheck = Reader.ReadBytes(bigStream, 2);
             if (refCheck[1] == 0xFB && refCheck[0] == 0x10) // Refpack flags
             {
-                data = RefpackHandler.Decompress(data); 
+                data = Refpack.Decompress(data); 
             }
 
             // Create file
@@ -179,7 +179,7 @@ internal static class COFB
             byte[] data = File.ReadAllBytes(path);
             if (useCompression)
             {
-                RefpackHandler.Compress(data, out data, CompressionLevel.Max);
+                data = Refpack.Compress(data);
             }
             long dataOffset = bigStream.Position;
             Writer.WriteBytes(bigStream, data);
