@@ -10,8 +10,7 @@ namespace SSX_Library.Internal;
     More Info on the bitstream structure: http://wiki.niotso.org/RefPack
 */
 
-// TODO: Make internal after finishing.
-public static class Refpack
+internal static class Refpack
 {
     /// <summary>
     /// Peeks at the current stream position to check for a Refpack signature, 
