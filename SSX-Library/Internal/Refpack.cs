@@ -227,7 +227,7 @@ public static class Refpack
 
         if (pos + 3 >= length) return false;
 
-        int h = ((inputData[pos] << 5) ^ (inputData[pos + 1] << 2) ^ inputData[pos + 2]) & 0xFFFF;
+        int h = ((inputData[pos] << 5) ^ (inputData[pos + 1] << 2) ^ inputData[pos + 2]) & 0xFFFF; // Hash
         int refPos = head[h];
         head[h] = pos; // Update head even if no match for next loop iterations.
 
