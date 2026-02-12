@@ -1,4 +1,5 @@
 using System.Buffers.Binary;
+using ICSharpCode.SharpZipLib;
 
 namespace SSX_Library.Internal.Utilities;
 
@@ -103,5 +104,17 @@ internal static class Writer
     {
         stream.Write(System.Text.Encoding.ASCII.GetBytes(text));
         stream.Write([0]); // Null
+    }
+
+    /// <remarks>
+    /// Excludes null char
+    /// </remarks>
+    public static void WriteASCIIStringWithLength(Stream stream, string text, int length)
+    {
+        if (length > text.Length)
+        {
+            throw new ValueOutOfRangeException("Length out of range");
+        }
+        stream.Write(System.Text.Encoding.ASCII.GetBytes(text));
     }
 }
