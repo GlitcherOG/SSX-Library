@@ -369,8 +369,7 @@ namespace SSX_Library.EATextureLibrary
             if (shapeImage.MatrixType == MatrixType.EightBitCompressed)
             {
                 //Compress Image
-                byte[] TempBytes = new byte[4];
-                RefpackHandler.Compress(Matrix, out TempBytes);
+                byte[] TempBytes = Refpack.Compress(Matrix);
                 Matrix = TempBytes;
             }
 
