@@ -15,17 +15,13 @@ public class CharDB
         JP_Korean_Chear_Characters,
     }
 
-    private readonly List<DefaultInfo> DefaultInfoList = [];
-    private readonly List<JPKoreanInfo> JPKoreanInfoList = [];
-    private readonly List<JPKoreanCheatCharactersInfo> JPKoreanCheatCharactersInfoList = [];
+    public List<Info> InfoList = [];
     private InfoMode LoadedModeType = InfoMode.Default;
 
     public void Load(string loadPath, InfoMode infoMode = InfoMode.Default)
     {
         LoadedModeType = infoMode;
-        DefaultInfoList.Clear();
-        JPKoreanInfoList.Clear();
-        JPKoreanCheatCharactersInfoList.Clear();
+        InfoList.Clear();
 
         using var stream = File.OpenRead(loadPath);
         while (stream.Position != stream.Length)
@@ -33,13 +29,13 @@ public class CharDB
             switch (infoMode)
             {
                 case InfoMode.Default: 
-                    ReadDefaultInfo(stream, DefaultInfoList); 
+                    ReadDefaultInfo(stream, InfoList); 
                     break;
                 case InfoMode.JP_Korean: 
-                    ReadJPKoreanInfo(stream, JPKoreanInfoList); 
+                    ReadJPKoreanInfo(stream, InfoList); 
                     break;
                 case InfoMode.JP_Korean_Chear_Characters: 
-                    ReadJPKoreanCheatCharactersInfo(stream, JPKoreanCheatCharactersInfoList); 
+                    ReadJPKoreanCheatCharactersInfo(stream, InfoList); 
                     break;
             }
         }
@@ -51,18 +47,18 @@ public class CharDB
         switch (LoadedModeType)
         {
             case InfoMode.Default: 
-                WriteDefaultInfo(stream, DefaultInfoList); 
+                WriteDefaultInfo(stream, InfoList); 
                 break;
             case InfoMode.JP_Korean: 
-                WriteJPKoreanInfo(stream, JPKoreanInfoList); 
+                WriteJPKoreanInfo(stream, InfoList); 
                 break;
             case InfoMode.JP_Korean_Chear_Characters: 
-                WriteJPKoreanCheatCharactersInfo(stream, JPKoreanCheatCharactersInfoList); 
+                WriteJPKoreanCheatCharactersInfo(stream, InfoList); 
                 break;
         }
     }
 
-    private static void WriteDefaultInfo(Stream stream, List<DefaultInfo> infoList)
+    private static void WriteDefaultInfo(Stream stream, List<Info> infoList)
     {
         foreach (var info in infoList)
         {
@@ -81,7 +77,7 @@ public class CharDB
         }
     }
 
-    private static void WriteJPKoreanInfo(Stream stream, List<JPKoreanInfo> infoList)
+    private static void WriteJPKoreanInfo(Stream stream, List<Info> infoList)
     {
         foreach (var info in infoList)
         {
@@ -101,7 +97,7 @@ public class CharDB
         }
     }
 
-    private static void WriteJPKoreanCheatCharactersInfo(Stream stream, List<JPKoreanCheatCharactersInfo> infoList)
+    private static void WriteJPKoreanCheatCharactersInfo(Stream stream, List<Info> infoList)
     {
         foreach (var info in infoList)
         {
@@ -110,9 +106,9 @@ public class CharDB
         }  
     }
 
-    private static void ReadDefaultInfo(Stream stream, List<DefaultInfo> infoList)
+    private static void ReadDefaultInfo(Stream stream, List<Info> infoList)
     {
-        DefaultInfo info = new()
+        Info info = new()
         {
             LongName = Reader.ReadASCIIStringWithLength(stream, 32),
             FirstName = Reader.ReadASCIIStringWithLength(stream, 16),
@@ -130,9 +126,9 @@ public class CharDB
         infoList.Add(info);
     }
 
-    private static void ReadJPKoreanInfo(Stream stream, List<JPKoreanInfo> infoList)
+    private static void ReadJPKoreanInfo(Stream stream, List<Info> infoList)
     {
-        JPKoreanInfo info = new()
+        Info info = new()
         {
             FirstNameEnglish = Reader.ReadASCIIStringWithLength(stream, 16),
             LongName = Reader.ReadASCIIStringWithLength(stream, 32),
@@ -151,9 +147,9 @@ public class CharDB
         infoList.Add(info);
     }
 
-    private static void ReadJPKoreanCheatCharactersInfo(Stream stream, List<JPKoreanCheatCharactersInfo> infoList)
+    private static void ReadJPKoreanCheatCharactersInfo(Stream stream, List<Info> infoList)
     {
-        JPKoreanCheatCharactersInfo info = new()
+        Info info = new()
         {
             FirstNameEnglish = Reader.ReadASCIIStringWithLength(stream, 8),
             LongName = Reader.ReadASCIIStringWithLength(stream, 24),
@@ -161,23 +157,7 @@ public class CharDB
         infoList.Add(info);
     }
 
-    public struct DefaultInfo
-    {
-        public string LongName;
-        public string FirstName;
-        public string NickName;
-        public uint Weight;
-        public uint Stance;
-        public uint ModelSize;
-        public string BloodType;
-        public uint Gender;
-        public uint Age;
-        public string Height;
-        public string Nationality;
-        public uint Position;
-    }
-
-    public struct JPKoreanInfo
+    public struct Info
     {
         public string FirstNameEnglish;
         public string LongName;
@@ -192,12 +172,6 @@ public class CharDB
         public string Height;
         public string Nationality;
         public uint Position;
-    }
-
-    public struct JPKoreanCheatCharactersInfo
-    {
-        public string FirstNameEnglish;
-        public string LongName;
     }
 }
 
