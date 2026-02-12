@@ -82,9 +82,9 @@ public class CharDB
         foreach (var info in infoList)
         {
             Writer.WriteASCIIStringWithLength(stream, info.FirstNameEnglish, 16);
-            Writer.WriteASCIIStringWithLength(stream, info.LongName, 32);
-            Writer.WriteASCIIStringWithLength(stream, info.FirstName, 16);
-            Writer.WriteASCIIStringWithLength(stream, info.NickName, 16);
+            Writer.WriteStringUTF16(stream, info.LongName, 32);
+            Writer.WriteStringUTF16(stream, info.FirstName, 16);
+            Writer.WriteStringUTF16(stream, info.NickName, 16);
             Writer.WriteUInt32(stream, info.Weight, ByteOrder.LittleEndian);
             Writer.WriteUInt32(stream, info.Stance, ByteOrder.LittleEndian);
             Writer.WriteUInt32(stream, info.ModelSize, ByteOrder.LittleEndian);
@@ -102,7 +102,7 @@ public class CharDB
         foreach (var info in infoList)
         {
             Writer.WriteASCIIStringWithLength(stream, info.FirstNameEnglish, 8);
-            Writer.WriteASCIIStringWithLength(stream, info.LongName, 24);
+            Writer.WriteStringUTF16(stream, info.LongName, 24);
         }  
     }
 
