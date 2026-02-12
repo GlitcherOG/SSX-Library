@@ -117,4 +117,17 @@ internal static class Writer
         }
         stream.Write(System.Text.Encoding.ASCII.GetBytes(text));
     }
+
+    public static void WriteStringUTF16(Stream stream, string text, int byteLength = 0)
+    {
+        byte[] bytes = System.Text.Encoding.Unicode.GetBytes(text);
+        if (byteLength == 0)
+        {
+            stream.Write(bytes);
+            return;
+        }
+        int bytesToWrite = Math.Min(bytes.Length, byteLength);
+        stream.Write(bytes, 0, bytesToWrite);
+    }
+
 }

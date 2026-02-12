@@ -131,9 +131,9 @@ public class CharDB
         Info info = new()
         {
             FirstNameEnglish = Reader.ReadASCIIStringWithLength(stream, 16),
-            LongName = Reader.ReadASCIIStringWithLength(stream, 32),
-            FirstName = Reader.ReadASCIIStringWithLength(stream, 16),
-            NickName = Reader.ReadASCIIStringWithLength(stream, 16),
+            LongName = Reader.ReadStringUTF16(stream, 32),
+            FirstName = Reader.ReadStringUTF16(stream, 16),
+            NickName = Reader.ReadStringUTF16(stream, 16),
             Weight = Reader.ReadUInt32(stream, ByteOrder.LittleEndian),
             Stance = Reader.ReadUInt32(stream, ByteOrder.LittleEndian),
             ModelSize = Reader.ReadUInt32(stream, ByteOrder.LittleEndian),
@@ -152,7 +152,7 @@ public class CharDB
         Info info = new()
         {
             FirstNameEnglish = Reader.ReadASCIIStringWithLength(stream, 8),
-            LongName = Reader.ReadASCIIStringWithLength(stream, 24),
+            LongName = Reader.ReadStringUTF16(stream, 24),
         };
         infoList.Add(info);
     }
