@@ -158,7 +158,7 @@ internal static class Refpack
         var latestBlocks = new Dictionary<int, List<int>>();
         var lastBlockStored = 0;
 
-        List<byte> output;
+        byte[] output;
 
         while (compressedIndex < inputData.Length)
         {
@@ -395,7 +395,7 @@ internal static class Refpack
         int chunkPosition;
         if (inputData.Length > 0xFFFFFF)
         {
-            output = [(byte)(compressedLength + 5 + (endIsValid ? 0 : 1))];
+            output = new byte[compressedLength + 5 + (endIsValid ? 0 : 1)];
             output[0] = 0x10 | 0x80; // 0x80 = length is 4 bytes
             output[1] = 0xFB;
             output[2] = (byte)(inputData.Length >> 24);
@@ -406,18 +406,18 @@ internal static class Refpack
         }
         else
         {
-            output = [(byte)(compressedLength + 5 + (endIsValid ? 0 : 1))];
+            output = new byte[compressedLength + 5 + (endIsValid ? 0 : 1)];
             output[0] = 0x10;
             output[1] = 0xFB;
             output[2] = (byte)(inputData.Length >> 16);
             output[3] = (byte)(inputData.Length >> 8);
-            output[4] = (byte)(inputData.Length);
+            output[4] = (byte)inputData.Length;
             chunkPosition = 5;
         }
 
         foreach (byte[] t in compressedChunks)
         {
-            Array.Copy(t, 0, output.ToArray(), chunkPosition, t.Length);
+            Array.Copy(t, 0, output, chunkPosition, t.Length);
             chunkPosition += t.Length;
         }
 
@@ -426,7 +426,7 @@ internal static class Refpack
             output[^1] = 0xFC;
         }
 
-        return [..output];
+        return output;
     }
 
     private static bool FindSequence(byte[] data,int offset,ref int bestStart,ref int bestLength,ref int bestIndex,Dictionary<int, List<int>> blockTracking)

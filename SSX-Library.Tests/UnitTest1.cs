@@ -12,8 +12,8 @@ public class UnitTest1
         string oldOutputPath = "/home/eric/Downloads/alaska_old";
         string newOutputPath = "/home/eric/Downloads/alaska_new";
 
-        string inputFolder = "/home/eric/Downloads/alaska";
-        string creationPath = "/home/eric/Downloads/alaska_new.big";
+        string inputFolder = "/home/eric/Downloads/Refpack Bug/alaska";
+        string creationPath = "/home/eric/Downloads/Refpack Bug/alaska_new.big";
         BIG.Create(BigType.C0FB, inputFolder, creationPath, true);
 
 
