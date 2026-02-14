@@ -11,7 +11,6 @@ namespace SSX_Library.Internal.BIG;
 internal static class COFB
 {
     private static readonly ImmutableArray<byte> _magic = [0xC0, 0xFB];
-    private const int _footerLength = 8;
 
     public static bool IsStreamCOFB(Stream stream)
     {
@@ -38,10 +37,8 @@ internal static class COFB
         }
 
         // Read Big Header
-        bigStream.Position += 2; // footerOffset u16
+        bigStream.Position += 2; // headerSize u16
         var fileCount = Reader.ReadUInt16(bigStream, ByteOrder.BigEndian);
-
-        // Read Member file headers
         List<MemberFileInfo> info = [];
         for (int _ = 0; _ < fileCount; _++)
         {
@@ -73,16 +70,10 @@ internal static class COFB
         }
 
         // Read Big Header
-        COFBHeader header = new()
-        {
-            Magic = magic,
-            FooterOffset = Reader.ReadUInt16(bigStream, ByteOrder.BigEndian),
-            FileCount = Reader.ReadUInt16(bigStream, ByteOrder.BigEndian),
-        };
-
-        // Read Member file headers
+        bigStream.Position += 2; // headerSize u16
+        uint fileCount = Reader.ReadUInt16(bigStream, ByteOrder.BigEndian);
         List<MemberFileHeader> memberFileHeaders = [];
-        for (int _ = 0; _ < header.FileCount; _++)
+        for (int _ = 0; _ < fileCount; _++)
         {
             MemberFileHeader file = new()
             {
@@ -104,9 +95,7 @@ internal static class COFB
             byte[] data = Reader.ReadBytes(bigStream, (int)memberFileHeader.Size);
 
             // Check if compressed. If so then decompress
-            bigStream.Position = (int)memberFileHeader.Offset;
-            var refCheck = Reader.ReadBytes(bigStream, 2);
-            if (refCheck[1] == 0xFB && refCheck[0] == 0x10) // Refpack flags
+            if (data[1] == 0xFB && data[0] == 0x10) // Refpack flags
             {
                 data = Refpack.Decompress(data); 
             }
@@ -135,8 +124,7 @@ internal static class COFB
         // Magic
         Writer.WriteBytes(bigStream, [.._magic]);
 
-        // Store footer position for setting later. Set to zero for now.
-        long headerFooterPosition = bigStream.Position;
+        // Set header size to zero for now.
         Writer.WriteUInt16(bigStream, 0, ByteOrder.BigEndian);
 
         // Get the path for all the member files relative to the input folder.
@@ -148,12 +136,12 @@ internal static class COFB
         int fileCount = relativeFilePaths.Length;
         Writer.WriteUInt16(bigStream, (ushort)fileCount, ByteOrder.BigEndian);
 
-        // Store member file header positions for second pass. Set values to zero for now
+        // Store member file header offsets and size for second pass. Set values to zero for now
         // except for the file paths.
-        List<long> memberHeaderPositions = [];
+        List<long> memberHeaderOffsets = [];
         for (int i = 0; i < fileCount; i++)
         {
-            memberHeaderPositions.Add(bigStream.Position);
+            memberHeaderOffsets.Add(bigStream.Position);
             Writer.WriteUInt24(bigStream, 0, ByteOrder.BigEndian); // offset
             Writer.WriteUInt24(bigStream, 0, ByteOrder.BigEndian); // size
 
@@ -166,12 +154,11 @@ internal static class COFB
             Writer.WriteNullTerminatedASCIIString(bigStream, path);
         }
 
-        // Write Footer offset to the header and write the footer
-        long footerOffset = bigStream.Position;
-        bigStream.Position = headerFooterPosition;
-        Writer.WriteUInt16(bigStream, (ushort)footerOffset, ByteOrder.BigEndian);
-        bigStream.Position = footerOffset; // Restore back to footer position
-        Writer.WriteBytes(bigStream, new byte[_footerLength]);
+        // Rewrite the header size
+        long headerSize = bigStream.Position;
+        bigStream.Position = 2; // header size
+        Writer.WriteUInt16(bigStream, (ushort)headerSize, ByteOrder.BigEndian);
+        bigStream.Position = headerSize; // Restore to last position
 
         // Write file data
         for (int i = 0; i < absoluteFilePaths.Length; i++)
@@ -182,23 +169,17 @@ internal static class COFB
             {
                 data = Refpack.Compress(data);
             }
+            bigStream.AlignBy(128);
             long dataOffset = bigStream.Position;
             Writer.WriteBytes(bigStream, data);
 
             // Update header
             long dataEndOffset = bigStream.Position;
-            bigStream.Position = memberHeaderPositions[i];
+            bigStream.Position = memberHeaderOffsets[i];
             Writer.WriteUInt24(bigStream, (uint)dataOffset, ByteOrder.BigEndian); // offset
             Writer.WriteUInt24(bigStream, (uint)data.Length, ByteOrder.BigEndian); // size
             bigStream.Position = dataEndOffset; // Restore to last position
         }
-    }
-
-    private struct COFBHeader
-    {
-        public byte[] Magic; // Size 2
-        public uint FooterOffset;  // Relative to this value's end
-        public uint FileCount;
     }
 
     private struct MemberFileHeader
