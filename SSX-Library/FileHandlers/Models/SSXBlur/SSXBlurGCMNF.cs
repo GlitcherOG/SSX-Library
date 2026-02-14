@@ -1,6 +1,7 @@
 ﻿using SSX_Library.Internal.Utilities;
 using System.IO;
 using System.Numerics;
+using SSX_Library.Internal;
 
 namespace SSXLibrary.FileHandlers.Models.SSXBlur
 {
@@ -64,7 +65,7 @@ namespace SSXLibrary.FileHandlers.Models.SSXBlur
                 {
                     stream.Position = StartPos + modelHeaders[i].ModelOffset;
                     ModelHeader modelHandler = modelHeaders[i];
-                    modelHandler.Matrix =  RefpackHandler.Decompress(StreamUtil.ReadBytes(stream, modelHeaders[i].ModelSize));
+                    modelHandler.Matrix = Refpack.Decompress(StreamUtil.ReadBytes(stream, modelHeaders[i].ModelSize));
                     modelHeaders[i] = modelHandler;
                 }
 

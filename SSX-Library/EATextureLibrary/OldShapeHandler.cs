@@ -3,6 +3,7 @@ using SixLabors.ImageSharp.PixelFormats;
 using SSXLibrary.FileHandlers;
 using SSX_Library.Internal.Utilities;
 using System.Text;
+using SSX_Library.Internal;
 
 
 namespace SSX_Library.EATextureLibrary
@@ -155,9 +156,9 @@ namespace SSX_Library.EATextureLibrary
                 tempImage.SwizzledImage = (imageMatrix.Flags & 8192) == 8192;
 
                 //Uncompress
-                if (MatrixType.EightBitCompressed == tempImage.MatrixType)
+                if (imageMatrix.Matrix != null && imageMatrix.Matrix.Length > 0) 
                 {
-                    imageMatrix.Matrix = RefpackHandler.Decompress(imageMatrix.Matrix);
+                    imageMatrix.Matrix = Refpack.Decompress(imageMatrix.Matrix);
                 }
 
                 //Process Colors
@@ -368,8 +369,7 @@ namespace SSX_Library.EATextureLibrary
             if (shapeImage.MatrixType == MatrixType.EightBitCompressed)
             {
                 //Compress Image
-                byte[] TempBytes = new byte[4];
-                RefpackHandler.Compress(Matrix, out TempBytes);
+                byte[] TempBytes = Refpack.Compress(Matrix);
                 Matrix = TempBytes;
             }
 
