@@ -3,6 +3,7 @@ using SixLabors.ImageSharp.PixelFormats;
 using SSXLibrary.FileHandlers;
 using SSX_Library.Internal.Utilities;
 using System.Text;
+using SSX_Library.Internal;
 
 namespace SSX_Library.EATextureLibrary
 {
@@ -117,7 +118,7 @@ namespace SSX_Library.EATextureLibrary
                 //Uncompress
                 if (tempImage.Compressed)
                 {
-                    imageMatrix.Matrix = RefpackHandler.Decompress(imageMatrix.Matrix);
+                    imageMatrix.Matrix = Refpack.Decompress(imageMatrix.Matrix);
                 }
 
                 //Process Colors

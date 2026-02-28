@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using SSX_Library.Internal.Utilities;
 using SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData;
 using System.Diagnostics;
+using SSX_Library.Internal;
 using SSXLibrary.JsonFiles.SSX3;
 
 namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2
@@ -137,7 +138,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2
                     byte[] DecompressedData = new byte[1];
                     Data = StreamUtil.ReadBytes(stream, Size - 8);
 
-                    DecompressedData = RefpackHandler.Decompress(Data);
+                    DecompressedData = Refpack.Decompress(Data);
                     StreamUtil.WriteBytes(memoryStream, DecompressedData);
                     if (MagicWords.ToUpper() == "CEND")
                     {
@@ -382,7 +383,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2
                                 End = false;
                             }
                             bytes = StreamUtil.ReadBytes(stream, ReadLength);
-                            RefpackHandler.Compress(bytes, out output, CompressionLevel.Max);
+                            output = Refpack.Compress(bytes);
                             Start = false;
                         }
                         

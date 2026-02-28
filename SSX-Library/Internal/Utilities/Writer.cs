@@ -7,9 +7,19 @@ namespace SSX_Library.Internal.Utilities;
 /// </summary>
 internal static class Writer
 {
+    public static void WriteByte(Stream stream, byte value)
+    {
+        stream.WriteByte(value);
+    }
+
     public static void WriteBytes(Stream stream, byte[] buffer)
     {
         stream.Write(buffer);
+    }
+
+    public static void WriteBytes(Stream stream, byte[] buffer, int offset, int count)
+    {
+        stream.Write(buffer, offset, count);
     }
 
     public static void WriteUInt16(Stream stream, ushort value, ByteOrder byteOrder)

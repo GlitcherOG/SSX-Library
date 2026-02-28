@@ -93,6 +93,7 @@ namespace SSX_Library.Internal.Utilities
 
         // TODO: References only call this function to get three 9bit numbers from an int.
         // Use BytesToInt9Array instead.
+        [Obsolete("References only call this function to get three 9bit numbers from an int.Use BytesToInt9Array instead.")]
         public static int ReadIntCustom(Stream stream, int bytesCount, int Bits, int StartBit, bool BigEndian = false)
         {
             byte[] tempByte = new byte[bytesCount];

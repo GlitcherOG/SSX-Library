@@ -1,4 +1,5 @@
 ﻿using SSX_Library.Internal.Utilities;
+using SSX_Library.Internal;
 using System.Numerics;
 
 namespace SSXLibrary.FileHandlers.SSX3
@@ -109,7 +110,7 @@ namespace SSXLibrary.FileHandlers.SSX3
                     var TempScreenTable = ScreenTables[i];
                     TempScreenTable.RefpackData = StreamUtil.ReadBytes(stream, ByteSize);
 
-                    TempScreenTable.RefpackData = RefpackHandler.Decompress(TempScreenTable.RefpackData);
+                    TempScreenTable.RefpackData = Refpack.Decompress(TempScreenTable.RefpackData);
 
                     ScreenTables[i] = TempScreenTable;
                 }

@@ -1,4 +1,5 @@
-﻿using SSX_Library.Internal.Utilities;
+﻿using SSX_Library.Internal;
+using SSX_Library.Internal.Utilities;
 using System.Drawing;
 using System.Drawing.Imaging;
 
@@ -74,7 +75,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
             //Decompress
             if (MatrixFormat == 130)
             {
-                Matrix = RefpackHandler.Decompress(Matrix);
+                Matrix = Refpack.Decompress(Matrix);
             }
 
             //Split Image Into Proper Bytes

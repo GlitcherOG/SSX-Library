@@ -1,4 +1,5 @@
-﻿using SSX_Library.Internal.Utilities;
+﻿using SSX_Library.Internal;
+using SSX_Library.Internal.Utilities;
 using System.Drawing;
 using System.Drawing.Imaging;
 
@@ -73,7 +74,6 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
             stream.Read(tempByte, 0, tempByte.Length);
             Matrix = tempByte;
 
-            //Matrix = RefpackHandler.Decompress(Matrix, true, Width * Height);
             if (MatrixFormat == 1)
             {
                 Matrix = ByteUtil.Unswizzle4bpp(Matrix, Width, Height);
