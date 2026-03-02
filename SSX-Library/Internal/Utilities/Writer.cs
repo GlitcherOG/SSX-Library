@@ -118,6 +118,26 @@ internal static class Writer
         stream.Write(System.Text.Encoding.ASCII.GetBytes(text));
     }
 
+    /// <summary>
+    /// Fill empty characters with null
+    /// </summary>
+    /// <exception cref="ValueOutOfRangeException"></exception>
+    public static void WriteASCIIStringWithNullLength(Stream stream, string text, int length)
+    {
+        byte[] bytes = System.Text.Encoding.ASCII.GetBytes(text);
+        for (int i = 0; i < length; i++)
+        {
+            if (i < bytes.Length)
+            {
+                stream.WriteByte(bytes[i]);
+            }
+            else
+            {
+                stream.WriteByte(0);
+            }
+        }
+    }
+
     public static void WriteStringUTF16(Stream stream, string text, int byteLength = 0)
     {
         byte[] bytes = System.Text.Encoding.Unicode.GetBytes(text);
@@ -130,4 +150,23 @@ internal static class Writer
         stream.Write(bytes, 0, bytesToWrite);
     }
 
+    /// <summary>
+    /// Write the UTF16 string to a stream with a length, Write null characters if
+    /// the string does dont fill the whole length.
+    /// </summary>
+    public static void WriteStringUTF16WithNullLength(Stream stream, string text, int byteLength)
+    {
+        byte[] bytes = System.Text.Encoding.Unicode.GetBytes(text);
+        for (int i = 0; i < byteLength; i++)
+        {
+            if (i < bytes.Length)
+            {
+                stream.WriteByte(bytes[i]);
+            }
+            else
+            {
+                stream.WriteByte(0);
+            }
+        }
+    }
 }

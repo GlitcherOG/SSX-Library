@@ -103,7 +103,7 @@ FileHandlers\SSX2012:
 
 FileHandlers\SSX3:
 - [ ] BoltPS2Handler.cs
-- [ ] CHARDBLHandler.cs
+- [x] CHARDBLHandler.cs
 - [ ] LUIHandler.cs
 - [ ] MusicINFHandler.cs
 

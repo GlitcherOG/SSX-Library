@@ -2,10 +2,13 @@ using SSX_Library.Internal.Utilities;
 
 namespace SSX_Library;
 
-
 /// <summary>
 /// Handler for the SSX3 CharDB.dbl file for storing character information.
 /// </summary>
+/// <remarks>
+/// Be careful when changing info strings. Make sure to stay within the
+/// string length bounds of the specific info mode.
+/// </remarks>
 public class CharDB
 {
     public enum InfoMode
@@ -15,15 +18,27 @@ public class CharDB
         JP_Korean_Chear_Characters,
     }
 
+    /// <summary>
+    /// The list of character information.
+    /// </summary>
     public List<Info> InfoList = [];
-    private InfoMode LoadedModeType = InfoMode.Default;
 
-    public void Load(string loadPath, InfoMode infoMode = InfoMode.Default)
+    /// <summary>
+    /// Info type/version depending on your game.
+    /// </summary>
+    public InfoMode LoadedModeType { get{ return _LoadedModeType; } }
+    private InfoMode _LoadedModeType = InfoMode.Default;
+
+    /// <summary>
+    /// Load the SSX3 CharDB.dbl file to memory (this class)
+    /// </summary>
+    /// <param name="infoMode"> The game version this file belongs to.</param>
+    public void Load(string path, InfoMode infoMode)
     {
-        LoadedModeType = infoMode;
+        _LoadedModeType = infoMode;
         InfoList.Clear();
 
-        using var stream = File.OpenRead(loadPath);
+        using var stream = File.OpenRead(path);
         while (stream.Position != stream.Length)
         {
             switch (infoMode)
@@ -41,10 +56,13 @@ public class CharDB
         }
     }
 
-    public void Save(string savePath)
+    /// <summary>
+    /// Load the SSX3 CharDB.dbl file to disc
+    /// </summary>
+    public void Save(string path)
     {
-        using var stream = File.Create(savePath);
-        switch (LoadedModeType)
+        using var stream = File.Create(path);
+        switch (_LoadedModeType)
         {
             case InfoMode.Default: 
                 WriteDefaultInfo(stream, InfoList); 
@@ -62,17 +80,17 @@ public class CharDB
     {
         foreach (var info in infoList)
         {
-            Writer.WriteASCIIStringWithLength(stream, info.LongName, 32);
-            Writer.WriteASCIIStringWithLength(stream, info.FirstName, 16);
-            Writer.WriteASCIIStringWithLength(stream, info.NickName, 16);
+            Writer.WriteASCIIStringWithNullLength(stream, info.LongName, 32);
+            Writer.WriteASCIIStringWithNullLength(stream, info.FirstName, 16);
+            Writer.WriteASCIIStringWithNullLength(stream, info.NickName, 16);
             Writer.WriteUInt32(stream, info.Weight, ByteOrder.LittleEndian);
             Writer.WriteUInt32(stream, info.Stance, ByteOrder.LittleEndian);
             Writer.WriteUInt32(stream, info.ModelSize, ByteOrder.LittleEndian);
-            Writer.WriteASCIIStringWithLength(stream, info.BloodType, 16);
+            Writer.WriteASCIIStringWithNullLength(stream, info.BloodType, 16);
             Writer.WriteUInt32(stream, info.Gender, ByteOrder.LittleEndian);
             Writer.WriteUInt32(stream, info.Age, ByteOrder.LittleEndian);
-            Writer.WriteASCIIStringWithLength(stream, info.Height, 16);
-            Writer.WriteASCIIStringWithLength(stream, info.Nationality, 16);
+            Writer.WriteASCIIStringWithNullLength(stream, info.Height, 16);
+            Writer.WriteASCIIStringWithNullLength(stream, info.Nationality, 16);
             Writer.WriteUInt32(stream, info.Position, ByteOrder.LittleEndian);
         }
     }
@@ -81,18 +99,18 @@ public class CharDB
     {
         foreach (var info in infoList)
         {
-            Writer.WriteASCIIStringWithLength(stream, info.FirstNameEnglish, 16);
-            Writer.WriteStringUTF16(stream, info.LongName, 32);
-            Writer.WriteStringUTF16(stream, info.FirstName, 16);
-            Writer.WriteStringUTF16(stream, info.NickName, 16);
+            Writer.WriteASCIIStringWithNullLength(stream, info.FirstNameEnglish, 16);
+            Writer.WriteStringUTF16WithNullLength(stream, info.LongName, 32);
+            Writer.WriteStringUTF16WithNullLength(stream, info.FirstName, 16);
+            Writer.WriteStringUTF16WithNullLength(stream, info.NickName, 16);
             Writer.WriteUInt32(stream, info.Weight, ByteOrder.LittleEndian);
             Writer.WriteUInt32(stream, info.Stance, ByteOrder.LittleEndian);
             Writer.WriteUInt32(stream, info.ModelSize, ByteOrder.LittleEndian);
-            Writer.WriteASCIIStringWithLength(stream, info.BloodType, 16);
+            Writer.WriteASCIIStringWithNullLength(stream, info.BloodType, 16);
             Writer.WriteUInt32(stream, info.Gender, ByteOrder.LittleEndian);
             Writer.WriteUInt32(stream, info.Age, ByteOrder.LittleEndian);
-            Writer.WriteASCIIStringWithLength(stream, info.Height, 16);
-            Writer.WriteASCIIStringWithLength(stream, info.Nationality, 16);
+            Writer.WriteASCIIStringWithNullLength(stream, info.Height, 16);
+            Writer.WriteASCIIStringWithNullLength(stream, info.Nationality, 16);
             Writer.WriteUInt32(stream, info.Position, ByteOrder.LittleEndian);
         }
     }
@@ -101,8 +119,8 @@ public class CharDB
     {
         foreach (var info in infoList)
         {
-            Writer.WriteASCIIStringWithLength(stream, info.FirstNameEnglish, 8);
-            Writer.WriteStringUTF16(stream, info.LongName, 24);
+            Writer.WriteASCIIStringWithNullLength(stream, info.FirstNameEnglish, 8);
+            Writer.WriteStringUTF16WithNullLength(stream, info.LongName, 24);
         }  
     }
 
