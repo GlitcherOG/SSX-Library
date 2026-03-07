@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
 using System.ComponentModel;
+using SSX_Library.Internal.Extensions;
 using SSX_Library.Internal.Utilities;
-using SSXLibrary.FileHandlers;
 
 namespace SSX_Library.Internal.BIG;
 
@@ -12,7 +12,6 @@ internal static class BIGF4
 {
     private static readonly ImmutableArray<byte> _magicBigF = [0x42, 0x49, 0x47, 0x46];
     private static readonly ImmutableArray<byte> _magicBig4 = [0x42, 0x49, 0x47, 0x34];
-    private const int _footerLength = 8;
 
     public static bool IsStreamBIGF(Stream stream)
     {
@@ -47,15 +46,15 @@ internal static class BIGF4
         }
 
         // Read Big Header
-        bigStream.Position += 4; // fileSize u32
-        var fileCount = Reader.ReadUInt32(bigStream, ByteOrder.BigEndian);
-        bigStream.Position += 4; // footerOffset u32
+        bigStream.Position += 4; // fileSize u32. Not needed.
+        uint fileCount = Reader.ReadUInt32(bigStream, ByteOrder.BigEndian);
+        bigStream.Position += 4; // headerSize u32. Not needed.
 
         // Read Member file headers
         List<MemberFileInfo> info = [];
         for (int _ = 0; _ < fileCount; _++)
         {
-            bigStream.Position += 4; // offset u24
+            bigStream.Position += 4; // offset u24. Not needed.
             MemberFileInfo file = new()
             {
                 Size = Reader.ReadUInt32(bigStream, ByteOrder.BigEndian),
@@ -85,10 +84,9 @@ internal static class BIGF4
         // Read Big Header
         BIGF4Header header = new()
         {
-            Magic = magic,
             FileSize = Reader.ReadUInt32(bigStream, ByteOrder.LittleEndian),
             FileCount = Reader.ReadUInt32(bigStream, ByteOrder.BigEndian),
-            FooterOffset = Reader.ReadUInt32(bigStream, ByteOrder.BigEndian),
+            HeaderSize = Reader.ReadUInt32(bigStream, ByteOrder.BigEndian),
         };
 
         // Read Member file headers
@@ -115,9 +113,7 @@ internal static class BIGF4
             byte[] data = Reader.ReadBytes(bigStream, (int)memberFileHeader.Size);
 
             // Check if compressed. If so then decompress
-            bigStream.Position = memberFileHeader.Offset;
-            var RefCheck = Reader.ReadBytes(bigStream, 2);
-            if (RefCheck[1] == 0xFB && RefCheck[0] == 0x10) // Refpack flags
+            if (data[1] == 0xFB && data[0] == 0x10) // Refpack flags
             {
                 data = Refpack.Decompress(data); 
             }
@@ -171,8 +167,8 @@ internal static class BIGF4
         int fileCount = relativeFilePaths.Length;
         Writer.WriteUInt32(bigStream, (uint)fileCount, ByteOrder.BigEndian);
 
-        // Store footer position for setting later. Set to zero for now.
-        long headerFooterPosition = bigStream.Position;
+        // Set headerSize to zero for now.
+        long headerSizePosition = bigStream.Position;
         Writer.WriteUInt32(bigStream, 0, ByteOrder.BigEndian);
 
         // Store member file header positions for second pass. Set values to zero for now
@@ -193,12 +189,11 @@ internal static class BIGF4
             Writer.WriteNullTerminatedASCIIString(bigStream, path);
         }
 
-        // Write Footer offset to the header and write the footer
-        long footerOffset = bigStream.Position;
-        bigStream.Position = headerFooterPosition;
-        Writer.WriteUInt32(bigStream, (uint)footerOffset, ByteOrder.BigEndian);
-        bigStream.Position = footerOffset; // Restore back to footer position
-        Writer.WriteBytes(bigStream, new byte[_footerLength]);
+        // Rewrite the header size
+        long headerSize = bigStream.Position;
+        bigStream.Position = headerSizePosition; // header size
+        Writer.WriteUInt16(bigStream, (ushort)headerSize, ByteOrder.BigEndian);
+        bigStream.Position = headerSize; // Restore to last position
 
         // Write file data
         for (int i = 0; i < absoluteFilePaths.Length; i++)
@@ -209,6 +204,7 @@ internal static class BIGF4
             {
                 data = Refpack.Compress(data);
             }
+            bigStream.AlignBy(128);
             long dataOffset = bigStream.Position;
             Writer.WriteBytes(bigStream, data);
 
@@ -218,7 +214,6 @@ internal static class BIGF4
             Writer.WriteUInt32(bigStream, (uint)dataOffset, ByteOrder.BigEndian); // offset
             Writer.WriteUInt32(bigStream, (uint)data.Length, ByteOrder.BigEndian); // size
             bigStream.Position = dataEndOffset; // Restore to last position
-            Console.WriteLine($"FINISHED {i}/{absoluteFilePaths.Length}");
         }
 
         // Set file size
@@ -229,10 +224,9 @@ internal static class BIGF4
 
     private struct BIGF4Header
     {
-        public byte[] Magic; // Size 4. Can be BigF or Big4
         public uint FileSize;
         public uint FileCount;
-        public uint FooterOffset;  // Relative to this value's end
+        public uint HeaderSize;
     }
 
     private struct MemberFileHeader

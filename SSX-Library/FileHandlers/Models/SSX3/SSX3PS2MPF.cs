@@ -1165,7 +1165,7 @@ namespace SSXLibrary.FileHandlers.Models.SSX3
                 var TempMatrix = new byte[1];
                 if (Compression)
                 {
-                    RefpackHandler.Compress(Model.Matrix, out TempMatrix);
+                    TempMatrix = Refpack.Compress(Model.Matrix);
                 }
                 else
                 {
