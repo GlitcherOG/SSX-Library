@@ -28,29 +28,84 @@ public sealed class LOC
     private readonly ImmutableArray<byte> _magicLOCL = [..Encoding.ASCII.GetBytes("LOCL")];
     private readonly List<TextEntry> _textEntries = [];
     private bool _usesLOCT;
-    private LOCH _locH;
-    private LOCT _locT;
-    private LOCL _locL;
 
     /// <summary>
     /// Does the LOC have an LOCT section.
     /// </summary>
-    // public bool UsesLOCT { get { return _usesLOCT; }}
+    public bool UsesLOCT { get { return _usesLOCT; }}
 
-    // /// <summary>
-    // /// Get the number of text entries in the LOCL.
-    // /// </summary>
-    // public int GetTextCount() => (int)_locL.TextEntryCount;
+    /// <summary>
+    /// Get the number of text entries.
+    /// </summary>
+    public int GetTextCount() => _textEntries.Count;
 
-    // /// <summary>
-    // /// Get the string of a text entry
-    // /// </summary>
-    // public string GetText(int id) => _locL.TextEntries[id];
+    /// <summary>
+    /// Get and find a text entry's string by it's hash.
+    /// </summary>
+    public string GetTextByHash(uint hash)
+    {
+        if (!_usesLOCT)
+        {
+            throw new KeyNotFoundException("The LOCT section does not exist for this LOC. Accessing the hash table is not possible.");
+        }
+        foreach (var entry in _textEntries)
+        {
+            if (entry.Hash == hash)
+            {
+                return entry.Text;
+            }
+        }
+        throw new KeyNotFoundException($"Text entry with hash {hash} was not found.");
+    }
 
-    // /// <summary>
-    // /// Set the string of a text entry
-    // /// </summary>
-    // public void SetText(int id, string value) => _locL.TextEntries[id] = value;
+    /// <summary>
+    /// Get and find a text entry's string by it's id.
+    /// </summary>
+    public string GetTextByID(int id)
+    {
+        if (id >= _textEntries.Count)
+        {
+            throw new KeyNotFoundException($"Text entry with id {id} was not found.");
+        }
+        return _textEntries[id].Text;
+    }
+
+    /// <summary>
+    /// Set a text entry's string by it's hash.
+    /// </summary>
+    public void SetTextByHash(uint hash, string text)
+    {
+        if (!_usesLOCT)
+        {
+            throw new KeyNotFoundException("The LOCT section does not exist for this LOC. Accessing the hash table is not possible.");
+        }
+        for (int i = 0; i < _textEntries.Count; i++)
+        {
+            if (_textEntries[i].Hash == hash)
+            {
+                TextEntry entry = _textEntries[i];
+                entry.Text = text;
+                _textEntries[i] = entry;
+                return;
+            }
+        }
+        throw new KeyNotFoundException($"Text entry with hash {hash} was not found.");
+    }
+
+    /// <summary>
+    /// Set a text entry's string by it's id.
+    /// </summary>
+    public void SetTextByID(int id, string text)
+    {
+        if (id >= _textEntries.Count)
+        {
+            throw new KeyNotFoundException($"Text entry with id {id} was not found.");
+        }
+        TextEntry entry = _textEntries[id];
+        entry.Text = text;
+        _textEntries[id] = entry;
+        return; 
+    }
 
     /// <summary>
     /// Load an LOC file from disk to memory.
@@ -170,65 +225,65 @@ public sealed class LOC
     /// </summary>
     /// <param name="filePath">Path to save the LOC. If empty it will save to the same place
     /// it was loaded from. </param>
-    public void Save(string filePath)
-    {
-        using FileStream stream = File.Create(filePath);
+    // public void Save(string filePath)
+    // {
+    //     using FileStream stream = File.Create(filePath);
 
-        // Save LOCH
-        Writer.WriteBytes(stream, [.._magicLOCH]);
-        Writer.WriteUInt32(stream, _locH.LOCHSize, ByteOrder.LittleEndian);
-        Writer.WriteUInt32(stream, _locH.Unk0, ByteOrder.LittleEndian);
-        Writer.WriteUInt32(stream, _locH.Unk1, ByteOrder.LittleEndian);
+    //     // Save LOCH
+    //     Writer.WriteBytes(stream, [.._magicLOCH]);
+    //     Writer.WriteUInt32(stream, _locH.LOCHSize, ByteOrder.LittleEndian);
+    //     Writer.WriteUInt32(stream, _locH.Unk0, ByteOrder.LittleEndian);
+    //     Writer.WriteUInt32(stream, _locH.Unk1, ByteOrder.LittleEndian);
 
-        long LOCLOffsetPos = stream.Position;
-        stream.Position += 4;
+    //     long LOCLOffsetPos = stream.Position;
+    //     stream.Position += 4;
 
-        // Save LOCT if used
-        if (_usesLOCT)
-        {
-            Writer.WriteBytes(stream, [.._magicLOCT]);
-            Writer.WriteUInt32(stream, 16, ByteOrder.LittleEndian);
-            Writer.WriteFloat(stream, _locT.Unk0, ByteOrder.LittleEndian);
-            Writer.WriteUInt32(stream, _locT.Unk1, ByteOrder.LittleEndian);
-            foreach (var hashTable in _locT.HashTable)
-            {
-                Writer.WriteUInt32(stream, hashTable.Hash, ByteOrder.LittleEndian);
-                Writer.WriteUInt32(stream, hashTable.ID, ByteOrder.LittleEndian);
-            }
-        }
+    //     // Save LOCT if used
+    //     if (_usesLOCT)
+    //     {
+    //         Writer.WriteBytes(stream, [.._magicLOCT]);
+    //         Writer.WriteUInt32(stream, 16, ByteOrder.LittleEndian);
+    //         Writer.WriteFloat(stream, _locT.Unk0, ByteOrder.LittleEndian);
+    //         Writer.WriteUInt32(stream, _locT.Unk1, ByteOrder.LittleEndian);
+    //         foreach (var hashTable in _locT.HashTable)
+    //         {
+    //             Writer.WriteUInt32(stream, hashTable.Hash, ByteOrder.LittleEndian);
+    //             Writer.WriteUInt32(stream, hashTable.ID, ByteOrder.LittleEndian);
+    //         }
+    //     }
 
-        // Save LOCL
-        var locLPosition = (uint)stream.Position;
+    //     // Save LOCL
+    //     var locLPosition = (uint)stream.Position;
 
-        //Write LOCL Offset
-        stream.Position = LOCLOffsetPos;
-        Writer.WriteUInt32(stream, locLPosition, ByteOrder.LittleEndian);
-        stream.Position = locLPosition;
-        Writer.WriteBytes(stream, [.._magicLOCL]);
-        Writer.WriteUInt32(stream, 0, ByteOrder.LittleEndian); // Placeholder
-        Writer.WriteUInt32(stream, _locL.Unk0, ByteOrder.LittleEndian);
-        _locL.TextEntryCount = (uint)_locL.TextEntries.Count; // Sync it
-        Writer.WriteUInt32(stream, _locL.TextEntryCount, ByteOrder.LittleEndian);
-        var locLOffsetsPosition = (uint)stream.Position; // Used later
-        Writer.WriteBytes(stream, new byte[_locL.TextEntryCount * sizeof(uint)]); // Placeholder for offsets
-        List<uint> realOffset = [];
-        foreach (var textEntry in _locL.TextEntries)
-        {
-            realOffset.Add((uint)stream.Position);
-            Writer.WriteBytes(stream, Encoding.Unicode.GetBytes(textEntry));
-            Writer.WriteBytes(stream, [0, 0, 0, 0]); // Null termination with two UTF16 characters
-        }
+    //     //Write LOCL Offset
+    //     stream.Position = LOCLOffsetPos;
+    //     Writer.WriteUInt32(stream, locLPosition, ByteOrder.LittleEndian);
+    //     stream.Position = locLPosition;
+    //     Writer.WriteBytes(stream, [.._magicLOCL]);
+    //     Writer.WriteUInt32(stream, 0, ByteOrder.LittleEndian); // Placeholder
+    //     Writer.WriteUInt32(stream, _locL.Unk0, ByteOrder.LittleEndian);
+    //     _locL.TextEntryCount = (uint)_locL.TextEntries.Count; // Sync it
+    //     Writer.WriteUInt32(stream, _locL.TextEntryCount, ByteOrder.LittleEndian);
+    //     var locLOffsetsPosition = (uint)stream.Position; // Used later
+    //     Writer.WriteBytes(stream, new byte[_locL.TextEntryCount * sizeof(uint)]); // Placeholder for offsets
+    //     List<uint> realOffset = [];
+    //     foreach (var textEntry in _locL.TextEntries)
+    //     {
+    //         realOffset.Add((uint)stream.Position);
+    //         Writer.WriteBytes(stream, Encoding.Unicode.GetBytes(textEntry));
+    //         Writer.WriteBytes(stream, [0, 0, 0, 0]); // Null termination with two UTF16 characters
+    //     }
         
-        // Rewrite the offsets to real ones
-        stream.Position = locLOffsetsPosition;
-        foreach (var offset in realOffset)
-        {
-            Writer.WriteUInt32(stream, offset, ByteOrder.LittleEndian);
-        }
-        // Set LOCL size
-        stream.Position = locLPosition + 4; // <- _locL.LOCLSize
-        Writer.WriteUInt32(stream, (uint)stream.Length - locLPosition + _locH.LOCHSize, ByteOrder.LittleEndian);
-    }
+    //     // Rewrite the offsets to real ones
+    //     stream.Position = locLOffsetsPosition;
+    //     foreach (var offset in realOffset)
+    //     {
+    //         Writer.WriteUInt32(stream, offset, ByteOrder.LittleEndian);
+    //     }
+    //     // Set LOCL size
+    //     stream.Position = locLPosition + 4; // <- _locL.LOCLSize
+    //     Writer.WriteUInt32(stream, (uint)stream.Length - locLPosition + _locH.LOCHSize, ByteOrder.LittleEndian);
+    // }
 
     private struct LOCH
     {
@@ -266,9 +321,9 @@ public sealed class LOC
         public List<uint> TextEntryOffsets; // Length: TextEntryCount. Relative to LOCL.
         public List<string> TextEntries; // Length: TextEntryCount
     }
-    private struct TextEntry
+    public struct TextEntry
     {
-        public uint Hash;
+        public uint Hash; // Invalid if not using LOCT
         public string Text;
     }
 }
