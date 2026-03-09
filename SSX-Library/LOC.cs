@@ -5,6 +5,12 @@ using SSX_Library.Internal.Utilities;
 namespace SSX_Library;
 
 /*
+    TODO: Update this remark. Also explain that saving doesnt take into account duplicated.
+    It duplicates text if its used in multiple hashes, its unconfirmed if there are any hashData
+    with the same offsets. This makes it easier to write since I can write the hashes in the same
+    order as the offsets. I doubt the hashData havign different IDs from the original is going to be
+    a problem.
+
     Remarks:
     LOCL strings are null terminated. The amount of null terminated UTF16 characters
     at the end of a string is inconsistant accross games. Do to this we've decided
@@ -26,18 +32,19 @@ public sealed class LOC
     private readonly ImmutableArray<byte> _magicLOCH = [..Encoding.ASCII.GetBytes("LOCH")];
     private readonly ImmutableArray<byte> _magicLOCT = [..Encoding.ASCII.GetBytes("LOCT")];
     private readonly ImmutableArray<byte> _magicLOCL = [..Encoding.ASCII.GetBytes("LOCL")];
-    private readonly List<TextEntry> _textEntries = [];
+    private readonly List<TextEntry> _textEntries = []; // Always sorted by hash.
+    private UnknwonValues _unknownValues;
     private bool _usesLOCT;
 
     /// <summary>
-    /// Does the LOC have an LOCT section.
+    /// Does the LOC have an LOCT section?
     /// </summary>
     public bool UsesLOCT { get { return _usesLOCT; }}
 
     /// <summary>
-    /// Get the number of text entries.
+    /// The number of text entries.
     /// </summary>
-    public int GetTextCount() => _textEntries.Count;
+    public int TextCount { get { return _textEntries.Count; }}
 
     /// <summary>
     /// Get and find a text entry's string by it's hash.
@@ -110,10 +117,11 @@ public sealed class LOC
     /// <summary>
     /// Load an LOC file from disk to memory.
     /// </summary>
-    /// <param name="filePath"> Path to the LOC file on disk.</param>
+    /// <param name="filePath"> Path to the LOC file.</param>
     public void Load(string filePath)
     {
         using FileStream stream = File.OpenRead(filePath);
+        _unknownValues = new();
 
         // Read LOCH
         if (!Reader.ReadBytes(stream, 4).SequenceEqual(_magicLOCH))
@@ -121,10 +129,11 @@ public sealed class LOC
             throw new InvalidDataException("Invalid/Corrupt LOC file. LOCH section not found.");
         }
         stream.Position += 4; // LochSize
-        stream.Position += 8; // Unknown 8 bytes
+        _unknownValues.LOCH0 = Reader.ReadUInt32(stream, ByteOrder.LittleEndian);
+        _unknownValues.LOCH1 = Reader.ReadUInt32(stream, ByteOrder.LittleEndian);
         stream.Position += 4; // loclOffset
 
-        // Read LOCT if available
+        // Read LOCT if used
         long loctPosition = stream.Position; // Invalid if no LOCT section exists.
         List<HashData> hashData = []; // Empty if no LOCT section exists.
         _usesLOCT = Reader.ReadBytes(stream, 4).SequenceEqual(_magicLOCT);
@@ -133,13 +142,14 @@ public sealed class LOC
         {
             stream.Position += 4; // Signature
             stream.Position += 4; // HeaderSize
-            stream.Position += 8; // Unknown 8 bytes
+            _unknownValues.LOCT0 = Reader.ReadUInt32(stream, ByteOrder.LittleEndian);
+            _unknownValues.LOCT1 = Reader.ReadUInt32(stream, ByteOrder.LittleEndian);
             while (true)
             {
                 hashData.Add(new()
                 {
                     Hash = Reader.ReadUInt32(stream, ByteOrder.LittleEndian),
-                    ID = Reader.ReadUInt32(stream, ByteOrder.LittleEndian)
+                    Id = Reader.ReadUInt32(stream, ByteOrder.LittleEndian)
                 });
 
                 // Break if the next 4 bytes is the LOCL signature.
@@ -156,7 +166,7 @@ public sealed class LOC
             throw new InvalidDataException("Invalid/Corrupt LOC file. LOCL section not found.");
         }
         stream.Position += 4; // Size
-        stream.Position += 4; // Unknown
+        _unknownValues.LOCL0 = Reader.ReadUInt32(stream, ByteOrder.LittleEndian);
         uint textEntryCount = Reader.ReadUInt32(stream, ByteOrder.LittleEndian);
         List<uint> offsets = [];
         for (int _ = 0; _ < textEntryCount; _++)
@@ -203,7 +213,7 @@ public sealed class LOC
                 _textEntries.Add(new()
                 {
                     Hash = hashData[i].Hash,
-                    Text = textList[(int)hashData[i].ID],
+                    Text = textList[(int)hashData[i].Id],
                 });
             }
         }
@@ -223,105 +233,95 @@ public sealed class LOC
     /// <summary>
     /// Save an LOC file from memory to disk.
     /// </summary>
-    /// <param name="filePath">Path to save the LOC. If empty it will save to the same place
-    /// it was loaded from. </param>
-    // public void Save(string filePath)
-    // {
-    //     using FileStream stream = File.Create(filePath);
-
-    //     // Save LOCH
-    //     Writer.WriteBytes(stream, [.._magicLOCH]);
-    //     Writer.WriteUInt32(stream, _locH.LOCHSize, ByteOrder.LittleEndian);
-    //     Writer.WriteUInt32(stream, _locH.Unk0, ByteOrder.LittleEndian);
-    //     Writer.WriteUInt32(stream, _locH.Unk1, ByteOrder.LittleEndian);
-
-    //     long LOCLOffsetPos = stream.Position;
-    //     stream.Position += 4;
-
-    //     // Save LOCT if used
-    //     if (_usesLOCT)
-    //     {
-    //         Writer.WriteBytes(stream, [.._magicLOCT]);
-    //         Writer.WriteUInt32(stream, 16, ByteOrder.LittleEndian);
-    //         Writer.WriteFloat(stream, _locT.Unk0, ByteOrder.LittleEndian);
-    //         Writer.WriteUInt32(stream, _locT.Unk1, ByteOrder.LittleEndian);
-    //         foreach (var hashTable in _locT.HashTable)
-    //         {
-    //             Writer.WriteUInt32(stream, hashTable.Hash, ByteOrder.LittleEndian);
-    //             Writer.WriteUInt32(stream, hashTable.ID, ByteOrder.LittleEndian);
-    //         }
-    //     }
-
-    //     // Save LOCL
-    //     var locLPosition = (uint)stream.Position;
-
-    //     //Write LOCL Offset
-    //     stream.Position = LOCLOffsetPos;
-    //     Writer.WriteUInt32(stream, locLPosition, ByteOrder.LittleEndian);
-    //     stream.Position = locLPosition;
-    //     Writer.WriteBytes(stream, [.._magicLOCL]);
-    //     Writer.WriteUInt32(stream, 0, ByteOrder.LittleEndian); // Placeholder
-    //     Writer.WriteUInt32(stream, _locL.Unk0, ByteOrder.LittleEndian);
-    //     _locL.TextEntryCount = (uint)_locL.TextEntries.Count; // Sync it
-    //     Writer.WriteUInt32(stream, _locL.TextEntryCount, ByteOrder.LittleEndian);
-    //     var locLOffsetsPosition = (uint)stream.Position; // Used later
-    //     Writer.WriteBytes(stream, new byte[_locL.TextEntryCount * sizeof(uint)]); // Placeholder for offsets
-    //     List<uint> realOffset = [];
-    //     foreach (var textEntry in _locL.TextEntries)
-    //     {
-    //         realOffset.Add((uint)stream.Position);
-    //         Writer.WriteBytes(stream, Encoding.Unicode.GetBytes(textEntry));
-    //         Writer.WriteBytes(stream, [0, 0, 0, 0]); // Null termination with two UTF16 characters
-    //     }
-        
-    //     // Rewrite the offsets to real ones
-    //     stream.Position = locLOffsetsPosition;
-    //     foreach (var offset in realOffset)
-    //     {
-    //         Writer.WriteUInt32(stream, offset, ByteOrder.LittleEndian);
-    //     }
-    //     // Set LOCL size
-    //     stream.Position = locLPosition + 4; // <- _locL.LOCLSize
-    //     Writer.WriteUInt32(stream, (uint)stream.Length - locLPosition + _locH.LOCHSize, ByteOrder.LittleEndian);
-    // }
-
-    private struct LOCH
+    /// <param name="filePath">Path to save the LOC.</param>
+    public void Save(string filePath)
     {
-        public byte[] MagicWord;
-        public uint LOCHSize;
-        public uint Unk0;
-        public uint Unk1;
-        public uint LOCLOffset; // Relative to file.
+        using FileStream stream = File.Create(filePath);
+
+        // Write LOCH
+        Writer.WriteBytes(stream, [.._magicLOCH]);
+        Writer.WriteUInt32(stream, 20, ByteOrder.LittleEndian);
+        Writer.WriteUInt32(stream, _unknownValues.LOCH0, ByteOrder.LittleEndian);
+        Writer.WriteUInt32(stream, _unknownValues.LOCH1, ByteOrder.LittleEndian);
+        long loclOffsetPosition = stream.Position; // Set later
+        stream.Position += 4;
+
+        // Write LOCT if used
+        if (_usesLOCT)
+        {
+            Writer.WriteBytes(stream, [.._magicLOCT]);
+            Writer.WriteUInt32(stream, 16, ByteOrder.LittleEndian);
+            Writer.WriteUInt32(stream, _unknownValues.LOCT0, ByteOrder.LittleEndian);
+            Writer.WriteUInt32(stream, _unknownValues.LOCT1, ByteOrder.LittleEndian);
+            for (int i = 0; i < _textEntries.Count; i++)
+            {
+                Writer.WriteUInt32(stream, _textEntries[i].Hash, ByteOrder.LittleEndian);
+                Writer.WriteUInt32(stream, (uint)i, ByteOrder.LittleEndian);
+            }
+        }
+
+        // Update LOCL offset on LOCH
+        long loclPosition = stream.Position;
+        stream.Position = loclOffsetPosition;
+        Writer.WriteUInt32(stream, (uint)loclPosition, ByteOrder.LittleEndian);
+        stream.Position = loclPosition;
+
+        // Write LOCL
+        Writer.WriteBytes(stream, [.._magicLOCL]);
+        long loclSizePosition = stream.Position; // Set later 
+        stream.Position += 4;
+        Writer.WriteUInt32(stream, _unknownValues.LOCL0, ByteOrder.LittleEndian);
+        Writer.WriteUInt32(stream, (uint)_textEntries.Count, ByteOrder.LittleEndian);
+        long offsetListPosition = stream.Position; // Used later
+        stream.Position += _textEntries.Count * sizeof(uint); // Placeholder for offsets
+
+        // Write LOCL Text
+        List<long> realOffset = [];
+        foreach (var entry in _textEntries)
+        {
+            realOffset.Add(stream.Position);
+            if (entry.Text == "")
+            {
+                Writer.WriteBytes(stream, [0, 0]); // Null character
+            }
+            else
+            {
+                Writer.WriteBytes(stream, Encoding.Unicode.GetBytes(entry.Text));
+                Writer.WriteBytes(stream, [0, 0, 0, 0]); // Null termination with two UTF16 characters
+            }
+        }
+        
+        // Update the offsets to real ones
+        stream.Position = offsetListPosition;
+        foreach (long offset in realOffset)
+        {
+            Writer.WriteUInt32(stream, (uint)offset, ByteOrder.LittleEndian);
+        }
+
+        // Write footer
+        Writer.WriteUInt16(stream, 0, ByteOrder.LittleEndian);
+
+        // Update the LOCL size
+        stream.Position = loclSizePosition;
+        Writer.WriteUInt32(stream, (uint)(stream.Length - loclPosition), ByteOrder.LittleEndian);
     }
 
-    private struct LOCT
+    private struct UnknwonValues
     {
-        public byte[] MagicWord;
-        public uint LOCTHeaderSize; // Always 16
-        public float Unk0;
-        public uint Unk1;
-
-        //Sorted from lowest to highest hash.
-        // Size is LOCL.TextEntryCount.
-        public List<HashData> HashTable; 
+        public uint LOCH0;
+        public uint LOCH1;
+        public uint LOCT0;
+        public uint LOCT1;
+        public uint LOCL0;
     }
 
     private struct HashData
     {
         public uint Hash;
-        public uint ID; // The index of the text entry in LOCL
+        public uint Id; // The index of the text entry in LOCL
     }
 
-    private struct LOCL
-    {
-        public byte[] MagicWord;
-        public uint LOCLSize;
-        public uint Unk0;
-        public uint TextEntryCount;
-        public List<uint> TextEntryOffsets; // Length: TextEntryCount. Relative to LOCL.
-        public List<string> TextEntries; // Length: TextEntryCount
-    }
-    public struct TextEntry
+    private struct TextEntry
     {
         public uint Hash; // Invalid if not using LOCT
         public string Text;
