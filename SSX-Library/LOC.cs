@@ -5,23 +5,13 @@ using SSX_Library.Internal.Utilities;
 namespace SSX_Library;
 
 /*
-    TODO: Update this remark. Also explain that saving doesnt take into account duplicated.
-    It duplicates text if its used in multiple hashes, its unconfirmed if there are any hashData
-    with the same offsets. This makes it easier to write since I can write the hashes in the same
-    order as the offsets. I doubt the hashData havign different IDs from the original is going to be
-    a problem.
-
-    Remarks:
-    LOCL strings are null terminated. The amount of null terminated UTF16 characters
-    at the end of a string is inconsistant accross games. Do to this we've decided
-    to use 2 null UTF16 characters for all the string terminations. That includes
-    only using 2 characters for the end of the LOCL section when saving back to disk.
-
-    The Load function only reads one null character to detect if a string terminated.
-
-    TextEntryCount is only updated when calling Save().
-
-    More Info: https://ssx.computernewb.com/wiki/Formats/Common:LOC
+    Saving Behavior:
+    When saving, text is written sequentially and may be duplicated if multiple hashes reference
+    the same text. This simplification allows hashes to be written in the same order
+    as text offsets without complex tracking logic. The only trade off is a few extra bytes of storage
+    in the rare case that duplicate references exist. If this becomes a problem then open a github issue.
+    
+    Wiki: https://ssx.computernewb.com/wiki/Formats/Common:LOC
 */
 
 /// <summary>
@@ -306,13 +296,10 @@ public sealed class LOC
         Writer.WriteUInt32(stream, (uint)(stream.Length - loclPosition), ByteOrder.LittleEndian);
     }
 
-    private struct UnknwonValues
+    private struct TextEntry
     {
-        public uint LOCH0;
-        public uint LOCH1;
-        public uint LOCT0;
-        public uint LOCT1;
-        public uint LOCL0;
+        public uint Hash; // Invalid if not using LOCT
+        public string Text;
     }
 
     private struct HashData
@@ -321,9 +308,12 @@ public sealed class LOC
         public uint Id; // The index of the text entry in LOCL
     }
 
-    private struct TextEntry
+    private struct UnknwonValues
     {
-        public uint Hash; // Invalid if not using LOCT
-        public string Text;
+        public uint LOCH0;
+        public uint LOCH1;
+        public uint LOCT0;
+        public uint LOCT1;
+        public uint LOCL0;
     }
 }
