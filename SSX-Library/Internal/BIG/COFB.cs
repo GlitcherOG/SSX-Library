@@ -1,7 +1,5 @@
 using System.Collections.Immutable;
-using SSX_Library.Internal.Utilities;
-using SSXLibrary.FileHandlers;
-using SSX_Library.Internal.Extensions;
+using SSX_Library.Internal.Utilities.StreamExtensions;
 
 namespace SSX_Library.Internal.BIG;
 
@@ -38,15 +36,15 @@ internal static class COFB
 
         // Read Big Header
         bigStream.Position += 2; // headerSize u16
-        var fileCount = Reader.ReadUInt16(bigStream, ByteOrder.BigEndian);
+        var fileCount = bigStream.ReadUInt16(ByteOrder.BigEndian);
         List<MemberFileInfo> info = [];
         for (int _ = 0; _ < fileCount; _++)
         {
             bigStream.Position += 3; // offset u24
             MemberFileInfo file = new()
             {
-                Size = Reader.ReadUInt24(bigStream, ByteOrder.BigEndian),
-                Path = Reader.ReadNullTerminatedASCIIString(bigStream),
+                Size = bigStream.ReadUInt24(ByteOrder.BigEndian),
+                Path = bigStream.ReadAsciiNullTerminated(),
             };
             info.Add(file);
         }
@@ -71,15 +69,15 @@ internal static class COFB
 
         // Read Big Header
         bigStream.Position += 2; // headerSize u16
-        uint fileCount = Reader.ReadUInt16(bigStream, ByteOrder.BigEndian);
+        uint fileCount = bigStream.ReadUInt16(ByteOrder.BigEndian);
         List<MemberFileHeader> memberFileHeaders = [];
         for (int _ = 0; _ < fileCount; _++)
         {
             MemberFileHeader file = new()
             {
-                Offset = Reader.ReadUInt24(bigStream, ByteOrder.BigEndian),
-                Size = Reader.ReadUInt24(bigStream, ByteOrder.BigEndian),
-                Path = Reader.ReadNullTerminatedASCIIString(bigStream),
+                Offset = bigStream.ReadUInt24(ByteOrder.BigEndian),
+                Size = bigStream.ReadUInt24(ByteOrder.BigEndian),
+                Path = bigStream.ReadAsciiNullTerminated(),
             };
             memberFileHeaders.Add(file);
         }
@@ -92,7 +90,7 @@ internal static class COFB
 
             // Read memberFileHeader data
             bigStream.Position = memberFileHeader.Offset;
-            byte[] data = Reader.ReadBytes(bigStream, (int)memberFileHeader.Size);
+            byte[] data = bigStream.ReadBytes((int)memberFileHeader.Size);
 
             // Check if compressed. If so then decompress
             if (data[1] == 0xFB && data[0] == 0x10) // Refpack flags
@@ -122,10 +120,10 @@ internal static class COFB
         using var bigStream = File.Create(bigOutputPath);
 
         // Magic
-        Writer.WriteBytes(bigStream, [.._magic]);
+        bigStream.Write([.._magic]);
 
         // Set header size to zero for now.
-        Writer.WriteUInt16(bigStream, 0, ByteOrder.BigEndian);
+        bigStream.WriteUInt16(0, ByteOrder.BigEndian);
 
         // Get the path for all the member files relative to the input folder.
         // And replace slashes.
@@ -134,7 +132,7 @@ internal static class COFB
 
         // Write File count
         int fileCount = relativeFilePaths.Length;
-        Writer.WriteUInt16(bigStream, (ushort)fileCount, ByteOrder.BigEndian);
+        bigStream.WriteUInt16((ushort)fileCount, ByteOrder.BigEndian);
 
         // Store member file header offsets and size for second pass. Set values to zero for now
         // except for the file paths.
@@ -142,8 +140,8 @@ internal static class COFB
         for (int i = 0; i < fileCount; i++)
         {
             memberHeaderOffsets.Add(bigStream.Position);
-            Writer.WriteUInt24(bigStream, 0, ByteOrder.BigEndian); // offset
-            Writer.WriteUInt24(bigStream, 0, ByteOrder.BigEndian); // size
+            bigStream.WriteUInt24(0, ByteOrder.BigEndian); // offset
+            bigStream.WriteUInt24(0, ByteOrder.BigEndian); // size
 
             // Select slash type
             string path = useBackslashes switch
@@ -151,13 +149,13 @@ internal static class COFB
                 true => relativeFilePaths[i].Replace('/', '\\'),
                 false => relativeFilePaths[i].Replace('\\', '/'),
             };
-            Writer.WriteNullTerminatedASCIIString(bigStream, path);
+            bigStream.WriteAsciiNullTerminated(path);
         }
 
         // Rewrite the header size
         long headerSize = bigStream.Position;
         bigStream.Position = 2; // header size
-        Writer.WriteUInt16(bigStream, (ushort)headerSize, ByteOrder.BigEndian);
+        bigStream.WriteUInt16((ushort)headerSize, ByteOrder.BigEndian);
         bigStream.Position = headerSize; // Restore to last position
 
         // Write file data
@@ -171,13 +169,13 @@ internal static class COFB
             }
             bigStream.AlignBy(128);
             long dataOffset = bigStream.Position;
-            Writer.WriteBytes(bigStream, data);
+            bigStream.Write(data);
 
             // Update header
             long dataEndOffset = bigStream.Position;
             bigStream.Position = memberHeaderOffsets[i];
-            Writer.WriteUInt24(bigStream, (uint)dataOffset, ByteOrder.BigEndian); // offset
-            Writer.WriteUInt24(bigStream, (uint)data.Length, ByteOrder.BigEndian); // size
+            bigStream.WriteUInt24((uint)dataOffset, ByteOrder.BigEndian); // offset
+            bigStream.WriteUInt24((uint)data.Length, ByteOrder.BigEndian); // size
             bigStream.Position = dataEndOffset; // Restore to last position
         }
     }

@@ -7,7 +7,7 @@ namespace SSX_Library.Internal.Utilities
     internal class StreamUtil
     {
         #region Read
-        [Obsolete("This function is defective. Use Reader.ReadNullTerminatedASCIIString Instead.")]
+        [Obsolete("This function is defective. Use StreamExtensions.ReadAsciiNullTerminated Instead.")]
         public static string ReadNullEndString(Stream stream)
         {
             bool tillNull = false;
@@ -31,7 +31,7 @@ namespace SSX_Library.Internal.Utilities
             return Encoding.ASCII.GetString(FilePath);
         }
 
-        [Obsolete("Use Reader.ReadASCIIStringWithLength instead")]
+        [Obsolete("Use StreamExtensions.ReadAsciiWithLength instead")]
         public static string ReadString(Stream stream, int Length, bool FixNull = true)
         {
             byte[] tempByte = new byte[Length];
