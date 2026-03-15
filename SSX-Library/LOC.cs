@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
 using System.Text;
-using SSX_Library.Internal.Utilities;
+using SSX_Library.Internal.Utilities.StreamExtensions;
 
 namespace SSX_Library;
 
@@ -114,36 +114,36 @@ public sealed class LOC
         _unknownValues = new();
 
         // Read LOCH
-        if (!Reader.ReadBytes(stream, 4).SequenceEqual(_magicLOCH))
+        if (!stream.ReadBytes(4).SequenceEqual(_magicLOCH))
         {
             throw new InvalidDataException("Invalid/Corrupt LOC file. LOCH section not found.");
         }
         stream.Position += 4; // LochSize
-        _unknownValues.LOCH0 = Reader.ReadUInt32(stream, ByteOrder.LittleEndian);
-        _unknownValues.LOCH1 = Reader.ReadUInt32(stream, ByteOrder.LittleEndian);
+        _unknownValues.LOCH0 = stream.ReadUInt32(ByteOrder.LittleEndian);
+        _unknownValues.LOCH1 = stream.ReadUInt32(ByteOrder.LittleEndian);
         stream.Position += 4; // loclOffset
 
         // Read LOCT if used
         long loctPosition = stream.Position; // Invalid if no LOCT section exists.
         List<HashData> hashData = []; // Empty if no LOCT section exists.
-        _usesLOCT = Reader.ReadBytes(stream, 4).SequenceEqual(_magicLOCT);
+        _usesLOCT = stream.ReadBytes(4).SequenceEqual(_magicLOCT);
         stream.Position -= 4; // Restore from LOCT signature check
         if (_usesLOCT)
         {
             stream.Position += 4; // Signature
             stream.Position += 4; // HeaderSize
-            _unknownValues.LOCT0 = Reader.ReadUInt32(stream, ByteOrder.LittleEndian);
-            _unknownValues.LOCT1 = Reader.ReadUInt32(stream, ByteOrder.LittleEndian);
+            _unknownValues.LOCT0 = stream.ReadUInt32(ByteOrder.LittleEndian);
+            _unknownValues.LOCT1 = stream.ReadUInt32(ByteOrder.LittleEndian);
             while (true)
             {
                 hashData.Add(new()
                 {
-                    Hash = Reader.ReadUInt32(stream, ByteOrder.LittleEndian),
-                    Id = Reader.ReadUInt32(stream, ByteOrder.LittleEndian)
+                    Hash = stream.ReadUInt32(ByteOrder.LittleEndian),
+                    Id = stream.ReadUInt32(ByteOrder.LittleEndian)
                 });
 
                 // Break if the next 4 bytes is the LOCL signature.
-                bool endOfSection = Reader.ReadBytes(stream, 4).SequenceEqual(_magicLOCL);
+                bool endOfSection = stream.ReadBytes(4).SequenceEqual(_magicLOCL);
                 stream.Position -= 4; // Restore from LOCL signature check
                 if (endOfSection) break;
             }
@@ -151,17 +151,17 @@ public sealed class LOC
 
         // Read LOCL
         long loclPosition = stream.Position;
-        if (!Reader.ReadBytes(stream, 4).SequenceEqual(_magicLOCL))
+        if (!stream.ReadBytes(4).SequenceEqual(_magicLOCL))
         {
             throw new InvalidDataException("Invalid/Corrupt LOC file. LOCL section not found.");
         }
         stream.Position += 4; // Size
-        _unknownValues.LOCL0 = Reader.ReadUInt32(stream, ByteOrder.LittleEndian);
-        uint textEntryCount = Reader.ReadUInt32(stream, ByteOrder.LittleEndian);
+        _unknownValues.LOCL0 = stream.ReadUInt32(ByteOrder.LittleEndian);
+        uint textEntryCount = stream.ReadUInt32(ByteOrder.LittleEndian);
         List<uint> offsets = [];
         for (int _ = 0; _ < textEntryCount; _++)
         {
-            offsets.Add(Reader.ReadUInt32(stream, ByteOrder.LittleEndian));
+            offsets.Add(stream.ReadUInt32(ByteOrder.LittleEndian));
         }
         List<string> textList = [];
         foreach (uint offset in offsets)
@@ -169,7 +169,7 @@ public sealed class LOC
             stream.Position = loclPosition + offset;
 
             // Check if empty
-            ushort firstCharacter = Reader.ReadUInt16(stream, ByteOrder.LittleEndian);
+            ushort firstCharacter = stream.ReadUInt16(ByteOrder.LittleEndian);
             stream.Position -= 2; // Restore
             if (firstCharacter == 0)
             {
@@ -182,7 +182,7 @@ public sealed class LOC
             while (true)
             {
                 // Check if null terminated
-                uint nullSequence = Reader.ReadUInt32(stream, ByteOrder.LittleEndian);
+                uint nullSequence = stream.ReadUInt32(ByteOrder.LittleEndian);
                 if (nullSequence == 0)
                 {
                     textList.Add(text);
@@ -190,7 +190,7 @@ public sealed class LOC
                 }
                 stream.Position -= 4; // Restore
 
-                text += Encoding.Unicode.GetString(Reader.ReadBytes(stream, 2));
+                text += Encoding.Unicode.GetString(stream.ReadBytes(2));
             }
         }
 
@@ -229,39 +229,39 @@ public sealed class LOC
         using FileStream stream = File.Create(filePath);
 
         // Write LOCH
-        Writer.WriteBytes(stream, [.._magicLOCH]);
-        Writer.WriteUInt32(stream, 20, ByteOrder.LittleEndian);
-        Writer.WriteUInt32(stream, _unknownValues.LOCH0, ByteOrder.LittleEndian);
-        Writer.WriteUInt32(stream, _unknownValues.LOCH1, ByteOrder.LittleEndian);
+        stream.Write([.._magicLOCH]);
+        stream.WriteUInt32(20, ByteOrder.LittleEndian);
+        stream.WriteUInt32(_unknownValues.LOCH0, ByteOrder.LittleEndian);
+        stream.WriteUInt32(_unknownValues.LOCH1, ByteOrder.LittleEndian);
         long loclOffsetPosition = stream.Position; // Set later
         stream.Position += 4;
 
         // Write LOCT if used
         if (_usesLOCT)
         {
-            Writer.WriteBytes(stream, [.._magicLOCT]);
-            Writer.WriteUInt32(stream, 16, ByteOrder.LittleEndian);
-            Writer.WriteUInt32(stream, _unknownValues.LOCT0, ByteOrder.LittleEndian);
-            Writer.WriteUInt32(stream, _unknownValues.LOCT1, ByteOrder.LittleEndian);
+            stream.Write([.._magicLOCT]);
+            stream.WriteUInt32(16, ByteOrder.LittleEndian);
+            stream.WriteUInt32(_unknownValues.LOCT0, ByteOrder.LittleEndian);
+            stream.WriteUInt32(_unknownValues.LOCT1, ByteOrder.LittleEndian);
             for (int i = 0; i < _textEntries.Count; i++)
             {
-                Writer.WriteUInt32(stream, _textEntries[i].Hash, ByteOrder.LittleEndian);
-                Writer.WriteUInt32(stream, (uint)i, ByteOrder.LittleEndian);
+                stream.WriteUInt32(_textEntries[i].Hash, ByteOrder.LittleEndian);
+                stream.WriteUInt32((uint)i, ByteOrder.LittleEndian);
             }
         }
 
         // Update LOCL offset on LOCH
         long loclPosition = stream.Position;
         stream.Position = loclOffsetPosition;
-        Writer.WriteUInt32(stream, (uint)loclPosition, ByteOrder.LittleEndian);
+        stream.WriteUInt32((uint)loclPosition, ByteOrder.LittleEndian);
         stream.Position = loclPosition;
 
         // Write LOCL
-        Writer.WriteBytes(stream, [.._magicLOCL]);
+        stream.Write([.._magicLOCL]);
         long loclSizePosition = stream.Position; // Set later 
         stream.Position += 4;
-        Writer.WriteUInt32(stream, _unknownValues.LOCL0, ByteOrder.LittleEndian);
-        Writer.WriteUInt32(stream, (uint)_textEntries.Count, ByteOrder.LittleEndian);
+        stream.WriteUInt32(_unknownValues.LOCL0, ByteOrder.LittleEndian);
+        stream.WriteUInt32((uint)_textEntries.Count, ByteOrder.LittleEndian);
         long offsetListPosition = stream.Position; // Used later
         stream.Position += _textEntries.Count * sizeof(uint); // Placeholder for offsets
 
@@ -272,12 +272,12 @@ public sealed class LOC
             realOffset.Add(stream.Position);
             if (entry.Text == "")
             {
-                Writer.WriteBytes(stream, [0, 0]); // Null character
+                stream.Write([0, 0]); // Null character
             }
             else
             {
-                Writer.WriteBytes(stream, Encoding.Unicode.GetBytes(entry.Text));
-                Writer.WriteBytes(stream, [0, 0, 0, 0]); // Null termination with two UTF16 characters
+                stream.Write(Encoding.Unicode.GetBytes(entry.Text));
+                stream.Write([0, 0, 0, 0]); // Null termination with two UTF16 characters
             }
         }
         
@@ -285,15 +285,15 @@ public sealed class LOC
         stream.Position = offsetListPosition;
         foreach (long offset in realOffset)
         {
-            Writer.WriteUInt32(stream, (uint)offset, ByteOrder.LittleEndian);
+            stream.WriteUInt32((uint)offset, ByteOrder.LittleEndian);
         }
 
         // Write footer
-        Writer.WriteUInt16(stream, 0, ByteOrder.LittleEndian);
+        stream.WriteUInt16(0, ByteOrder.LittleEndian);
 
         // Update the LOCL size
         stream.Position = loclSizePosition;
-        Writer.WriteUInt32(stream, (uint)(stream.Length - loclPosition), ByteOrder.LittleEndian);
+        stream.WriteUInt32((uint)(stream.Length - loclPosition), ByteOrder.LittleEndian);
     }
 
     private struct TextEntry
