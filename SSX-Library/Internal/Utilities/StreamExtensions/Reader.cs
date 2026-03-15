@@ -8,6 +8,14 @@ namespace SSX_Library.Internal.Utilities.StreamExtensions;
 /// </summary>
 internal static class Reader
 {
+
+    public static byte[] ReadBytes(this Stream stream, int length)
+    {
+        var buf = new byte[length];
+        stream.Read(buf);
+        return buf;
+    }
+
     public static ushort ReadUInt16(this Stream stream, ByteOrder byteOrder)
     {
         var buf = new byte[2];
@@ -80,7 +88,7 @@ internal static class Reader
         return Encoding.ASCII.GetString([..text]);
     }
 
-    /// <param name="removeNullChars"> Remove null characters if within the string</param>
+    /// <param name="removeNullChars"> Return the string with null characters removed</param>
     public static string ReadAsciiWithLength(this Stream stream, int length, bool removeNullChars)
     {
         var buf = new byte[length];
