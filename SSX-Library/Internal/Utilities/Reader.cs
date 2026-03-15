@@ -103,7 +103,10 @@ internal static class Reader
         return Encoding.ASCII.GetString(buf);
     }
 
-
-
-
+    public static string ReadStringUTF16(Stream stream, int byteLength)
+    {
+        byte[] tempByte = new byte[byteLength];
+        stream.Read(tempByte, 0, tempByte.Length);
+        return Encoding.Unicode.GetString(tempByte).Replace("\0", "");
+    }
 }
