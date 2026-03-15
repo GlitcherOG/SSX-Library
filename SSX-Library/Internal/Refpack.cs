@@ -1,4 +1,4 @@
-using SSX_Library.Internal.Utilities;
+using SSX_Library.Internal.Utilities.StreamExtensions;
 
 namespace SSX_Library.Internal;
 
@@ -14,7 +14,7 @@ internal static class Refpack
     /// </summary>
     public static bool HasRefpackSignature(Stream stream)
     {
-        byte[] buf = Reader.ReadBytes(stream, 2);
+        byte[] buf = stream.ReadBytes(2);
         stream.Position -= buf.Length;
         return buf.Length == 2 && buf[1] == 0xFB;
     }
@@ -32,8 +32,8 @@ internal static class Refpack
         using MemoryStream inputStream = new(inputData);
 
         // Header
-        byte magicFlags = Reader.ReadByte(inputStream);
-        byte signature = Reader.ReadByte(inputStream);
+        byte magicFlags = (byte)inputStream.ReadByte();
+        byte signature = (byte)inputStream.ReadByte();
 
         if (signature != 0xFB)
         {
@@ -44,15 +44,15 @@ internal static class Refpack
         bool hasCompressedSize = (magicFlags & 0x01) != 0;
 
         uint decompressedSize = isLongSize 
-            ? Reader.ReadUInt32(inputStream, ByteOrder.BigEndian) 
-            : Reader.ReadUInt24(inputStream, ByteOrder.BigEndian);
+            ? inputStream.ReadUInt32(ByteOrder.BigEndian) 
+            : inputStream.ReadUInt24(ByteOrder.BigEndian);
 
         if (hasCompressedSize)
         {
             // Skip compressed size if present. We dont need it for decompression.
             _ = isLongSize 
-                ? Reader.ReadUInt32(inputStream, ByteOrder.BigEndian) 
-                : Reader.ReadUInt24(inputStream, ByteOrder.BigEndian);
+                ? inputStream.ReadUInt32(ByteOrder.BigEndian) 
+                : inputStream.ReadUInt24(ByteOrder.BigEndian);
         }
 
         byte[] outputData = new byte[decompressedSize];
@@ -61,11 +61,11 @@ internal static class Refpack
         // Safety check to prevent infinite loop on corrupted data.
         while (outputPos < decompressedSize) 
         {
-            byte first = Reader.ReadByte(inputStream);
+            byte first = (byte)inputStream.ReadByte();
 
             if ((first & 0x80) == 0) // Command 2 (Unary 0)
             {
-                byte second = Reader.ReadByte(inputStream);
+                byte second = (byte)inputStream.ReadByte();
 
                 DecompressCommand command = new()
                 {
@@ -78,8 +78,8 @@ internal static class Refpack
             }
             else if ((first & 0x40) == 0) // Command 3 (Unary 10)
             {
-                byte second = Reader.ReadByte(inputStream);
-                byte third = Reader.ReadByte(inputStream);
+                byte second = (byte)inputStream.ReadByte();
+                byte third = (byte)inputStream.ReadByte();
 
                 DecompressCommand command = new()
                 {
@@ -92,9 +92,9 @@ internal static class Refpack
             }
             else if ((first & 0x20) == 0) // Command 4 (Unary 110)
             {
-                byte second = Reader.ReadByte(inputStream);
-                byte third = Reader.ReadByte(inputStream);
-                byte fourth = Reader.ReadByte(inputStream);
+                byte second = (byte)inputStream.ReadByte();
+                byte third = (byte)inputStream.ReadByte();
+                byte fourth = (byte)inputStream.ReadByte();
 
                 DecompressCommand command = new()
                 {
@@ -112,7 +112,7 @@ internal static class Refpack
                     int proceedingDataLength = (first & 0x1F) * 4 + 4;
                     for (int _ = 0; _ < proceedingDataLength; _++)
                     {
-                        outputData[outputPos++] = Reader.ReadByte(inputStream);
+                        outputData[outputPos++] = (byte)inputStream.ReadByte();
                     }
                 }
                 else // Stop Command
@@ -120,7 +120,7 @@ internal static class Refpack
                     int proceedingDataLength = first & 0x03;
                     for (int _ = 0; _ < proceedingDataLength; _++)
                     {
-                        outputData[outputPos++] = Reader.ReadByte(inputStream);
+                        outputData[outputPos++] = (byte)inputStream.ReadByte();
                     }
                     break;
                 }
@@ -536,7 +536,7 @@ internal static class Refpack
         // Copy proceeding literal data.
         for (int _ = 0; _ < command.ProceedingDataLength; _++)
         {
-            outputData[outputPos++] = Reader.ReadByte(inputStream);
+            outputData[outputPos++] = (byte)inputStream.ReadByte();
         }
 
         // Copy matching reference data.
