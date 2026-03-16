@@ -10,7 +10,7 @@ The library was made to isolate the backend from the Windows only [SSX Collectio
 - [ ] HDRHandler.cs
 - [x] LOCHandler.cs
 - [x] NewBigHandler.cs
-- [ ] RefpackHandler.cs
+- [x] RefpackHandler.cs
 
 FileHandlers\Audio:
 - [ ] EAAudioHandler.cs
