@@ -41,6 +41,18 @@ internal static class Reader
         };
     }
 
+    public static int ReadInt32(Stream stream, ByteOrder byteOrder)
+    {
+        var buf = new byte[4];
+        stream.Read(buf);
+        return byteOrder switch
+        {
+            ByteOrder.BigEndian => BinaryPrimitives.ReadInt32BigEndian(buf),
+            ByteOrder.LittleEndian => BinaryPrimitives.ReadInt32LittleEndian(buf),
+            _ => 0
+        };
+    }
+
     public static uint ReadUInt32(Stream stream, ByteOrder byteOrder)
     {
         var buf = new byte[4];

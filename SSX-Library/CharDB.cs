@@ -85,7 +85,7 @@ public class CharDB
             Writer.WriteASCIIStringWithNullLength(stream, info.NickName, 16);
             Writer.WriteUInt32(stream, info.Weight, ByteOrder.LittleEndian);
             Writer.WriteUInt32(stream, info.Stance, ByteOrder.LittleEndian);
-            Writer.WriteUInt32(stream, info.ModelSize, ByteOrder.LittleEndian);
+            Writer.WriteInt32(stream, info.ModelSize, ByteOrder.LittleEndian);
             Writer.WriteASCIIStringWithNullLength(stream, info.BloodType, 16);
             Writer.WriteUInt32(stream, info.Gender, ByteOrder.LittleEndian);
             Writer.WriteUInt32(stream, info.Age, ByteOrder.LittleEndian);
@@ -105,7 +105,7 @@ public class CharDB
             Writer.WriteStringUTF16WithNullLength(stream, info.NickName, 16);
             Writer.WriteUInt32(stream, info.Weight, ByteOrder.LittleEndian);
             Writer.WriteUInt32(stream, info.Stance, ByteOrder.LittleEndian);
-            Writer.WriteUInt32(stream, info.ModelSize, ByteOrder.LittleEndian);
+            Writer.WriteInt32(stream, info.ModelSize, ByteOrder.LittleEndian);
             Writer.WriteASCIIStringWithNullLength(stream, info.BloodType, 16);
             Writer.WriteUInt32(stream, info.Gender, ByteOrder.LittleEndian);
             Writer.WriteUInt32(stream, info.Age, ByteOrder.LittleEndian);
@@ -133,7 +133,7 @@ public class CharDB
             NickName = Reader.ReadASCIIStringWithLength(stream, 16),
             Weight = Reader.ReadUInt32(stream, ByteOrder.LittleEndian),
             Stance = Reader.ReadUInt32(stream, ByteOrder.LittleEndian),
-            ModelSize = Reader.ReadUInt32(stream, ByteOrder.LittleEndian),
+            ModelSize = Reader.ReadInt32(stream, ByteOrder.LittleEndian),
             BloodType = Reader.ReadASCIIStringWithLength(stream, 16),
             Gender = Reader.ReadUInt32(stream, ByteOrder.LittleEndian),
             Age = Reader.ReadUInt32(stream, ByteOrder.LittleEndian),
@@ -183,7 +183,7 @@ public class CharDB
         public string NickName;
         public uint Weight;
         public uint Stance;
-        public uint ModelSize;
+        public int ModelSize;
         public string BloodType;
         public uint Gender;
         public uint Age;

@@ -55,6 +55,20 @@ internal static class Writer
         stream.Write(buf);
     }
 
+    public static void WriteInt32(Stream stream, int value, ByteOrder byteOrder)
+    {
+        var buf = new byte[4];
+        if (byteOrder == ByteOrder.BigEndian)
+        {
+            BinaryPrimitives.WriteInt32BigEndian(buf, value);
+        }
+        else if (byteOrder == ByteOrder.LittleEndian)
+        {
+            BinaryPrimitives.WriteInt32LittleEndian(buf, value);
+        }
+        stream.Write(buf);
+    }
+
     public static void WriteUInt32(Stream stream, uint value, ByteOrder byteOrder)
     {
         var buf = new byte[4];
