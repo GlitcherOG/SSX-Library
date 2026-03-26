@@ -154,7 +154,7 @@ public class CharDB
             NickName = Reader.ReadStringUTF16(stream, 16),
             Weight = Reader.ReadUInt32(stream, ByteOrder.LittleEndian),
             Stance = Reader.ReadUInt32(stream, ByteOrder.LittleEndian),
-            ModelSize = Reader.ReadUInt32(stream, ByteOrder.LittleEndian),
+            ModelSize = Reader.ReadInt32(stream, ByteOrder.LittleEndian),
             BloodType = Reader.ReadASCIIStringWithLength(stream, 16),
             Gender = Reader.ReadUInt32(stream, ByteOrder.LittleEndian),
             Age = Reader.ReadUInt32(stream, ByteOrder.LittleEndian),
