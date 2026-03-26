@@ -6,7 +6,6 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
-using static SSXLibrary.JsonFiles.SSX3.Bin0JsonHandler;
 
 namespace SSXLibrary.JsonFiles.SSX3
 {
@@ -26,18 +25,18 @@ namespace SSXLibrary.JsonFiles.SSX3
             File.WriteAllText(path, serializer);
         }
 
-        public static Bin3JsonHandler Load(string path)
+        public static Bin6JsonHandler Load(string path)
         {
             string paths = path;
             if (File.Exists(paths))
             {
                 var stream = File.ReadAllText(paths);
-                var container = JsonConvert.DeserializeObject<Bin3JsonHandler>(stream);
+                var container = JsonConvert.DeserializeObject<Bin6JsonHandler>(stream);
                 return container;
             }
             else
             {
-                return new Bin3JsonHandler();
+                return new Bin6JsonHandler();
             }
         }
 

@@ -13,6 +13,8 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
 {
     public class WorldPatch
     {
+        public string Name = "Null";
+
         public int U0;
         public int U1;
         public int U2;

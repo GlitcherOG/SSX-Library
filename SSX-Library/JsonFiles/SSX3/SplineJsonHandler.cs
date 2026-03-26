@@ -6,7 +6,6 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
-using static SSXLibrary.JsonFiles.SSX3.Bin0JsonHandler;
 
 namespace SSXLibrary.JsonFiles.SSX3
 {
@@ -45,7 +44,7 @@ namespace SSXLibrary.JsonFiles.SSX3
         [Serializable]
         public struct SplineJson
         {
-            //public string SplineName;
+            public string Name;
 
             public int U0;
             public int U1;

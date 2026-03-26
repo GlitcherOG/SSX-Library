@@ -1,18 +1,13 @@
 ﻿using SSX_Library.Internal.Utilities;
 using SSXLibrary.JsonFiles.SSX3;
-using SSX_Library.Internal.Utilities;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
 {
     public class WorldSpline
     {
+        public string Name = "Null";
+
         public int U0;
         public Vector3 BBoxMin;
         public Vector3 BBoxMax;

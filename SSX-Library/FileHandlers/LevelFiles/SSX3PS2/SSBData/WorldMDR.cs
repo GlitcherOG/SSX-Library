@@ -1,22 +1,16 @@
-﻿using SSX_Library.Internal.Utilities;
-using SSXLibrary.JsonFiles.SSX3;
+﻿using SSXLibrary.JsonFiles.SSX3;
 using SSX_Library.Internal.Utilities;
-using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
-using System.Linq;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 
 
 namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
 {
     public class WorldMDR
     {
-        public int TrackID;
-        public int RID;
+        public string Name;
+
+        public ObjectID objectID;
 
         public int U1Count;
         public int U1Offset;
@@ -37,12 +31,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
 
         public void LoadData(Stream stream)
         {
-            stream.Position = 0;
-
-            var Temp = WorldCommon.ObjectIDLoad(stream);
-
-            TrackID = Temp.TrackID;
-            RID = Temp.RID;
+            objectID = WorldCommon.ObjectIDLoad(stream);
 
             U1Count = StreamUtil.ReadUInt32(stream);
             U1Offset = StreamUtil.ReadUInt32(stream);
@@ -102,7 +91,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
 
                         TempS5.U0 = StreamUtil.ReadInt16(stream);
                         TempS5.U1 = StreamUtil.ReadInt16(stream);
-                        TempS5.ModelDataOffset = StreamUtil.ReadUInt24(stream);
+                        TempS5.ModelDataOffset = StreamUtil.ReadInt24(stream);
                         TempS5.U4 = StreamUtil.ReadInt8(stream);
 
                         TempS5.ModelOffsetHeaders = new List<ModelData>();
@@ -113,9 +102,9 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
                         {
                             ModelData TempS7 = new ModelData();
 
-                            TempS7.LineCount = StreamUtil.ReadUInt24(stream);
+                            TempS7.LineCount = StreamUtil.ReadInt24(stream);
                             TempS7.U1 = StreamUtil.ReadUInt8(stream);
-                            TempS7.ModelOffset = StreamUtil.ReadUInt24(stream);
+                            TempS7.ModelOffset = StreamUtil.ReadInt24(stream);
                             TempS7.U2 = StreamUtil.ReadUInt8(stream);
                             if (TempS7.U2 != 0)
                             {
@@ -504,9 +493,11 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
         {
             MDRJsonHandler.MainModelHeader JsonModelObject = new MDRJsonHandler.MainModelHeader();
 
+            JsonModelObject.Name = Name;
+
             //Convert to JSON
-            JsonModelObject.TrackID = TrackID;
-            JsonModelObject.RID = RID;
+            JsonModelObject.TrackID = objectID.TrackID;
+            JsonModelObject.RID = objectID.RID;
 
             JsonModelObject.U3 = U3;
             JsonModelObject.U4 = U4;
@@ -547,7 +538,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
                 {
                     if (modelObject.modelFaces.Count != 0)
                     {
-                        NewObject.ModelPath = RID + "-" + i + ".obj";
+                        NewObject.ModelPath = objectID.RID + "-" + i + ".obj";
                     }
                 }
 
@@ -555,7 +546,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
 
                 if (modelObject.unknownS2.ModelHeaderOffset != null)
                 {
-                    for (int j = 0; j < modelObject.unknownS2.ModelHeaderOffset.Count; j++)
+                    for (global::System.Int32 j = 0; j < modelObject.unknownS2.ModelHeaderOffset.Count; j++)
                     {
                         var TempModelOffset = new MDRJsonHandler.ModelDataHeaderStruct();
 
@@ -603,7 +594,6 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
 
                 if (Data.modelFaces != null)
                 {
-
                     for (int b = 0; b < Data.modelFaces.Count; b++)
                     {
                         var Face = Data.modelFaces[b];
@@ -684,7 +674,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
 
                     if (Data.modelFaces.Count != 0)
                     {
-                        File.WriteAllText(Path + "/" + RID + "-" + a + ".obj", output);
+                        File.WriteAllText(Path + "/" + objectID.RID + "-" + a + ".obj", output);
                     }
                 }
                 //    if (ModelObjects[a].unknownS2.ModelHeaderOffset[ax].model != null)
@@ -781,8 +771,6 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
                 //    }
 
             }
-
-
             //Return Model
 
             return JsonModelObject;
