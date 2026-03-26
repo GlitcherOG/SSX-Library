@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2
 {
-    internal class PSMHandler
+    public class PSMHandler
     {
         public byte[] Unknown1 = new byte[8];
         public int NumArrays;

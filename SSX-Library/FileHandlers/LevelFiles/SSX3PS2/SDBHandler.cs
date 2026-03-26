@@ -3,7 +3,7 @@ using System.Numerics;
 
 namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2
 {
-    internal class SDBHandler
+    public class SDBHandler
     {
         public byte[] UnknownBytes = new byte[4];
         public float UnknownFloat;
