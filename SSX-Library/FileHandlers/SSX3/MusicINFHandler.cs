@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace SSXLibrary.FileHandlers
 {
-    class MusicINFHandler
+    public class MusicINFHandler
     {
         public string musPath;
         public string musFileHeader = "";
