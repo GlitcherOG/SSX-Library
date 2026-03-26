@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2
 {
-    internal class PHMHandler
+    public class PHMHandler
     {
 
     }

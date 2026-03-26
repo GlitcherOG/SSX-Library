@@ -12,7 +12,7 @@ using SSXLibrary.JsonFiles.SSX3;
 
 namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2
 {
-    internal class SSBHandler
+    public class SSBHandler
     {
         /*
             
