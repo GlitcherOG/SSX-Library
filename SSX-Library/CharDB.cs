@@ -85,7 +85,7 @@ public class CharDB
             stream.WriteAsciiWithLength(info.NickName, 16);
             stream.WriteUInt32(info.Weight, ByteOrder.LittleEndian);
             stream.WriteUInt32(info.Stance, ByteOrder.LittleEndian);
-            stream.WriteUInt32(info.ModelSize, ByteOrder.LittleEndian);
+            stream.WriteInt32(info.ModelSize, ByteOrder.LittleEndian);
             stream.WriteAsciiWithLength(info.BloodType, 16);
             stream.WriteUInt32(info.Gender, ByteOrder.LittleEndian);
             stream.WriteUInt32(info.Age, ByteOrder.LittleEndian);
@@ -105,7 +105,7 @@ public class CharDB
             stream.WriteUtf16WithLength(info.NickName, 16);
             stream.WriteUInt32(info.Weight, ByteOrder.LittleEndian);
             stream.WriteUInt32(info.Stance, ByteOrder.LittleEndian);
-            stream.WriteUInt32(info.ModelSize, ByteOrder.LittleEndian);
+            stream.WriteInt32(info.ModelSize, ByteOrder.LittleEndian);
             stream.WriteAsciiWithLength(info.BloodType, 16);
             stream.WriteUInt32(info.Gender, ByteOrder.LittleEndian);
             stream.WriteUInt32(info.Age, ByteOrder.LittleEndian);
@@ -133,7 +133,7 @@ public class CharDB
             NickName = stream.ReadAsciiWithLength(16, false),
             Weight = stream.ReadUInt32(ByteOrder.LittleEndian),
             Stance = stream.ReadUInt32(ByteOrder.LittleEndian),
-            ModelSize = stream.ReadUInt32(ByteOrder.LittleEndian),
+            ModelSize = stream.ReadInt32(ByteOrder.LittleEndian),
             BloodType = stream.ReadAsciiWithLength(16, false),
             Gender = stream.ReadUInt32(ByteOrder.LittleEndian),
             Age = stream.ReadUInt32(ByteOrder.LittleEndian),
@@ -183,7 +183,7 @@ public class CharDB
         public string NickName;
         public uint Weight;
         public uint Stance;
-        public uint ModelSize;
+        public int ModelSize;
         public string BloodType;
         public uint Gender;
         public uint Age;
