@@ -1,18 +1,12 @@
 ﻿using Newtonsoft.Json;
-using System;
 using System.IO;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-using static SSXLibrary.JsonFiles.SSX3.Bin0JsonHandler;
+
 
 namespace SSXLibrary.JsonFiles.SSX3
 {
-    public class Bin3JsonHandler
+    public class InstanceJsonHandler
     {
-        public List<Bin3File> bin3Files = new List<Bin3File>();
+        public List<Instance> Instances = new List<Instance>();
 
         public void CreateJson(string path, bool Inline = false)
         {
@@ -26,24 +20,29 @@ namespace SSXLibrary.JsonFiles.SSX3
             File.WriteAllText(path, serializer);
         }
 
-        public static Bin3JsonHandler Load(string path)
+        public static InstanceJsonHandler Load(string path)
         {
             string paths = path;
             if (File.Exists(paths))
             {
                 var stream = File.ReadAllText(paths);
-                var container = JsonConvert.DeserializeObject<Bin3JsonHandler>(stream);
+                var container = JsonConvert.DeserializeObject<InstanceJsonHandler>(stream);
                 return container;
             }
             else
             {
-                return new Bin3JsonHandler();
+                return new InstanceJsonHandler();
             }
         }
 
 
-        public struct Bin3File
+        public struct Instance
         {
+            public string Name;
+
+            public int TrackID;
+            public int RID;
+
             public int U0;
             public int U1;
             public int U2;
@@ -59,12 +58,10 @@ namespace SSXLibrary.JsonFiles.SSX3
             public float[] V2;
             public float U31;
 
-            public int TrackID;
-            public int RID;
             public int U4;
 
-            public int UTrackID;
-            public int URID;
+            public int ModelTrackID;
+            public int ModelRID;
 
             public float U5;
             public int U6;

@@ -1,16 +1,12 @@
 ﻿using SSX_Library.Internal.Utilities;
-using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2
 {
     public class PSMHandler
     {
-        public byte[] Unknown1 = new byte[8];
+        public float U0;
+        public float U1;
         public int NumArrays;
         public List<NameList> nameLists = new List<NameList>();
 
@@ -20,18 +16,20 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2
             {
                 bool test = false;
 
-                Unknown1 = StreamUtil.ReadBytes(stream, 8);
+                U0  = StreamUtil.ReadFloat(stream);
+                U1 = StreamUtil.ReadFloat(stream);
                 NumArrays = StreamUtil.ReadUInt32(stream);
                 nameLists = new List<NameList>();
                 for (int i = 0; i < NumArrays; i++)
                 {
                     var TempNameList = new NameList();
-                    TempNameList.Unknown2 = StreamUtil.ReadBytes(stream, 4);
+                    TempNameList.Unknown2 = StreamUtil.ReadUInt32(stream);
                     TempNameList.NumStrings = StreamUtil.ReadUInt32(stream);
                     TempNameList.strings = new List<string>();
                     for (int a = 0; a < TempNameList.NumStrings; a++)
                     {
                         TempNameList.strings.Add(StreamUtil.ReadNullEndString(stream));
+                        stream.Position++; //Put here to fix bug with Read Null End String
                     }
                     stream.Position++;
                     if(test)
@@ -44,10 +42,9 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2
             }
         }
 
-
         public struct NameList
         {
-            public byte[] Unknown2;
+            public int Unknown2;
             public int NumStrings;
             public List<string> strings;
         }
