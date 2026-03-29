@@ -72,8 +72,6 @@ namespace SSX_Library.EATextureLibrary
                             TempImage.Size = NewSize;
                         }
 
-
-
                         ShapeImages[i] = TempImage;
                     }
 
@@ -156,7 +154,7 @@ namespace SSX_Library.EATextureLibrary
                 tempImage.SwizzledImage = (imageMatrix.Flags & 8192) == 8192;
 
                 //Uncompress
-                if (imageMatrix.Matrix != null && imageMatrix.Matrix.Length > 0) 
+                if (imageMatrix.Matrix != null && imageMatrix.Matrix.Length > 0 && imageMatrix.MatrixFormat == MatrixType.EightBitCompressed) 
                 {
                     imageMatrix.Matrix = Refpack.Decompress(imageMatrix.Matrix);
                 }
