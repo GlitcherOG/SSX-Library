@@ -1,5 +1,4 @@
-using SSX_Library.Internal.Extensions;
-using SSX_Library.Internal.Utilities;
+using SSX_Library.Internal.Utilities.StreamExtensions;
 using System.Collections.Immutable;
 using System.Text;
 using System.IO.Compression;
@@ -20,7 +19,7 @@ internal static class ChunkZip
     /// </summary>
     public static bool HasChunkZipSignature(Stream stream)
     {
-        byte[] buf = Reader.ReadBytes(stream, _magic.Length);
+        byte[] buf = stream.ReadBytes(_magic.Length);
         stream.Position -= _magic.Length;
         return buf.SequenceEqual(_magic);
     }
@@ -36,12 +35,12 @@ internal static class ChunkZip
         // Read header
         ChunkZipHeader header = new()
         {
-            Header = Reader.ReadASCIIStringWithLength(dataStream, _magic.Length),
-            VersionNumber = Reader.ReadUInt32(dataStream, ByteOrder.BigEndian),
-            FullSize = Reader.ReadUInt32(dataStream, ByteOrder.BigEndian),
-            BlockSize = Reader.ReadUInt32(dataStream, ByteOrder.BigEndian),
-            NumSegments = Reader.ReadUInt32(dataStream, ByteOrder.BigEndian),
-            Alignment = Reader.ReadUInt32(dataStream, ByteOrder.BigEndian),
+            Header = dataStream.ReadAsciiWithLength(_magic.Length, false),
+            VersionNumber = dataStream.ReadUInt32(ByteOrder.BigEndian),
+            FullSize = dataStream.ReadUInt32(ByteOrder.BigEndian),
+            BlockSize = dataStream.ReadUInt32(ByteOrder.BigEndian),
+            NumSegments = dataStream.ReadUInt32(ByteOrder.BigEndian),
+            Alignment = dataStream.ReadUInt32(ByteOrder.BigEndian),
         };
 
         // Read chunks
@@ -55,14 +54,14 @@ internal static class ChunkZip
             // Read chunk header
             Chunk chunk = new()
             {
-                Size = Reader.ReadUInt32(dataStream, ByteOrder.BigEndian),
-                CompressionType = Reader.ReadUInt32(dataStream, ByteOrder.BigEndian),
+                Size = dataStream.ReadUInt32(ByteOrder.BigEndian),
+                CompressionType = dataStream.ReadUInt32(ByteOrder.BigEndian),
             };
 
             // Read chunk data and put it into a stream in
             // order to use System.IO.Compression.DeflateStream,
             // Then copy it to the output stream.
-            byte[] chunkData = Reader.ReadBytes(dataStream, (int)chunk.Size);
+            byte[] chunkData = dataStream.ReadBytes((int)chunk.Size);
             using MemoryStream inputStream = new(chunkData);
             var decompressedStream = new DeflateStream(inputStream, CompressionMode.Decompress);
             decompressedStream.CopyTo(outputStream);
@@ -70,7 +69,7 @@ internal static class ChunkZip
 
         // return the decompressed data
         outputStream.Position = 0;
-        return Reader.ReadBytes(outputStream, (int)outputStream.Length);
+        return outputStream.ReadBytes((int)outputStream.Length);
     }
 
     /// <summary>
@@ -81,12 +80,12 @@ internal static class ChunkZip
         using var outputStream = new MemoryStream();
 
         // Write header
-        Writer.WriteBytes(outputStream, [.. _magic]); // magic 
-        Writer.WriteUInt32(outputStream, 2, ByteOrder.BigEndian); // version
-        Writer.WriteUInt32(outputStream, (uint)data.Length, ByteOrder.BigEndian); // fullSize
-        Writer.WriteUInt32(outputStream, DefaultBlockSize, ByteOrder.BigEndian); // blockSize
-        Writer.WriteUInt32(outputStream, GetNumberOfSegments(data.Length), ByteOrder.BigEndian); // numSegments
-        Writer.WriteUInt32(outputStream, 16, ByteOrder.BigEndian); // alignment
+        outputStream.Write([.. _magic]); // magic 
+        outputStream.WriteUInt32(2, ByteOrder.BigEndian); // version
+        outputStream.WriteUInt32((uint)data.Length, ByteOrder.BigEndian); // fullSize
+        outputStream.WriteUInt32(DefaultBlockSize, ByteOrder.BigEndian); // blockSize
+        outputStream.WriteUInt32(GetNumberOfSegments(data.Length), ByteOrder.BigEndian); // numSegments
+        outputStream.WriteUInt32(16, ByteOrder.BigEndian); // alignment
 
         // Compress data into chunks
         List<byte[]> compressedBlocks = [];
@@ -95,7 +94,7 @@ internal static class ChunkZip
             for (int _ = 0; _ < GetNumberOfSegments(data.Length); _++)
             {
                 int distanceToEndOfData = (int)(dataStream.Length - dataStream.Position);
-                byte[] blockData = Reader.ReadBytes(dataStream, Math.Min(DefaultBlockSize, distanceToEndOfData));
+                byte[] blockData = dataStream.ReadBytes(Math.Min(DefaultBlockSize, distanceToEndOfData));
                 var deflater = new ICSharpCode.SharpZipLib.Zip.Compression.Deflater(
                     6,     // level
                     true   // true = RAW DEFLATE (NO zlib header)
@@ -105,7 +104,6 @@ internal static class ChunkZip
                 deflater.Finish();
                 var outBuf = new byte[blockData.Length * 2];
                 int size = deflater.Deflate(outBuf);
-
                 compressedBlocks.Add(outBuf.Take(size).ToArray());
             }
         }
@@ -114,11 +112,10 @@ internal static class ChunkZip
         foreach (byte[] block in compressedBlocks)
         {
             outputStream.AlignBy(16, 8);
-            Writer.WriteUInt32(outputStream, (uint)block.Length, ByteOrder.BigEndian); // size
-            Writer.WriteUInt32(outputStream, 1, ByteOrder.BigEndian); // compressionType
-            Writer.WriteBytes(outputStream, block); // compressedChunkData
+            outputStream.WriteUInt32((uint)block.Length, ByteOrder.BigEndian); // size
+            outputStream.WriteUInt32(1, ByteOrder.BigEndian); // compressionType
+            outputStream.Write(block); // compressedChunkData
         }
-
         return outputStream.ToArray();
     }
 

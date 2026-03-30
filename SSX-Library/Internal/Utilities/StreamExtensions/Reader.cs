@@ -1,23 +1,22 @@
 using System.Buffers.Binary;
 using System.Text;
 
-namespace SSX_Library.Internal.Utilities;
+namespace SSX_Library.Internal.Utilities.StreamExtensions;
 
 /// <summary>
-/// Reads primitive types from a stream
+/// Stream extensions for reading primitive types.
 /// </summary>
 internal static class Reader
 {
-    public static byte ReadByte(Stream stream) => ReadBytes(stream, 1)[0];
 
-    public static byte[] ReadBytes(Stream stream, int length)
+    public static byte[] ReadBytes(this Stream stream, int length)
     {
         var buf = new byte[length];
         stream.Read(buf);
         return buf;
     }
 
-    public static ushort ReadUInt16(Stream stream, ByteOrder byteOrder)
+    public static ushort ReadUInt16(this Stream stream, ByteOrder byteOrder)
     {
         var buf = new byte[2];
         stream.Read(buf);
@@ -29,7 +28,7 @@ internal static class Reader
         };
     }
 
-    public static uint ReadUInt24(Stream stream, ByteOrder byteOrder)
+    public static uint ReadUInt24(this Stream stream, ByteOrder byteOrder)
     {
         var buf = new byte[3];
         stream.Read(buf);
@@ -41,19 +40,7 @@ internal static class Reader
         };
     }
 
-    public static int ReadInt32(Stream stream, ByteOrder byteOrder)
-    {
-        var buf = new byte[4];
-        stream.Read(buf);
-        return byteOrder switch
-        {
-            ByteOrder.BigEndian => BinaryPrimitives.ReadInt32BigEndian(buf),
-            ByteOrder.LittleEndian => BinaryPrimitives.ReadInt32LittleEndian(buf),
-            _ => 0
-        };
-    }
-
-    public static uint ReadUInt32(Stream stream, ByteOrder byteOrder)
+    public static uint ReadUInt32(this Stream stream, ByteOrder byteOrder)
     {
         var buf = new byte[4];
         stream.Read(buf);
@@ -65,7 +52,19 @@ internal static class Reader
         };
     }
 
-    public static ulong ReadUInt64(Stream stream, ByteOrder byteOrder)
+    public static int ReadInt32(this Stream stream, ByteOrder byteOrder)
+    {
+        var buf = new byte[4];
+        stream.Read(buf);
+        return byteOrder switch
+        {
+            ByteOrder.BigEndian => BinaryPrimitives.ReadInt32BigEndian(buf),
+            ByteOrder.LittleEndian => BinaryPrimitives.ReadInt32LittleEndian(buf),
+            _ => 0
+        };
+    }
+
+    public static ulong ReadUInt64(this Stream stream, ByteOrder byteOrder)
     {
         var buf = new byte[8];
         stream.Read(buf);
@@ -77,7 +76,7 @@ internal static class Reader
         };
     }
 
-    public static float ReadFloat(Stream stream, ByteOrder byteOrder)
+    public static float ReadFloat(this Stream stream, ByteOrder byteOrder)
     {
         var buf = new byte[4];
         stream.Read(buf);
@@ -89,22 +88,20 @@ internal static class Reader
         };
     }
 
-    /// <remarks>
-    /// Does not include the null character
-    /// </remarks>
-    public static string ReadNullTerminatedASCIIString(Stream stream)
+    public static string ReadAsciiNullTerminated(this Stream stream)
     {
         List<byte> text = [];
         while (true)
         {
             int letter = stream.ReadByte();
-            if (letter <= 0) break;
+            if (letter == 0) break;
             text.Add((byte)letter);
         }
         return Encoding.ASCII.GetString([..text]);
     }
 
-    public static string ReadASCIIStringWithLength(Stream stream, int length, bool removeNullChars = true)
+    /// <param name="removeNullChars"> Return the string with null characters removed</param>
+    public static string ReadAsciiWithLength(this Stream stream, int length, bool removeNullChars)
     {
         var buf = new byte[length];
         stream.Read(buf);
@@ -115,10 +112,15 @@ internal static class Reader
         return Encoding.ASCII.GetString(buf);
     }
 
-    public static string ReadStringUTF16(Stream stream, int byteLength)
+    /// <param name="removeNullChars"> Remove null characters if within the string</param>
+    public static string ReadUtf16WithByteLength(this Stream stream, int byteLength, bool removeNullChars)
     {
-        byte[] tempByte = new byte[byteLength];
-        stream.Read(tempByte, 0, tempByte.Length);
-        return Encoding.Unicode.GetString(tempByte).Replace("\0", "");
+        var buf = new byte[byteLength];
+        stream.Read(buf);
+        if (removeNullChars)
+        {
+            return Encoding.Unicode.GetString(buf).Replace("\0", "");
+        }
+        return Encoding.Unicode.GetString(buf);
     }
 }

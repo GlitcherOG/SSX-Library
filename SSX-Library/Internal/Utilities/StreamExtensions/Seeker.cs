@@ -1,10 +1,9 @@
-namespace SSX_Library.Internal.Extensions;
+namespace SSX_Library.Internal.Utilities.StreamExtensions;
 
-/*
-    Provides extension methods for the Stream class.
-    For functions that dont fit neatly into the Reader & Writer Utillity classes.
-*/
-internal static class StreamExtensions
+/// <summary>
+/// Stream extensions for moving a stream's position without reading or writing.
+/// </summary>
+internal static class Seeker
 {
     //With how often align by 16 is used just better to have a quick function for it
 
@@ -14,7 +13,7 @@ internal static class StreamExtensions
     /// <param name="alignment">How many bytes to align by</param>
     public static void AlignBy16(this Stream stream)
     {
-        AlignBy(stream, 16);
+        stream.AlignBy(16);
     }
 
     /// <summary>

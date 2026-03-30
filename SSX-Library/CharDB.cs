@@ -1,4 +1,4 @@
-using SSX_Library.Internal.Utilities;
+using SSX_Library.Internal.Utilities.StreamExtensions;
 
 namespace SSX_Library;
 
@@ -80,18 +80,18 @@ public class CharDB
     {
         foreach (var info in infoList)
         {
-            Writer.WriteASCIIStringWithNullLength(stream, info.LongName, 32);
-            Writer.WriteASCIIStringWithNullLength(stream, info.FirstName, 16);
-            Writer.WriteASCIIStringWithNullLength(stream, info.NickName, 16);
-            Writer.WriteUInt32(stream, info.Weight, ByteOrder.LittleEndian);
-            Writer.WriteUInt32(stream, info.Stance, ByteOrder.LittleEndian);
-            Writer.WriteInt32(stream, info.ModelSize, ByteOrder.LittleEndian);
-            Writer.WriteASCIIStringWithNullLength(stream, info.BloodType, 16);
-            Writer.WriteUInt32(stream, info.Gender, ByteOrder.LittleEndian);
-            Writer.WriteUInt32(stream, info.Age, ByteOrder.LittleEndian);
-            Writer.WriteASCIIStringWithNullLength(stream, info.Height, 16);
-            Writer.WriteASCIIStringWithNullLength(stream, info.Nationality, 16);
-            Writer.WriteUInt32(stream, info.Position, ByteOrder.LittleEndian);
+            stream.WriteAsciiWithLength(info.LongName, 32);
+            stream.WriteAsciiWithLength(info.FirstName, 16);
+            stream.WriteAsciiWithLength(info.NickName, 16);
+            stream.WriteUInt32(info.Weight, ByteOrder.LittleEndian);
+            stream.WriteUInt32(info.Stance, ByteOrder.LittleEndian);
+            stream.WriteInt32(info.ModelSize, ByteOrder.LittleEndian);
+            stream.WriteAsciiWithLength(info.BloodType, 16);
+            stream.WriteUInt32(info.Gender, ByteOrder.LittleEndian);
+            stream.WriteUInt32(info.Age, ByteOrder.LittleEndian);
+            stream.WriteAsciiWithLength(info.Height, 16);
+            stream.WriteAsciiWithLength(info.Nationality, 16);
+            stream.WriteUInt32(info.Position, ByteOrder.LittleEndian);
         }
     }
 
@@ -99,19 +99,19 @@ public class CharDB
     {
         foreach (var info in infoList)
         {
-            Writer.WriteASCIIStringWithNullLength(stream, info.FirstNameEnglish, 16);
-            Writer.WriteStringUTF16WithNullLength(stream, info.LongName, 32);
-            Writer.WriteStringUTF16WithNullLength(stream, info.FirstName, 16);
-            Writer.WriteStringUTF16WithNullLength(stream, info.NickName, 16);
-            Writer.WriteUInt32(stream, info.Weight, ByteOrder.LittleEndian);
-            Writer.WriteUInt32(stream, info.Stance, ByteOrder.LittleEndian);
-            Writer.WriteInt32(stream, info.ModelSize, ByteOrder.LittleEndian);
-            Writer.WriteASCIIStringWithNullLength(stream, info.BloodType, 16);
-            Writer.WriteUInt32(stream, info.Gender, ByteOrder.LittleEndian);
-            Writer.WriteUInt32(stream, info.Age, ByteOrder.LittleEndian);
-            Writer.WriteASCIIStringWithNullLength(stream, info.Height, 16);
-            Writer.WriteASCIIStringWithNullLength(stream, info.Nationality, 16);
-            Writer.WriteUInt32(stream, info.Position, ByteOrder.LittleEndian);
+            stream.WriteAsciiWithLength(info.FirstNameEnglish, 16);
+            stream.WriteUtf16WithLength(info.LongName, 32);
+            stream.WriteUtf16WithLength(info.FirstName, 16);
+            stream.WriteUtf16WithLength(info.NickName, 16);
+            stream.WriteUInt32(info.Weight, ByteOrder.LittleEndian);
+            stream.WriteUInt32(info.Stance, ByteOrder.LittleEndian);
+            stream.WriteInt32(info.ModelSize, ByteOrder.LittleEndian);
+            stream.WriteAsciiWithLength(info.BloodType, 16);
+            stream.WriteUInt32(info.Gender, ByteOrder.LittleEndian);
+            stream.WriteUInt32(info.Age, ByteOrder.LittleEndian);
+            stream.WriteAsciiWithLength(info.Height, 16);
+            stream.WriteAsciiWithLength(info.Nationality, 16);
+            stream.WriteUInt32(info.Position, ByteOrder.LittleEndian);
         }
     }
 
@@ -119,27 +119,27 @@ public class CharDB
     {
         foreach (var info in infoList)
         {
-            Writer.WriteASCIIStringWithNullLength(stream, info.FirstNameEnglish, 8);
-            Writer.WriteStringUTF16WithNullLength(stream, info.LongName, 24);
-        }  
+            stream.WriteAsciiWithLength(info.FirstNameEnglish, 8);
+            stream.WriteUtf16WithLength(info.LongName, 24);
+        }
     }
 
     private static void ReadDefaultInfo(Stream stream, List<Info> infoList)
     {
         Info info = new()
         {
-            LongName = Reader.ReadASCIIStringWithLength(stream, 32),
-            FirstName = Reader.ReadASCIIStringWithLength(stream, 16),
-            NickName = Reader.ReadASCIIStringWithLength(stream, 16),
-            Weight = Reader.ReadUInt32(stream, ByteOrder.LittleEndian),
-            Stance = Reader.ReadUInt32(stream, ByteOrder.LittleEndian),
-            ModelSize = Reader.ReadInt32(stream, ByteOrder.LittleEndian),
-            BloodType = Reader.ReadASCIIStringWithLength(stream, 16),
-            Gender = Reader.ReadUInt32(stream, ByteOrder.LittleEndian),
-            Age = Reader.ReadUInt32(stream, ByteOrder.LittleEndian),
-            Height = Reader.ReadASCIIStringWithLength(stream, 16),
-            Nationality = Reader.ReadASCIIStringWithLength(stream, 16),
-            Position = Reader.ReadUInt32(stream, ByteOrder.LittleEndian),
+            LongName = stream.ReadAsciiWithLength(32, false),
+            FirstName = stream.ReadAsciiWithLength(16, false),
+            NickName = stream.ReadAsciiWithLength(16, false),
+            Weight = stream.ReadUInt32(ByteOrder.LittleEndian),
+            Stance = stream.ReadUInt32(ByteOrder.LittleEndian),
+            ModelSize = stream.ReadInt32(ByteOrder.LittleEndian),
+            BloodType = stream.ReadAsciiWithLength(16, false),
+            Gender = stream.ReadUInt32(ByteOrder.LittleEndian),
+            Age = stream.ReadUInt32(ByteOrder.LittleEndian),
+            Height = stream.ReadAsciiWithLength(16, false),
+            Nationality = stream.ReadAsciiWithLength(16, false),
+            Position = stream.ReadUInt32(ByteOrder.LittleEndian),
         };
         infoList.Add(info);
     }
@@ -148,19 +148,19 @@ public class CharDB
     {
         Info info = new()
         {
-            FirstNameEnglish = Reader.ReadASCIIStringWithLength(stream, 16),
-            LongName = Reader.ReadStringUTF16(stream, 32),
-            FirstName = Reader.ReadStringUTF16(stream, 16),
-            NickName = Reader.ReadStringUTF16(stream, 16),
-            Weight = Reader.ReadUInt32(stream, ByteOrder.LittleEndian),
-            Stance = Reader.ReadUInt32(stream, ByteOrder.LittleEndian),
-            ModelSize = Reader.ReadInt32(stream, ByteOrder.LittleEndian),
-            BloodType = Reader.ReadASCIIStringWithLength(stream, 16),
-            Gender = Reader.ReadUInt32(stream, ByteOrder.LittleEndian),
-            Age = Reader.ReadUInt32(stream, ByteOrder.LittleEndian),
-            Height = Reader.ReadASCIIStringWithLength(stream, 16),
-            Nationality = Reader.ReadASCIIStringWithLength(stream, 16),
-            Position = Reader.ReadUInt32(stream, ByteOrder.LittleEndian),
+            FirstNameEnglish = stream.ReadAsciiWithLength(16, false),
+            LongName = stream.ReadUtf16WithByteLength(32, false),
+            FirstName = stream.ReadUtf16WithByteLength(16, false),
+            NickName = stream.ReadUtf16WithByteLength(16, false),
+            Weight = stream.ReadUInt32(ByteOrder.LittleEndian),
+            Stance = stream.ReadUInt32(ByteOrder.LittleEndian),
+            ModelSize = stream.ReadInt32(ByteOrder.LittleEndian),
+            BloodType = stream.ReadAsciiWithLength(16, false),
+            Gender = stream.ReadUInt32(ByteOrder.LittleEndian),
+            Age = stream.ReadUInt32(ByteOrder.LittleEndian),
+            Height = stream.ReadAsciiWithLength(16, false),
+            Nationality = stream.ReadAsciiWithLength(16, false),
+            Position = stream.ReadUInt32(ByteOrder.LittleEndian),
         };
         infoList.Add(info);
     }
@@ -169,8 +169,8 @@ public class CharDB
     {
         Info info = new()
         {
-            FirstNameEnglish = Reader.ReadASCIIStringWithLength(stream, 8),
-            LongName = Reader.ReadStringUTF16(stream, 24),
+            FirstNameEnglish = stream.ReadAsciiWithLength(8, false),
+            LongName = stream.ReadUtf16WithByteLength(24, false),
         };
         infoList.Add(info);
     }
