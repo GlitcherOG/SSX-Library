@@ -184,7 +184,6 @@ public class CharDB
         public uint Weight;
         public uint Stance;
         public int ModelSize;
-        public int ModelSize;
         public string BloodType;
         public uint Gender;
         public uint Age;
