@@ -186,11 +186,14 @@ namespace SSX_Library.EATextureLibrary
                 //Process Colors
                 //Todo Check If Type is here instead
                 if ((tempImage.MatrixType == MatrixType.FourBit || tempImage.MatrixType == MatrixType.EightBit
-                    || tempImage.MatrixType == MatrixType.EightBitCompressed) && MetalCheck == null)
+                    || tempImage.MatrixType == MatrixType.EightBitCompressed))
                 {
                     var colorShape = GetShapeHeader(tempImage, MatrixType.ColorPallet);
                     tempImage.colorsTable = GetColorTable(tempImage);
-                    tempImage = AlphaFix(tempImage);
+                    if (MetalCheck == null)
+                    {
+                        tempImage = AlphaFix(tempImage);
+                    }
                 }
 
                 if(tempImage.MatrixType == MatrixType.EightBitXbox)
