@@ -10,9 +10,11 @@ namespace SSX_Library.EATextureLibrary
 {
     public class OldShapeHandler
     {
-        public string MagicWord;
-        public int FileSize;
-        public int ImageCount;
+        //Ensure cant set bad version
+        public TextureType ConsoleVersion = TextureType.OldPS2;
+        private string MagicWord;
+        private int FileSize;
+        private int ImageCount;
         public string Format;
         public string EndingString;
         public List<ShapeImage> ShapeImages = new List<ShapeImage>();
@@ -24,8 +26,12 @@ namespace SSX_Library.EATextureLibrary
             {
                 MagicWord = StreamUtil.ReadString(stream, 4);
 
-                if (MagicWord == "SHPS" || MagicWord == "SHPX")
+                var Type = OldSignatureCheck(MagicWord);
+
+                if (OldSignatureCheck(MagicWord)!=null)
                 {
+                    ConsoleVersion = Type.Value;
+
                     FileSize = StreamUtil.ReadUInt32(stream);
 
                     ImageCount = StreamUtil.ReadUInt32(stream);
@@ -47,7 +53,6 @@ namespace SSX_Library.EATextureLibrary
 
                         //SSX 3
                         //Mix of no ERTS for group ending and ERTS for group ending
-
 
                         ShapeImages.Add(tempImage);
                     }
@@ -85,6 +90,21 @@ namespace SSX_Library.EATextureLibrary
                 }
                 stream.Dispose();
                 stream.Close();
+            }
+        }
+
+        public TextureType? OldSignatureCheck(string signature)
+        {
+            switch (signature)
+            {
+                case "SHPS": //PS2
+                    return TextureType.OldPS2;
+                case "SHPX": //Xbox
+                    return TextureType.OldXbox;
+                case "SHPG": //GameCube
+                    return TextureType.OldGC;
+                default:
+                    return null;
             }
         }
 
@@ -256,6 +276,20 @@ namespace SSX_Library.EATextureLibrary
                     sshImage.Image = ImageUtil.ReduceBitmapColorsFast(sshImage.Image, 256);
                 }
                 ShapeImages[i] = sshImage;
+            }
+
+            //Pick Magic
+            switch (ConsoleVersion)
+            {
+                case TextureType.OldPS2: //PS2
+                    MagicWord = "SHPS";
+                    break;
+                case TextureType.OldXbox: //Xbox
+                    MagicWord = "SHPX";
+                    break;
+                case TextureType.OldGC: //GameCube
+                    MagicWord = "SHPG";
+                    break;
             }
 
             //Write Header
@@ -627,11 +661,11 @@ namespace SSX_Library.EATextureLibrary
 
         public struct ShapeImage
         {
-            public int Offset;
-            public int Size;
+            internal int Offset;
+            internal int Size;
             public string Shortname;
             public string Longname;
-            public List<ShapeHeader> ShapeHeaders;
+            internal List<ShapeHeader> ShapeHeaders;
 
             //Converted
             public MatrixType MatrixType;
