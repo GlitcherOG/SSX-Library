@@ -4,6 +4,7 @@ using SSXLibrary.FileHandlers;
 using SSX_Library.Internal.Utilities;
 using System.Text;
 using SSX_Library.Internal;
+using SSX_Library.Internal.Utilities.StreamExtensions;
 
 
 namespace SSX_Library.EATextureLibrary
@@ -169,7 +170,7 @@ namespace SSX_Library.EATextureLibrary
 
                 //Get Matrix Type
                 tempImage.MatrixType = GetShapeMatrixType(tempImage);
-                var imageMatrix = GetShapeHeader(tempImage, tempImage.MatrixType);
+                var imageMatrix = GetShapeHeader(tempImage, tempImage.MatrixType).Value;
 
                 tempImage.SwizzledImage = (imageMatrix.Flags & 8192) == 8192;
 
@@ -179,10 +180,13 @@ namespace SSX_Library.EATextureLibrary
                     imageMatrix.Matrix = Refpack.Decompress(imageMatrix.Matrix);
                 }
 
+                //Metal Check
+                var MetalCheck = GetShapeHeader(tempImage, MatrixType.MetalAlpha);
+
                 //Process Colors
                 //Todo Check If Type is here instead
-                if (tempImage.MatrixType == MatrixType.FourBit || tempImage.MatrixType == MatrixType.EightBit
-                    || tempImage.MatrixType == MatrixType.EightBitCompressed)
+                if ((tempImage.MatrixType == MatrixType.FourBit || tempImage.MatrixType == MatrixType.EightBit
+                    || tempImage.MatrixType == MatrixType.EightBitCompressed) && MetalCheck == null)
                 {
                     var colorShape = GetShapeHeader(tempImage, MatrixType.ColorPallet);
                     tempImage.colorsTable = GetColorTable(tempImage);
@@ -247,8 +251,25 @@ namespace SSX_Library.EATextureLibrary
                         break;
                 }
 
-                //Metal Bin
-                //Need to add check
+                //Metal Alpha
+                if (MetalCheck!=null)
+                {
+                    var TempTexture = tempImage.Image;
+                    var NewImage = new Image<A8>(TempTexture.Width, TempTexture.Height);
+
+                    for (int Y = 0; Y < TempTexture.Height; Y++)
+                    {
+                        for (int X = 0; X < TempTexture.Width; X++)
+                        {
+                            NewImage[X, Y] = new A8(TempTexture[X, Y].A);
+                            TempTexture[X, Y] = new Rgba32(TempTexture[X, Y].R, TempTexture[X, Y].G, TempTexture[X, Y].B);
+                        }
+                    }
+
+                    tempImage.Image = TempTexture;
+                    tempImage.MetalAlpha = true;
+                    tempImage.Metal = NewImage;
+                }
 
                 ShapeImages[i] = tempImage;
             }
@@ -359,6 +380,23 @@ namespace SSX_Library.EATextureLibrary
 
             shapeImage.Offset = (int)stream.Position;
 
+            //If Metal Alpha combine textures
+            if(shapeImage.MetalAlpha)
+            {
+                var NewImage = new Image<Rgba32>(shapeImage.Image.Height, shapeImage.Image.Width);
+
+                for (int Y = 0; Y < NewImage.Height; Y++)
+                {
+                    for (int X = 0; X < NewImage.Width; X++)
+                    {
+                        NewImage[X, Y] = new Rgba32(shapeImage.Image[X, Y].R, shapeImage.Image[X, Y].G, shapeImage.Image[X, Y].B, shapeImage.Metal[X, Y].PackedValue);
+                    }
+                }
+                shapeImage.AlphaFix = false;
+
+                shapeImage.Image = NewImage;
+            }
+
             var Matrix = new byte[0];
             var Colours = new List<Rgba32>();
 
@@ -375,7 +413,6 @@ namespace SSX_Library.EATextureLibrary
             }
             else if (shapeImage.MatrixType == MatrixType.EightBit || shapeImage.MatrixType == MatrixType.EightBitXbox || shapeImage.MatrixType == MatrixType.EightBitCompressed)
             {
-                //WriteMatrix2(stream, Image);
                 var EncodedImage = EAEncode.EncodeMatrix2(shapeImage.Image);
                 Matrix = EncodedImage.Matrix;
                 Colours = EncodedImage.ColourTable;
@@ -419,6 +456,24 @@ namespace SSX_Library.EATextureLibrary
 
                 StreamUtil.AlignBy16(stream);
             }
+
+            //Write Metal Alpha
+            if (shapeImage.MetalAlpha)
+            {
+                stream.WriteByte((byte)MatrixType.MetalAlpha);
+                stream.WriteUInt24(16, ByteOrder.LittleEndian);
+                stream.WriteUInt16(0, ByteOrder.LittleEndian);
+                stream.WriteUInt16(128, ByteOrder.LittleEndian);
+                stream.AlignBy16();
+            }
+
+            //Write Longname
+            if (shapeImage.Longname != "")
+            {
+                stream.WriteUInt32((byte)MatrixType.LongName, ByteOrder.LittleEndian);
+                stream.WriteAsciiWithLength(shapeImage.Longname, 12);
+            }
+
             stream.Position = 0;
             return StreamUtil.ReadBytes(stream, (int)stream.Length);
         }
@@ -512,6 +567,7 @@ namespace SSX_Library.EATextureLibrary
                 else
                 {
                     //Give error
+                    throw new Exception("No File at Path " + path); 
                 }
             }
 
@@ -521,13 +577,12 @@ namespace SSX_Library.EATextureLibrary
 
         private List<Rgba32> GetColorTable(ShapeImage newSSHImage)
         {
-            var colorShape = GetShapeHeader(newSSHImage, MatrixType.ColorPallet);
+            var colorShape = GetShapeHeader(newSSHImage, MatrixType.ColorPallet).Value;
             
             if(colorShape.MatrixFormat == MatrixType.Unknown)
             {
-                colorShape = GetShapeHeader(newSSHImage, MatrixType.ColorPalletXbox);
+                colorShape = GetShapeHeader(newSSHImage, MatrixType.ColorPalletXbox).Value;
             }
-
 
             List<Rgba32> colors = new List<Rgba32>();
 
@@ -570,7 +625,7 @@ namespace SSX_Library.EATextureLibrary
             return newSSHImage;
         }
 
-        private ShapeHeader GetShapeHeader(ShapeImage newSSHImage, MatrixType Type)
+        private ShapeHeader? GetShapeHeader(ShapeImage newSSHImage, MatrixType Type)
         {
             for (int i = 0; i < newSSHImage.ShapeHeaders.Count; i++)
             {
@@ -579,7 +634,7 @@ namespace SSX_Library.EATextureLibrary
                     return newSSHImage.ShapeHeaders[i];
                 }
             }
-            return new ShapeHeader();
+            return null;
         }
 
         private MatrixType GetShapeMatrixType(ShapeImage tempImage)
@@ -677,6 +732,7 @@ namespace SSX_Library.EATextureLibrary
             public bool SwizzledImage;
             public bool SwizzledColours;
             public bool AlphaFix;
+            public bool MetalAlpha;
         }
 
         public struct ShapeHeader
