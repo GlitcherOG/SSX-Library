@@ -2,8 +2,6 @@ using SSX_Library.Internal.BIG;
 
 namespace SSX_Library;
 
-//Test Line
-
 /*
     More Info: https://ssx.computernewb.com/wiki/Formats/Common:BIG
 */
@@ -11,7 +9,6 @@ namespace SSX_Library;
 /// <summary>
 /// Big files
 /// </summary>
-
 public static class BIG
 {
     /// <summary>

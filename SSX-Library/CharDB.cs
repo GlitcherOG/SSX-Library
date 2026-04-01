@@ -9,7 +9,7 @@ namespace SSX_Library;
 /// Be careful when changing info strings. Make sure to stay within the
 /// string length bounds of the specific info mode.
 /// </remarks>
-public class CharDB
+public sealed class CharDB
 {
     public enum InfoMode
     {
