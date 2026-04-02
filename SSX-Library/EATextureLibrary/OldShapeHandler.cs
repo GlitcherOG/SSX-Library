@@ -189,6 +189,7 @@ namespace SSX_Library.EATextureLibrary
                     || tempImage.MatrixType == MatrixType.EightBitCompressed))
                 {
                     var colorShape = GetShapeHeader(tempImage, MatrixType.ColorPallet);
+                    tempImage.SwizzledColours = (colorShape.Value.Flags & 8192) == 8192;
                     tempImage.colorsTable = GetColorTable(tempImage);
                     if (MetalCheck == null)
                     {
@@ -546,7 +547,10 @@ namespace SSX_Library.EATextureLibrary
 
             StreamUtil.WriteInt16(stream, 0);
 
-            StreamUtil.WriteInt32(stream, 0);
+            int Flags = 0;
+            Flags += (image.SwizzledColours ? 8192 : 0);
+
+            StreamUtil.WriteInt32(stream, Flags);
         }
 
         public void AddImage(MatrixType matrixType, string name = "", string path = "")
@@ -587,6 +591,11 @@ namespace SSX_Library.EATextureLibrary
                 colorShape = GetShapeHeader(newSSHImage, MatrixType.ColorPalletXbox).Value;
             }
 
+            if (newSSHImage.SwizzledColours)
+            {
+                colorShape.Matrix = ByteUtil.UnswizzlePalette(colorShape.Matrix, colorShape.Width);
+            }
+
             List<Rgba32> colors = new List<Rgba32>();
 
             for (int i = 0; i < colorShape.Width * colorShape.Height; i++)
@@ -609,10 +618,10 @@ namespace SSX_Library.EATextureLibrary
                     break;
                 }
             }
-            newSSHImage.AlphaFix = true;
 
             if (TestAlpha)
             {
+                newSSHImage.AlphaFix = true;
                 for (int i = 0; i < newSSHImage.colorsTable.Count; i++)
                 {
                     var TempColour = newSSHImage.colorsTable[i];
