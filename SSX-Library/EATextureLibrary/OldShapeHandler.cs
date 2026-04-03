@@ -593,12 +593,12 @@ namespace SSX_Library.EATextureLibrary
 
             if (newSSHImage.SwizzledColours)
             {
-                colorShape.Matrix = ByteUtil.UnswizzlePalette(colorShape.Matrix, colorShape.Width);
+                colorShape.Matrix = ByteUtil.UnswizzlePalette(colorShape.Matrix, (colorShape.Size - 16) / 4);
             }
 
             List<Rgba32> colors = new List<Rgba32>();
 
-            for (int i = 0; i < colorShape.Width * colorShape.Height; i++)
+            for (int i = 0; i < ((colorShape.Size-16)/4); i++)
             {
                 colors.Add(new Rgba32(colorShape.Matrix[i * 4], colorShape.Matrix[i * 4 + 1], colorShape.Matrix[i * 4 + 2], colorShape.Matrix[i * 4 + 3]));
             }
