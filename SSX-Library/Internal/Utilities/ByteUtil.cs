@@ -370,6 +370,9 @@ internal class ByteUtil
     public static byte[] SwizzlePalette(byte[] palBuffer, int width)
     {
         byte[] swizzledPal = new byte[1024];
+        byte[] NewArray = new byte[1024];
+
+        palBuffer.CopyTo(NewArray, 0);
 
         for (int p = 0; p < width; p++)
         {
@@ -377,7 +380,7 @@ internal class ByteUtil
             int destIndex = p * 4;
             int srcIndex = pos * 4;
 
-            Array.Copy(palBuffer, srcIndex, swizzledPal, destIndex, 4);
+            Array.Copy(NewArray, srcIndex, swizzledPal, destIndex, 4);
         }
 
         return swizzledPal;

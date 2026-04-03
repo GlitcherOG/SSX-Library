@@ -543,13 +543,14 @@ namespace SSX_Library.EATextureLibrary
                 }
             }
 
-            WriteColourHeader(stream, image, Matrix.Length+16);
-
             if (image.SwizzledColours)
             {
                 //Swizzle Colours
                 Matrix = ByteUtil.SwizzlePalette(Matrix, image.colorsTable.Count);
+                //Limit Matrix to Remove Bloat
             }
+
+            WriteColourHeader(stream, image, Matrix.Length+16);
 
             StreamUtil.WriteBytes(stream, Matrix);
         }
