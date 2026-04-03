@@ -591,14 +591,21 @@ namespace SSX_Library.EATextureLibrary
                 colorShape = GetShapeHeader(newSSHImage, MatrixType.ColorPalletXbox).Value;
             }
 
+            int RealColour = colorShape.Width * colorShape.Height;
+
+            if (colorShape.Size != 0)
+            {
+                RealColour = (colorShape.Size - 16) / 4;
+            }
+
             if (newSSHImage.SwizzledColours)
             {
-                colorShape.Matrix = ByteUtil.UnswizzlePalette(colorShape.Matrix, (colorShape.Size - 16) / 4);
+                colorShape.Matrix = ByteUtil.UnswizzlePalette(colorShape.Matrix, RealColour);
             }
 
             List<Rgba32> colors = new List<Rgba32>();
 
-            for (int i = 0; i < ((colorShape.Size-16)/4); i++)
+            for (int i = 0; i < RealColour; i++)
             {
                 colors.Add(new Rgba32(colorShape.Matrix[i * 4], colorShape.Matrix[i * 4 + 1], colorShape.Matrix[i * 4 + 2], colorShape.Matrix[i * 4 + 3]));
             }
