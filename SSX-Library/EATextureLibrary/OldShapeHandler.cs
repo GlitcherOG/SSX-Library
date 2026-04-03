@@ -122,9 +122,16 @@ namespace SSX_Library.EATextureLibrary
                 {
                     var shape = new ShapeHeader();
 
+                    string TestEnd = StreamUtil.ReadString(stream, 8);
+                    stream.Position -= 8;
+                    if(TestEnd == EndingString)
+                    {
+                        break;
+                    }
+
                     shape.MatrixFormat = (MatrixType)StreamUtil.ReadUInt8(stream);
 
-                    if (shape.MatrixFormat != MatrixType.LongName)
+                    if (shape.MatrixFormat != MatrixType.LongName && shape.MatrixFormat != MatrixType.Unknown1 && shape.MatrixFormat != MatrixType.Unknown)
                     {
                         shape.Size = StreamUtil.ReadUInt24(stream);
 
@@ -142,7 +149,7 @@ namespace SSX_Library.EATextureLibrary
                         if (shape.Size == 0 || shape.MatrixFormat == MatrixType.LongName)
                         {
                             int RealSize = shape.Width * shape.Height;
-                            if (shape.MatrixFormat == MatrixType.ColorPallet || shape.MatrixFormat == MatrixType.ColorPalletXbox)
+                            if (shape.MatrixFormat == MatrixType.ColorPallet || shape.MatrixFormat == MatrixType.ColorPalletXbox || shape.MatrixFormat == MatrixType.FullColor)
                             {
                                 RealSize = RealSize * 4;
                             }
@@ -158,11 +165,25 @@ namespace SSX_Library.EATextureLibrary
                             shape.Matrix = StreamUtil.ReadBytes(stream, shape.Size - 16);
                         }
                     }
-                    else
+                    else if (shape.MatrixFormat == MatrixType.LongName)
                     {
                         stream.Position += 3;
                         tempImage.Longname = StreamUtil.ReadNullEndString(stream);
                         StreamUtil.AlignBy(stream, 16, tempImage.Offset);
+                    }
+                    else if (shape.MatrixFormat == MatrixType.Unknown1)
+                    {
+                        shape.Size = StreamUtil.ReadUInt24(stream);
+
+                        shape.Width = StreamUtil.ReadInt16(stream);
+
+                        shape.Matrix = StreamUtil.ReadBytes(stream, shape.Width*8);
+
+                        StreamUtil.AlignBy16(stream);
+                    }
+                    else
+                    {
+                        throw new Exception("Unknown Shape");
                     }
 
                     tempImage.ShapeHeaders.Add(shape);
@@ -794,6 +815,8 @@ namespace SSX_Library.EATextureLibrary
             //Other
             MetalAlpha = 105,
             LongName = 112,
+
+            Unknown1 = 124,
 
             EightBitCompressed = 130,
         }
