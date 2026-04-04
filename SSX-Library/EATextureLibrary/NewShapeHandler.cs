@@ -1,9 +1,9 @@
 ﻿using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
-using SSXLibrary.FileHandlers;
-using SSX_Library.Internal.Utilities;
-using System.Text;
 using SSX_Library.Internal;
+using SSX_Library.Internal.Utilities;
+using SSX_Library.Internal.Utilities.StreamExtensions;
+using System.Text;
 
 namespace SSX_Library.EATextureLibrary
 {
@@ -385,8 +385,12 @@ namespace SSX_Library.EATextureLibrary
                     StreamUtil.AlignBy16(stream);
                 }
 
-                //Write Long Name
-                //FIX SOON
+                //Write Longname
+                if (Image.Longname != "")
+                {
+                    stream.WriteUInt32((byte)MatrixType.LongName, ByteOrder.LittleEndian);
+                    stream.WriteAsciiWithLength(Image.Longname, 12);
+                }
 
                 Image.Size = (int)stream.Position - Image.Offset;
 
