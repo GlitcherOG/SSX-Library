@@ -1,5 +1,4 @@
 using SSX_Library.Internal.Textures;
-using SSX_Library.Internal.Utilities;
 
 namespace SSX_Library;
 
