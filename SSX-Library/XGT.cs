@@ -13,10 +13,10 @@ public static class XGT
     /// </summary>
     /// <param name="pixelDataPath">Path to the XGT texture who's pixel indices should be used</param>
     /// <param name="palettePath">Path to the XGT texture who's palette should be used</param>
-    /// <param name="pngOutputPath"></param>
-    public static void ToPng(string pixelDataPath, string palettePath, string outputPngPath)
+    /// <param name="outputPath"></param>
+    public static void ToPng(string pixelDataPath, string palettePath, string outputPath)
     {
-        
+        Gizmondo.XgtToPng(pixelDataPath, palettePath, outputPath);
     }
 }
 
