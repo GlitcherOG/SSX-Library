@@ -6,4 +6,4 @@ namespace SSX_Library;
 
 public enum ByteOrder {LittleEndian, BigEndian};
 public enum BigType {C0FB, BIGF, BIG4, NewBig}
-
+public enum TextureType { OldPS2, OldXbox, OldGC, NewPS2, NewXbox, NewGC }

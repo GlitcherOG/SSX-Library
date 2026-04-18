@@ -72,8 +72,6 @@ namespace SSX_Library.EATextureLibrary
         {
             int MatrixSize = StreamUtil.AlignbyMath(image.Height * image.Width * 4, 16);
 
-            MatrixSize = 16 - MatrixSize % 16;
-
             byte[] Matrix = new byte[MatrixSize];
 
             for (int y = 0; y < image.Height; y++)
@@ -81,10 +79,11 @@ namespace SSX_Library.EATextureLibrary
                 for (int x = 0; x < image.Width; x++)
                 {
                     var Pixel = image[x, y];
-                    Matrix[y * x + x * 4] = Pixel.R;
-                    Matrix[y * x + x * 4 + 1] = Pixel.G;
-                    Matrix[y * x + x * 4 + 2] = Pixel.B;
-                    Matrix[y * x + x * 4 + 3] = Pixel.A;
+                    int RowID = (y * image.Width*4) + (x * 4);
+                    Matrix[RowID] = Pixel.R;
+                    Matrix[RowID + 1] = Pixel.G;
+                    Matrix[RowID + 2] = Pixel.B;
+                    Matrix[RowID + 3] = Pixel.A;
                 }
             }
 
