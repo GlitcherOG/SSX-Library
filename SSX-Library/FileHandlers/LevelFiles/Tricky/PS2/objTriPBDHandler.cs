@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using SSXLibrary.FileHandlers.Models;
 
-namespace SSXLibrary.FileHandlers.LevelFiles.TrickyPS2
+namespace SSX_Library.FileHandlers.LevelFiles.Tricky.PS2
 {
     public class objTriPBDHandler
     {

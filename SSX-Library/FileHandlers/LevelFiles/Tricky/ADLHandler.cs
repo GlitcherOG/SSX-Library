@@ -1,6 +1,6 @@
 ﻿using SSX_Library.Internal.Utilities;
 
-namespace SSXLibrary.FileHandlers.LevelFiles.TrickyPS2
+namespace SSX_Library.FileHandlers.LevelFiles.Tricky
 {
     public class ADLHandler
     {

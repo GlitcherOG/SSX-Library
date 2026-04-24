@@ -7,8 +7,8 @@ using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using SSX_Library.Internal.Utilities;
-using SSXLibrary.FileHandlers.LevelFiles.TrickyPS2;
 using SSX_Library.Internal.Utilities;
+using SSX_Library.FileHandlers.LevelFiles.Tricky.PS2;
 
 namespace SSXLibrary.JsonFiles.Tricky
 {

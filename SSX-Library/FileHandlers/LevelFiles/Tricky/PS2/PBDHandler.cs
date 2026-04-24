@@ -5,7 +5,7 @@ using SharpGLTF.Geometry.VertexTypes;
 using SharpGLTF.Geometry;
 using SharpGLTF.Materials;
 
-namespace SSXLibrary.FileHandlers.LevelFiles.TrickyPS2
+namespace SSX_Library.FileHandlers.LevelFiles.Tricky.PS2
 {
     public class PBDHandler
     {

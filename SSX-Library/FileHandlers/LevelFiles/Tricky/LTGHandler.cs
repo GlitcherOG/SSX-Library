@@ -8,8 +8,9 @@ using System.Threading.Tasks;
 using SSX_Library.Internal.Utilities;
 using System.Net.Http.Headers;
 using SSX_Library.Internal.Utilities;
+using SSX_Library.FileHandlers.LevelFiles.Tricky.PS2;
 
-namespace SSXLibrary.FileHandlers.LevelFiles.TrickyPS2
+namespace SSX_Library.FileHandlers.LevelFiles.Tricky
 {
     public class LTGHandler
     {
