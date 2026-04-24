@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="SSX-Library.Tests/SSX-Library.Tests.csproj" />
+  <Project Path="SSX-Library/SSX-Library.csproj" />
+</Solution>
