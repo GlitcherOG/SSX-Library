@@ -176,7 +176,6 @@ namespace SSXLibrary.FileHandlers
         public struct FileHeader
         {
             public int Unknown;
-            public byte[] Offset;
             public int Unknown2;
             public int EventID;
 
