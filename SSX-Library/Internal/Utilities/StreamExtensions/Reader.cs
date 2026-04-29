@@ -12,14 +12,14 @@ internal static class Reader
     public static byte[] ReadBytes(this Stream stream, int length)
     {
         var buf = new byte[length];
-        stream.Read(buf);
+        stream.ReadExactly(buf);
         return buf;
     }
 
     public static ushort ReadUInt16(this Stream stream, ByteOrder byteOrder)
     {
         var buf = new byte[2];
-        stream.Read(buf);
+        stream.ReadExactly(buf);
         return byteOrder switch
         {
             ByteOrder.BigEndian => BinaryPrimitives.ReadUInt16BigEndian(buf),
@@ -28,10 +28,22 @@ internal static class Reader
         };
     }
 
+    public static short ReadInt16(this Stream stream, ByteOrder byteOrder)
+    {
+        var buf = new byte[2];
+        stream.ReadExactly(buf);
+        return byteOrder switch
+        {
+            ByteOrder.BigEndian => BinaryPrimitives.ReadInt16BigEndian(buf),
+            ByteOrder.LittleEndian => BinaryPrimitives.ReadInt16LittleEndian(buf),
+            _ => 0
+        };
+    }
+
     public static uint ReadUInt24(this Stream stream, ByteOrder byteOrder)
     {
         var buf = new byte[3];
-        stream.Read(buf);
+        stream.ReadExactly(buf);
         return byteOrder switch
         {
             ByteOrder.BigEndian => (uint)(buf[0] << 16 | buf[1] << 8 | buf[2]),
@@ -43,7 +55,7 @@ internal static class Reader
     public static uint ReadUInt32(this Stream stream, ByteOrder byteOrder)
     {
         var buf = new byte[4];
-        stream.Read(buf);
+        stream.ReadExactly(buf);
         return byteOrder switch
         {
             ByteOrder.BigEndian => BinaryPrimitives.ReadUInt32BigEndian(buf),
@@ -55,7 +67,7 @@ internal static class Reader
     public static int ReadInt32(this Stream stream, ByteOrder byteOrder)
     {
         var buf = new byte[4];
-        stream.Read(buf);
+        stream.ReadExactly(buf);
         return byteOrder switch
         {
             ByteOrder.BigEndian => BinaryPrimitives.ReadInt32BigEndian(buf),
@@ -67,7 +79,7 @@ internal static class Reader
     public static ulong ReadUInt64(this Stream stream, ByteOrder byteOrder)
     {
         var buf = new byte[8];
-        stream.Read(buf);
+        stream.ReadExactly(buf);
         return byteOrder switch
         {
             ByteOrder.BigEndian => BinaryPrimitives.ReadUInt64BigEndian(buf),
@@ -79,7 +91,7 @@ internal static class Reader
     public static float ReadFloat(this Stream stream, ByteOrder byteOrder)
     {
         var buf = new byte[4];
-        stream.Read(buf);
+        stream.ReadExactly(buf);
         return byteOrder switch
         {
             ByteOrder.BigEndian => BinaryPrimitives.ReadSingleBigEndian(buf),
@@ -104,7 +116,7 @@ internal static class Reader
     public static string ReadAsciiWithLength(this Stream stream, int length, bool removeNullChars)
     {
         var buf = new byte[length];
-        stream.Read(buf);
+        stream.ReadExactly(buf);
         if (removeNullChars)
         {
             return Encoding.ASCII.GetString([..buf.Where(x => x != '\0')]);
@@ -116,7 +128,7 @@ internal static class Reader
     public static string ReadUtf16WithByteLength(this Stream stream, int byteLength, bool removeNullChars)
     {
         var buf = new byte[byteLength];
-        stream.Read(buf);
+        stream.ReadExactly(buf);
         if (removeNullChars)
         {
             return Encoding.Unicode.GetString(buf).Replace("\0", "");
