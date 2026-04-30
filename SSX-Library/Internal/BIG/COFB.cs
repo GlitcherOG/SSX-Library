@@ -13,7 +13,7 @@ internal static class COFB
     public static bool IsStreamCOFB(Stream stream)
     {
         byte[] magic = new byte[_magic.Length];
-        stream.Read(magic);
+        stream.ReadExactly(magic);
         stream.Position = 0;
         return magic.SequenceEqual(_magic);
     }
@@ -28,7 +28,7 @@ internal static class COFB
 
         // Confirm magic signature is valid
         byte[] magic = new byte[2];
-        bigStream.Read(magic);
+        bigStream.ReadExactly(magic);
         if (magic[0] != _magic[0] || magic[1] != _magic[1])
         {
             throw new InvalidDataException("Invalid C0FB signature.");
@@ -61,7 +61,7 @@ internal static class COFB
 
         // Confirm magic signature is valid
         byte[] magic = new byte[2];
-        bigStream.Read(magic);
+        bigStream.ReadExactly(magic);
         if (magic[0] != _magic[0] || magic[1] != _magic[1])
         {
             throw new InvalidDataException("Invalid C0FB signature.");

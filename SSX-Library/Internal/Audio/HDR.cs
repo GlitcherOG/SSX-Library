@@ -22,9 +22,10 @@ internal partial class DAT
         public void Load(string path)
         {
             using var stream = File.OpenRead(path);
+
             Unknown1 = stream.ReadInt16(ByteOrder.LittleEndian);
             Unknown2 = stream.ReadInt16(ByteOrder.LittleEndian); //Always -1
-            EntryTypes = stream.ReadUInt16(ByteOrder.LittleEndian);
+            EntryTypes = (byte)stream.ReadByte();
             FileCount = (byte)stream.ReadByte();
             PaddingCount = (byte)stream.ReadByte();
             AligmentSize = (byte)stream.ReadByte(); //Multi 0 == 1
@@ -94,7 +95,56 @@ internal partial class DAT
             }
         }
 
+        public void Save(string path)
+        {
+            using var stream = File.OpenWrite(path);
 
+            stream.WriteUInt16((ushort)Unknown1, ByteOrder.LittleEndian);
+            stream.WriteUInt16((ushort)Unknown2, ByteOrder.LittleEndian);
+            stream.WriteByte((byte)EntryTypes);
+            stream.WriteByte((byte)fileHeaders.Count);
+            stream.WriteByte((byte)Padding.Count);
+            stream.WriteByte(AligmentSize);
+            stream.WriteUInt16((ushort)Unknown3, ByteOrder.LittleEndian);
+
+            stream.Position += EntryTypes switch
+            {
+                0 or 2 => 2,
+                1 or 3 => 1,
+                _ => 0,
+            };
+
+            for (int i = 0; i < fileHeaders.Count; i++)
+            {
+                var header = fileHeaders[i];
+                switch (EntryTypes) {
+                case 0:
+                    stream.WriteUInt16((ushort)header.OffsetInt, ByteOrder.BigEndian);
+                    break;
+                case 1 or 2:
+                    stream.WriteByte(header.Unknown1);
+                    stream.WriteUInt16((ushort)header.OffsetInt, ByteOrder.BigEndian);
+                    break;
+                case 3:
+                    stream.WriteUInt24((uint)header.OffsetInt, ByteOrder.BigEndian);
+                    stream.WriteByte(header.Unknown2);
+                    stream.WriteByte(header.EventID);
+                    break;
+                case 4:
+                    stream.WriteByte(header.Unknown1);
+                    stream.WriteUInt24((uint)header.OffsetInt, ByteOrder.BigEndian);
+                    stream.WriteByte(header.Unknown2);
+                    stream.WriteByte(header.EventID);
+                    break;
+                }
+            }
+
+            stream.Position += GapSize;
+            for (int i = 0; i < Padding.Count; i++)
+            {
+                stream.Write(Padding[i]);
+            }
+        }
 
         public struct FileHeader
         {

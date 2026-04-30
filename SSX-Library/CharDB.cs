@@ -85,7 +85,7 @@ public sealed class CharDB
             stream.WriteAsciiWithLength(info.NickName, 16);
             stream.WriteUInt32(info.Weight, ByteOrder.LittleEndian);
             stream.WriteUInt32(info.Stance, ByteOrder.LittleEndian);
-            stream.WriteInt32(info.ModelSize, ByteOrder.LittleEndian);
+            stream.WriteUInt32((uint)info.ModelSize, ByteOrder.LittleEndian);
             stream.WriteAsciiWithLength(info.BloodType, 16);
             stream.WriteUInt32(info.Gender, ByteOrder.LittleEndian);
             stream.WriteUInt32(info.Age, ByteOrder.LittleEndian);
@@ -105,7 +105,7 @@ public sealed class CharDB
             stream.WriteUtf16WithLength(info.NickName, 16);
             stream.WriteUInt32(info.Weight, ByteOrder.LittleEndian);
             stream.WriteUInt32(info.Stance, ByteOrder.LittleEndian);
-            stream.WriteInt32(info.ModelSize, ByteOrder.LittleEndian);
+            stream.WriteUInt32((uint)info.ModelSize, ByteOrder.LittleEndian);
             stream.WriteAsciiWithLength(info.BloodType, 16);
             stream.WriteUInt32(info.Gender, ByteOrder.LittleEndian);
             stream.WriteUInt32(info.Age, ByteOrder.LittleEndian);

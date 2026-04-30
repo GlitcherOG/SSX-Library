@@ -6,6 +6,9 @@ namespace SSX_Library.Internal.Utilities.StreamExtensions;
 /// <summary>
 /// Stream extensions for writing primitive types.
 /// </summary>
+/// <remarks>
+/// There is no need for sidgned WriteInt methods because it makes no difference at the binary level.
+/// </remarks>
 internal static class Writer
 {
     public static void WriteUInt16(this Stream stream, ushort value, ByteOrder byteOrder)
@@ -50,20 +53,6 @@ internal static class Writer
         else if(byteOrder == ByteOrder.LittleEndian)
         {
             BinaryPrimitives.WriteUInt32LittleEndian(buf, value);
-        }
-        stream.Write(buf);
-    }
-
-    public static void WriteInt32(this Stream stream, int value, ByteOrder byteOrder)
-    {
-        var buf = new byte[4];
-        if (byteOrder == ByteOrder.BigEndian)
-        {
-            BinaryPrimitives.WriteInt32BigEndian(buf, value);
-        }
-        else if (byteOrder == ByteOrder.LittleEndian)
-        {
-            BinaryPrimitives.WriteInt32LittleEndian(buf, value);
         }
         stream.Write(buf);
     }

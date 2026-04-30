@@ -15,7 +15,7 @@ internal static class BIGF4
     public static bool IsStreamBIGF(Stream stream)
     {
         byte[] magic = new byte[_magicBigF.Length];
-        stream.Read(magic);
+        stream.ReadExactly(magic);
         stream.Position = 0;
         return magic.SequenceEqual(_magicBigF);
     }
@@ -23,7 +23,7 @@ internal static class BIGF4
     public static bool IsStreamBIG4(Stream stream)
     {
         byte[] magic = new byte[_magicBig4.Length];
-        stream.Read(magic);
+        stream.ReadExactly(magic);
         stream.Position = 0;
         return magic.SequenceEqual(_magicBig4);
     }
@@ -38,7 +38,7 @@ internal static class BIGF4
 
         // Confirm magic signature is valid
         byte[] magic = new byte[4];
-        bigStream.Read(magic);
+        bigStream.ReadExactly(magic);
         if (!magic.SequenceEqual(_magicBigF) && !magic.SequenceEqual(_magicBig4))
         {
             throw new InvalidDataException("Invalid Big signature.");
@@ -74,7 +74,7 @@ internal static class BIGF4
 
         // Confirm magic signature is valid
         byte[] magic = new byte[4];
-        bigStream.Read(magic);
+        bigStream.ReadExactly(magic);
         if (!magic.SequenceEqual(_magicBigF) && !magic.SequenceEqual(_magicBig4))
         {
             throw new InvalidDataException("Invalid Big signature.");

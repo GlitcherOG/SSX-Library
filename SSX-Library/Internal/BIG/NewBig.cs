@@ -13,7 +13,7 @@ internal static class NewBig
     public static bool IsStreamNewBig(Stream stream)
     {
         byte[] magic = new byte[_magic.Length];
-        stream.Read(magic);
+        stream.ReadExactly(magic);
         stream.Position = 0;
         return magic.SequenceEqual(_magic);
     }
@@ -238,7 +238,7 @@ internal static class NewBig
 
         // Confirm magic signature is valid
         byte[] magic = new byte[2];
-        bigStream.Read(magic);
+        bigStream.ReadExactly(magic);
         if (!magic.SequenceEqual(_magic))
         {
             throw new InvalidDataException("Invalid NewBig signature.");
