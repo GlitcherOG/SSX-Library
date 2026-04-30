@@ -1,12 +1,11 @@
-
 using SSX_Library.Internal.Utilities.StreamExtensions;
 using SSX_Library.Internal.Utilities;
 
 namespace SSX_Library.Internal.Audio;
 
-internal partial class DAT
+internal static partial class DAT
 {
-    private class HDR
+    private sealed class HDR
     {
         public short Unknown1; // U1
         public short Unknown2; // U2
@@ -87,7 +86,6 @@ internal partial class DAT
                     stream.Position -= 1;
                 }
             }
-
             Padding = [];
             for (int _ = 0; _ < PaddingCount; _++)
             {
@@ -142,7 +140,7 @@ internal partial class DAT
             stream.Position += GapSize;
             for (int i = 0; i < Padding.Count; i++)
             {
-                stream.Write(Padding[i]);
+                stream.WriteByte(Padding[i]);
             }
         }
 
