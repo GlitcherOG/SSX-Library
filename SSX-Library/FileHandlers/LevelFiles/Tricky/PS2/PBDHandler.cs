@@ -71,9 +71,9 @@ namespace SSX_Library.FileHandlers.LevelFiles.Tricky.PS2
 
         public byte[] MeshData;
 
-        public void LoadPBD(string path)
+        public void LoadPBD(string LoadPath)
         {
-            using (Stream stream = File.Open(path, FileMode.Open))
+            using (Stream stream = File.Open(LoadPath, FileMode.Open))
             {
                 MagicBytes = StreamUtil.ReadBytes(stream, 4);
                 NumPlayerStarts = StreamUtil.ReadUInt32(stream); //NA
@@ -2308,8 +2308,6 @@ namespace SSX_Library.FileHandlers.LevelFiles.Tricky.PS2
         public Vector4 UVPoint2;
         public Vector4 UVPoint3;
         public Vector4 UVPoint4;
-
-        //public List<Vector4> Points;
 
         public Vector4 R4C4;
         public Vector4 R4C3;
