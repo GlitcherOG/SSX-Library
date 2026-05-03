@@ -1,4 +1,5 @@
 using System.Buffers.Binary;
+using System.Numerics;
 using System.Text;
 
 namespace SSX_Library.Internal.Utilities.StreamExtensions;
@@ -8,6 +9,16 @@ namespace SSX_Library.Internal.Utilities.StreamExtensions;
 /// </summary>
 internal static class Reader
 {
+    static ByteOrder DefaultReadMode = ByteOrder.LittleEndian;
+    public static void SetDefaultReadMode(ByteOrder byteOrder)
+    {
+        DefaultReadMode = byteOrder;
+    }
+
+    public static ByteOrder ReturnDefaultReadMode()
+    {
+        return DefaultReadMode;
+    }
 
     public static byte[] ReadBytes(this Stream stream, int length)
     {
@@ -16,10 +27,16 @@ internal static class Reader
         return buf;
     }
 
-    public static ushort ReadUInt16(this Stream stream, ByteOrder byteOrder)
+    public static ushort ReadUInt16(this Stream stream, ByteOrder? byteOrder = null)
     {
         var buf = new byte[2];
         stream.Read(buf);
+
+        if (!byteOrder.HasValue)
+        {
+            byteOrder = DefaultReadMode;
+        }
+
         return byteOrder switch
         {
             ByteOrder.BigEndian => BinaryPrimitives.ReadUInt16BigEndian(buf),
@@ -28,10 +45,16 @@ internal static class Reader
         };
     }
 
-    public static uint ReadUInt24(this Stream stream, ByteOrder byteOrder)
+    public static uint ReadUInt24(this Stream stream, ByteOrder? byteOrder = null)
     {
         var buf = new byte[3];
         stream.Read(buf);
+
+        if (!byteOrder.HasValue)
+        {
+            byteOrder = DefaultReadMode;
+        }
+
         return byteOrder switch
         {
             ByteOrder.BigEndian => (uint)(buf[0] << 16 | buf[1] << 8 | buf[2]),
@@ -40,10 +63,16 @@ internal static class Reader
         };
     }
 
-    public static uint ReadUInt32(this Stream stream, ByteOrder byteOrder)
+    public static uint ReadUInt32(this Stream stream, ByteOrder? byteOrder = null)
     {
         var buf = new byte[4];
         stream.Read(buf);
+
+        if (!byteOrder.HasValue)
+        {
+            byteOrder = DefaultReadMode;
+        }
+
         return byteOrder switch
         {
             ByteOrder.BigEndian => BinaryPrimitives.ReadUInt32BigEndian(buf),
@@ -52,10 +81,16 @@ internal static class Reader
         };
     }
 
-    public static int ReadInt32(this Stream stream, ByteOrder byteOrder)
+    public static int ReadInt32(this Stream stream, ByteOrder? byteOrder = null)
     {
         var buf = new byte[4];
         stream.Read(buf);
+
+        if (!byteOrder.HasValue)
+        {
+            byteOrder = DefaultReadMode;
+        }
+
         return byteOrder switch
         {
             ByteOrder.BigEndian => BinaryPrimitives.ReadInt32BigEndian(buf),
@@ -64,10 +99,16 @@ internal static class Reader
         };
     }
 
-    public static ulong ReadUInt64(this Stream stream, ByteOrder byteOrder)
+    public static ulong ReadUInt64(this Stream stream, ByteOrder? byteOrder = null)
     {
         var buf = new byte[8];
         stream.Read(buf);
+
+        if (!byteOrder.HasValue)
+        {
+            byteOrder = DefaultReadMode;
+        }
+
         return byteOrder switch
         {
             ByteOrder.BigEndian => BinaryPrimitives.ReadUInt64BigEndian(buf),
@@ -76,16 +117,32 @@ internal static class Reader
         };
     }
 
-    public static float ReadFloat(this Stream stream, ByteOrder byteOrder)
+    public static float ReadFloat(this Stream stream, ByteOrder? byteOrder = null)
     {
         var buf = new byte[4];
         stream.Read(buf);
+
+        if (!byteOrder.HasValue)
+        {
+            byteOrder = DefaultReadMode;
+        }
+
         return byteOrder switch
         {
             ByteOrder.BigEndian => BinaryPrimitives.ReadSingleBigEndian(buf),
             ByteOrder.LittleEndian => BinaryPrimitives.ReadSingleLittleEndian(buf),
             _ => 0
         };
+    }
+
+    public static Vector3 ReadVector3(this Stream stream, ByteOrder? byteOrder = null)
+    {
+        return new Vector3(ReadFloat(stream, byteOrder), ReadFloat(stream, byteOrder), ReadFloat(stream, byteOrder));
+    }
+
+    public static Vector4 ReadVector4(this Stream stream, ByteOrder? byteOrder = null)
+    {
+        return new Vector4(ReadFloat(stream, byteOrder), ReadFloat(stream, byteOrder), ReadFloat(stream, byteOrder), ReadFloat(stream, byteOrder));
     }
 
     public static string ReadAsciiNullTerminated(this Stream stream)
