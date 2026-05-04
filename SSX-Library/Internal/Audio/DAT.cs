@@ -61,7 +61,7 @@ namespace SSX_Library.Internal.Audio;
             string wine = platform == Compatibility.Platform.Windows? "" : "wine ";
             string outputPath = Path.Combine(outputFolder, $"{i:000}" + ".wav");
             cmd.StandardInput.WriteLine("cd " + tempDir.FullName);
-            cmd.StandardInput.WriteLine($"{wine}sx.exe -wave -s16l_int -playlocmaincpu  Temp.mus -={outputPath}");
+            cmd.StandardInput.WriteLine($"{wine}sx_2002.exe -wave -s16l_int -playlocmaincpu  Temp.mus -={outputPath}");
             cmd.StandardInput.Flush();
             cmd.StandardInput.Close();
             cmd.WaitForExit();
