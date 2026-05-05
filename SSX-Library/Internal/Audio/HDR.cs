@@ -3,7 +3,7 @@ using SSX_Library.Internal.Utilities;
 
 namespace SSX_Library.Internal.Audio;
 
-internal static partial class DAT
+public static partial class DAT
 {
     private sealed class HDR
     {

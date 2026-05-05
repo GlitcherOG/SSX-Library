@@ -7,6 +7,12 @@ namespace SSX_Library;
     
     I'll not add a feature to add individual sounds, You have to extract the whole sound pack,
     replace the one you want to change, and then rebuild again.
+
+    Warning:
+    A folder containing.dat files was found right next to a headers.big. This is in ssx Tricky's 
+    data/speech/anim
+    The headers.big also replicate the fact that the .dat is in a folder by the same name, interesting.
+
 */
 
 /// <summary>
