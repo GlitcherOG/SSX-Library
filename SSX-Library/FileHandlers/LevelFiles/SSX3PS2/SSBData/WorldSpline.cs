@@ -85,7 +85,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
 
                 for (int j = 0; j < 4; j++)
                 {
-                    TempJsonSegment.Points = ArrayConv.Vector3ToArray2D(bezierUtil.RawPoints[j], j);
+                    TempJsonSegment.Points = ArrayConv.Vector3ToArray2D(TempJsonSegment.Points, bezierUtil.RawPoints[j], j);
                 }
 
                 TempJsonSegment.E0 = splineSegments[i].E0;

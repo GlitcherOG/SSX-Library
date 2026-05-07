@@ -370,7 +370,7 @@ namespace SSXLibrary.JsonFiles
 
                     for (int b = 0; b < 4; b++)
                     {
-                        NewSegment.Points = ArrayConv.Vector3ToArray2D(bezierUtil.RawPoints[b], b);
+                        NewSegment.Points = ArrayConv.Vector3ToArray2D(NewSegment.Points, bezierUtil.RawPoints[b], b);
                     }
 
                     NewSegment.U0 = OldSegment.U0;
@@ -412,7 +412,7 @@ namespace SSXLibrary.JsonFiles
 
                             for (int b = 0; b < 4; b++)
                             {
-                                NewSegment.Points = ArrayConv.Vector3ToArray2D(bezierUtil.RawPoints[b], b);
+                                NewSegment.Points = ArrayConv.Vector3ToArray2D(NewSegment.Points, bezierUtil.RawPoints[b], b);
                             }
 
                             NewSegment.U0 = OldSegment.U0;

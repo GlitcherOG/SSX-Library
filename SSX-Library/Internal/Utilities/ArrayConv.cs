@@ -37,9 +37,8 @@ internal static class ArrayConv
         return new Vector3(floats[ArrayPos, 0], floats[ArrayPos,1], floats[ArrayPos,2]);
     }
 
-    public static float[,] Vector3ToArray2D(Vector3 vector3, int ArrayPos)
+    public static float[,] Vector3ToArray2D(float[,] array, Vector3 vector3, int ArrayPos)
     {
-        float[,] array = new float[4,3];
         array[ArrayPos, 0] = vector3.X;
         array[ArrayPos, 1] = vector3.Y;
         array[ArrayPos, 2] = vector3.Z;

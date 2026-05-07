@@ -132,7 +132,7 @@ namespace SSXLibrary
 
                 for (int a= 0; a < 16; a++)
                 {
-                    patch.Points = ArrayConv.Vector3ToArray2D(bezierUtil.RawPoints[a], a);
+                    patch.Points = ArrayConv.Vector3ToArray2D(patch.Points,bezierUtil.RawPoints[a], a);
                 }
 
                 patch.SurfaceType = pbdHandler.Patches[i].SurfaceType;
@@ -453,7 +453,7 @@ namespace SSXLibrary
 
                     for (int b = 0; b < 4; b++)
                     {
-                        segmentJson.Points = ArrayConv.Vector3ToArray2D(bezierUtil.RawPoints[b], b);
+                        segmentJson.Points = ArrayConv.Vector3ToArray2D(segmentJson.Points, bezierUtil.RawPoints[b], b);
                     }
 
                     //segmentJson.U0 = pbdHandler.splinesSegments[a].Coefficient1;
@@ -1248,6 +1248,24 @@ namespace SSXLibrary
                     LightmapHandler.ExtractSingleImage(ExportPath + "\\Lightmaps\\" + LightmapHandler.ShapeImages[i].Shortname + ".png", i);
                 }
             }
+
+            SSXTrickyConfig trickyConfig = new SSXTrickyConfig();
+
+            trickyConfig.BuildUniLightmap = true;
+            trickyConfig.BuildPBDGenerate = true;
+            trickyConfig.BuildSSHGenerate = true;
+            trickyConfig.BuildLSSHGenerate = true;
+            trickyConfig.BuildLTGGenerate = true;
+            trickyConfig.BuildMAPGenerate = true;
+            trickyConfig.BuildSkyPBDGenerate = true;
+            trickyConfig.BuildSkySSHGenerate = true;
+            trickyConfig.BuildADLGenerate = true;
+            trickyConfig.BuildSSFGenerate = true;
+            trickyConfig.BuildAIPGenerate = true;
+            trickyConfig.BuildSOPGenerate = true;
+            trickyConfig.BuildLTGGenerateMode = 1;
+
+            trickyConfig.CreateJson(ExportPath + "/ConfigTricky.ssx");
         }
 
         public void BuildTrickyLevelFiles(string LoadPath, string ExportPath)

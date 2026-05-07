@@ -173,7 +173,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
 
             for (int a = 0; a < 16; a++)
             {
-                patchJson.Points = ArrayConv.Vector3ToArray2D(bezierUtil.RawPoints[a], a);
+                patchJson.Points = ArrayConv.Vector3ToArray2D(patchJson.Points, bezierUtil.RawPoints[a], a);
             }
 
             patchJson.U7 = ArrayConv.Vector4ToArray(U7);
