@@ -58,7 +58,7 @@ public static partial  class DAT
             cmd.StartInfo.CreateNoWindow = true;
             cmd.Start();
 
-            string wine = platform == Compatibility.Platform.Windows? "" : "wine ";
+            string wine = platform == Compatibility.Platform.Windows? "" : "WINEDEBUG=-all wine ./";
             string outputPath = Path.Combine(outputFolder, $"{i:000}" + ".wav");
             cmd.StandardInput.WriteLine("cd " + tempDir.FullName);
             cmd.StandardInput.WriteLine($"{wine}sx_2002.exe -wave -s16l_int -playlocmaincpu  Temp.mus -={outputPath}");

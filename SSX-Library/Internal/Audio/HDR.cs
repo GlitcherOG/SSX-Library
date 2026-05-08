@@ -148,7 +148,7 @@ public static partial class DAT
         {
             public byte Unknown1;
             public byte[] Offset;
-            public byte Unknown2;
+            public byte Unknown2; // Speaker ID
             public byte EventID;
             public int OffsetInt;
         }
