@@ -83,7 +83,7 @@ public static class BIG
     }
 
     /// <summary>
-    /// Create a big file from a folder.
+    /// Create/Overwrite a big file from a folder.
     /// </summary>
     /// <param name="useCompression">Should compress all files with refpack/ChunkZip.</param>
     /// <param name="useBackslashes">Should member files store their paths using backslash.</param>

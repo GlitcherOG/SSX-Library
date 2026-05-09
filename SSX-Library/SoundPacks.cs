@@ -28,61 +28,59 @@ namespace SSX_Library;
 /// </remarks>
 public sealed class SoundPacks : IDisposable
 {
-    private readonly string Sx_2002Path;
-    private readonly string Sx_2004Path;
-    private readonly string HeaderFilePath;
-    private readonly string ExtractedHeaderFileFolder;
-    private readonly BigType HeaderBigType;
+    private bool _disposed = false;
+    private readonly string _sx_2002Path;
+    private readonly string _sx_2004Path;
+    private readonly string _headerFilePath;
+    private readonly string _extractedHeaderFileFolder;
+    private readonly BigType _headerBigType;
 
     /// <summary>
-    /// Create a SoundsPack folder handler.
+    /// Create a SoundsPacks folder handler.
     /// </summary>
     /// <param name="audioToolsFolder"> The path to the proprietary EA audio tools, 
     /// used for sound extraction/generation.</param>
-    public SoundPacks(string soundPackFolder, string audioToolsFolder)
+    public SoundPacks(string soundPacksFolder, string audioToolsFolder)
     {
         // Validate the tools
-        Sx_2002Path = Path.Combine(audioToolsFolder, "sx_2002.exe");
-        Sx_2004Path = Path.Combine(audioToolsFolder, "sx_2004.exe");
-        if (!File.Exists(Sx_2002Path) || !File.Exists(Sx_2004Path))
+        _sx_2002Path = Path.Combine(audioToolsFolder, "sx_2002.exe");
+        _sx_2004Path = Path.Combine(audioToolsFolder, "sx_2004.exe");
+        if (!File.Exists(_sx_2002Path) || !File.Exists(_sx_2004Path))
         {
-            throw new FileNotFoundException("Could not find sx_2002.exe on the provided folder");
+            throw new FileNotFoundException("Could not find required audio tools in the provided folder");
         }
-        else if (OperatingSystem.IsLinux() && !File.Exists("/bin/wine"))
+        if (OperatingSystem.IsLinux() && !File.Exists("/bin/wine"))
         {
             throw new FileNotFoundException("Wine must be installed on your linux machine");
         }
 
-        // Validate the soundPackFolder
-        HeaderFilePath = "";
-        var soundPackFiles = Directory.GetFiles(soundPackFolder);
-        foreach (var file in soundPackFiles)
+        // Validate the soundPacksFolder
+        _headerFilePath = "";
+        foreach (var file in Directory.GetFiles(soundPacksFolder))
         {
             // Find the header file
             var fileName = Path.GetFileName(file);
-            if (fileName.Contains("header") && fileName.Contains(".big"))
+            if (fileName.Contains("header") && fileName.EndsWith(".big"))
             {
-                HeaderFilePath = file;
+                _headerFilePath = file;
                 break;
             }
         }
-        if (HeaderFilePath == "")
+        if (_headerFilePath == "")
         {
             throw new FileNotFoundException("Header file not found");
         }
         
         // Extract the headers.big into a temp folder.
-        var extractedHeaderFile = Directory.CreateTempSubdirectory();
-        ExtractedHeaderFileFolder = extractedHeaderFile.FullName;
-        HeaderBigType = BIG.GetBigType(HeaderFilePath);
-        BIG.Extract(HeaderFilePath, ExtractedHeaderFileFolder);
+        _extractedHeaderFileFolder = Directory.CreateTempSubdirectory().FullName;
+        _headerBigType = BIG.GetBigType(_headerFilePath);
+        BIG.Extract(_headerFilePath, _extractedHeaderFileFolder);
     }
 
     /// <summary>
     /// Gets the list of packs only if there is a corresponding .dat file to the .hdr
     /// </summary>
     /// <returns>A list of sound pack names</returns>
-    /// <exception cref="ArgumentExceptions"></exception>
     public string[] GetValidSoundPacks()
     {
         return ["sus"];
@@ -130,7 +128,13 @@ public sealed class SoundPacks : IDisposable
 
     public void Dispose()
     {
-        // Clear Temp folder and archive header.big
-    }
+        if (_disposed) return;
 
+        // Archive the temp folder back to its .big path. And delete the temp folder.
+        BIG.Create(_headerBigType, _extractedHeaderFileFolder, _headerFilePath, true);
+        Directory.Delete(_extractedHeaderFileFolder, true);
+
+        _disposed = true;
+        GC.SuppressFinalize(this);
+    }
 }
