@@ -1,5 +1,6 @@
-using ICSharpCode.SharpZipLib;
 using SSX_Library.Internal.Audio;
+using SSX_Library.Internal.Utilities;
+using System.Diagnostics;
 
 namespace SSX_Library;
 
@@ -62,7 +63,7 @@ public sealed class SoundPacks : IDisposable
     /// <summary>
     /// Gets two lists of packs based on if there is a corresponding .dat file to the .hdr
     /// </summary>
-    /// <returns>A tuple with valid and invalid lists of sound pack names.
+    /// <returns>A tuple with lists of valid and invalid sound pack names.
     /// The names are paths relative to the SoundPacks but without
     /// the extension. e.g. "/char/talk", that way its can be used for searching for both the hdr and dat.</returns>
     public (string[] valid, string[] invalid) GetSoundPacks()
@@ -125,7 +126,7 @@ public sealed class SoundPacks : IDisposable
         }
         if (soundID >= hdr.FileCount)
         {
-            throw new ValueOutOfRangeException("Sound ID is out of range");
+            throw new IndexOutOfRangeException("Sound ID is out of range");
         }
         return hdr.FileHeaders[soundID].EventID;
     }
@@ -152,7 +153,7 @@ public sealed class SoundPacks : IDisposable
         }
         if (soundID >= hdr.FileCount)
         {
-            throw new ValueOutOfRangeException("Speaker ID is out of range");
+            throw new IndexOutOfRangeException("Speaker ID is out of range");
         }
         return hdr.FileHeaders[soundID].SpeakerID;
     }
@@ -179,7 +180,7 @@ public sealed class SoundPacks : IDisposable
         }
         if (soundID >= hdr.FileCount)
         {
-            throw new ValueOutOfRangeException("Event ID is out of range");
+            throw new IndexOutOfRangeException("Event ID is out of range");
         }
         var newHeader = hdr.FileHeaders[soundID];
         newHeader.EventID = newEventID;
@@ -209,7 +210,7 @@ public sealed class SoundPacks : IDisposable
         }
         if (soundID >= hdr.FileCount)
         {
-            throw new ValueOutOfRangeException("Speaker ID is out of range");
+            throw new IndexOutOfRangeException("Speaker ID is out of range");
         }
         var newHeader = hdr.FileHeaders[soundID];
         newHeader.SpeakerID = newSpeakerID;
@@ -217,10 +218,72 @@ public sealed class SoundPacks : IDisposable
         hdr.Save(hdrPath);
     }
 
-    // Make sure the extracted wav file is named after it's pack name and sound ID
+    /// <summary>
+    /// Extracts a sound pack to a folder. The output files will be .wav, each named by the
+    /// sound pack name plus the ID of the sound.
+    /// </summary>
+    /// <param name="soundPackName"> A valid sound pack name, obtainable through GetSoundPacks() </param>
     public void ExtractSoundPack(string soundPackName, string folderToExtractTo)
     {
-        
+        // Validate the tools again (to be safe)
+        if (!File.Exists(_sx_2002Path))
+        {
+            throw new FileNotFoundException("Could not find required audio tools in the provided folder");
+        }
+        if (OperatingSystem.IsLinux() && !File.Exists("/bin/wine"))
+        {
+            throw new FileNotFoundException("Wine must be installed on your linux machine");
+        }
+
+        using var datFile = File.OpenRead(Path.Join(_extractedHeaderFileFolder, soundPackName + ".dat"));
+
+        // Look for offsets based on the music file's header magic signature.
+        var offsets = new List<long>();
+        while (true)
+        {
+            var offset = ByteConv.FindBytePattern(datFile, [ 0x53, 0x43, 0x48, 0x6C ]);
+            if (offset == -1) break;
+            offsets.Add(offset);
+        }
+
+        for (int i = 0; i < offsets.Count; i++)
+        {
+            // Create a temp .mus file
+            datFile.Position = offsets[i];
+            long musFileSize;
+            if (i == offsets.Count - 1)
+            {
+                musFileSize = datFile.Length - offsets[i];
+            }
+            else
+            {
+                musFileSize = offsets[i + 1] - offsets[i];
+            }
+            var tempMusFilePath = Path.GetTempFileName();
+            try
+            {
+                using var tempMusFile = File.OpenWrite(tempMusFilePath);
+                datFile.CopyTo(tempMusFile, (int)musFileSize);
+
+                // Take the mus file as input, and output the sound to the extraction folder as .wav.
+                var cmd = new Process();
+                cmd.StartInfo.FileName = OperatingSystem.IsLinux() ? "/bin/bash" : "cmd.exe";
+                cmd.StartInfo.RedirectStandardInput = true;
+                cmd.StartInfo.RedirectStandardOutput = true;
+                cmd.StartInfo.CreateNoWindow = true;
+                cmd.Start();
+                var wine = OperatingSystem.IsLinux() ? "WINEDEBUG=-all wine " : "";
+                var outputPath = Path.Join(folderToExtractTo, soundPackName + $"_{i:000}" + ".wav");
+                cmd.StandardInput.WriteLine($"{wine}{_sx_2002Path} -wave -s16l_int -playlocmaincpu  {tempMusFilePath} -={outputPath}");
+                cmd.StandardInput.Flush();
+                cmd.StandardInput.Close();
+                cmd.WaitForExit();
+            }
+            finally
+            {
+                File.Delete(tempMusFilePath);
+            }
+        }
     }
 
     /// <summary>
@@ -233,7 +296,7 @@ public sealed class SoundPacks : IDisposable
     /// </remarks>
     public void ReplaceSoundPackWithWavFolder(string soundPackName, string[] wavFilePaths)
     {
-        
+        // Todo Next
     }
 
     public void Dispose()
