@@ -31,7 +31,7 @@ public sealed class SoundPacks : IDisposable
     /// Create a SoundsPacks folder handler.
     /// </summary>
     /// <remarks>This class's objects must be disposed of after
-    /// opening - to commit changes to the filesystem.</remarks>
+    /// opening to commit changes and clear temp files.</remarks>
     /// <param name="audioToolsFolder"> The path to the proprietary EA audio tools, 
     /// used for sound extraction/generation.</param>
     public SoundPacks(string soundPacksFolder, string audioToolsFolder)
@@ -120,22 +120,21 @@ public sealed class SoundPacks : IDisposable
     /// <summary>
     /// Get the EventID of a sound.
     /// </summary>
-    /// <param name="soundPackName"> A valid sound pack name, obtainable through GetSoundPacks() </param>
     /// <param name="soundID"> A sound ID. It must be lower than the amount of sounds in a sound pack. </param>
-    public byte GetSoundPackEventID(string soundPackName, int soundID)
+    [SuppressMessage("Performance", "CA1822:Mark members as static")]
+    public byte GetSoundPackEventID(SoundPackName soundPackName, int soundID)
     {
         // Load the .hdr
-        var hdrPath = Path.Join(_extractedHeaderFileFolder, soundPackName + ".hdr");
-        if (!File.Exists(hdrPath))
+        if (!File.Exists(soundPackName.HdrPath))
         {
-            throw new FileNotFoundException("Could not find header file: " + hdrPath);
+            throw new FileNotFoundException("Could not find header file: " + soundPackName.HdrPath);
         }
 
         // Read and return the sound event ID
         var hdr = new HDR();
-        hdr.Load(hdrPath);
+        hdr.Load(soundPackName.HdrPath);
         if (hdr.EntryTypes is 0 or 1){
-            throw new InvalidOperationException($"{hdrPath}'s entry type does not contain Event IDs ");
+            throw new InvalidOperationException($"{soundPackName.HdrPath}'s entry type does not contain Event IDs ");
         }
         if (soundID >= hdr.FileCount)
         {
@@ -147,22 +146,21 @@ public sealed class SoundPacks : IDisposable
     /// <summary>
     /// Get the SpeakerID of a sound.
     /// </summary>
-    /// <param name="soundPackName"> A valid sound pack name, obtainable through GetSoundPacks() </param>
     /// <param name="soundID"> A sound ID. It must be lower than the amount of sounds in a sound pack. </param>
-    public byte GetSoundPackSpeakerID(string soundPackName, int soundID)
+    [SuppressMessage("Performance", "CA1822:Mark members as static")]
+    public byte GetSoundPackSpeakerID(SoundPackName soundPackName, int soundID)
     {
         // Load the .hdr
-        var hdrPath = Path.Join(_extractedHeaderFileFolder, soundPackName + ".hdr");
-        if (!File.Exists(hdrPath))
+        if (!File.Exists(soundPackName.HdrPath))
         {
-            throw new FileNotFoundException("Could not find header file: " + hdrPath);
+            throw new FileNotFoundException("Could not find header file: " + soundPackName.HdrPath);
         }
 
         // Read and return the sound speaker ID
         var hdr = new HDR();
-        hdr.Load(hdrPath);
+        hdr.Load(soundPackName.HdrPath);
         if (hdr.EntryTypes is 0 or 1){
-            throw new InvalidOperationException($"{hdrPath}'s entry type does not contain Speaker IDs ");
+            throw new InvalidOperationException($"{soundPackName.HdrPath}'s entry type does not contain Speaker IDs ");
         }
         if (soundID >= hdr.FileCount)
         {
@@ -174,22 +172,21 @@ public sealed class SoundPacks : IDisposable
     /// <summary>
     /// Set the EventID of a sound.
     /// </summary>
-    /// <param name="soundPackName"> A valid sound pack name, obtainable through GetSoundPacks() </param>
     /// <param name="soundID"> A sound ID. It must be lower than the amount of sounds in a sound pack. </param>
-    public void SetSoundPackEventID(string soundPackName, int soundID, byte newEventID)
+    [SuppressMessage("Performance", "CA1822:Mark members as static")]
+    public void SetSoundPackEventID(SoundPackName soundPackName, int soundID, byte newEventID)
     {
         // Load the .hdr
-        var hdrPath = Path.Join(_extractedHeaderFileFolder, soundPackName + ".hdr");
-        if (!File.Exists(hdrPath))
+        if (!File.Exists(soundPackName.HdrPath))
         {
-            throw new FileNotFoundException("Could not find header file: " + hdrPath);
+            throw new FileNotFoundException("Could not find header file: " + soundPackName.HdrPath);
         }
 
         // Update the EventID and save back to disk
         var hdr = new HDR();
-        hdr.Load(hdrPath);
+        hdr.Load(soundPackName.HdrPath);
         if (hdr.EntryTypes is 0 or 1){
-            throw new InvalidOperationException($"{hdrPath}'s entry type does not contain Event IDs ");
+            throw new InvalidOperationException($"{soundPackName.HdrPath}'s entry type does not contain Event IDs ");
         }
         if (soundID >= hdr.FileCount)
         {
@@ -198,28 +195,27 @@ public sealed class SoundPacks : IDisposable
         var newHeader = hdr.FileHeaders[soundID];
         newHeader.EventID = newEventID;
         hdr.FileHeaders[soundID] = newHeader;
-        hdr.Save(hdrPath);
+        hdr.Save(soundPackName.HdrPath);
     }
 
     /// <summary>
     /// Set the SpeakerID of a sound.
     /// </summary>
-    /// <param name="soundPackName"> A valid sound pack name, obtainable through GetSoundPacks() </param>
     /// <param name="soundID"> A sound ID. It must be lower than the amount of sounds in a sound pack. </param>
-    public void SetSoundPackSpeakerID(string soundPackName, int soundID, byte newSpeakerID)
+    [SuppressMessage("Performance", "CA1822:Mark members as static")]
+    public void SetSoundPackSpeakerID(SoundPackName soundPackName, int soundID, byte newSpeakerID)
     {
         // Load the .hdr
-        var hdrPath = Path.Join(_extractedHeaderFileFolder, soundPackName + ".hdr");
-        if (!File.Exists(hdrPath))
+        if (!File.Exists(soundPackName.HdrPath))
         {
-            throw new FileNotFoundException("Could not find header file: " + hdrPath);
+            throw new FileNotFoundException("Could not find header file: " + soundPackName.HdrPath);
         }
 
         // Update the SpeakerID and save back to disk
         var hdr = new HDR();
-        hdr.Load(hdrPath);
+        hdr.Load(soundPackName.HdrPath);
         if (hdr.EntryTypes is 0 or 1){
-            throw new InvalidOperationException($"{hdrPath}'s entry type does not contain Speaker IDs ");
+            throw new InvalidOperationException($"{soundPackName.HdrPath}'s entry type does not contain Speaker IDs ");
         }
         if (soundID >= hdr.FileCount)
         {
@@ -228,7 +224,7 @@ public sealed class SoundPacks : IDisposable
         var newHeader = hdr.FileHeaders[soundID];
         newHeader.SpeakerID = newSpeakerID;
         hdr.FileHeaders[soundID] = newHeader;
-        hdr.Save(hdrPath);
+        hdr.Save(soundPackName.HdrPath);
     }
 
     /// <summary>

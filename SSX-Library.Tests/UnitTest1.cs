@@ -18,9 +18,16 @@ public class UnitTest1
         string fePath = speech + "fe";
         string mcPath = speech + "mc";
         string narrPath = speech + "narr";
-        string output = "/home/eric/Downloads/output";
+        // string output = "/home/eric/Downloads/output";
 
         using var soundPacks = new SoundPacks(charPath, tools);
+        var packs = soundPacks.GetSoundPacks();
+
+        
+        // Console.WriteLine(packs.Length);
+        // Console.Write(packs[0]);
+        // Console.WriteLine(soundPacks.GetSoundPackEventID(packs[0], 0));
+        // Console.WriteLine(soundPacks.GetSoundPackSoundCount(packs[1]));
 
         // var names = soundPacks.GetSoundPacks();
         // Console.WriteLine($"{valid.Length}, {invalid.Length}");

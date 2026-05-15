@@ -168,7 +168,7 @@ internal static class BIGF4
 
         // Set headerSize to zero for now.
         long headerSizePosition = bigStream.Position;
-        bigStream.WriteUInt32(0, ByteOrder.BigEndian);
+        bigStream.WriteUInt32(0, ByteOrder.LittleEndian);
 
         // Store member file header positions for second pass. Set values to zero for now
         // except for the file paths.
@@ -191,7 +191,7 @@ internal static class BIGF4
         // Rewrite the header size
         long headerSize = bigStream.Position;
         bigStream.Position = headerSizePosition; // header size
-        bigStream.WriteUInt16((ushort)headerSize, ByteOrder.BigEndian);
+        bigStream.WriteUInt32((uint)headerSize, ByteOrder.BigEndian);
         bigStream.Position = headerSize; // Restore to last position
 
         // Write file data
@@ -218,7 +218,7 @@ internal static class BIGF4
         // Set file size
         long fileSize = bigStream.Seek(0, SeekOrigin.End);
         bigStream.Position = fileSizePosition;
-        bigStream.WriteUInt32((uint)fileSize, ByteOrder.LittleEndian);
+        bigStream.WriteUInt32((uint)fileSize, ByteOrder.BigEndian);
     }
 
     private struct BIGF4Header

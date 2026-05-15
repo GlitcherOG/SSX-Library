@@ -399,3 +399,6 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+SSX-Library/SSX-Library.csproj.lscache
+.gitignore
+SSX-Library.Tests/SSX-Library.Tests.csproj.lscache

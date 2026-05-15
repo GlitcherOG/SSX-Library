@@ -85,10 +85,10 @@ internal sealed class HDR
                 stream.Position -= 1;
             }
             stream.Position = oldPos;
-            stream.ReadExactly(Unknown4, 0, GapSize);
+            Unknown4 = stream.ReadBytes(GapSize);
             stream.Position = newPos;
         }
-        stream.ReadExactly(Padding, 0, PaddingCount);
+        Padding = stream.ReadBytes(PaddingCount);
     }
 
     public void Save(string path)
