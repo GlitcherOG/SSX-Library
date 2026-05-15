@@ -92,11 +92,7 @@ namespace SSXLibrary.FileHandlers
                     }
 
                     stream.Position = Pos;
-                    EndFileData = stream.ReadBytes((int)(stream.Length - Pos));
-
-                    stream.Position = Pos;
                     UnknownData = stream.ReadBytes(GapSize);
-                    stream.Position = NewPos;
                 }
 
                 Padding = new List<int>();
@@ -105,10 +101,12 @@ namespace SSXLibrary.FileHandlers
                     Padding.Add(StreamUtil.ReadInt8(stream));
                 }
 
+                EndFileData = stream.ReadBytes((int)(stream.Length - stream.Position));
+
             }
         }
 
-        public void Save(string Path, bool WriteRawEndFile = false)
+        public void Save(string Path)
         {
             MemoryStream stream = new MemoryStream();
 
@@ -162,22 +160,17 @@ namespace SSXLibrary.FileHandlers
                 }
             }
 
-            if (WriteRawEndFile)
-            {
-                stream.WriteBytes(EndFileData);
-            }
-            else
-            {
-                //Garbage stuff here
-                stream.WriteBytes(UnknownData);
-                //stream.Position += GapSize;
+            //Garbage stuff here
+            stream.WriteBytes(UnknownData);
+            //stream.Position += GapSize;
 
-
-                for (int i = 0; i < Padding.Count; i++)
-                {
-                    StreamUtil.WriteUInt8(stream, Padding[i]);
-                }
+            for (int i = 0; i < Padding.Count; i++)
+            {
+                StreamUtil.WriteUInt8(stream, Padding[i]);
             }
+
+            stream.WriteBytes(EndFileData);
+                
 
             if (File.Exists(Path))
             {
