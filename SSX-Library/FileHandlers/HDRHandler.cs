@@ -15,6 +15,7 @@ namespace SSXLibrary.FileHandlers
 
         public int GapSize;
         public byte[] UnknownData;
+        public byte[] EndFileData;
 
         public List<FileHeader> fileHeaders = new List<FileHeader>();
         public List<int> Padding = new List<int>();
@@ -91,6 +92,9 @@ namespace SSXLibrary.FileHandlers
                     }
 
                     stream.Position = Pos;
+                    EndFileData = stream.ReadBytes((int)(stream.Length - Pos));
+
+                    stream.Position = Pos;
                     UnknownData = stream.ReadBytes(GapSize);
                     stream.Position = NewPos;
                 }
@@ -104,7 +108,7 @@ namespace SSXLibrary.FileHandlers
             }
         }
 
-        public void Save(string Path)
+        public void Save(string Path, bool WriteRawEndFile = false)
         {
             MemoryStream stream = new MemoryStream();
 
@@ -139,8 +143,9 @@ namespace SSXLibrary.FileHandlers
                 }
                 if (EntryTypes == 2)
                 {
-                    StreamUtil.WriteUInt8(stream, TempHeader.Unknown);
                     StreamUtil.WriteInt16(stream, TempHeader.OffsetInt, true);
+                    StreamUtil.WriteUInt8(stream, TempHeader.Unknown2);
+                    StreamUtil.WriteUInt8(stream, TempHeader.EventID);
                 }
                 if (EntryTypes == 3)
                 {
@@ -157,19 +162,30 @@ namespace SSXLibrary.FileHandlers
                 }
             }
 
-            //Garbage stuff here
-            stream.WriteBytes(UnknownData);
-            //stream.Position += GapSize;
-
-
-            for (int i = 0; i < Padding.Count; i++)
+            if (WriteRawEndFile)
             {
-                StreamUtil.WriteUInt8(stream, Padding[i]);
+                stream.WriteBytes(EndFileData);
+            }
+            else
+            {
+                //Garbage stuff here
+                stream.WriteBytes(UnknownData);
+                //stream.Position += GapSize;
+
+
+                for (int i = 0; i < Padding.Count; i++)
+                {
+                    StreamUtil.WriteUInt8(stream, Padding[i]);
+                }
             }
 
             if (File.Exists(Path))
             {
                 File.Delete(Path);
+            }
+            while (File.Exists(Path))
+            {
+
             }
             var file = File.Create(Path);
             stream.Position = 0;
