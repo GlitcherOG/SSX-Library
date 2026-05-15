@@ -166,7 +166,7 @@ Utilities:
 - [ ] ImageUtil.cs
 - [ ] StreamUtil.cs
 
-Some EA tools are required to use some features. Here is a mirror of the essentials: [SSX-External-Tools](https://github.com/Erickson400/SSX-External-Tools). If on linux you also need wine to run them.
+Some EA tools are required to use some features. Here is a mirror of the essentials: [SSX-External-Tools](https://github.com/Erickson400/SSX-External-Tools). Wine is required to run on Linux.
 
 ## Special Thanks
 https://github.com/Erickson400/SSXTrickyModelExporter <br>

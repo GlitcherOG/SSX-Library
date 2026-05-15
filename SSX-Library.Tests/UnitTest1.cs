@@ -22,13 +22,13 @@ public class UnitTest1
 
         using var soundPacks = new SoundPacks(charPath, tools);
 
-        var names = soundPacks.GetSoundPacks();
+        // var names = soundPacks.GetSoundPacks();
         // Console.WriteLine($"{valid.Length}, {invalid.Length}");
 
-        foreach (var name in names)
-        {
-            Console.WriteLine(name);
-        }
+        // foreach (var name in names)
+        // {
+        //     Console.WriteLine(name);
+        // }
 
 
 

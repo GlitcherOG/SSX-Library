@@ -13,6 +13,7 @@ internal sealed class HDR
     public byte AligmentSize;
     public short Unknown3; // U5
     public int GapSize;
+    public byte[] Unknown4 = [];
     public List<FileHeader> FileHeaders = [];
     public byte[] Padding = [];
 
@@ -83,6 +84,9 @@ internal sealed class HDR
                 GapSize = (int)(newPos - oldPos);
                 stream.Position -= 1;
             }
+            stream.Position = oldPos;
+            stream.ReadExactly(Unknown4, 0, GapSize);
+            stream.Position = newPos;
         }
         stream.ReadExactly(Padding, 0, PaddingCount);
     }
@@ -131,7 +135,7 @@ internal sealed class HDR
             }
         }
 
-        stream.Position += GapSize;
+        stream.Write(Unknown4);
         stream.Write(Padding);
     }
 

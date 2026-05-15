@@ -1,7 +1,6 @@
 using SSX_Library.Internal.Audio;
 using SSX_Library.Internal.Utilities;
 using SSX_Library.Internal.Utilities.StreamExtensions;
-using SSXLibrary.FileHandlers;
 using System.Diagnostics;
 
 namespace SSX_Library;
@@ -370,7 +369,7 @@ public sealed class SoundPacks : IDisposable
             {
                 // Copy the whole .mus into the .dat with the corresponding alignment. 
                 using var musFile = File.OpenRead(musFilePaths[i]);
-                datFile.Position = hdr.FileHeaders[i].Offset * 0x100 / (hdr.AligmentSize + 1);
+                datFile.Position = hdr.FileHeaders[i].Offset * 0x100 * (hdr.AligmentSize + 1);
                 musFile.CopyTo(datFile);
             }
         }
