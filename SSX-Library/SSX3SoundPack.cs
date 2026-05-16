@@ -1,10 +1,8 @@
 ﻿using SSX_Library;
 using SSX_Library.Internal.Utilities;
-using SSX_Library.Internal.Utilities.StreamExtensions;
 using SSXLibrary.FileHandlers;
 using System.Diagnostics;
-using System.Security.Cryptography;
-using System.Text;
+using System.IO.Hashing;
 
 namespace SSXLibrary
 {
@@ -12,6 +10,7 @@ namespace SSXLibrary
     {
         public static async Task FullExtractAsync(string MainBig, string ExtractFolder, string SXDirectory)
         {
+            Console.WriteLine("Starting Audio Extract");
             //Extract Mainbig to the temp folder
             string HiddenFolder = ExtractFolder + "\\OriginalData";
             string HDRFolder = HiddenFolder + "\\HDRFolder";
@@ -21,9 +20,13 @@ namespace SSXLibrary
             DirectoryInfo di = Directory.CreateDirectory(HiddenFolder);
             di.Attributes = FileAttributes.Directory | FileAttributes.Hidden;
 
+            Console.WriteLine("Creating Hidden Directories");
+
             Directory.CreateDirectory(HDRFolder);
             Directory.CreateDirectory(DATFolder);
             Directory.CreateDirectory(MUSFolder);
+
+            Console.WriteLine("Extracting Main Big");
 
             BIG.Extract(MainBig, DATFolder);
 
@@ -35,12 +38,18 @@ namespace SSXLibrary
                 return;
             }
 
+            Console.WriteLine("Extracting HDR Big");
+
             BIG.Extract(LangHeader[0], HDRFolder);
 
             File.Copy(SXDirectory + "/sx_2002.exe", MUSFolder + "/sx.exe", true);
 
             //Extract DATS to Correct Folders
             string[] DATs = Directory.GetFiles(DATFolder, "*.DAT", SearchOption.AllDirectories);
+
+            Console.WriteLine("Starting DAT To WAV Conversion");
+            Console.WriteLine("Using " + maxProcesses.ToString() + " Threads");
+
             List<Task> tasks = new List<Task>();
 
             for (int i = 0; i < DATs.Length; i++)
@@ -62,6 +71,8 @@ namespace SSXLibrary
             {
                 await Task.Run(() =>
                 {
+                    Console.WriteLine("Extracting DAT TO MUS - " + MUSFolder);
+
                     Process cmd = new Process();
                     cmd.StartInfo.FileName = "cmd.exe";
                     cmd.StartInfo.RedirectStandardInput = true;
@@ -126,6 +137,8 @@ namespace SSXLibrary
 
                             MUSFiles.Add(NewPath);
 
+                            Console.WriteLine(a.ToString() + "/" + Offsets.Count + " Creating MUS File - " + NewPath);
+
                             var file = File.Create(NewPath);
                             StreamMemory.Position = 0;
                             StreamMemory.CopyTo(file);
@@ -134,7 +147,11 @@ namespace SSXLibrary
                         }
                     }
 
+                    Console.WriteLine("Starting MUS TO WAV CONVERSION - " + ExtractMUSFolder);
+
                     Directory.CreateDirectory(ExtractMUSFolder);
+
+                    string[] HASHText = new string[MUSFiles.Count];
 
                     //Extract to WAVs
                     for (int j = 0; j < MUSFiles.Count; j++)
@@ -142,6 +159,7 @@ namespace SSXLibrary
                         string LoadPath = MUSFiles[j].Replace(MUSFolder, "");
                         string ExtractPath = ExtractFolder + LoadPath.Replace(".mus", ".wav");
 
+                        Console.WriteLine(j.ToString() + "/" + MUSFiles.Count + " Starting Conversion - " + ExtractPath);
                         cmd.StandardInput.WriteLine("sx.exe -wave -s16l_int -playlocmaincpu  \"" + MUSFiles[j] + "\" -=\"" + ExtractPath + "\"");
                         string marker = "__DONE__";
                         cmd.StandardInput.WriteLine($"echo {marker}");
@@ -155,27 +173,14 @@ namespace SSXLibrary
                         }
 
                         //Generate HASH for WAVs and save next to MUS
-                        using (SHA256 sha256Hash = SHA256.Create())
-                        {
-                            byte[] Data = new byte[1];
-                            using (Stream stream = File.Open(ExtractPath, FileMode.Open))
-                            {
-                                Data = sha256Hash.ComputeHash(stream.ReadBytes((int)stream.Length));
-                            }
-                            // Create a new Stringbuilder to collect the bytes
-                            // and create a string.
-                            var sBuilder = new StringBuilder();
+                        ulong Data = XxHash64.HashToUInt64(File.ReadAllBytes(ExtractPath));
 
-                            // Loop through each byte of the hashed data
-                            // and format each one as a hexadecimal string.
-                            for (int a = 0; a < Data.Length; a++)
-                            {
-                                sBuilder.Append(Data[a].ToString("x2"));
-                            }
-
-                            File.WriteAllText(MUSFiles[j].Replace(".mus", ".hash"), sBuilder.ToString());
-                        }
+                        HASHText[j] = Data.ToString();
                     }
+
+                    File.WriteAllLines(MUSFolderName + "\\WAVHashSet.Hash", HASHText);
+
+                    Console.WriteLine("Pending Window Finish");
 
                     cmd.StandardInput.WriteLine("exit");
                     cmd.WaitForExit();
@@ -237,44 +242,30 @@ namespace SSXLibrary
                 string[] WAVFiles = Directory.GetFiles(MainWavFolder, "*.wav", SearchOption.AllDirectories);
                 string[] MUSFiles = Directory.GetFiles(HDRMusFile, "*.mus", SearchOption.AllDirectories);
 
+                string[] Hash = File.ReadAllLines(HashFiles[0]);
+                string[] HASHText = new string[WAVFiles.Length];
                 //May need to add alphabetaical sort for stinky linux users to ensure it doesnt die
 
                 for (int j = 0; j < WAVFiles.Length; j++)
                 {
-                    string Hash = File.ReadAllText(HashFiles[j]);
-
                     //Generate HASH for WAVs and save next to MUS
-                    using (SHA256 sha256Hash = SHA256.Create())
+                    ulong Data = XxHash64.HashToUInt64(File.ReadAllBytes(WAVFiles[j]));
+
+                    HASHText[j] = Data.ToString();
+
+                    if (HASHText[j] != Hash[j])
                     {
-                        byte[] Data = new byte[1];
-                        using (Stream stream = File.Open(WAVFiles[j], FileMode.Open))
-                        {
-                            Data = sha256Hash.ComputeHash(stream.ReadBytes((int)stream.Length));
-                        }
-                        // Create a new Stringbuilder to collect the bytes
-                        // and create a string.
-                        var sBuilder = new StringBuilder();
+                        cmd.StandardInput.WriteLine("sx.exe -ps2stream -eaxa_blk -playlocmaincpu -removeuserall \"" + WAVFiles[j] + "\" -=\"" + MUSFiles[j] + "\" -v3");
 
-                        // Loop through each byte of the hashed data
-                        // and format each one as a hexadecimal string.
-                        for (int a = 0; a < Data.Length; a++)
-                        {
-                            sBuilder.Append(Data[a].ToString("x2"));
-                        }
-
-                        if (sBuilder.ToString() != Hash)
-                        {
-                            cmd.StandardInput.WriteLine("sx.exe -ps2stream -eaxa_blk -playlocmaincpu -removeuserall \"" + WAVFiles[j] + "\" -=\"" + MUSFiles[j] + "\" -v3");
-
-                            File.WriteAllText(HashFiles[j], sBuilder.ToString());
-                            Updated = true;
-                        }
+                        Updated = true;
                     }
                 }
 
                 //Rebuild DAT File if changed
                 if (Updated)
                 {
+                    File.WriteAllLines(HDRMusFile + "\\WAVHashSet.Hash", HASHText);
+
                     string marker = i.ToString();
                     cmd.StandardInput.WriteLine($"echo {marker}");
 
