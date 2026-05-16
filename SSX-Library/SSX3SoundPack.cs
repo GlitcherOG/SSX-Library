@@ -1,6 +1,7 @@
 ﻿using SSX_Library;
 using SSX_Library.Internal.Utilities;
 using SSX_Library.Internal.Utilities.StreamExtensions;
+using SSXLibrary.FileHandlers;
 using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Text;
@@ -37,6 +38,20 @@ namespace SSXLibrary
             BIG.Extract(LangHeader[0], HDRFolder);
 
             File.Copy(SXDirectory + "/sx_2002.exe", MUSFolder + "/sx.exe", true);
+
+            Process cmd = new Process();
+            cmd.StartInfo.FileName = "cmd.exe";
+            cmd.StartInfo.RedirectStandardInput = true;
+            cmd.StartInfo.RedirectStandardOutput = true;
+            cmd.StartInfo.CreateNoWindow = true;
+            cmd.StartInfo.UseShellExecute = false;
+            cmd.Start();
+
+            FileInfo f = new FileInfo(MUSFolder);
+            string drive = System.IO.Path.GetPathRoot(f.FullName.Substring(0, 2));
+
+            cmd.StandardInput.WriteLine(drive);
+            cmd.StandardInput.WriteLine("cd " + MUSFolder);
 
             //Extract DATS to Correct Folders
             string[] DATs = Directory.GetFiles(DATFolder, "*.DAT", SearchOption.AllDirectories);
@@ -107,28 +122,21 @@ namespace SSXLibrary
                 //Extract to WAVs
                 for (int j = 0; j < MUSFiles.Count; j++)
                 {
-                    Process cmd = new Process();
-                    cmd.StartInfo.FileName = "cmd.exe";
-                    cmd.StartInfo.RedirectStandardInput = true;
-                    cmd.StartInfo.RedirectStandardOutput = false;
-                    cmd.StartInfo.CreateNoWindow = false;
-                    cmd.StartInfo.UseShellExecute = false;
-                    cmd.Start();
-
-                    FileInfo f = new FileInfo(MUSFolder);
-                    string drive = System.IO.Path.GetPathRoot(f.FullName.Substring(0, 2));
-
                     string LoadPath = MUSFiles[j].Replace(MUSFolder, "");
                     string ExtractPath = ExtractFolder +LoadPath.Replace(".mus", ".wav");
 
                     WavFiles.Add(ExtractPath);
-
-                    cmd.StandardInput.WriteLine(drive);
-                    cmd.StandardInput.WriteLine("cd " + MUSFolder);
                     cmd.StandardInput.WriteLine("sx.exe -wave -s16l_int -playlocmaincpu  \"" + MUSFiles[j] + "\" -=\"" + ExtractPath + "\"");
-                    cmd.StandardInput.Flush();
-                    cmd.StandardInput.Close();
-                    cmd.WaitForExit();
+                    string marker = "__DONE__";
+                    cmd.StandardInput.WriteLine($"echo {marker}");
+
+                    // Read output until the marker appears
+                    string line;
+                    while ((line = cmd.StandardOutput.ReadLine()) != null)
+                    {
+                        if (line.Trim() == marker)
+                            break;
+                    }
 
                     //Generate HASH for WAVs and save next to MUS
                     using (SHA256 sha256Hash = SHA256.Create())
@@ -153,20 +161,165 @@ namespace SSXLibrary
                     }
                 }
             }
+
+            cmd.StandardInput.WriteLine("exit");
+            cmd.WaitForExit();
         }
 
         public static void FullRebuild(string MainFolder, string MainBig, string SXDirectory)
         {
+            //Extract Mainbig to the temp folder
+            string HiddenFolder = MainFolder + "\\OriginalData";
+            string HDRFolder = HiddenFolder + "\\HDRFolder";
+            string DATFolder = HiddenFolder + "\\DATFolder";
+            string MUSFolder = HiddenFolder + "\\MUSFolder";
+
+            File.Copy(SXDirectory + "/sx_2002.exe", MUSFolder + "/sx.exe", true);
+
             //Get all HDR files
+            string[] HDRFiles = Directory.GetFiles(HDRFolder, "*.hdr", SearchOption.AllDirectories);
+
+            Process cmd = new Process();
+            cmd.StartInfo.FileName = "cmd.exe";
+            cmd.StartInfo.RedirectStandardInput = true;
+            cmd.StartInfo.RedirectStandardOutput = true;
+            cmd.StartInfo.CreateNoWindow = true;
+            cmd.StartInfo.UseShellExecute = false;
+            cmd.Start();
+
+            FileInfo f = new FileInfo(MUSFolder);
+            string drive = System.IO.Path.GetPathRoot(f.FullName.Substring(0, 2));
+
+            cmd.StandardInput.WriteLine(drive);
+            cmd.StandardInput.WriteLine("cd " + MUSFolder);
 
             //Do a quick verify that original data hasnt been messed with
+            //Verify big file exists in DATFolder
+            //Verify Folders match between HDR, MUS and Main set of data
+
+
 
             //Using each HDR file indivdually check each folder and there are matching wavs to confirm hash matches
             //If not matching update with new hash and convert Wav to Mus
             //Mark File as needing rebuild
             //Once entire file checked if marked rebuild file into single DAT File
+            for (int i = 0; i < HDRFiles.Length; i++)
+            {
+                bool Updated = false;
 
+                cmd.StandardInput.WriteLine($"echo NewFile");
 
+                string HDRFile = HDRFiles[i];
+                string DATFile = HDRFiles[i].Replace("HDRFolder", "DATFolder").Replace(".hdr", ".dat");
+                string HDRMusFile = HDRFile.Replace("HDRFolder", "MUSFolder").Replace(".hdr","");
+                string MainWavFolder = HDRMusFile.Replace("OriginalData\\MUSFolder\\", "");
+
+                string[] HashFiles = Directory.GetFiles(HDRMusFile, "*.hash", SearchOption.AllDirectories);
+                string[] WAVFiles = Directory.GetFiles(MainWavFolder, "*.wav", SearchOption.AllDirectories);
+                string[] MUSFiles = Directory.GetFiles(HDRMusFile, "*.mus", SearchOption.AllDirectories);
+
+                //May need to add alphabetaical sort for stinky linux users to ensure it doesnt die
+
+                for (int j = 0; j < WAVFiles.Length; j++)
+                {
+                    string Hash = File.ReadAllText(HashFiles[j]);
+
+                    //Generate HASH for WAVs and save next to MUS
+                    using (SHA256 sha256Hash = SHA256.Create())
+                    {
+                        byte[] Data = new byte[1];
+                        using (Stream stream = File.Open(WAVFiles[j], FileMode.Open))
+                        {
+                            Data = sha256Hash.ComputeHash(stream.ReadBytes((int)stream.Length));
+                        }
+                        // Create a new Stringbuilder to collect the bytes
+                        // and create a string.
+                        var sBuilder = new StringBuilder();
+
+                        // Loop through each byte of the hashed data
+                        // and format each one as a hexadecimal string.
+                        for (int a = 0; a < Data.Length; a++)
+                        {
+                            sBuilder.Append(Data[a].ToString("x2"));
+                        }
+
+                        if (sBuilder.ToString() != Hash)
+                        {
+                            cmd.StandardInput.WriteLine("sx.exe -ps2stream -eaxa_blk -playlocmaincpu -removeuserall \"" + WAVFiles[j] + "\" -=\"" + MUSFiles[j] + "\" -v3");
+
+                            File.WriteAllText(HashFiles[j], sBuilder.ToString());
+                            Updated = true;
+                        }
+                    }
+                }
+
+                //Rebuild DAT File if changed
+                if (Updated)
+                {
+                    string marker = "__DONE__";
+                    cmd.StandardInput.WriteLine($"echo {marker}");
+
+                    // Read output until the marker appears
+                    string line;
+                    while ((line = cmd.StandardOutput.ReadLine()) != null)
+                    {
+                        if (line.Trim() == marker)
+                            break;
+                    }
+
+                    long CurrentOffset = 0;
+
+                    if (File.Exists(DATFile))
+                    {
+                        File.Delete(DATFile);
+                    }
+                    while (File.Exists(DATFile))
+                    {
+
+                    }
+
+                    using (Stream stream = File.Create(DATFile))
+                    {
+                        HDRHandler hdrHandler = new HDRHandler();
+                        hdrHandler.Load(HDRFile);
+
+                        //Recalculate Offsets
+                        for (int a = 0; a < MUSFiles.Length; a++)
+                        {
+                            var TempHolder = File.Open(MUSFiles[a], FileMode.Open);
+
+                            var TempHdrHeader = hdrHandler.fileHeaders[a];
+                            TempHolder.Position = TempHolder.Length;
+
+                            StreamUtil.AlignBy(TempHolder, 0x100 * (hdrHandler.LongFileMode + 1));
+                            long FixedLength = TempHolder.Position;
+                            TempHolder.Close();
+                            TempHdrHeader.OffsetInt = (int)(CurrentOffset / (0x100 * (hdrHandler.LongFileMode + 1)));
+                            CurrentOffset += FixedLength;
+
+                            hdrHandler.fileHeaders[a] = TempHdrHeader;
+
+                            using (Stream stream1 = File.Open(MUSFiles[a], FileMode.Open))
+                            {
+                                stream.Position = (hdrHandler.fileHeaders[a].OffsetInt * 0x100) * (hdrHandler.LongFileMode + 1);
+
+                                StreamUtil.WriteStreamIntoStream(stream, stream1);
+                            }
+
+                        }
+                        
+                        hdrHandler.Save(HDRFile);
+                    }
+                }
+            }
+
+            string[] BigFile = Directory.GetFiles(DATFolder, "*.big", SearchOption.AllDirectories);
+
+            BIG.Create(BigType.BIG4, HDRFolder, BigFile[0], false, true);
+            BIG.Create(BigType.BIG4, DATFolder, MainBig, false, true);
+
+            cmd.StandardInput.WriteLine("exit");
+            cmd.WaitForExit();
         }
     }
 }
