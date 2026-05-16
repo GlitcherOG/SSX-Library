@@ -10,7 +10,7 @@ namespace SSXLibrary
 {
     public class SSX3SoundPack
     {
-        public static void FullExtract(string MainBig, string ExtractFolder, string SXDirectory)
+        public static async Task FullExtractAsync(string MainBig, string ExtractFolder, string SXDirectory)
         {
             //Extract Mainbig to the temp folder
             string HiddenFolder = ExtractFolder + "\\OriginalData";
@@ -39,131 +39,152 @@ namespace SSXLibrary
 
             File.Copy(SXDirectory + "/sx_2002.exe", MUSFolder + "/sx.exe", true);
 
-            Process cmd = new Process();
-            cmd.StartInfo.FileName = "cmd.exe";
-            cmd.StartInfo.RedirectStandardInput = true;
-            cmd.StartInfo.RedirectStandardOutput = true;
-            cmd.StartInfo.CreateNoWindow = true;
-            cmd.StartInfo.UseShellExecute = false;
-            cmd.Start();
-
-            FileInfo f = new FileInfo(MUSFolder);
-            string drive = System.IO.Path.GetPathRoot(f.FullName.Substring(0, 2));
-
-            cmd.StandardInput.WriteLine(drive);
-            cmd.StandardInput.WriteLine("cd " + MUSFolder);
-
             //Extract DATS to Correct Folders
             string[] DATs = Directory.GetFiles(DATFolder, "*.DAT", SearchOption.AllDirectories);
+            List<Task> tasks = new List<Task>();
 
             for (int i = 0; i < DATs.Length; i++)
             {
-                string MUSFolderName = DATs[i].Replace(".dat", "").Replace("DATFolder", "MUSFolder");
-                string ExtractMUSFolder = MUSFolderName.Replace("OriginalData\\MUSFolder", "");
-
-                Directory.CreateDirectory(MUSFolderName);
-                List<string> MUSFiles = new List<string>();
-                List<string> WavFiles = new List<string>();
-
-                using (Stream stream = File.Open(DATs[i], FileMode.Open))
-                {
-                    List<long> Offsets = new List<long>();
-
-                    while (true)
-                    {
-                        long Offset = ByteUtil.FindPosition(stream, new byte[4] { 0x53, 0x43, 0x48, 0x6C }, -1, -1);
-
-                        if (Offset != -1)
-                        {
-                            Offsets.Add(Offset);
-
-                        }
-                        else
-                        {
-                            break;
-                        }
-                    }
-
-                    for (int a = 0; a < Offsets.Count; a++)
-                    {
-                        stream.Position = Offsets[a];
-
-                        long ByteSize = 0;
-
-                        if (a == Offsets.Count - 1)
-                        {
-                            ByteSize = stream.Length - Offsets[a];
-                        }
-                        else
-                        {
-                            ByteSize = Offsets[a + 1] - Offsets[a];
-                        }
-
-                        MemoryStream StreamMemory = new MemoryStream();
-
-                        byte[] Data = StreamUtil.ReadBytes(stream, (int)ByteSize);
-
-                        StreamUtil.WriteBytes(StreamMemory, Data);
-
-                        string NewPath = MUSFolderName + $"\\{a:000}.mus";
-
-                        MUSFiles.Add(NewPath);
-
-                        var file = File.Create(NewPath);
-                        StreamMemory.Position = 0;
-                        StreamMemory.CopyTo(file);
-                        StreamMemory.Dispose();
-                        file.Close();
-                    }
-                }
-
-                Directory.CreateDirectory(ExtractMUSFolder);
-
-                //Extract to WAVs
-                for (int j = 0; j < MUSFiles.Count; j++)
-                {
-                    string LoadPath = MUSFiles[j].Replace(MUSFolder, "");
-                    string ExtractPath = ExtractFolder +LoadPath.Replace(".mus", ".wav");
-
-                    WavFiles.Add(ExtractPath);
-                    cmd.StandardInput.WriteLine("sx.exe -wave -s16l_int -playlocmaincpu  \"" + MUSFiles[j] + "\" -=\"" + ExtractPath + "\"");
-                    string marker = "__DONE__";
-                    cmd.StandardInput.WriteLine($"echo {marker}");
-
-                    // Read output until the marker appears
-                    string line;
-                    while ((line = cmd.StandardOutput.ReadLine()) != null)
-                    {
-                        if (line.Trim() == marker)
-                            break;
-                    }
-
-                    //Generate HASH for WAVs and save next to MUS
-                    using (SHA256 sha256Hash = SHA256.Create())
-                    {
-                        byte[] Data = new byte[1];
-                        using (Stream stream = File.Open(ExtractPath, FileMode.Open))
-                        {
-                            Data = sha256Hash.ComputeHash(stream.ReadBytes((int)stream.Length));
-                        }
-                        // Create a new Stringbuilder to collect the bytes
-                        // and create a string.
-                        var sBuilder = new StringBuilder();
-
-                        // Loop through each byte of the hashed data
-                        // and format each one as a hexadecimal string.
-                        for (int a = 0; a < Data.Length; a++)
-                        {
-                            sBuilder.Append(Data[a].ToString("x2"));
-                        }
-
-                        File.WriteAllText(MUSFiles[j].Replace(".mus", ".hash"), sBuilder.ToString());
-                    }
-                }
+                tasks.Add(ExtractPrcoess(DATs[i], MUSFolder, ExtractFolder));
             }
 
-            cmd.StandardInput.WriteLine("exit");
-            cmd.WaitForExit();
+            await Task.WhenAll(tasks);
+        }
+
+        public static int maxProcesses = Environment.ProcessorCount; // <-- limit concurrency
+        static SemaphoreSlim semaphore = new SemaphoreSlim(maxProcesses);
+
+        static async Task ExtractPrcoess(string DATFile, string MUSFolder, string ExtractFolder)
+        {
+            await semaphore.WaitAsync();
+
+            try
+            {
+                await Task.Run(() =>
+                {
+                    Process cmd = new Process();
+                    cmd.StartInfo.FileName = "cmd.exe";
+                    cmd.StartInfo.RedirectStandardInput = true;
+                    cmd.StartInfo.RedirectStandardOutput = true;
+                    cmd.StartInfo.CreateNoWindow = true;
+                    cmd.StartInfo.UseShellExecute = false;
+                    cmd.Start();
+
+                    FileInfo f = new FileInfo(MUSFolder);
+                    string drive = System.IO.Path.GetPathRoot(f.FullName.Substring(0, 2));
+
+                    cmd.StandardInput.WriteLine(drive);
+                    cmd.StandardInput.WriteLine("cd " + MUSFolder);
+
+                    string MUSFolderName = DATFile.Replace(".dat", "").Replace("DATFolder", "MUSFolder");
+                    string ExtractMUSFolder = MUSFolderName.Replace("OriginalData\\MUSFolder", "");
+
+                    Directory.CreateDirectory(MUSFolderName);
+                    List<string> MUSFiles = new List<string>();
+
+                    using (Stream stream = File.Open(DATFile, FileMode.Open))
+                    {
+                        List<long> Offsets = new List<long>();
+
+                        while (true)
+                        {
+                            long Offset = ByteUtil.FindPosition(stream, new byte[4] { 0x53, 0x43, 0x48, 0x6C }, -1, -1);
+
+                            if (Offset != -1)
+                            {
+                                Offsets.Add(Offset);
+
+                            }
+                            else
+                            {
+                                break;
+                            }
+                        }
+
+                        for (int a = 0; a < Offsets.Count; a++)
+                        {
+                            stream.Position = Offsets[a];
+
+                            long ByteSize = 0;
+
+                            if (a == Offsets.Count - 1)
+                            {
+                                ByteSize = stream.Length - Offsets[a];
+                            }
+                            else
+                            {
+                                ByteSize = Offsets[a + 1] - Offsets[a];
+                            }
+
+                            MemoryStream StreamMemory = new MemoryStream();
+
+                            byte[] Data = StreamUtil.ReadBytes(stream, (int)ByteSize);
+
+                            StreamUtil.WriteBytes(StreamMemory, Data);
+
+                            string NewPath = MUSFolderName + $"\\{a:000}.mus";
+
+                            MUSFiles.Add(NewPath);
+
+                            var file = File.Create(NewPath);
+                            StreamMemory.Position = 0;
+                            StreamMemory.CopyTo(file);
+                            StreamMemory.Dispose();
+                            file.Close();
+                        }
+                    }
+
+                    Directory.CreateDirectory(ExtractMUSFolder);
+
+                    //Extract to WAVs
+                    for (int j = 0; j < MUSFiles.Count; j++)
+                    {
+                        string LoadPath = MUSFiles[j].Replace(MUSFolder, "");
+                        string ExtractPath = ExtractFolder + LoadPath.Replace(".mus", ".wav");
+
+                        cmd.StandardInput.WriteLine("sx.exe -wave -s16l_int -playlocmaincpu  \"" + MUSFiles[j] + "\" -=\"" + ExtractPath + "\"");
+                        string marker = "__DONE__";
+                        cmd.StandardInput.WriteLine($"echo {marker}");
+
+                        // Read output until the marker appears
+                        string line;
+                        while ((line = cmd.StandardOutput.ReadLine()) != null)
+                        {
+                            if (line.Trim() == marker)
+                                break;
+                        }
+
+                        //Generate HASH for WAVs and save next to MUS
+                        using (SHA256 sha256Hash = SHA256.Create())
+                        {
+                            byte[] Data = new byte[1];
+                            using (Stream stream = File.Open(ExtractPath, FileMode.Open))
+                            {
+                                Data = sha256Hash.ComputeHash(stream.ReadBytes((int)stream.Length));
+                            }
+                            // Create a new Stringbuilder to collect the bytes
+                            // and create a string.
+                            var sBuilder = new StringBuilder();
+
+                            // Loop through each byte of the hashed data
+                            // and format each one as a hexadecimal string.
+                            for (int a = 0; a < Data.Length; a++)
+                            {
+                                sBuilder.Append(Data[a].ToString("x2"));
+                            }
+
+                            File.WriteAllText(MUSFiles[j].Replace(".mus", ".hash"), sBuilder.ToString());
+                        }
+                    }
+
+                    cmd.StandardInput.WriteLine("exit");
+                    cmd.WaitForExit();
+                });
+            }
+            finally
+            {
+                semaphore.Release();
+            }
         }
 
         public static void FullRebuild(string MainFolder, string MainBig, string SXDirectory)
@@ -206,8 +227,6 @@ namespace SSXLibrary
             for (int i = 0; i < HDRFiles.Length; i++)
             {
                 bool Updated = false;
-
-                cmd.StandardInput.WriteLine($"echo NewFile");
 
                 string HDRFile = HDRFiles[i];
                 string DATFile = HDRFiles[i].Replace("HDRFolder", "DATFolder").Replace(".hdr", ".dat");
@@ -256,7 +275,7 @@ namespace SSXLibrary
                 //Rebuild DAT File if changed
                 if (Updated)
                 {
-                    string marker = "__DONE__";
+                    string marker = i.ToString();
                     cmd.StandardInput.WriteLine($"echo {marker}");
 
                     // Read output until the marker appears
@@ -318,7 +337,7 @@ namespace SSXLibrary
             BIG.Create(BigType.BIG4, HDRFolder, BigFile[0], false, true);
             BIG.Create(BigType.BIG4, DATFolder, MainBig, false, true);
 
-            cmd.StandardInput.WriteLine("exit");
+            cmd.StandardInput.Close();
             cmd.WaitForExit();
         }
     }
