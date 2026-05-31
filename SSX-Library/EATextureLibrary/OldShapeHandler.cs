@@ -723,9 +723,9 @@ namespace SSX_Library.EATextureLibrary
                 for (int x = 0; x < TempImage.Width; x++)
                 {
                     Rgba32 color = TempImage[x, y];
-                    color.R = (byte)(Math.Clamp(color.R * 2 -1,0,256));
-                    color.G = (byte)(Math.Clamp(color.G * 2 - 1, 0, 256));
-                    color.B = (byte)(Math.Clamp(color.B * 2 - 1, 0, 256));
+                    color.R = (byte)(Math.Clamp(color.R * 2 - 1, 0, 255));
+                    color.G = (byte)(Math.Clamp(color.G * 2 - 1, 0, 255));
+                    color.B = (byte)(Math.Clamp(color.B * 2 - 1, 0, 255));
 
                     TempImage[x,y] = color;
                 }
@@ -743,9 +743,9 @@ namespace SSX_Library.EATextureLibrary
                 for (int x = 0; x < TempImage.Width; x++)
                 {
                     Rgba32 color = TempImage[x, y];
-                    color.R = (byte)(Math.Clamp((color.R + 1 )/ 2,0,256));
-                    color.G = (byte)(Math.Clamp((color.G + 1) / 2, 0, 256));
-                    color.B = (byte)(Math.Clamp((color.B + 1) / 2, 0, 256));
+                    color.R = (byte)(Math.Clamp((color.R + 1) / 2, 0, 255));
+                    color.G = (byte)(Math.Clamp((color.G + 1) / 2, 0, 255));
+                    color.B = (byte)(Math.Clamp((color.B + 1) / 2, 0, 255));
 
                     TempImage[x, y] = color;
                 }
