@@ -23,7 +23,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
         public int ModelDataOffset;
         public int U11Count;
 
-        public List<ObjectID> U12 = new List<ObjectID>();
+        public List<ObjectID> MaterialList = new List<ObjectID>();
 
         public List<ModelObject> ModelObjects = new List<ModelObject>();
 
@@ -42,11 +42,11 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
             ModelDataOffset = StreamUtil.ReadUInt32(stream);
             U11Count = StreamUtil.ReadUInt32(stream);
 
-            U12 = new List<ObjectID>();
+            MaterialList = new List<ObjectID>();
 
             for (int i = 0; i < U11Count; i++)
             {
-                U12.Add(WorldCommon.ObjectIDLoad(stream));
+                MaterialList.Add(WorldCommon.ObjectIDLoad(stream));
             }
 
             ModelObjects = new List<ModelObject>();
@@ -210,8 +210,8 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
                                     {
                                         Vector2 vector3 = new Vector2();
 
-                                        vector3.X = StreamUtil.ReadInt16(stream) / 32767f;
-                                        vector3.Y = StreamUtil.ReadInt16(stream) / 32767f;
+                                        vector3.X = StreamUtil.ReadInt16(stream) / 4096f;
+                                        vector3.Y = StreamUtil.ReadInt16(stream) / 4096f;
 
                                         TempModelData.UV.Add(vector3);
                                     }
@@ -225,9 +225,9 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
                                     {
                                         Vector3 vector3 = new Vector3();
 
-                                        vector3.X = (StreamUtil.ReadInt16(stream) / 32767f) * Scale.X;
-                                        vector3.Y = (StreamUtil.ReadInt16(stream) / 32767f) * Scale.Y;
-                                        vector3.Z = (StreamUtil.ReadInt16(stream) / 32767f) * Scale.Z;
+                                        vector3.X = (StreamUtil.ReadInt16(stream) / 32768f) * Scale.X;
+                                        vector3.Y = (StreamUtil.ReadInt16(stream) / 32768f) * Scale.Y;
+                                        vector3.Z = (StreamUtil.ReadInt16(stream) / 32768f) * Scale.Z;
 
                                         TempModelData.Vertices.Add(vector3);
                                     }
@@ -251,9 +251,9 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
                                     {
                                         Vector3 vector3 = new Vector3();
 
-                                        vector3.X = StreamUtil.ReadInt16(stream) / 32767f;
-                                        vector3.Y = StreamUtil.ReadInt16(stream) / 32767f;
-                                        vector3.Z = StreamUtil.ReadInt16(stream) / 32767f;
+                                        vector3.X = StreamUtil.ReadInt16(stream) / 32768f;
+                                        vector3.Y = StreamUtil.ReadInt16(stream) / 32768f;
+                                        vector3.Z = StreamUtil.ReadInt16(stream) / 32768f;
 
                                         TempModelData.Normals.Add(vector3);
                                     }
@@ -500,7 +500,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
 
             JsonModelObject.U6 = U6;
 
-            JsonModelObject.U12 = U12;
+            JsonModelObject.MaterialList = MaterialList;
 
             JsonModelObject.ModelObjects = new List<MDRJsonHandler.ModelObject>();
 
