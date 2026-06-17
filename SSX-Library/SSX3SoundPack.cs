@@ -10,6 +10,9 @@ namespace SSXLibrary
     {
         public static async Task FullExtractAsync(string MainBig, string ExtractFolder, string SXDirectory)
         {
+            //Check Empty Folder
+            //Check SX_2002 Exists
+
             Console.WriteLine("Starting Audio Extract");
             //Extract Mainbig to the temp folder
             string HiddenFolder = ExtractFolder + "\\OriginalData";
