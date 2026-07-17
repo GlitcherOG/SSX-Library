@@ -193,7 +193,13 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
                     {
                         var ModelHeader = S1.unknownS2.ModelHeaderOffset[a];
                         bool HeaderStart = false;
-                        bool Normal = false;
+                        // Pairing robustness. An earlier revision decided
+                        // V/UV vs normal records with a `Normal` toggle that only
+                        // flipped on ModelOffset > 0, while ConvertToModelFaces pairs
+                        // records STRICTLY positionally (k*2 = V/UV, k*2+1 = normals).
+                        // The moment a record has ModelOffset <= 0 the two passes
+                        // desync. Drive the split off record position (b % 2) so it
+                        // always agrees with the positional pairing below.
                         for (int b = 0; b < ModelHeader.ModelOffsetHeaders.Count - 1; b++)
                         {
                             var ModelOffsetHeader = ModelHeader.ModelOffsetHeaders[b];
@@ -213,7 +219,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
                                     HeaderStart = true;
                                 }
 
-                                if (!Normal)
+                                if (b % 2 == 0)
                                 {
                                     stream.Position += 32;
                                     ModelVandUVData TempModelData = new ModelVandUVData();
@@ -225,6 +231,21 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
                                     TempModelData.VerticesCount = StreamUtil.ReadUInt32(stream);
 
                                     stream.Position += 4 + 16;
+
+                                    // Guard against absurd counts on a recovered
+                                    // (formerly U2-aborted) record: leave the lists
+                                    // empty so the pair is skipped downstream rather
+                                    // than reading a multi-MB garbage blob.
+                                    if (TempModelData.TristripCount > 100000 || TempModelData.VerticesCount > 100000)
+                                    {
+                                        Console.WriteLine($"[WorldMDR] RID={objectID.RID} obj={i} hdr={a} rec={b}: insane counts Tristrip={TempModelData.TristripCount} Verts={TempModelData.VerticesCount}; dropping record geometry");
+                                        TempModelData.Tristrip = new List<int>();
+                                        TempModelData.UV = new List<Vector2>();
+                                        TempModelData.Vertices = new List<Vector3>();
+                                        ModelOffsetHeader.modelVandUVData = TempModelData;
+                                        ModelHeader.ModelOffsetHeaders[b] = ModelOffsetHeader;
+                                        continue;
+                                    }
 
                                     TempModelData.Tristrip = new List<int>();
 
@@ -291,8 +312,13 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
 
                                     ModelOffsetHeader.modelNormalData = TempModelData;
                                 }
-
-                                Normal = !Normal;
+                            }
+                            else
+                            {
+                                // Non-terminator record (b < Count-1) with no model
+                                // data. Leave its geometry lists null; the pair it
+                                // belongs to is null-guarded in ConvertToModelFaces.
+                                Console.WriteLine($"[WorldMDR] RID={objectID.RID} obj={i} hdr={a} rec={b}: non-terminator record with ModelOffset={ModelOffsetHeader.ModelOffset} (<=0), no geometry");
                             }
 
                             ModelHeader.ModelOffsetHeaders[b] = ModelOffsetHeader;
@@ -322,13 +348,27 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
                         S2.modelFaces = new List<ModelFace>();
                         for (int k = 0; k < S2.ModelOffsetHeaders.Count / 2; k++)
                         {
-                            var S3 = S2.ModelOffsetHeaders[k * 2];
-
                             int VerticesUVID = k * 2;
                             int NormalID = k * 2 + 1;
 
                             var VerticesUV = S2.ModelOffsetHeaders[VerticesUVID];
                             var Normal = S2.ModelOffsetHeaders[NormalID];
+
+                            // Pairing robustness. GenerateFaces NREs
+                            // on a null Vertices/UV/Normals list, and nothing in the
+                            // SSX3PS2 chain catches it. A record can legitimately have
+                            // no geometry now (terminator paired with an orphan V/UV
+                            // record, or a ModelOffset<=0 record) -- skip and log that
+                            // pair instead of throwing away the whole extract.
+                            if (VerticesUV.modelVandUVData.Vertices == null ||
+                                VerticesUV.modelVandUVData.UV == null ||
+                                VerticesUV.modelVandUVData.Tristrip == null ||
+                                Normal.modelNormalData.Normals == null ||
+                                Normal.modelNormalData.Normals.Count == 0)
+                            {
+                                Console.WriteLine($"[WorldMDR] RID={objectID.RID} obj={i} hdr={j} pair={k}: null/empty V/UV or normals, skipping pair");
+                                continue;
+                            }
 
                             S2.modelFaces.AddRange(GenerateFaces(VerticesUV.modelVandUVData, Normal.modelNormalData));
 
@@ -353,6 +393,12 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
 
             //Make Faces
             List<ModelFace> faces = new List<ModelFace>();
+            // The normal list can be shorter than the vertex list on a
+            // recovered record; CreateFaces clamps the normal index. Log once here.
+            if (modelNormalData.Normals.Count < ModelData.Vertices.Count)
+            {
+                Console.WriteLine($"[WorldMDR] RID={objectID.RID}: normals {modelNormalData.Normals.Count} < verts {ModelData.Vertices.Count}; clamping normal indices for this mesh");
+            }
             int localIndex = 0;
             bool Rotation = false;
             for (int b = 0; b < ModelData.Vertices.Count; b++)
@@ -425,9 +471,13 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
             //face.UV2Pos = Index2;
             //face.UV3Pos = Index3;
 
-            face.Normal1 = modelNormalData.Normals[Index1];
-            face.Normal2 = modelNormalData.Normals[Index2];
-            face.Normal3 = modelNormalData.Normals[Index3];
+            // Clamp normal indices: the normal list may be shorter
+            // than the vertex list on a recovered record (one-per-mesh log emitted in
+            // GenerateFaces). UV/Vertices are the same length so those are safe.
+            int nMax = modelNormalData.Normals.Count - 1;
+            face.Normal1 = modelNormalData.Normals[Index1 < nMax ? Index1 : nMax];
+            face.Normal2 = modelNormalData.Normals[Index2 < nMax ? Index2 : nMax];
+            face.Normal3 = modelNormalData.Normals[Index3 < nMax ? Index3 : nMax];
 
             //face.Normal1Pos = Index1;
             //face.Normal2Pos = Index2;
