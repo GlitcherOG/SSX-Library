@@ -95,8 +95,35 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
 
                         stream.Position = TempS5.ModelDataOffset + ModelDataOffset;
 
+                        // U2 handling. Returning from here aborts the ENTIRE
+                        // prefab (`return` from LoadData) the first time a model
+                        // record has U2 != 0, so every ModelObject/part after that
+                        // point exports zero faces. Evidence (full-mountain extract,
+                        // logged below) shows U2 is a *flag bit* on an otherwise
+                        // valid record: it carries a valid positive ModelOffset and
+                        // the record chain still terminates on the normal U1 == 96
+                        // record a few entries later. It is NOT the high byte of a
+                        // 32-bit ModelOffset -- (U2 << 24) | ModelOffset lands far
+                        // out of the (few-KB) prefab chunk on every hit. So we mask
+                        // the flag and keep reading, preserving the record (and its
+                        // geometry) and the positional V/UV<->normal pairing. Guard
+                        // the loop with an iteration cap and a stream-bounds check so
+                        // a genuinely malformed chain degrades to "break this header
+                        // group" instead of running away or throwing.
+                        int _recGuard = 0;
                         while (true)
                         {
+                            if (stream.Position + 8 > stream.Length)
+                            {
+                                Console.WriteLine($"[WorldMDR] RID={objectID.RID} obj={i} hdr={a}: record loop reached end-of-stream (pos={stream.Position} len={stream.Length}); breaking header group");
+                                break;
+                            }
+                            if (++_recGuard > 4096)
+                            {
+                                Console.WriteLine($"[WorldMDR] RID={objectID.RID} obj={i} hdr={a}: record loop exceeded 4096 iterations; breaking header group");
+                                break;
+                            }
+
                             ModelData TempS7 = new ModelData();
 
                             TempS7.LineCount = StreamUtil.ReadInt24(stream);
@@ -105,8 +132,10 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
                             TempS7.U2 = StreamUtil.ReadUInt8(stream);
                             if (TempS7.U2 != 0)
                             {
-                                Console.WriteLine(TempS7.U2 + " Detected");
-                                return;
+                                int combinedOffset = (TempS7.U2 << 24) | (TempS7.ModelOffset & 0xFFFFFF);
+                                long combinedTarget = (long)combinedOffset + ModelDataOffset;
+                                Console.WriteLine($"[WorldMDR] flag ignored RID={objectID.RID} obj={i} hdr={a} rec={TempS5.ModelOffsetHeaders.Count} U2={TempS7.U2} U1={TempS7.U1} LineCount={TempS7.LineCount} ModelOffset={TempS7.ModelOffset} (rejected 32-bit hypothesis: combined={combinedOffset} target={combinedTarget} len={stream.Length})");
+                                TempS7.U2 = 0;
                             }
                             TempS5.ModelOffsetHeaders.Add(TempS7);
 
