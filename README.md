@@ -5,12 +5,8 @@ The library serves as a framework for GUI/CLI modding tools, but it can also be 
 
 The library was made to isolate the backend from the Windows only [SSX Collection Multitool](https://github.com/GlitcherOG/SSX-Collection-Multitool). Currently we're refactoring every part of the library to make it maintainable and cross-platform. We have a general checklist of the things we need to do, though many will be combined or removed. 
 ## Refactor Checklist
-- [x] BigHandler.cs
 - [ ] DATAudio.cs
 - [ ] HDRHandler.cs
-- [x] LOCHandler.cs
-- [x] NewBigHandler.cs
-- [x] RefpackHandler.cs
 
 FileHandlers\Audio:
 - [ ] EAAudioHandler.cs
@@ -103,15 +99,11 @@ FileHandlers\SSX2012:
 
 FileHandlers\SSX3:
 - [ ] BoltPS2Handler.cs
-- [x] CHARDBLHandler.cs
 - [ ] LUIHandler.cs
 - [ ] MusicINFHandler.cs
 
 FileHandlers\Textures:
 - [ ] GTFHandler.cs
-- [x] NewSSHHandler.cs
-- [x] OldSSHHandler.cs
-- [x] OldXSHHandler.cs
 - [ ] SMPHandler.cs
 
 JsonFiles:
@@ -158,11 +150,6 @@ JsonFiles\Tricky:
 
 Utilities:
 - [ ] BezierUtil.cs
-- [x] ByteUtil.cs
-- [x] MathUtil.cs
-- [x] ConsoleWindow.cs
-- [x] ErrorManager.cs
-- [x] JsonUtil.cs
 - [ ] ImageUtil.cs
 - [ ] StreamUtil.cs
 
