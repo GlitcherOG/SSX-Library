@@ -1,3 +1,28 @@
+// This file is a C# port of the UTK (EA MicroTalk) decoder from vgmstream
+// (src/coding/ea_mt_decoder/utkdec.c), https://github.com/vgmstream/vgmstream.
+// vgmstream is distributed under the ISC License, whose copyright and permission
+// notice are reproduced below as that license requires.
+//
+//     Copyright (c) 2008-2025 Adam Gashlin, Fastelbja, Ronny Elfert, bnnm,
+//     Christopher Snowhill, NicknineTheEagle, bxaimc, Thealexbarney, CyberBotX,
+//     EdnessP, et al
+//
+//     Permission to use, copy, modify, and distribute this software for any
+//     purpose with or without fee is hereby granted, provided that the above
+//     copyright notice and this permission notice appear in all copies.
+//
+//     THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+//     WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+//     MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+//     ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+//     WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+//     ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+//     OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+//
+// Modifications for SSX-Library are Copyright (C) 2026 swax and, as part of this
+// repository, are licensed GPL-3.0. ISC is compatible with the GPL, so the
+// combined work may be conveyed under GPL-3.0 with this notice preserved.
+
 using System;
 using System.Collections.Generic;
 
