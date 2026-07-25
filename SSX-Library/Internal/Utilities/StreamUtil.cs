@@ -184,15 +184,15 @@ namespace SSX_Library.Internal.Utilities
 
             if (!BigEndian)
             {
-                return tempByte[0]
+                return (tempByte[0]
                      | (tempByte[1] << 8)
-                     | (tempByte[2] << 16);
+                     | (tempByte[2] << 16));
             }
             else
             {
-                return (tempByte[0] << 16)
+                return ((tempByte[0] << 16)
                     | (tempByte[1] << 8)
-                    | tempByte[2];
+                    | tempByte[2]);
             }
         }
 

@@ -19,6 +19,11 @@ internal static class Refpack
         return buf.Length == 2 && buf[1] == 0xFB;
     }
 
+    public static bool HasRefpackSignature(byte[] array)
+    {
+        return array.Length > 2 && array[1] == 0xFB && array[0] == 0x10;
+    }
+
     /// <summary>
     /// Decompresses a Refpack compressed array of bytes.
     /// </summary>

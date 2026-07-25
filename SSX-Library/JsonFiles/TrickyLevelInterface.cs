@@ -3,7 +3,6 @@ using SSX_Library.Internal.Utilities;
 using System.Numerics;
 using System.Collections;
 using SSX_Library.EATextureLibrary;
-using SSX_Library.Internal.Utilities;
 using SSX_Library.FileHandlers.LevelFiles.Tricky;
 using SSX_Library.FileHandlers.LevelFiles.Tricky.PS2;
 

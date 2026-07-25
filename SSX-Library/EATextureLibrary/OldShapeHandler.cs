@@ -1,10 +1,9 @@
 ﻿using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
-using SSXLibrary.FileHandlers;
-using SSX_Library.Internal.Utilities;
-using System.Text;
 using SSX_Library.Internal;
+using SSX_Library.Internal.Utilities;
 using SSX_Library.Internal.Utilities.StreamExtensions;
+using System.Text;
 
 
 namespace SSX_Library.EATextureLibrary
@@ -104,6 +103,8 @@ namespace SSX_Library.EATextureLibrary
                     return TextureType.OldXbox;
                 case "SHPG": //GameCube
                     return TextureType.OldGC;
+                case "SHPM": //PSP
+                    return TextureType.OldPSP;
                 default:
                     return null;
             }
@@ -149,7 +150,7 @@ namespace SSX_Library.EATextureLibrary
                         if (shape.Size == 0 || shape.MatrixFormat == MatrixType.LongName)
                         {
                             int RealSize = shape.Width * shape.Height;
-                            if (shape.MatrixFormat == MatrixType.ColorPallet || shape.MatrixFormat == MatrixType.ColorPalletXbox || shape.MatrixFormat == MatrixType.FullColor)
+                            if (shape.MatrixFormat == MatrixType.ColorPallet || shape.MatrixFormat == MatrixType.ColorPallet_Xbox || shape.MatrixFormat == MatrixType.FullColor)
                             {
                                 RealSize = RealSize * 4;
                             }
@@ -211,7 +212,7 @@ namespace SSX_Library.EATextureLibrary
                 {
                     var colorShape = GetShapeHeader(tempImage, MatrixType.ColorPallet);
                     tempImage.SwizzledColours = (colorShape.Value.Flags & 8192) == 8192;
-                    tempImage.colorsTable = GetColorTable(tempImage);
+                    tempImage.colorsTable = GetColorTable(tempImage, MatrixType.ColorPallet);
                     if (MetalCheck == null)
                     {
                         tempImage = AlphaFix(tempImage);
@@ -220,8 +221,14 @@ namespace SSX_Library.EATextureLibrary
 
                 if(tempImage.MatrixType == MatrixType.EightBitXbox)
                 {
-                    var colorShape = GetShapeHeader(tempImage, MatrixType.ColorPalletXbox);
-                    tempImage.colorsTable = GetColorTable(tempImage);
+                    var colorShape = GetShapeHeader(tempImage, MatrixType.ColorPallet_Xbox);
+                    tempImage.colorsTable = GetColorTable(tempImage, MatrixType.ColorPallet_Xbox);
+                }
+
+                if (tempImage.MatrixType == MatrixType.EightBit_PSP)
+                {
+                    var colorShape = GetShapeHeader(tempImage, MatrixType.ColorPallet_PSP);
+                    tempImage.colorsTable = GetColorTablePSP(tempImage, MatrixType.ColorPallet_PSP);
                 }
 
                 //Process into image
@@ -237,6 +244,7 @@ namespace SSX_Library.EATextureLibrary
                     case MatrixType.EightBit:
                     case MatrixType.EightBitCompressed:
                     case MatrixType.EightBitXbox:
+                    case MatrixType.EightBit_PSP:   
                         if (tempImage.SwizzledImage)
                         {
                             imageMatrix.Matrix = ByteUtil.Unswizzle8(imageMatrix.Matrix, imageMatrix.Width, imageMatrix.Height);
@@ -251,8 +259,9 @@ namespace SSX_Library.EATextureLibrary
                         tempImage.Image = EADecode.DecodeMatrix30(imageMatrix.Matrix, imageMatrix.Width, imageMatrix.Height);
                         tempImage.colorsTable = ImageUtil.GetBitmapColorsFast(tempImage.Image).ToList();
                         break;
+                    case MatrixType.BC1_PSP:
                     case MatrixType.BC1:
-                        tempImage.Image = EADecode.DecodeMatrix96(imageMatrix.Matrix, imageMatrix.Width, imageMatrix.Height);
+                        tempImage.Image = EADecode.DecodeMatrixDXT1(imageMatrix.Matrix, imageMatrix.Width, imageMatrix.Height);
                         tempImage.colorsTable = ImageUtil.GetBitmapColorsFast(tempImage.Image).ToList();
                         break;
                     case MatrixType.BC2:
@@ -604,15 +613,14 @@ namespace SSX_Library.EATextureLibrary
             ShapeImages.Add(NewSSHImage);
         }
 
-        private List<Rgba32> GetColorTable(ShapeImage newSSHImage)
+        private List<Rgba32> GetColorTable(ShapeImage newSSHImage, MatrixType matrixType)
         {
-            var colorShape = GetShapeHeader(newSSHImage, MatrixType.ColorPallet).Value;
+            var colorShape = GetShapeHeader(newSSHImage, matrixType).Value;
             
-            if(colorShape.MatrixFormat == MatrixType.Unknown)
-            {
-                colorShape = GetShapeHeader(newSSHImage, MatrixType.ColorPalletXbox).Value;
-            }
-
+            //if(colorShape.MatrixFormat == MatrixType.Unknown)
+            //{
+            //    colorShape = GetShapeHeader(newSSHImage, MatrixType.ColorPallet_Xbox).Value;
+            //}
             int RealColour = colorShape.Width * colorShape.Height;
 
             if (colorShape.Size != 0)
@@ -630,6 +638,51 @@ namespace SSX_Library.EATextureLibrary
             for (int i = 0; i < RealColour; i++)
             {
                 colors.Add(new Rgba32(colorShape.Matrix[i * 4], colorShape.Matrix[i * 4 + 1], colorShape.Matrix[i * 4 + 2], colorShape.Matrix[i * 4 + 3]));
+            }
+
+            return colors;
+        }
+
+        private List<Rgba32> GetColorTablePSP(ShapeImage newSSHImage, MatrixType matrixType)
+        {
+            var colorShape = GetShapeHeader(newSSHImage, matrixType).Value;
+
+            int RealColour = colorShape.Width * colorShape.Height;
+
+            if (colorShape.Size != 0)
+            {
+                RealColour = (colorShape.Size - 16) / 2;
+            }
+
+            if (newSSHImage.SwizzledColours)
+            {
+                throw new InvalidOperationException("Missing Swizzled Opperation for ABGR1555");
+                //colorShape.Matrix = ByteUtil.UnswizzlePalette(colorShape.Matrix, RealColour);
+            }
+
+            List<Rgba32> colors = new List<Rgba32>();
+
+            for (int i = 0; i < RealColour; i++)
+            {
+                byte low = colorShape.Matrix[(i *2)];
+                byte high = colorShape.Matrix[(i *2) + 1];
+
+                int value = low | (high << 8);
+
+                //ABGR1555
+                int a = (value >> 15) & 1;
+                int b = (value >> 10) & 0x1F;
+                int g = (value >> 5) & 0x1F;
+                int r = value & 0x1F;
+
+                byte R = (byte)((r << 3) | (r >> 2));
+                byte G = (byte)((g << 3) | (g >> 2));
+                byte B = (byte)((b << 3) | (b >> 2));
+                byte A = (byte)(a * 255);
+
+                Rgba32 NewColour = new Rgba32(R, G, B, 255);
+
+                colors.Add(NewColour);
             }
 
             return colors;
@@ -723,9 +776,9 @@ namespace SSX_Library.EATextureLibrary
                 for (int x = 0; x < TempImage.Width; x++)
                 {
                     Rgba32 color = TempImage[x, y];
-                    color.R = (byte)(Math.Clamp(color.R * 2 -1,0,256));
-                    color.G = (byte)(Math.Clamp(color.G * 2 - 1, 0, 256));
-                    color.B = (byte)(Math.Clamp(color.B * 2 - 1, 0, 256));
+                    color.R = (byte)(Math.Clamp(color.R * 2 - 1, 0, 255));
+                    color.G = (byte)(Math.Clamp(color.G * 2 - 1, 0, 255));
+                    color.B = (byte)(Math.Clamp(color.B * 2 - 1, 0, 255));
 
                     TempImage[x,y] = color;
                 }
@@ -743,9 +796,9 @@ namespace SSX_Library.EATextureLibrary
                 for (int x = 0; x < TempImage.Width; x++)
                 {
                     Rgba32 color = TempImage[x, y];
-                    color.R = (byte)(Math.Clamp((color.R + 1 )/ 2,0,256));
-                    color.G = (byte)(Math.Clamp((color.G + 1) / 2, 0, 256));
-                    color.B = (byte)(Math.Clamp((color.B + 1) / 2, 0, 256));
+                    color.R = (byte)(Math.Clamp((color.R + 1) / 2, 0, 255));
+                    color.G = (byte)(Math.Clamp((color.G + 1) / 2, 0, 255));
+                    color.B = (byte)(Math.Clamp((color.B + 1) / 2, 0, 255));
 
                     TempImage[x, y] = color;
                 }
@@ -803,7 +856,12 @@ namespace SSX_Library.EATextureLibrary
             N64 = 30,
 
             ColorPallet = 33,
-            ColorPalletXbox = 42,
+            ColorPallet_Xbox = 42,
+
+            //PSP
+            ColorPallet_PSP = 57,
+            BC1_PSP = 69,
+            EightBit_PSP = 93,
 
             //Xbox
             BC1 = 96,

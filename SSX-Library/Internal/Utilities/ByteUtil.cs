@@ -367,39 +367,41 @@ internal class ByteUtil
         return pSwizTexels;
     }
 
-    public static byte[] SwizzlePalette(byte[] palBuffer, int width)
+    public static byte[] SwizzlePalette(byte[] palBuffer, int colourCount)
     {
-        byte[] swizzledPal = new byte[1024];
-        byte[] NewArray = new byte[1024];
+        byte[] swizzled = new byte[colourCount * 4];
 
-        palBuffer.CopyTo(NewArray, 0);
-
-        for (int p = 0; p < width; p++)
+        for (int p = 0; p < colourCount; p++)
         {
-            int pos = (p & 231) + ((p & 8) << 1) + ((p & 16) >> 1); // same swizzle index
-            int destIndex = p * 4;
-            int srcIndex = pos * 4;
+            int pos = (p & 0xE7) | ((p & 0x08) << 1) | ((p & 0x10) >> 1);
 
-            Array.Copy(NewArray, srcIndex, swizzledPal, destIndex, 4);
+            // Prevent invalid writes for small palettes
+            if (pos >= colourCount)
+                continue;
+
+            Buffer.BlockCopy(palBuffer, p * 4, swizzled, pos * 4, 4);
         }
 
-        return swizzledPal;
+        return swizzled;
     }
 
-    public static byte[] UnswizzlePalette(byte[] palBuffer, int width)
+    public static byte[] UnswizzlePalette(byte[] palBuffer, int colourCount)
     {
-        byte[] newPal = new byte[1024];
-        for (int p = 0; p < width; p++)
-        {
-            int pos = (p & 231) + ((p & 8) << 1) + ((p & 16) >> 1);
-            int srcIndex = p * 4;
-            int destIndex = pos * 4;
+        byte[] unswizzled = new byte[colourCount * 4];
 
-            Array.Copy(palBuffer, srcIndex, newPal, destIndex, 4);
+        for (int p = 0; p < colourCount; p++)
+        {
+            int pos = (p & 0xE7) | ((p & 0x08) << 1) | ((p & 0x10) >> 1);
+
+            if (pos >= colourCount)
+                continue;
+
+            Buffer.BlockCopy(palBuffer, pos * 4, unswizzled, p * 4, 4);
         }
-        return newPal;
+
+        return unswizzled;
     }
-    
+
     public static float UintByteToFloat(int Int)
     {
         byte[] bytes = BitConverter.GetBytes(Int);

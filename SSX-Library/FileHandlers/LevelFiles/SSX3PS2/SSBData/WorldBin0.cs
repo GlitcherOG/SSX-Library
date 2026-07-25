@@ -1,11 +1,12 @@
-﻿using SSXLibrary.JsonFiles.SSX3;
-using SSX_Library.Internal.Utilities;
+﻿using SSX_Library.Internal.Utilities;
+using SSXLibrary.JsonFiles.SSX3;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
 {
@@ -13,7 +14,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
     {
         public ObjectID objectID;
 
-        public int U0;
+        public int TextureID;
         public int U1;
         public int U2;
         public int U3;
@@ -28,7 +29,10 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
 
         public void LoadData(Stream stream, int TrackID, int RID)
         {
-            U0 = StreamUtil.ReadInt16(stream);
+            objectID.TrackID = TrackID;
+            objectID.RID = RID;
+
+            TextureID = StreamUtil.ReadInt16(stream);
             U1 = StreamUtil.ReadInt16(stream);
             U2 = StreamUtil.ReadInt16(stream);
             U3 = StreamUtil.ReadInt16(stream);
@@ -45,7 +49,10 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
         {
             Bin0JsonHandler.Bin0File bin0File = new Bin0JsonHandler.Bin0File();
 
-            bin0File.U0 = U0;
+            bin0File.TrackID = objectID.TrackID;
+            bin0File.RID = objectID.RID;
+
+            bin0File.TextureName = TextureID.ToString() + ".png";
             bin0File.U1 = U1;
             bin0File.U2 = U2;
             bin0File.U3 = U3;

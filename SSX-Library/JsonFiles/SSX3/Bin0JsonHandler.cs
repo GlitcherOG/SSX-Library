@@ -41,7 +41,10 @@ namespace SSXLibrary.JsonFiles.SSX3
 
         public struct Bin0File
         {
-            public int U0;
+            public int TrackID;
+            public int RID;
+
+            public string TextureName;
             public int U1;
             public int U2;
             public int U3;

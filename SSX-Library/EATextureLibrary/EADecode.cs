@@ -133,7 +133,7 @@ namespace SSX_Library.EATextureLibrary
 
         //Xbox
         //96 - BCnEncoder.Shared.CompressionFormat.Bc1
-        public static Image<Rgba32> DecodeMatrix96(byte[] matrix, int width, int height)
+        public static Image<Rgba32> DecodeMatrixDXT1(byte[] matrix, int width, int height)
         {
             //Process Image
             Image<Rgba32> NewImage = new Image<Rgba32>(width, height);

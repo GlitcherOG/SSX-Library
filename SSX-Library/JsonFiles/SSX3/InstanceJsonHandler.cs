@@ -72,6 +72,11 @@ namespace SSXLibrary.JsonFiles.SSX3
             public int U10;
             public int U11;
             public int U12;
+
+            // Per-model-vertex baked lighting decoded from the instance tail: one
+            // raw 16-bit ABGR1555 colour per model vertex, PS2 vertex-stream order.
+            // Only populated when WorldInstance.EmitVertexColors is set (large).
+            public List<int> VertexColors;
         }
     }
 }

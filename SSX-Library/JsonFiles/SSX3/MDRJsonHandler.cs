@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -51,11 +52,8 @@ namespace SSXLibrary.JsonFiles.SSX3
             public int U4;
 
             public float U6;
-            public float U7;
-            public float U8;
-            public float U9;
 
-            public List<int> U12;
+            public List<ObjectID> MaterialList;
 
             public List<ModelObject> ModelObjects;
         }
@@ -70,14 +68,10 @@ namespace SSXLibrary.JsonFiles.SSX3
 
             public UnknownS2 unknownS2;
             public UnknownS3 unknownS3;
-
-            public string ModelPath;
         }
 
         public struct UnknownS2
         {
-            public float[] BboxLow;
-            public float[] BboxHigh;
             public int U0;
 
             public List<ModelDataHeaderStruct> ModelHeaderOffset;
@@ -97,7 +91,9 @@ namespace SSXLibrary.JsonFiles.SSX3
 
         public struct ModelDataHeaderStruct
         {
-            public int U0;
+            public string ModelPath;
+
+            public int MaterialID;
             public int U1;
             public int U4;
 
