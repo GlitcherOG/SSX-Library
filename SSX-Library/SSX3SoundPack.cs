@@ -10,8 +10,40 @@ namespace SSXLibrary
     {
         public static async Task FullExtractAsync(string MainBig, string ExtractFolder, string SXDirectory)
         {
-            //Check Empty Folder
-            //Check SX_2002 Exists
+            // Validate MainBig file exists
+            if (!File.Exists(MainBig))
+            {
+                throw new FileNotFoundException($"MainBig file not found: {MainBig}");
+            }
+
+            // Validate SXDirectory exists
+            if (!Directory.Exists(SXDirectory))
+            {
+                throw new DirectoryNotFoundException($"SXDirectory not found: {SXDirectory}");
+            }
+
+            // Check if sx_2002.exe exists in SXDirectory
+            string sx2002Path = Path.Combine(SXDirectory, "sx_2002.exe");
+            if (!File.Exists(sx2002Path))
+            {
+                throw new FileNotFoundException($"sx_2002.exe not found in SXDirectory: {sx2002Path}");
+            }
+
+            // Check if ExtractFolder is empty
+            if (!Directory.Exists(ExtractFolder))
+            {
+                Directory.CreateDirectory(ExtractFolder);
+            }
+            else
+            {
+                string[] existingFiles = Directory.GetFiles(ExtractFolder);
+                string[] existingDirs = Directory.GetDirectories(ExtractFolder);
+
+                if (existingFiles.Length > 0 || existingDirs.Length > 0)
+                {
+                    throw new InvalidOperationException($"ExtractFolder is not empty: {ExtractFolder}. Please use an empty folder.");
+                }
+            }
 
             Console.WriteLine("Starting Audio Extract");
             //Extract Mainbig to the temp folder
@@ -21,7 +53,7 @@ namespace SSXLibrary
             string MUSFolder = HiddenFolder + "\\MUSFolder";
 
             DirectoryInfo di = Directory.CreateDirectory(HiddenFolder);
-            di.Attributes = FileAttributes.Directory | FileAttributes.Hidden;
+            //di.Attributes = FileAttributes.Directory | FileAttributes.Hidden;
 
             Console.WriteLine("Creating Hidden Directories");
 
@@ -37,15 +69,14 @@ namespace SSXLibrary
 
             if (LangHeader.Length != 1)
             {
-                //MessageBox.Show("Incorrect Ammount of Bigs");
-                return;
+                throw new Exception("Incorrect Ammount of Bigs");
             }
 
             Console.WriteLine("Extracting HDR Big");
 
             BIG.Extract(LangHeader[0], HDRFolder);
 
-            File.Copy(SXDirectory + "/sx_2002.exe", MUSFolder + "/sx.exe", true);
+            File.Copy(sx2002Path, MUSFolder + "/sx.exe", true);
 
             //Extract DATS to Correct Folders
             string[] DATs = Directory.GetFiles(DATFolder, "*.DAT", SearchOption.AllDirectories);
@@ -197,13 +228,38 @@ namespace SSXLibrary
 
         public static void FullRebuild(string MainFolder, string MainBig, string SXDirectory)
         {
+            // Validate MainBig file exists
+            if (!File.Exists(MainBig))
+            {
+                throw new FileNotFoundException($"MainBig file not found: {MainBig}");
+            }
+
+            // Validate MainFolder exists
+            if (!Directory.Exists(MainFolder))
+            {
+                throw new DirectoryNotFoundException($"MainFolder not found: {MainFolder}");
+            }
+
+            // Validate SXDirectory exists
+            if (!Directory.Exists(SXDirectory))
+            {
+                throw new DirectoryNotFoundException($"SXDirectory not found: {SXDirectory}");
+            }
+
+            // Check if sx_2002.exe exists in SXDirectory
+            string sx2002Path = Path.Combine(SXDirectory, "sx_2002.exe");
+            if (!File.Exists(sx2002Path))
+            {
+                throw new FileNotFoundException($"sx_2002.exe not found in SXDirectory: {sx2002Path}");
+            }
+
             //Extract Mainbig to the temp folder
             string HiddenFolder = MainFolder + "\\OriginalData";
             string HDRFolder = HiddenFolder + "\\HDRFolder";
             string DATFolder = HiddenFolder + "\\DATFolder";
             string MUSFolder = HiddenFolder + "\\MUSFolder";
 
-            File.Copy(SXDirectory + "/sx_2002.exe", MUSFolder + "/sx.exe", true);
+            File.Copy(sx2002Path, MUSFolder + "/sx.exe", true);
 
             //Get all HDR files
             string[] HDRFiles = Directory.GetFiles(HDRFolder, "*.hdr", SearchOption.AllDirectories);
