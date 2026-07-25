@@ -212,16 +212,10 @@ namespace SSXLibrary.FileHandlers
             {
 
             }
-            var file = File.Create(FileSave);
-            while (!File.Exists(FileSave))
-            {
-
-            }
-            file.Close();
 
             List<string> HolderPaths = new List<string>();
             //Create File and memory stream
-            using (Stream stream = File.Open(FileSave, FileMode.Open))
+            using (Stream stream = File.Create(FileSave))
             {
                 for (int i = 0; i < FileOpen.Length; i++)
                 {
