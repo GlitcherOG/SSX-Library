@@ -13,6 +13,13 @@ internal static class ChunkZip
     const int DefaultBlockSize = 128 * 1024; // 128KB in KiB
     private static readonly ImmutableArray<byte> _magic = [.. Encoding.ASCII.GetBytes("chunkzip")];
 
+    // Per-chunk compression type. Not every chunk is deflated: SSX 2012's PS3
+    // caches store a handful of chunks raw (cache1.big has 735 deflate + 4 stored).
+    // The sibling "chunklzx" container used by the Xbox 360 builds shares this
+    // header layout and uses 3 for its LZX payloads.
+    const uint ChunkTypeDeflate = 1;
+    const uint ChunkTypeStored = 4;
+
     /// <summary>
     /// Peeks at the current stream position to check for a ChunkZip signature, 
     /// restoring the stream position before returning.
@@ -58,13 +65,37 @@ internal static class ChunkZip
                 CompressionType = dataStream.ReadUInt32(ByteOrder.BigEndian),
             };
 
-            // Read chunk data and put it into a stream in
-            // order to use System.IO.Compression.DeflateStream,
-            // Then copy it to the output stream.
             byte[] chunkData = dataStream.ReadBytes((int)chunk.Size);
-            using MemoryStream inputStream = new(chunkData);
-            var decompressedStream = new DeflateStream(inputStream, CompressionMode.Decompress);
-            decompressedStream.CopyTo(outputStream);
+            switch (chunk.CompressionType)
+            {
+                case ChunkTypeDeflate:
+                    // Put it into a stream in order to use
+                    // System.IO.Compression.DeflateStream, then copy it to the
+                    // output stream.
+                    using (MemoryStream inputStream = new(chunkData))
+                    using (var decompressedStream = new DeflateStream(inputStream, CompressionMode.Decompress))
+                    {
+                        decompressedStream.CopyTo(outputStream);
+                    }
+                    break;
+
+                case ChunkTypeStored:
+                    outputStream.Write(chunkData);
+                    break;
+
+                default:
+                    throw new InvalidDataException(
+                        $"Unknown ChunkZip chunk compression type {chunk.CompressionType}.");
+            }
+        }
+
+        // The header knows how big this should have come out, so a short read
+        // (a chunk we walked past, a bad alignment) fails here instead of
+        // silently handing back a truncated file.
+        if (outputStream.Length != header.FullSize)
+        {
+            throw new InvalidDataException(
+                $"ChunkZip decompressed to {outputStream.Length} bytes but the header declared {header.FullSize}.");
         }
 
         // return the decompressed data
