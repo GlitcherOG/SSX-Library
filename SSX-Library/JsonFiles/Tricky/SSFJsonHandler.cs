@@ -1083,7 +1083,7 @@ namespace SSXLibrary.JsonFiles.Tricky
             public float U2;
             public float U3;
             public float U4;
-            public int U5;
+            public float U5;
         }
 
         public struct TextureFlipEffect

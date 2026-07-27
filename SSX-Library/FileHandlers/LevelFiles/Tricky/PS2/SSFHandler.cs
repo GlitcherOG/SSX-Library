@@ -386,12 +386,12 @@ namespace SSX_Library.FileHandlers.LevelFiles.Tricky.PS2
                 if (NewMainType.SubType == 10)
                 {
                     var NewSubType = new UVScrolling();
-                    NewSubType.U0 = StreamUtil.ReadUInt32(stream); //Scroll Mode 
-                    NewSubType.U1 = StreamUtil.ReadFloat(stream); //Horozontal Scroll
-                    NewSubType.U2 = StreamUtil.ReadFloat(stream); //Vertical Scroll
-                    NewSubType.U3 = StreamUtil.ReadFloat(stream); //Horozontal Scroll Length
-                    NewSubType.U4 = StreamUtil.ReadFloat(stream); //Vertical Scroll Length
-                    NewSubType.U5 = StreamUtil.ReadUInt32(stream);
+                    NewSubType.U0 = StreamUtil.ReadUInt32(stream); // Mode: 0 linear, 1 eased ping-pong, 2 constant ping-pong
+                    NewSubType.U1 = StreamUtil.ReadFloat(stream); // Horizontal UV units per tick
+                    NewSubType.U2 = StreamUtil.ReadFloat(stream); // Vertical UV units per tick
+                    NewSubType.U3 = StreamUtil.ReadFloat(stream); // Active duration (seconds)
+                    NewSubType.U4 = StreamUtil.ReadFloat(stream); // Pause duration (seconds)
+                    NewSubType.U5 = StreamUtil.ReadFloat(stream); // Total lifetime (seconds; 0 = until slot unload)
                     NewMainType.UVScroll = NewSubType;
                 }
                 else
@@ -873,7 +873,7 @@ namespace SSX_Library.FileHandlers.LevelFiles.Tricky.PS2
                     StreamUtil.WriteFloat32(stream, Type0Temp.UVScroll.Value.U2);
                     StreamUtil.WriteFloat32(stream, Type0Temp.UVScroll.Value.U3);
                     StreamUtil.WriteFloat32(stream, Type0Temp.UVScroll.Value.U4);
-                    StreamUtil.WriteInt32(stream, Type0Temp.UVScroll.Value.U5);
+                    StreamUtil.WriteFloat32(stream, Type0Temp.UVScroll.Value.U5);
                 }
                 else if (EffectData.type0.Value.SubType == 11)
                 {
@@ -1824,7 +1824,7 @@ namespace SSX_Library.FileHandlers.LevelFiles.Tricky.PS2
             public float U2;
             public float U3;
             public float U4;
-            public int U5;
+            public float U5;
         }
 
         public struct TextureFlipEffect
