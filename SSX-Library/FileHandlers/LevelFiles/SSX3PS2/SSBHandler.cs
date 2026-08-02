@@ -11,7 +11,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2
         /*
             
         All IDS
-        0 - Materials?
+        0 - Materials
         1 - Patches
         2 - WorldMDR
         3 - Instance
