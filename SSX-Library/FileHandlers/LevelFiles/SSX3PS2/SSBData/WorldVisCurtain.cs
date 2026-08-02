@@ -1,6 +1,5 @@
-﻿using SSX_Library.Internal.Utilities;
-using SSXLibrary.JsonFiles.SSX3;
 using SSX_Library.Internal.Utilities;
+using SSXLibrary.JsonFiles.SSX3;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -11,70 +10,88 @@ using System.Threading.Tasks;
 
 namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
 {
+    // Chunk ID-11: visibility curtain. 208 bytes, fixed (the size histogram on
+    // bam.ssb is a single bucket, {208: 167}).
+    //
+    // One record is a planar occluder quad plus its bounding volume: four
+    // homogeneous corners (w = 1), the unit plane those corners lie in, a
+    // bounding sphere whose centre also lies in that plane, and an AABB. All
+    // of it is in the location's own world frame.
+    //
+    // There are no visibility-cell or portal ids in the record -- every dword
+    // is geometry, a constant, or zero padding -- so the occlusion has to be
+    // resolved spatially rather than through a stored cell graph.
+    //
+    // Read order is unchanged; the fields were previously named U0..U7 and
+    // Point4/Point3/Point2/ControlPoint.
     public class WorldVisCurtain
     {
-        public float U0;
-        public float U1;
-        public float U2;
-        public float U3;
+        // XYZ = centre, W = radius. The radius is exactly the distance to the
+        // furthest corner, and the centre lies on the quad's plane.
+        public Vector4 BoundSphere;
 
-        public Vector4 Point4;
-        public Vector4 Point3;
-        public Vector4 Point2;
-        public Vector4 ControlPoint;
+        // The occluder quad, in file order. W is 1.0 in every record.
+        public Vector4 Corner0;
+        public Vector4 Corner1;
+        public Vector4 Corner2;
+        public Vector4 Corner3;
 
-        public float U4;
-        public float U5;
-        public float U6;
-        public float U7;
-
+        // The plane the quad lies in, as n.x + d = 0. The normal is unit length
+        // and parallel to the quad's own cross-product normal in every record.
+        public Vector3 PlaneNormal;
+        public float PlaneDistance;
 
         public Vector3 BBoxMin;
         public Vector3 BBoxMax;
 
+        // Offset 184. Reads 1 in every record on the retail disc, so its
+        // meaning is a guess -- kept because a 208-byte record should not have
+        // an unread field.
+        public int Flag;
+
         public void LoadData(Stream stream)
         {
-            U0 = StreamUtil.ReadFloat(stream);
-            U1 = StreamUtil.ReadFloat(stream);
-            U2 = StreamUtil.ReadFloat(stream);
-            U3 = StreamUtil.ReadFloat(stream);
+            BoundSphere = StreamUtil.ReadVector4(stream);
 
-            Point4 = StreamUtil.ReadVector4(stream);
-            Point3 = StreamUtil.ReadVector4(stream);
-            Point2 = StreamUtil.ReadVector4(stream);
-            ControlPoint = StreamUtil.ReadVector4(stream);
+            Corner0 = StreamUtil.ReadVector4(stream);
+            Corner1 = StreamUtil.ReadVector4(stream);
+            Corner2 = StreamUtil.ReadVector4(stream);
+            Corner3 = StreamUtil.ReadVector4(stream);
 
-            U4 = StreamUtil.ReadFloat(stream);
-            U5 = StreamUtil.ReadFloat(stream);
-            U6 = StreamUtil.ReadFloat(stream);
-            U7 = StreamUtil.ReadFloat(stream);
+            PlaneNormal = StreamUtil.ReadVector3(stream);
+            PlaneDistance = StreamUtil.ReadFloat(stream);
 
+            // Offsets 96-159: zero in every record.
             stream.Position += 0x40;
 
             BBoxMin = StreamUtil.ReadVector3(stream);
             BBoxMax = StreamUtil.ReadVector3(stream);
+
+            Flag = StreamUtil.ReadInt32(stream);
+
+            // Offsets 188-207 are zero padding to the end of the record.
         }
 
         public VisCurtainJsonHandler.VisCurtain ToJSON()
         {
-            VisCurtainJsonHandler.VisCurtain bin11File = new VisCurtainJsonHandler.VisCurtain();
+            VisCurtainJsonHandler.VisCurtain visCurtain = new VisCurtainJsonHandler.VisCurtain();
 
-            bin11File.U0 = U0;
-            bin11File.U1 = U1;
-            bin11File.U2 = U2;
-            bin11File.U3 = U3;
+            visCurtain.BoundSphere = ArrayConv.Vector4ToArray(BoundSphere);
 
-            bin11File.Point4 = ArrayConv.Vector4ToArray(Point4);
-            bin11File.Point3 = ArrayConv.Vector4ToArray(Point3);
-            bin11File.Point2 = ArrayConv.Vector4ToArray(Point2);
-            bin11File.ControlPoint = ArrayConv.Vector4ToArray(ControlPoint);
+            visCurtain.Corner0 = ArrayConv.Vector4ToArray(Corner0);
+            visCurtain.Corner1 = ArrayConv.Vector4ToArray(Corner1);
+            visCurtain.Corner2 = ArrayConv.Vector4ToArray(Corner2);
+            visCurtain.Corner3 = ArrayConv.Vector4ToArray(Corner3);
 
-            bin11File.U4 = U4;
-            bin11File.U5 = U5;
-            bin11File.U6 = U6;
-            bin11File.U7 = U7;
+            visCurtain.PlaneNormal = ArrayConv.Vector3ToArray(PlaneNormal);
+            visCurtain.PlaneDistance = PlaneDistance;
 
-            return bin11File;
+            visCurtain.BBoxMin = ArrayConv.Vector3ToArray(BBoxMin);
+            visCurtain.BBoxMax = ArrayConv.Vector3ToArray(BBoxMax);
+
+            visCurtain.Flag = Flag;
+
+            return visCurtain;
         }
     }
 }
