@@ -112,7 +112,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2
                 PatchesJsonHandler patchesJsonHandler = new PatchesJsonHandler();
                 Bin0JsonHandler bin0JsonHandler = new Bin0JsonHandler();
                 InstanceJsonHandler bin3JsonHandler = new InstanceJsonHandler();
-                Bin5JsonHandler bin5JsonHandler = new Bin5JsonHandler();
+                ParticleInstanceJsonHandler particleInstanceJsonHandler = new ParticleInstanceJsonHandler();
                 Bin6JsonHandler bin6JsonHandler = new Bin6JsonHandler();
                 SplineJsonHandler splineJsonHandler = new SplineJsonHandler();
                 VisCurtainJsonHandler visCurtainJsonHandler = new VisCurtainJsonHandler();
@@ -205,10 +205,10 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2
                             }
                             else if (ID == 5)
                             {
-                                WorldBin5 worldBin5 = new WorldBin5();
-                                worldBin5.LoadData(memoryStream1);
+                                WorldParticleInstance worldParticleInstance = new WorldParticleInstance();
+                                worldParticleInstance.LoadData(memoryStream1);
 
-                                bin5JsonHandler.bin5Files.Add(worldBin5.ToJSON());
+                                particleInstanceJsonHandler.ParticleInstances.Add(worldParticleInstance.ToJSON());
                             }
                             else if (ID == 6)
                             {
@@ -331,8 +331,8 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2
                             Console.WriteLine(extractPath + "//Levels//" + sdbHandler.locations[ChunkID].Name + "//Instances.json");
                             bin3JsonHandler.CreateJson(extractPath + "//Levels//" + sdbHandler.locations[ChunkID].Name + "//Instances.json");
 
-                            Console.WriteLine(extractPath + "//Levels//" + sdbHandler.locations[ChunkID].Name + "//Bin5.json");
-                            bin5JsonHandler.CreateJson(extractPath + "//Levels//" + sdbHandler.locations[ChunkID].Name + "//Bin5.json");
+                            Console.WriteLine(extractPath + "//Levels//" + sdbHandler.locations[ChunkID].Name + "//ParticleInstances.json");
+                            particleInstanceJsonHandler.CreateJson(extractPath + "//Levels//" + sdbHandler.locations[ChunkID].Name + "//ParticleInstances.json");
 
                             Console.WriteLine(extractPath + "//Levels//" + sdbHandler.locations[ChunkID].Name + "//Bin6.json");
                             bin6JsonHandler.CreateJson(extractPath + "//Levels//" + sdbHandler.locations[ChunkID].Name + "//Bin6.json");
@@ -349,7 +349,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2
                             patchesJsonHandler = new PatchesJsonHandler();
                             bin0JsonHandler = new Bin0JsonHandler();
                             bin3JsonHandler = new InstanceJsonHandler();
-                            bin5JsonHandler = new Bin5JsonHandler();
+                            particleInstanceJsonHandler = new ParticleInstanceJsonHandler();
                             bin6JsonHandler = new Bin6JsonHandler();
                             visCurtainJsonHandler = new VisCurtainJsonHandler();
                             splineJsonHandler = new SplineJsonHandler();
