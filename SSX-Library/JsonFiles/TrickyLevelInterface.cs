@@ -50,6 +50,16 @@ namespace SSXLibrary
         public MaterialJsonHandler SkyMaterialJson = new MaterialJsonHandler();
         public ModelJsonHandler SkyPrefabJsonHandler = new ModelJsonHandler();
 
+        //Custom courses can declare more objects in the .pbd than the .map linker tables
+        //name. Snow Belline has 59 particle instances in the pbd against 9 in the map,
+        //and 69 splines against 50. The name is cosmetic, since every transform and bound
+        //comes from the pbd, so fall back to a synthetic one rather than throwing part
+        //way through an extraction.
+        static string LinkerName(List<LinkerItem> items, int i, string Prefix)
+        {
+            return i < items.Count ? items[i].Name : Prefix + "_" + i;
+        }
+
         public void ExtractTrickyLevelFiles(string LoadPath, string ExportPath)
         {
             Console.WriteLine("Loading ADL File");
@@ -87,9 +97,10 @@ namespace SSXLibrary
             patchPoints = new PatchesJsonHandler();
             for (int i = 0; i < pbdHandler.Patches.Count; i++)
             {
-                Console.WriteLine("Patch: " + (i + 1) + "/" + pbdHandler.Patches.Count + " " + mapHandler.Patchs[i].Name);
+                string patchName = LinkerName(mapHandler.Patchs, i, "Patch");
+                Console.WriteLine("Patch: " + (i + 1) + "/" + pbdHandler.Patches.Count + " " + patchName);
                 PatchesJsonHandler.PatchJson patch = new PatchesJsonHandler.PatchJson();
-                patch.PatchName = mapHandler.Patchs[i].Name;
+                patch.PatchName = patchName;
 
                 patch.LightMapPoint = ArrayConv.Vector4ToArray(pbdHandler.Patches[i].LightMapPoint);
 
@@ -152,10 +163,11 @@ namespace SSXLibrary
             instancesJson = new InstanceJsonHandler();
             for (int i = 0; i < pbdHandler.Instances.Count; i++)
             {
-                Console.WriteLine("Instance: " + (i + 1) + "/" + pbdHandler.Instances.Count + " " + mapHandler.InternalInstances[i].Name);
+                string instanceName = LinkerName(mapHandler.InternalInstances, i, "Instance");
+                Console.WriteLine("Instance: " + (i + 1) + "/" + pbdHandler.Instances.Count + " " + instanceName);
 
                 InstanceJsonHandler.InstanceJson instanceJson = new InstanceJsonHandler.InstanceJson();
-                instanceJson.InstanceName = mapHandler.InternalInstances[i].Name;
+                instanceJson.InstanceName = instanceName;
 
                 Vector3 Scale;
                 Quaternion Rotation;
@@ -237,39 +249,46 @@ namespace SSXLibrary
                 }
 
                 //SSF
-                instanceJson.U0 = ssfHandler.ObjectProperties[ssfHandler.InstanceState[i]].U0;
-                instanceJson.PlayerBounceAmmount = ssfHandler.ObjectProperties[ssfHandler.InstanceState[i]].PlayerBounce;
-                instanceJson.U2 = ssfHandler.ObjectProperties[ssfHandler.InstanceState[i]].U2;
-
-                //GenerateBitArray
-
-                byte[] TempBytes = BitConverter.GetBytes(ssfHandler.ObjectProperties[ssfHandler.InstanceState[i]].BitFlags);
-
-                BitArray bitArray = new BitArray(TempBytes);
-
-
-
-                instanceJson.Visable = bitArray[0];
-                instanceJson.PlayerCollision = bitArray[5];
-                instanceJson.PlayerBounce = bitArray[7];
-                instanceJson.Unknown241 = bitArray[12];
-                instanceJson.UVScroll  = bitArray[13];
-
-
-                instanceJson.SurfaceType = ssfHandler.ObjectProperties[ssfHandler.InstanceState[i]].SurfaceType;
-                instanceJson.CollsionMode = ssfHandler.ObjectProperties[ssfHandler.InstanceState[i]].CollsionMode;
-                instanceJson.EffectSlotIndex = ssfHandler.ObjectProperties[ssfHandler.InstanceState[i]].EffectSlotIndex;
-                instanceJson.PhysicsIndex = ssfHandler.ObjectProperties[ssfHandler.InstanceState[i]].PhysicsIndex;
-                instanceJson.U8 = ssfHandler.ObjectProperties[ssfHandler.InstanceState[i]].U8;
-
-                int CollsionPos = ssfHandler.ObjectProperties[ssfHandler.InstanceState[i]].CollisonModelIndex;
-                if (CollsionPos!=-1 && instanceJson.CollsionMode!=3)
+                //The .ssf can come up short on a custom course the same way the .map does.
+                //Only the gameplay properties are missing - the instance itself is already
+                //built from the pbd - so leave them at their defaults and carry on.
+                int StatePos = i < ssfHandler.InstanceState.Count ? ssfHandler.InstanceState[i] : -1;
+                if (StatePos >= 0 && StatePos < ssfHandler.ObjectProperties.Count)
                 {
-                    instanceJson.CollsionModelPaths = new string[ssfHandler.CollisonModelPointers[CollsionPos].Models.Count];
+                    instanceJson.U0 = ssfHandler.ObjectProperties[StatePos].U0;
+                    instanceJson.PlayerBounceAmmount = ssfHandler.ObjectProperties[StatePos].PlayerBounce;
+                    instanceJson.U2 = ssfHandler.ObjectProperties[StatePos].U2;
 
-                    for (int a = 0; a < instanceJson.CollsionModelPaths.Length; a++)
+                    //GenerateBitArray
+
+                    byte[] TempBytes = BitConverter.GetBytes(ssfHandler.ObjectProperties[StatePos].BitFlags);
+
+                    BitArray bitArray = new BitArray(TempBytes);
+
+
+
+                    instanceJson.Visable = bitArray[0];
+                    instanceJson.PlayerCollision = bitArray[5];
+                    instanceJson.PlayerBounce = bitArray[7];
+                    instanceJson.Unknown241 = bitArray[12];
+                    instanceJson.UVScroll  = bitArray[13];
+
+
+                    instanceJson.SurfaceType = ssfHandler.ObjectProperties[StatePos].SurfaceType;
+                    instanceJson.CollsionMode = ssfHandler.ObjectProperties[StatePos].CollsionMode;
+                    instanceJson.EffectSlotIndex = ssfHandler.ObjectProperties[StatePos].EffectSlotIndex;
+                    instanceJson.PhysicsIndex = ssfHandler.ObjectProperties[StatePos].PhysicsIndex;
+                    instanceJson.U8 = ssfHandler.ObjectProperties[StatePos].U8;
+
+                    int CollsionPos = ssfHandler.ObjectProperties[StatePos].CollisonModelIndex;
+                    if (CollsionPos!=-1 && CollsionPos<ssfHandler.CollisonModelPointers.Count && instanceJson.CollsionMode!=3)
                     {
-                        instanceJson.CollsionModelPaths[a] = ssfHandler.CollisonModelPointers[CollsionPos].Models[a].MeshPath;
+                        instanceJson.CollsionModelPaths = new string[ssfHandler.CollisonModelPointers[CollsionPos].Models.Count];
+
+                        for (int a = 0; a < instanceJson.CollsionModelPaths.Length; a++)
+                        {
+                            instanceJson.CollsionModelPaths[a] = ssfHandler.CollisonModelPointers[CollsionPos].Models[a].MeshPath;
+                        }
                     }
                 }
 
@@ -281,9 +300,10 @@ namespace SSXLibrary
             particleInstanceJson = new ParticleInstanceJsonHandler();
             for (int i = 0; i < pbdHandler.particleInstances.Count; i++)
             {
-                Console.WriteLine("Particle Instance: " + (i + 1) + "/" + pbdHandler.particleInstances.Count + " " + mapHandler.ParticleInstances[i].Name);
+                string particleName = LinkerName(mapHandler.ParticleInstances, i, "ParticleInstance");
+                Console.WriteLine("Particle Instance: " + (i + 1) + "/" + pbdHandler.particleInstances.Count + " " + particleName);
                 ParticleInstanceJsonHandler.ParticleJson TempParticle = new ParticleInstanceJsonHandler.ParticleJson();
-                TempParticle.ParticleName = mapHandler.ParticleInstances[i].Name;
+                TempParticle.ParticleName = particleName;
 
                 Vector3 Scale;
                 Quaternion Rotation;
@@ -310,9 +330,10 @@ namespace SSXLibrary
             materialJson = new MaterialJsonHandler();
             for (int i = 0; i < pbdHandler.materials.Count; i++)
             {
-                Console.WriteLine("Material: " + (i + 1) + "/" + pbdHandler.materials.Count + " " + mapHandler.Materials[i].Name);
+                string materialName = LinkerName(mapHandler.Materials, i, "Material");
+                Console.WriteLine("Material: " + (i + 1) + "/" + pbdHandler.materials.Count + " " + materialName);
                 MaterialJsonHandler.MaterialsJson TempMaterial = new MaterialJsonHandler.MaterialsJson();
-                TempMaterial.MaterialName = mapHandler.Materials[i].Name;
+                TempMaterial.MaterialName = materialName;
 
                 if (pbdHandler.materials[i].TextureID != -1)
                 {
@@ -353,10 +374,11 @@ namespace SSXLibrary
             lightJsonHandler = new LightJsonHandler();
             for (int i = 0; i < pbdHandler.lights.Count; i++)
             {
-                Console.WriteLine("Light: " + (i + 1) + "/" + pbdHandler.lights.Count + " " + mapHandler.Lights[i].Name);
+                string lightName = LinkerName(mapHandler.Lights, i, "Light");
+                Console.WriteLine("Light: " + (i + 1) + "/" + pbdHandler.lights.Count + " " + lightName);
 
                 LightJsonHandler.LightJson TempLight = new LightJsonHandler.LightJson();
-                TempLight.LightName = mapHandler.Lights[i].Name;
+                TempLight.LightName = lightName;
 
                 TempLight.Type = pbdHandler.lights[i].Type;
                 TempLight.SpriteRes = pbdHandler.lights[i].spriteRes;
@@ -425,14 +447,18 @@ namespace SSXLibrary
             splineJsonHandler = new SplineJsonHandler();
             for (int i = 0; i < pbdHandler.splines.Count; i++)
             {
-                Console.WriteLine("Spline: " + (i + 1) + "/" + pbdHandler.splines.Count + " " + mapHandler.Splines[i].Name);
+                string splineName = LinkerName(mapHandler.Splines, i, "Spline");
+                Console.WriteLine("Spline: " + (i + 1) + "/" + pbdHandler.splines.Count + " " + splineName);
 
                 SplineJsonHandler.SplineJson TempSpline = new SplineJsonHandler.SplineJson();
-                TempSpline.SplineName = mapHandler.Splines[i].Name;
+                TempSpline.SplineName = splineName;
 
-                TempSpline.U0 = ssfHandler.Splines[i].U1;
-                TempSpline.U1 = ssfHandler.Splines[i].U2;
-                TempSpline.SplineStyle = ssfHandler.Splines[i].SplineStyle;
+                if (i < ssfHandler.Splines.Count)
+                {
+                    TempSpline.U0 = ssfHandler.Splines[i].U1;
+                    TempSpline.U1 = ssfHandler.Splines[i].U2;
+                    TempSpline.SplineStyle = ssfHandler.Splines[i].SplineStyle;
+                }
 
                 TempSpline.Segments = new List<SplineJsonHandler.SegmentJson>();
 
@@ -471,9 +497,10 @@ namespace SSXLibrary
             prefabJsonHandler = new ModelJsonHandler();
             for (int i = 0; i < pbdHandler.modelData.Count; i++)
             {
-                Console.WriteLine("Model: " + (i + 1) + "/" + pbdHandler.modelData.Count + " " + mapHandler.Models[i].Name);
+                string modelName = LinkerName(mapHandler.Models, i, "Model");
+                Console.WriteLine("Model: " + (i + 1) + "/" + pbdHandler.modelData.Count + " " + modelName);
                 ModelJsonHandler.ModelJson TempModel = new ModelJsonHandler.ModelJson();
-                TempModel.ModelName = mapHandler.Models[i].Name;
+                TempModel.ModelName = modelName;
                 TempModel.Unknown3 = pbdHandler.modelData[i].Unknown3;
                 TempModel.AnimTime = pbdHandler.modelData[i].AnimTime;
                 TempModel.ModelObjects = new();
@@ -567,10 +594,11 @@ namespace SSXLibrary
             particleModelJsonHandler = new ParticleModelJsonHandler();
             for (int i = 0; i < pbdHandler.particleModels.Count; i++)
             {
-                Console.WriteLine("Particle Model: " + (i + 1) + "/" + pbdHandler.particleModels.Count + " " + mapHandler.particelModels[i].Name);
+                string particleModelName = LinkerName(mapHandler.particelModels, i, "ParticleModel");
+                Console.WriteLine("Particle Model: " + (i + 1) + "/" + pbdHandler.particleModels.Count + " " + particleModelName);
 
                 ParticleModelJsonHandler.ParticleModelJson TempParticleModel = new ParticleModelJsonHandler.ParticleModelJson();
-                TempParticleModel.ParticleModelName = mapHandler.particelModels[i].Name;
+                TempParticleModel.ParticleModelName = particleModelName;
                 TempParticleModel.ParticleObjectHeaders = new List<ParticleModelJsonHandler.ParticleObjectHeader>();
 
                 for (int a = 0; a < pbdHandler.particleModels[i].ParticleObjectHeaders.Count; a++)
@@ -606,12 +634,13 @@ namespace SSXLibrary
             cameraJSONHandler = new CameraJSONHandler();
             for (int i = 0; i < pbdHandler.Cameras.Count; i++)
             {
-                Console.WriteLine("Camera: " + (i + 1) + "/" + pbdHandler.Cameras.Count + " " + mapHandler.Cameras[i].Name);
+                string cameraName = LinkerName(mapHandler.Cameras, i, "Camera");
+                Console.WriteLine("Camera: " + (i + 1) + "/" + pbdHandler.Cameras.Count + " " + cameraName);
 
                 var TempCamera = pbdHandler.Cameras[i];
                 var NewCamera = new CameraJSONHandler.CameraInstance();
 
-                NewCamera.CameraName = mapHandler.Cameras[i].Name;
+                NewCamera.CameraName = cameraName;
 
                 NewCamera.Translation = ArrayConv.Vector3ToArray(TempCamera.Translation);
                 NewCamera.Rotation = ArrayConv.Vector3ToArray(TempCamera.Rotation);
