@@ -43,23 +43,20 @@ namespace SSXLibrary.JsonFiles.SSX3
 
         public struct VisCurtain
         {
-            public float U0;
-            public float U1;
-            public float U2;
-            public float U3;
+            public float[] BoundSphere;
 
-            public float[] Point4;
-            public float[] Point3;
-            public float[] Point2;
-            public float[] ControlPoint;
+            public float[] Corner0;
+            public float[] Corner1;
+            public float[] Corner2;
+            public float[] Corner3;
 
-            public float U4;
-            public float U5;
-            public float U6;
-            public float U7;
+            public float[] PlaneNormal;
+            public float PlaneDistance;
 
             public float[] BBoxMin;
             public float[] BBoxMax;
+
+            public int Flag;
         }
     }
 }
