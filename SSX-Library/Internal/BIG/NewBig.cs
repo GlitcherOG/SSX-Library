@@ -51,6 +51,11 @@ internal static class NewBig
         //Open the big file
         using var bigStream = File.OpenRead(bigPath);
 
+        // One unreadable member must not cost us the rest of the archive, so
+        // failures are collected and rethrown together once everything that
+        // CAN be extracted has been.
+        List<Exception> failures = [];
+
         // Create each member file
         for (int i = 0; i < headerInfo.HashIndices.Count; i++)
         {
@@ -60,34 +65,57 @@ internal static class NewBig
             string absoluteDirectory = Path.Join(extractionPath, relativeDirectory).Replace('\\', '/');
             string absolutePath = Path.Join(absoluteDirectory, filename).Replace('\\', '/');
 
-            // Create directory if it doesnt exist
-            if (!Directory.Exists(absoluteDirectory))
+            try
             {
-                Directory.CreateDirectory(absoluteDirectory);
-            }
+                // Create directory if it doesnt exist
+                if (!Directory.Exists(absoluteDirectory))
+                {
+                    Directory.CreateDirectory(absoluteDirectory);
+                }
 
-            // Create file
-            using var outputStream = File.Create(absolutePath);
+                // Create file
+                using var outputStream = File.Create(absolutePath);
 
-            // Read the member file data, decompress it if needed,
-            // and write it to the output file.
-            bigStream.Position = headerInfo.HashIndices[i].Offset * 16;
-            if (Refpack.HasRefpackSignature(bigStream))
-            {
-                byte[] data = bigStream.ReadBytes((int)headerInfo.HashIndices[i].zSize);
-                outputStream.Write(Refpack.Decompress(data));
+                // Read the member file data, decompress it if needed,
+                // and write it to the output file.
+                bigStream.Position = headerInfo.HashIndices[i].Offset * 16;
+                if (Refpack.HasRefpackSignature(bigStream))
+                {
+                    byte[] data = bigStream.ReadBytes((int)headerInfo.HashIndices[i].zSize);
+                    outputStream.Write(Refpack.Decompress(data));
+                }
+                else if (ChunkZip.HasChunkZipSignature(bigStream))
+                {
+                    byte[] data = bigStream.ReadBytes((int)headerInfo.HashIndices[i].Size);
+                    outputStream.Write(ChunkZip.Decompress(data));
+                }
+                else
+                {
+                    // No compression. Write raw data.
+                    byte[] data = bigStream.ReadBytes((int)headerInfo.HashIndices[i].Size);
+                    outputStream.Write(data);
+                }
             }
-            else if (ChunkZip.HasChunkZipSignature(bigStream))
+            catch (Exception ex)
             {
-                byte[] data = bigStream.ReadBytes((int)headerInfo.HashIndices[i].Size);
-                outputStream.Write(ChunkZip.Decompress(data));
+                // Drop whatever landed on disk before the failure. A truncated
+                // or zero-byte file is worse than none: it still counts toward
+                // the member total and reads as a clean extraction.
+                try
+                {
+                    if (File.Exists(absolutePath)) File.Delete(absolutePath);
+                }
+                catch { /* the original failure is the one worth reporting */ }
+
+                failures.Add(new InvalidDataException($"Failed to extract member '{Path.Join(relativeDirectory, filename)}'.", ex));
             }
-            else
-            {
-                // No compression. Write raw data.
-                byte[] data = bigStream.ReadBytes((int)headerInfo.HashIndices[i].Size);
-                outputStream.Write(data);
-            }
+        }
+
+        if (failures.Count > 0)
+        {
+            throw new AggregateException(
+                $"{failures.Count} of {headerInfo.HashIndices.Count} members failed to extract from '{bigPath}'.",
+                failures);
         }
     }
 
