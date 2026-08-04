@@ -71,6 +71,16 @@ namespace SSX_Library.FileHandlers.LevelFiles.Tricky.PS2
 
         public byte[] MeshData;
 
+        /// <summary>Encode one signed-normalized normal component without letting +1 wrap through Int16.
+        /// The old direct <c>(int)(v * 32768)</c> produced 32768 for +1, and WriteInt16's cast turned that
+        /// into -32768: every positive cardinal normal therefore became its negative in a rebuilt PBD.</summary>
+        private static int PackNormalComponent(float value)
+        {
+            if (!float.IsFinite(value)) return 0;
+            int scaled = (int)(Math.Clamp(value, -1f, 1f) * 32768f);
+            return Math.Clamp(scaled, short.MinValue, short.MaxValue);
+        }
+
         public void LoadPBD(string LoadPath)
         {
             using (Stream stream = File.Open(LoadPath, FileMode.Open))
@@ -2088,9 +2098,9 @@ namespace SSX_Library.FileHandlers.LevelFiles.Tricky.PS2
                                     //Normals Generation
                                     for (int i = 0; i < TempMeshChunk.normals.Count; i++)
                                     {
-                                        StreamUtil.WriteInt16(memoryStream, (int)((TempMeshChunk.normals[i].X) * 32768f));
-                                        StreamUtil.WriteInt16(memoryStream, (int)((TempMeshChunk.normals[i].Y) * 32768f));
-                                        StreamUtil.WriteInt16(memoryStream, (int)((TempMeshChunk.normals[i].Z) * 32768f));
+                                        StreamUtil.WriteInt16(memoryStream, PackNormalComponent(TempMeshChunk.normals[i].X));
+                                        StreamUtil.WriteInt16(memoryStream, PackNormalComponent(TempMeshChunk.normals[i].Y));
+                                        StreamUtil.WriteInt16(memoryStream, PackNormalComponent(TempMeshChunk.normals[i].Z));
                                     }
                                     StreamUtil.AlignBy16(memoryStream);
                                     #endregion
