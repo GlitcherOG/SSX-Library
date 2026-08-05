@@ -1,3 +1,4 @@
+using SSX_Library.Internal.Utilities.StreamExtensions;
 using System;
 using System.Buffers.Binary;
 using System.Collections.Generic;
@@ -5,6 +6,8 @@ using System.Globalization;
 using System.IO;
 using System.Numerics;
 using System.Text;
+using System.Xml.Linq;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace SSXLibrary.FileHandlers.Models.SSX2012
 {
@@ -149,42 +152,26 @@ namespace SSXLibrary.FileHandlers.Models.SSX2012
         // Pass `length` whenever the stream carries anything past the end of this
         // file. Without it the size is taken to EOF and the trailing bytes are
         // reported by Check() as a mismatch against the header's own size field.
-        public void Load(Stream stream, long? length = null)
+        public void Load(Stream stream)
         {
-            long start = stream.Position;
-            long size = length ?? (stream.Length - start);
-            if (size < 20)
-            {
-                throw new InvalidDataException("too short for a .pob header");
-            }
+            Reader.SetDefaultReadMode(SSX_Library.ByteOrder.LittleEndian);
 
-            var data = new byte[size];
-            int got = 0;
-            while (got < data.Length)
-            {
-                int n = stream.Read(data, got, data.Length - got);
-                if (n <= 0)
-                {
-                    throw new EndOfStreamException($"wanted {data.Length} bytes, got {got}");
-                }
-                got += n;
-            }
 
             // Everything below parses into locals and is committed to the instance
             // in one go at the end. Load() is public and re-callable on a live
             // handler, so a throw part way through must leave it on its previous
             // file rather than half one file and half another.
-            uint magic = U32(data, 0);
+            uint magic = stream.ReadUInt32();
             if (magic != Magic)
             {
                 throw new InvalidDataException($"bad magic 0x{magic:X8}");
             }
 
-            int version = I32(data, 0x04);
-            int declaredSize = I32(data, 0x08);
-            int alignment = I32(data, 0x0C);
-            int sectionCount = I32(data, 0x10);
-            if (sectionCount < 1 || 20 + 4L * sectionCount > size)
+            int version = (int)stream.ReadUInt32();
+            int declaredSize = (int)stream.ReadUInt32();
+            int alignment = (int)stream.ReadUInt32();
+            int sectionCount = (int)stream.ReadUInt32();
+            if (sectionCount < 1 || 20 + 4L * sectionCount > stream.Length)
             {
                 throw new InvalidDataException($"section count {sectionCount} does not fit the file");
             }
@@ -192,39 +179,46 @@ namespace SSXLibrary.FileHandlers.Models.SSX2012
             var sections = new List<int>(sectionCount);
             for (int i = 0; i < sectionCount; i++)
             {
-                sections.Add(I32(data, 20 + 4 * i));
+                sections.Add((int)stream.ReadUInt32());
             }
 
             int toc = sections[0];
-            int tocC0 = I32(data, toc);
-            int typeCount = I32(data, toc + 0x04);
-            int objectCount = I32(data, toc + 0x08);
-            int stringBytes = I32(data, toc + 0x0C);
-            int typeTable = I32(data, toc + 0x10);
-            int objectTable = I32(data, toc + 0x14);
-            int stringTable = I32(data, toc + 0x18);
+            stream.Position = toc;
+
+            int tocC0 = (int)stream.ReadUInt32();
+            int typeCount = (int)stream.ReadUInt32();
+            int objectCount = (int)stream.ReadUInt32();
+            int stringBytes = (int)stream.ReadUInt32();
+            int typeTable = (int)stream.ReadUInt32();
+            int objectTable = (int)stream.ReadUInt32();
+            int stringTable = (int)stream.ReadUInt32();
 
             var types = new List<TypeDescStruct>(typeCount);
+            stream.Position = toc + typeTable;
             for (int i = 0; i < typeCount; i++)
             {
-                int o = toc + typeTable + 12 * i;
                 types.Add(new TypeDescStruct
                 {
-                    TypeId = I32(data, o),
-                    Count = I32(data, o + 4),
-                    Offset = I32(data, o + 8),
+                    TypeId = (int)stream.ReadUInt32(),
+                    Count = (int)stream.ReadUInt32(),
+                    Offset = (int)stream.ReadUInt32(),
                 });
             }
 
             var objects = new List<ObjectEntryStruct>(objectCount);
+            stream.Position= toc+objectTable;
             for (int i = 0; i < objectCount; i++)
             {
-                int o = toc + objectTable + 8 * i;
-                objects.Add(new ObjectEntryStruct
-                {
-                    Offset = I32(data, o),
-                    Name = CString(data, toc + I32(data, o + 4)),
-                });
+                var objectEntry = new ObjectEntryStruct();
+
+                objectEntry.Offset = (int)stream.ReadUInt32();
+
+                long CurrentPos = stream.Position;
+                stream.Position = toc + stream.ReadUInt32();
+                objectEntry.Name = stream.ReadAsciiNullTerminated();
+                stream.Position = CurrentPos;
+
+                objects.Add(objectEntry);
             }
 
             // Objects are looked up by name -- the names are fixed across the
@@ -303,8 +297,9 @@ namespace SSXLibrary.FileHandlers.Models.SSX2012
 
         // -- record readers ---------------------------------------------------
 
-        private static VolumeStruct ReadVolume(byte[] d, int off)
+        private static VolumeStruct ReadVolume(Stream d, int off)
         {
+            d.Position = off;
             var v = new VolumeStruct
             {
                 Offset = off,
@@ -1257,26 +1252,26 @@ namespace SSXLibrary.FileHandlers.Models.SSX2012
 
         // Explicit little-endian rather than BitConverter, which is host-order:
         // correct on x64 and ARM64 today, silently wrong on a big-endian host.
-        private static uint U32(byte[] d, int o) => BinaryPrimitives.ReadUInt32LittleEndian(d.AsSpan(o, 4));
+        //private static uint U32(byte[] d, int o) => BinaryPrimitives.ReadUInt32LittleEndian(d.AsSpan(o, 4));
 
-        private static int I32(byte[] d, int o) => BinaryPrimitives.ReadInt32LittleEndian(d.AsSpan(o, 4));
+        //private static int I32(byte[] d, int o) => BinaryPrimitives.ReadInt32LittleEndian(d.AsSpan(o, 4));
 
-        private static int U16(byte[] d, int o) => BinaryPrimitives.ReadUInt16LittleEndian(d.AsSpan(o, 2));
+        //private static int U16(byte[] d, int o) => BinaryPrimitives.ReadUInt16LittleEndian(d.AsSpan(o, 2));
 
-        private static float F32(byte[] d, int o) => BitConverter.UInt32BitsToSingle(U32(d, o));
+        //private static float F32(byte[] d, int o) => BitConverter.UInt32BitsToSingle(U32(d, o));
 
-        private static Vector3 Vec3(byte[] d, int o) => new Vector3(F32(d, o), F32(d, o + 4), F32(d, o + 8));
+        //private static Vector3 Vec3(byte[] d, int o) => new Vector3(F32(d, o), F32(d, o + 4), F32(d, o + 8));
 
-        private static string CString(byte[] d, int o)
-        {
-            int e = o;
-            while (e < d.Length && d[e] != 0) { e++; }
-            return Encoding.ASCII.GetString(d, o, e - o);
-        }
+        //private static string CString(byte[] d, int o)
+        //{
+        //    int e = o;
+        //    while (e < d.Length && d[e] != 0) { e++; }
+        //    return Encoding.ASCII.GetString(d, o, e - o);
+        //}
 
-        // -- small helpers ----------------------------------------------------
+        //// -- small helpers ----------------------------------------------------
 
-        private static int Align16(int x) => (x + 15) / 16 * 16;
+        //private static int Align16(int x) => (x + 15) / 16 * 16;
 
         // Python's int.bit_length(): 0 for 0, else the position of the high bit.
         private static int BitLength(int x)
