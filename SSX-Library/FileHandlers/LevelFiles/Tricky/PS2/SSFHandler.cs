@@ -817,13 +817,53 @@ namespace SSX_Library.FileHandlers.LevelFiles.Tricky.PS2
 
                 NewEffect.Spline = NewMainType;
             } //Done
+            else if (NewEffect.MainType == 12)
+            {
+                int payload = PayloadLength(NewEffect);
+                if (payload < HudColourBytes)
+                {
+                    throw new InvalidDataException(
+                        $"SSF HUD-message node at 0x{NewEffect.Offset:X} declares {payload} payload bytes; " +
+                        $"it must carry at least the {HudColourBytes}-byte colour.");
+                }
+                NewEffect.HudRed = StreamUtil.ReadFloat(stream);
+                NewEffect.HudGreen = StreamUtil.ReadFloat(stream);
+                NewEffect.HudBlue = StreamUtil.ReadFloat(stream);
+                NewEffect.HudText = StreamUtil.ReadString16(stream, payload - HudColourBytes);
+            }
             else
             {
-                //MessageBox.Show("Missing Type " + NewEffect.MainType.ToString());
-                return null;
+                //An opcode with no branch here. The engine dispatches more main types than the
+                //shipped corpus authors, so this is a real case rather than a corrupt-file one:
+                //keep the bytes and let the writer put them back. Returning null instead - which is
+                //what this did - makes the caller break out of the chain loop, so the unknown node
+                //AND every node after it in that chain vanish with no diagnostic.
+                NewEffect.UnknownPayload = StreamUtil.ReadBytes(stream, PayloadLength(NewEffect));
             }
 
             return NewEffect;
+        }
+
+        /// <summary>Payload bytes of one effect node: its size field counts the whole node, main type
+        /// and size included, so the payload is what is left after those two words.</summary>
+        /// <remarks>A size that cannot be a whole node would seek the chain loop backwards and hang
+        /// it, so this refuses rather than trusting the file.</remarks>
+        /// <summary>R, G and B as f32, the fixed head of a main-type-12 payload.</summary>
+        const int HudColourBytes = 12;
+
+        static int PayloadLength(Effect effect)
+        {
+            const int HeaderBytes = 8; // MainType + ByteSize
+
+            if (effect.ByteSize < HeaderBytes || (effect.ByteSize % 4) != 0)
+            {
+                throw new InvalidDataException(
+                    $"SSF effect at 0x{effect.Offset:X} declares ByteSize {effect.ByteSize}; a node is at " +
+                    $"least {HeaderBytes} bytes and always a multiple of 4 (the engine reads the next " +
+                    "node's main type with a word load, which faults when unaligned).");
+            }
+
+            return effect.ByteSize - HeaderBytes;
         }
 
         public void SaveEffectData(Stream stream, Effect EffectData)
@@ -1219,6 +1259,31 @@ namespace SSX_Library.FileHandlers.LevelFiles.Tricky.PS2
             {
                 StreamUtil.WriteInt32(stream, EffectData.Spline.Value.SplineIndex);
                 StreamUtil.WriteInt32(stream, EffectData.Spline.Value.Effect);
+            }
+            else if (EffectData.MainType == 12)
+            {
+                //Colour first, then UTF-16LE text, NUL-terminated, then zero-padded so the node stays a
+                //multiple of 4 bytes. The padding is load bearing rather than tidy: the chain walker
+                //advances by the size field and reads the next node's main type with a word load, which
+                //faults on the EE if that lands unaligned.
+                StreamUtil.WriteFloat32(stream, EffectData.HudRed);
+                StreamUtil.WriteFloat32(stream, EffectData.HudGreen);
+                StreamUtil.WriteFloat32(stream, EffectData.HudBlue);
+                StreamUtil.WriteString16(stream, EffectData.HudText ?? "");
+                StreamUtil.WriteInt16(stream, 0);
+
+                long PayloadBytes = stream.Position - (ByteSize + 4);
+                int Padding = (int)((4 - (PayloadBytes % 4)) % 4);
+                if (Padding != 0)
+                {
+                    StreamUtil.WriteBytes(stream, new byte[Padding]);
+                }
+            }
+            else if (EffectData.UnknownPayload != null)
+            {
+                //An opcode the reader had no branch for. Put its bytes back exactly, so a main type
+                //this library does not understand survives a round trip instead of being erased.
+                StreamUtil.WriteBytes(stream, EffectData.UnknownPayload);
             }
             else
             {
@@ -1757,6 +1822,25 @@ namespace SSX_Library.FileHandlers.LevelFiles.Tricky.PS2
             public int FunctionRunIndex; //Script Used By Screenlogo
             public int TeleportInstanceIndex;
             public SplineEffect? Spline;
+
+            //12 - HUD message. Retail authors no main type 12 and the retail dispatcher sends it to
+            //the inert default, so a node carrying one is a no-op on a stock executable. The payload
+            //is an inline UTF-16LE string, NUL-terminated: node payloads are variable length (the
+            //size field below is what the engine's chain walker advances by), so the text needs no
+            //side table and travels with the level.
+            public string? HudText;
+            //12 - the message's colour, as three 0..1 channels ahead of the text. They sit BEFORE the
+            //string so the one pointer the engine carries reaches both: the patch's shim finds them at a
+            //fixed negative offset from the text it was handed.
+            //No default here - Effect is a struct, so these start at 0 (invisible). Whoever builds a
+            //node owns the colour: the JSON conversion substitutes white for an absent one, and the
+            //reader always fills them from the payload.
+            public float HudRed, HudGreen, HudBlue;
+
+            //Any main type this reader has no branch for, kept verbatim so a round trip preserves it.
+            //Without this an unknown opcode used to return null, which made the caller abandon the
+            //rest of its chain and silently drop every node after it.
+            public byte[]? UnknownPayload;
         }
 
         #region Type0

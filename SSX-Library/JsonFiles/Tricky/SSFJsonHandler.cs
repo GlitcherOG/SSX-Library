@@ -482,9 +482,18 @@ namespace SSXLibrary.JsonFiles.Tricky
 
                 NewEffect.Spline = NewSpline;
             }
+            else if (NewEffect.MainType == 12)
+            {
+                NewEffect.HudText = TempEffect.HudText;
+                NewEffect.HudRed = TempEffect.HudRed;
+                NewEffect.HudGreen = TempEffect.HudGreen;
+                NewEffect.HudBlue = TempEffect.HudBlue;
+            }
             else
             {
-                //MessageBox.Show("ERROR Converting to Json Format SSF " + NewEffect.MainType);
+                //Carry an unrecognised opcode's bytes through the JSON rather than dropping it, so
+                //the document round trip is as lossless as the binary one.
+                NewEffect.UnknownPayload = TempEffect.UnknownPayload;
             }
 
             return NewEffect;
@@ -923,9 +932,17 @@ namespace SSXLibrary.JsonFiles.Tricky
 
                 NewEffect.Spline = NewSpline;
             }
+            else if (NewEffect.MainType == 12)
+            {
+                NewEffect.HudText = TempEffect.HudText;
+                //A document that names no colour gets white, which is what the banner draws anyway.
+                NewEffect.HudRed = TempEffect.HudRed ?? 1f;
+                NewEffect.HudGreen = TempEffect.HudGreen ?? 1f;
+                NewEffect.HudBlue = TempEffect.HudBlue ?? 1f;
+            }
             else
             {
-                //MessageBox.Show("ERROR Converting to Json Format SSF " + NewEffect.MainType);
+                NewEffect.UnknownPayload = TempEffect.UnknownPayload;
             }
 
             return NewEffect;
@@ -1024,6 +1041,12 @@ namespace SSXLibrary.JsonFiles.Tricky
             public int? FunctionRunIndex;
             public int? TeleportInstanceIndex;
             public SplineEffect? Spline;
+
+            public string? HudText;            //12 - inline UTF-16LE text
+            public float? HudRed;              //12 - colour channels, 0..1, ahead of the text
+            public float? HudGreen;
+            public float? HudBlue;
+            public byte[]? UnknownPayload;     //any main type this library has no branch for
         }
 
         #region Type0
