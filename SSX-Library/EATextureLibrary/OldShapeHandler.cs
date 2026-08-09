@@ -616,7 +616,10 @@ namespace SSX_Library.EATextureLibrary
             {
                 if(File.Exists(path))
                 {
-                    NewSSHImage.Image = (Image<Rgba32>)Image.Load(path);
+                    // Decode into the representation ShapeImage actually stores. An untyped load preserves
+                    // an opaque PNG as Image<Rgb24>, which cannot be cast to Image<Rgba32> even though the
+                    // pixels are losslessly convertible (and made repack reject ordinary RGB terrain art).
+                    NewSSHImage.Image = Image.Load<Rgba32>(path);
                 }
                 else
                 {
@@ -777,7 +780,7 @@ namespace SSX_Library.EATextureLibrary
         public void LoadSingleImage(string path, int i)
         {
             var temp = ShapeImages[i];
-            temp.Image = (Image<Rgba32>)Image.Load(path);
+            temp.Image = Image.Load<Rgba32>(path);
             temp.colorsTable = ImageUtil.GetBitmapColorsFast(temp.Image).ToList();
             ShapeImages[i] = temp;
         }
