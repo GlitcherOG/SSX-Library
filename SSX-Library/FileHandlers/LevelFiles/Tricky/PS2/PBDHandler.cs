@@ -1686,7 +1686,9 @@ namespace SSX_Library.FileHandlers.LevelFiles.Tricky.PS2
                                 output += "vn " + Normals[z].X.ToString(CultureInfo.InvariantCulture.NumberFormat) + " " + Normals[z].Y.ToString(CultureInfo.InvariantCulture.NumberFormat) + " " + Normals[z].Z.ToString(CultureInfo.InvariantCulture.NumberFormat) + "\n";
                             }
                             output += outputString;
-                            File.AppendAllText(path + "/" + modelData[a].ModelObjects[ax].objectData.MeshOffsets[i].MeshID.ToString() + ".obj", output);
+                            // One file per MeshID, overwritten: each block restarts its v/vt/vn indices at 1,
+                            // so a second block in the same file only re-draws the first block's triangles.
+                            File.WriteAllText(path + "/" + modelData[a].ModelObjects[ax].objectData.MeshOffsets[i].MeshID.ToString() + ".obj", output);
                         }
                     }
                 }
