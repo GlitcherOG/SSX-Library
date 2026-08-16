@@ -226,7 +226,7 @@ namespace SSXLibrary
             }
         }
 
-        public static void FullRebuild(string MainFolder, string MainBig, string SXDirectory)
+        public static async Task FullRebuild(string MainFolder, string MainBig, string SXDirectory)
         {
             // Validate MainBig file exists
             if (!File.Exists(MainBig))
@@ -252,7 +252,7 @@ namespace SSXLibrary
             {
                 throw new FileNotFoundException($"sx_2002.exe not found in SXDirectory: {sx2002Path}");
             }
-
+            Console.WriteLine("Starting Audio Rebuild");
             //Extract Mainbig to the temp folder
             string HiddenFolder = MainFolder + "\\OriginalData";
             string HDRFolder = HiddenFolder + "\\HDRFolder";
@@ -264,37 +264,57 @@ namespace SSXLibrary
             //Get all HDR files
             string[] HDRFiles = Directory.GetFiles(HDRFolder, "*.hdr", SearchOption.AllDirectories);
 
-            Process cmd = new Process();
-            cmd.StartInfo.FileName = "cmd.exe";
-            cmd.StartInfo.RedirectStandardInput = true;
-            cmd.StartInfo.RedirectStandardOutput = true;
-            cmd.StartInfo.CreateNoWindow = true;
-            cmd.StartInfo.UseShellExecute = false;
-            cmd.Start();
-
-            FileInfo f = new FileInfo(MUSFolder);
-            string drive = System.IO.Path.GetPathRoot(f.FullName.Substring(0, 2));
-
-            cmd.StandardInput.WriteLine(drive);
-            cmd.StandardInput.WriteLine("cd " + MUSFolder);
-
             //Do a quick verify that original data hasnt been messed with
             //Verify big file exists in DATFolder
             //Verify Folders match between HDR, MUS and Main set of data
-
-
 
             //Using each HDR file indivdually check each folder and there are matching wavs to confirm hash matches
             //If not matching update with new hash and convert Wav to Mus
             //Mark File as needing rebuild
             //Once entire file checked if marked rebuild file into single DAT File
+            Console.WriteLine("Starting Rebuilding Each File");
+            Console.WriteLine("Using " + maxProcesses.ToString() + " Threads");
+            List<Task> tasks = new List<Task>();
             for (int i = 0; i < HDRFiles.Length; i++)
             {
+                tasks.Add(RebuildProcess(HDRFiles[i], MUSFolder, SXDirectory));
+            }
+
+            await Task.WhenAll(tasks);
+
+            string[] BigFile = Directory.GetFiles(DATFolder, "*.big", SearchOption.AllDirectories);
+
+            BIG.Create(BigType.BIG4, HDRFolder, BigFile[0], false, true);
+            BIG.Create(BigType.BIG4, DATFolder, MainBig, false, true);
+        }
+
+        static async Task RebuildProcess(string HDRFile, string MUSFolder, string SXDirectory)
+        {
+            await semaphore.WaitAsync();
+            try
+            {
+                await Task.Run(() =>
+                {
+                    Console.WriteLine("Extracting MUS TO DAT - " + MUSFolder);
+                Process cmd = new Process();
+                cmd.StartInfo.FileName = "cmd.exe";
+                cmd.StartInfo.RedirectStandardInput = true;
+                cmd.StartInfo.RedirectStandardOutput = true;
+                cmd.StartInfo.CreateNoWindow = true;
+                cmd.StartInfo.UseShellExecute = false;
+                cmd.Start();
+
+                FileInfo f = new FileInfo(MUSFolder);
+                string drive = System.IO.Path.GetPathRoot(f.FullName.Substring(0, 2));
+
+                cmd.StandardInput.WriteLine(drive);
+                cmd.StandardInput.WriteLine("cd " + MUSFolder);
+
+
                 bool Updated = false;
 
-                string HDRFile = HDRFiles[i];
-                string DATFile = HDRFiles[i].Replace("HDRFolder", "DATFolder").Replace(".hdr", ".dat");
-                string HDRMusFile = HDRFile.Replace("HDRFolder", "MUSFolder").Replace(".hdr","");
+                string DATFile = HDRFile.Replace("HDRFolder", "DATFolder").Replace(".hdr", ".dat");
+                string HDRMusFile = HDRFile.Replace("HDRFolder", "MUSFolder").Replace(".hdr", "");
                 string MainWavFolder = HDRMusFile.Replace("OriginalData\\MUSFolder\\", "");
 
                 string[] HashFiles = Directory.GetFiles(HDRMusFile, "*.hash", SearchOption.AllDirectories);
@@ -303,29 +323,50 @@ namespace SSXLibrary
 
                 string[] Hash = File.ReadAllLines(HashFiles[0]);
                 string[] HASHText = new string[WAVFiles.Length];
-                //May need to add alphabetaical sort for stinky linux users to ensure it doesnt die
+                    //May need to add alphabetaical sort for stinky linux users to ensure it doesnt die
 
-                for (int j = 0; j < WAVFiles.Length; j++)
-                {
-                    //Generate HASH for WAVs and save next to MUS
-                    ulong Data = XxHash64.HashToUInt64(File.ReadAllBytes(WAVFiles[j]));
-
-                    HASHText[j] = Data.ToString();
-
-                    if (HASHText[j] != Hash[j])
+                    for (int j = 0; j < WAVFiles.Length; j++)
                     {
-                        cmd.StandardInput.WriteLine("sx.exe -ps2stream -eaxa_blk -playlocmaincpu -removeuserall \"" + WAVFiles[j] + "\" -=\"" + MUSFiles[j] + "\" -v3");
+                        Console.WriteLine("Checking Hash " + WAVFiles[j]);
+                        //Generate HASH for WAVs and save next to MUS
+                        ulong Data = XxHash64.HashToUInt64(File.ReadAllBytes(WAVFiles[j]));
 
-                        Updated = true;
+                        HASHText[j] = Data.ToString();
+
+                        try
+                        {
+                            if (HASHText[j] != Hash[j])
+                            {
+                                Console.WriteLine("Rebuilding File" + WAVFiles[j]);
+                                cmd.StandardInput.WriteLine("sx.exe -ps2stream -eaxa_blk -playlocmaincpu -removeuserall \"" + WAVFiles[j] + "\" -=\"" + MUSFiles[j] + "\" -v3");
+                                string marker = "__DONE__";
+                                cmd.StandardInput.WriteLine($"echo {marker}");
+
+                                // Read output until the marker appears
+                                string line;
+                                while ((line = cmd.StandardOutput.ReadLine()) != null)
+                                {
+                                    if (line.Trim() == marker)
+                                        break;
+                                }
+
+                                Updated = true;
+                            }
+                        }
+                        catch
+                        {
+                            Console.WriteLine("More Files Then Expected");
+                            break;
+                        }
                     }
-                }
 
                 //Rebuild DAT File if changed
                 if (Updated)
                 {
+                    Console.WriteLine("DAT File" + HDRMusFile);
                     File.WriteAllLines(HDRMusFile + "\\WAVHashSet.Hash", HASHText);
 
-                    string marker = i.ToString();
+                    string marker = HDRFile;
                     cmd.StandardInput.WriteLine($"echo {marker}");
 
                     // Read output until the marker appears
@@ -376,19 +417,19 @@ namespace SSXLibrary
                             }
 
                         }
-                        
+
                         hdrHandler.Save(HDRFile);
                     }
                 }
+                Console.WriteLine("File Check Done " + HDRFile);
+                cmd.StandardInput.Close();
+                cmd.WaitForExit();
+                });
             }
-
-            string[] BigFile = Directory.GetFiles(DATFolder, "*.big", SearchOption.AllDirectories);
-
-            BIG.Create(BigType.BIG4, HDRFolder, BigFile[0], false, true);
-            BIG.Create(BigType.BIG4, DATFolder, MainBig, false, true);
-
-            cmd.StandardInput.Close();
-            cmd.WaitForExit();
+            finally
+            {
+                semaphore.Release();
+            }
         }
     }
 }
