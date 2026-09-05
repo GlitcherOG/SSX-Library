@@ -282,11 +282,11 @@ namespace SSXLibrary.FileHandlers
             }
 
             StreamUtil.WriteInt32(stream, ListCount);
-
-            for (int i = 0; i < ListCount; i++)
+            for (int j = 0; j < characters.Count; j++)
             {
-                var TempCharEntry = characters[i];
-                for (int j = 0; j < characters.Count; j++)
+                var TempCharEntry = characters[j];
+
+                for (int i = 0; i < TempCharEntry.unkown2s.Count; i++)
                 {
                     var TempEntry = TempCharEntry.unkown2s[i];
 

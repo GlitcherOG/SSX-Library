@@ -285,11 +285,11 @@ public sealed class LOC
         stream.Position = offsetListPosition;
         foreach (long offset in realOffset)
         {
-            stream.WriteUInt32((uint)offset, ByteOrder.LittleEndian);
+            stream.WriteUInt32((uint)offset- (uint)loclPosition, ByteOrder.LittleEndian);
         }
 
         // Write footer
-        stream.WriteUInt16(0, ByteOrder.LittleEndian);
+        //stream.WriteUInt16(0, ByteOrder.LittleEndian);
 
         // Update the LOCL size
         stream.Position = loclSizePosition;

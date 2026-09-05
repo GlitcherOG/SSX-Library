@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 using System;
 using System.IO;
 using System.Collections.Generic;
@@ -9,9 +9,9 @@ using System.Threading.Tasks;
 
 namespace SSXLibrary.JsonFiles.SSX3
 {
-    public class VisCurtainJsonHandler
+    public class ParticleInstanceJsonHandler
     {
-        public List<VisCurtain> VisCurtains = new List<VisCurtain>();
+        public List<ParticleInstance> ParticleInstances = new List<ParticleInstance>();
 
         public void CreateJson(string path, bool Inline = false)
         {
@@ -25,38 +25,41 @@ namespace SSXLibrary.JsonFiles.SSX3
             File.WriteAllText(path, serializer);
         }
 
-        public static VisCurtainJsonHandler Load(string path)
+        public static ParticleInstanceJsonHandler Load(string path)
         {
             string paths = path;
             if (File.Exists(paths))
             {
                 var stream = File.ReadAllText(paths);
-                var container = JsonConvert.DeserializeObject<VisCurtainJsonHandler>(stream);
+                var container = JsonConvert.DeserializeObject<ParticleInstanceJsonHandler>(stream);
                 return container;
             }
             else
             {
-                return new VisCurtainJsonHandler();
+                return new ParticleInstanceJsonHandler();
             }
         }
 
 
-        public struct VisCurtain
+        public struct ParticleInstance
         {
-            public float[] BoundSphere;
+            public int[] Reserved0;
 
-            public float[] Corner0;
-            public float[] Corner1;
-            public float[] Corner2;
-            public float[] Corner3;
+            public float[] Position;
+            public float[] Rotation;
+            public float[] Scale;
 
-            public float[] PlaneNormal;
-            public float PlaneDistance;
+            public float[] BoundingSphere;
 
-            public float[] BBoxMin;
-            public float[] BBoxMax;
+            public int TrackID;
+            public int RID;
+            public int DuplicateTrackID;
+            public int DuplicateRID;
 
-            public int Flag;
+            public float[] AABBMin;
+            public float[] AABBMax;
+
+            public int[] Reserved1;
         }
     }
 }

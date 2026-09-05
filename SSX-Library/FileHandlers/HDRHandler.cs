@@ -5,7 +5,7 @@ namespace SSXLibrary.FileHandlers
 {
     public class HDRHandler
     {
-        public int U1;
+        public int U1; //Some Kind of ID that def has to do with languae
         public int U2;
         public int EntryTypes;
         public int FileCount;
