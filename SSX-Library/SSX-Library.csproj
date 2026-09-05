@@ -9,6 +9,12 @@
     <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="2.1.7" />
   </ItemGroup>
 
+  <!-- Required with source and binary redistributions of the vendored BSD-3-Clause implementation. -->
+  <ItemGroup>
+    <None Include="SharpTriStrip\LICENSE.txt" Link="licenses\SharpTriStrip-LICENSE.txt"
+          CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <RootNamespace>SSX_Library</RootNamespace>

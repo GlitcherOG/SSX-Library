@@ -25,6 +25,11 @@ C#/.NET Library for Extracting, Creating, and Modifying files for SSX games.
 > - **Fixes:** AIP/SOP writer path vectors and bounding boxes, Bézier arc-length
 >   sampling, SSX On Tour MPF parsing, and 8-bit palette limiting/ordering/alpha
 >   in old SSH shapes.
+> - **Vendored SharpTriStrip:** `SSX-Library/SharpTriStrip/` is MaxHwoy's C# port
+>   of NVidia's NvTriStrip algorithm and remains under its BSD-3-Clause license,
+>   not this fork's general GPL terms. The complete required notice is retained
+>   in [`SSX-Library/SharpTriStrip/LICENSE.txt`](SSX-Library/SharpTriStrip/LICENSE.txt)
+>   and copied beside binary build output as `licenses/SharpTriStrip-LICENSE.txt`.
 >
 > `git log --oneline upstream/main..HEAD` gives the authoritative list. Fixes are
 > offered back upstream where they are generally applicable; please report

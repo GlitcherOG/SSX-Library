@@ -2,6 +2,11 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 
+/*
+ * SharpTriStrip is Copyright (c) 2021 MaxHwoy. Its original NvTriStrip algorithm is Copyright (c) NVidia.
+ * This directory is BSD-3-Clause licensed; see LICENSE.txt beside this file for the notice and full terms.
+ */
+
 namespace SharpTriStrip
 {
 	/// <summary>
