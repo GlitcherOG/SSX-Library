@@ -165,6 +165,41 @@ namespace SSX_Library.EATextureLibrary
             return Matrixes.SelectMany(x => x).ToArray();
         }
 
+        //98 - BCnEncoder.Shared.CompressionFormat.Bc3
+        public static byte[] EncodeMatrix98(Image<Rgba32> image)
+        {
+            BcEncoder bcEncoder = new BcEncoder();
+
+            bcEncoder.OutputOptions.GenerateMipMaps = false;
+            bcEncoder.OutputOptions.Format = BCnEncoder.Shared.CompressionFormat.Bc3;
+
+            byte[] Matrix = new byte[image.Width * image.Height * 4];
+
+            int offset = 0;
+
+            for (int y = 0; y < image.Height; y++)
+            {
+                for (int x = 0; x < image.Width; x++)
+                {
+                    Rgba32 pixel = image[x, y];
+
+                    Matrix[offset++] = pixel.R;
+                    Matrix[offset++] = pixel.G;
+                    Matrix[offset++] = pixel.B;
+                    Matrix[offset++] = pixel.A;
+                }
+            }
+
+            var Matrixes = bcEncoder.EncodeToRawBytes(
+                Matrix,
+                image.Width,
+                image.Height,
+                PixelFormat.Rgba32
+            );
+
+            return Matrixes.SelectMany(x => x).ToArray();
+        }
+
         //109 - ImageFormats.BGRA4444 https://github.com/bartlomiejduda/EA-Graphics-Manager/blob/c9aec00c005437ddbc2752001913e1e2f46840e7/src/EA_Image/ea_image_decoder.py#L289
         //120 - ImageFormats.BGR565 https://github.com/bartlomiejduda/EA-Graphics-Manager/blob/c9aec00c005437ddbc2752001913e1e2f46840e7/src/EA_Image/ea_image_decoder.py#L311
         //123 - Indexed Image https://github.com/bartlomiejduda/EA-Graphics-Manager/blob/c9aec00c005437ddbc2752001913e1e2f46840e7/src/EA_Image/ea_image_decoder.py#L334

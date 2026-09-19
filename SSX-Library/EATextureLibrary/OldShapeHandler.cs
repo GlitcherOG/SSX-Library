@@ -276,6 +276,10 @@ namespace SSX_Library.EATextureLibrary
                         tempImage.Image = EADecode.DecodeMatrix97(imageMatrix.Matrix, imageMatrix.Width, imageMatrix.Height);
                         tempImage.colorsTable = ImageUtil.GetBitmapColorsFast(tempImage.Image).ToList();
                         break;
+                    case MatrixType.BC3:
+                        tempImage.Image = EADecode.DecodeMatrix98(imageMatrix.Matrix, imageMatrix.Width, imageMatrix.Height);
+                        tempImage.colorsTable = ImageUtil.GetBitmapColorsFast(tempImage.Image).ToList();
+                        break;
                     case MatrixType.BGRA4444:
                         tempImage.Image = EADecode.DecodeMatrix109(imageMatrix.Matrix, imageMatrix.Width, imageMatrix.Height);
                         tempImage.colorsTable = ImageUtil.GetBitmapColorsFast(tempImage.Image).ToList();
@@ -486,6 +490,9 @@ namespace SSX_Library.EATextureLibrary
                     break;
                 case MatrixType.BC2:
                     Matrix = EAEncode.EncodeMatrix97(shapeImage.Image);
+                    break;
+                case MatrixType.BC3:
+                    Matrix = EAEncode.EncodeMatrix98(shapeImage.Image);
                     break;
                 case MatrixType.BGRA4444:
                     break;
@@ -897,6 +904,7 @@ namespace SSX_Library.EATextureLibrary
             //Xbox
             BC1 = 96,
             BC2 = 97,
+            BC3 = 98,
             BGRA4444 = 109,
             BGR565 = 120,
             EightBitXbox = 123,

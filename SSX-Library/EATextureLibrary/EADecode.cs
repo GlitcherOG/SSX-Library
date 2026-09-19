@@ -181,6 +181,30 @@ namespace SSX_Library.EATextureLibrary
             return NewImage;
         }
 
+        //98 - BCnEncoder.Shared.CompressionFormat.Bc3
+        public static Image<Rgba32> DecodeMatrix98(byte[] matrix, int width, int height)
+        {
+            //Process Image
+            Image<Rgba32> NewImage = new Image<Rgba32>(width, height);
+
+            BcDecoder bcDecoder = new BcDecoder();
+
+            var Temp = bcDecoder.DecodeRaw(matrix, width, height, BCnEncoder.Shared.CompressionFormat.Bc3);
+
+            int post = 0;
+
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    NewImage[x, y] = new Rgba32(Temp[post].r, Temp[post].g, Temp[post].b, Temp[post].a);
+                    post++;
+                }
+            }
+
+            return NewImage;
+        }
+
 
         //109 - ImageFormats.BGRA4444
         public static Image<Rgba32> DecodeMatrix109(byte[] matrix, int width, int height)
