@@ -19,6 +19,9 @@ namespace SSX_Library.EATextureLibrary
         public string EndingString;
         public List<ShapeImage> ShapeImages = new List<ShapeImage>();
 
+        public bool BigEd = false;
+
+
         public void LoadShape(string path)
         {
             ShapeImages = new List<ShapeImage>();
@@ -32,9 +35,14 @@ namespace SSX_Library.EATextureLibrary
                 {
                     ConsoleVersion = Type.Value;
 
+                    if(ConsoleVersion == TextureType.OldGC)
+                    {
+                        BigEd = true;
+                    }
+
                     FileSize = StreamUtil.ReadUInt32(stream);
 
-                    ImageCount = StreamUtil.ReadUInt32(stream);
+                    ImageCount = StreamUtil.ReadUInt32(stream, BigEd);
 
                     Format = StreamUtil.ReadString(stream, 4);
 
@@ -44,7 +52,7 @@ namespace SSX_Library.EATextureLibrary
 
                         tempImage.Shortname = StreamUtil.ReadString(stream, 4);
 
-                        tempImage.Offset = StreamUtil.ReadUInt32(stream);
+                        tempImage.Offset = StreamUtil.ReadUInt32(stream, BigEd);
 
                         //SSX OG Simple Check onsize should work
 
