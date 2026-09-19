@@ -60,7 +60,11 @@ namespace SSXLibrary.FileHandlers.Models.SSX3
                 {
                     stream.Position = StartPos + modelHeaders[i].ModelOffset;
                     ModelHeader modelHandler = modelHeaders[i];
-                    modelHandler.Matrix =  Refpack.Decompress(StreamUtil.ReadBytes(stream, modelHeaders[i].ModelSize));
+                    modelHandler.Matrix = StreamUtil.ReadBytes(stream, modelHeaders[i].ModelSize);
+                    if (Refpack.HasRefpackSignature(modelHandler.Matrix))
+                    {
+                        modelHandler.Matrix = Refpack.Decompress(modelHandler.Matrix);
+                    }
                     modelHeaders[i] = modelHandler;
                 }
 
@@ -491,6 +495,116 @@ namespace SSXLibrary.FileHandlers.Models.SSX3
 
                 StreamUtil.WriteBytes(stream, TempModel.Matrix);
             }
+
+            if (File.Exists(path))
+            {
+                File.Delete(path);
+            }
+            var file = File.Create(path);
+            stream.Position = 0;
+            stream.CopyTo(file);
+            stream.Dispose();
+            file.Close();
+        }
+
+        public void SaveCompressedData(string path)
+        {
+            MemoryStream stream = new MemoryStream();
+
+            //Write File Header
+
+            StreamUtil.WriteBytes(stream, Version);
+            StreamUtil.WriteInt16(stream, modelHeaders.Count, true);
+            StreamUtil.WriteInt16(stream, 12, true);
+            StreamUtil.WriteInt32(stream, 96 * modelHeaders.Count+12, true);
+
+            //Skip Entry Data
+            stream.Position += 96 * modelHeaders.Count;
+            int StartModelData = (int)stream.Position;
+
+            //For Each Entry Compress and Write info getting sizes
+            for (int i = 0; i < modelHeaders.Count; i++)
+            {
+                var Header = modelHeaders[i];
+
+                Header.ModelOffset = (int)stream.Position - StartModelData;
+
+                var MatrixCompress = Refpack.Compress(modelHeaders[i].Matrix);
+
+                StreamUtil.WriteBytes(stream, MatrixCompress);
+
+                Header.ModelSize = modelHeaders[i].Matrix.Length;
+
+                modelHeaders[i] = Header;
+            }
+
+            //Go back and write entry data
+            stream.Position = 12;
+
+            for (int i = 0; i < modelHeaders.Count; i++)
+            {
+                var Header = modelHeaders[i];
+
+                StreamUtil.WriteString(stream, Header.ModelName, 16);
+                StreamUtil.WriteInt32(stream, Header.ModelOffset, true);
+                StreamUtil.WriteInt32(stream, Header.ModelSize, true);
+                StreamUtil.WriteInt32(stream, Header.OffsetBoneData, true);
+
+                StreamUtil.WriteInt32(stream, Header.OffsetMorphID, true);
+                StreamUtil.WriteInt32(stream, Header.OffsetMorphData, true);
+                StreamUtil.WriteInt32(stream, Header.U2, true);
+                StreamUtil.WriteInt32(stream, Header.OffsetSkinningSection, true);
+
+                StreamUtil.WriteInt32(stream, Header.OffsetTristripSection, true);
+                StreamUtil.WriteInt32(stream, Header.OffsetVertexSection, true);
+                StreamUtil.WriteInt32(stream, Header.OffsetMateralList, true);
+
+                stream.Position += 24;
+
+                StreamUtil.WriteInt16(stream, Header.NumTristrip, true);
+                StreamUtil.WriteInt16(stream, Header.NumVertices, true);
+                StreamUtil.WriteInt16(stream, Header.NumBones, true);
+                StreamUtil.WriteInt16(stream, Header.NumMorphs, true);
+
+                StreamUtil.WriteInt16(stream, Header.NumWeight, true);
+                StreamUtil.WriteInt16(stream, Header.NumMeshPerSkin, true);
+                StreamUtil.WriteInt16(stream, Header.NumMaterials, true);
+                StreamUtil.WriteInt16(stream, Header.FileID, true);
+            }
+
+            //modelHeaders = new List<ModelHeader>();
+            //for (int i = 0; i < NumModels; i++)
+            //{
+            //    var NewModelHeader = new ModelHeader();
+
+            //    NewModelHeader.ModelName = StreamUtil.ReadString(stream, 16);
+            //    NewModelHeader.ModelOffset = StreamUtil.ReadUInt32(stream, true);
+            //    NewModelHeader.ModelSize = StreamUtil.ReadUInt32(stream, true);
+            //    NewModelHeader.OffsetBoneData = StreamUtil.ReadUInt32(stream, true);
+
+            //    NewModelHeader.OffsetMorphID = StreamUtil.ReadUInt32(stream, true);
+            //    NewModelHeader.OffsetMorphData = StreamUtil.ReadUInt32(stream, true);
+            //    NewModelHeader.U2 = StreamUtil.ReadUInt32(stream, true);
+            //    NewModelHeader.OffsetSkinningSection = StreamUtil.ReadUInt32(stream, true);
+
+            //    NewModelHeader.OffsetTristripSection = StreamUtil.ReadUInt32(stream, true);
+            //    NewModelHeader.OffsetVertexSection = StreamUtil.ReadUInt32(stream, true);
+            //    NewModelHeader.OffsetMateralList = StreamUtil.ReadUInt32(stream, true);
+
+            //    stream.Position += 24;
+
+            //    NewModelHeader.NumTristrip = StreamUtil.ReadUInt16(stream, true);
+            //    NewModelHeader.NumVertices = StreamUtil.ReadUInt16(stream, true);
+            //    NewModelHeader.NumBones = StreamUtil.ReadUInt16(stream, true);
+            //    NewModelHeader.NumMorphs = StreamUtil.ReadUInt16(stream, true);
+
+            //    NewModelHeader.NumWeight = StreamUtil.ReadUInt16(stream, true);
+            //    NewModelHeader.NumMeshPerSkin = StreamUtil.ReadUInt16(stream, true);
+            //    NewModelHeader.NumMaterials = StreamUtil.ReadUInt16(stream, true);
+            //    NewModelHeader.FileID = StreamUtil.ReadUInt16(stream, false);
+
+            //    modelHeaders.Add(NewModelHeader);
+            //}
 
             if (File.Exists(path))
             {
