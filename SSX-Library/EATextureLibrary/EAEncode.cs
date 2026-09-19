@@ -201,7 +201,24 @@ namespace SSX_Library.EATextureLibrary
         }
 
         //109 - ImageFormats.BGRA4444 https://github.com/bartlomiejduda/EA-Graphics-Manager/blob/c9aec00c005437ddbc2752001913e1e2f46840e7/src/EA_Image/ea_image_decoder.py#L289
+        public static byte[] EncodeMatrix109(Image<Rgba32> Image)
+        {
+            //Process Image
+            byte[] Matrix = new byte[Image.Width*Image.Height*2];
+            Image.CloneAs<Bgra4444>().CopyPixelDataTo(Matrix);
+            return Matrix;
+        }
+
+
         //120 - ImageFormats.BGR565 https://github.com/bartlomiejduda/EA-Graphics-Manager/blob/c9aec00c005437ddbc2752001913e1e2f46840e7/src/EA_Image/ea_image_decoder.py#L311
+        public static byte[] EncodeMatrix120(Image<Rgba32> Image)
+        {
+            //Process Image
+            byte[] Matrix = new byte[Image.Width * Image.Height * 2];
+            Image.CloneAs<Bgr565>().CopyPixelDataTo(Matrix);
+            return Matrix;
+        }
+
         //123 - Indexed Image https://github.com/bartlomiejduda/EA-Graphics-Manager/blob/c9aec00c005437ddbc2752001913e1e2f46840e7/src/EA_Image/ea_image_decoder.py#L334
         //125 - BCnEncoder.Shared.CompressionFormat.Bgra
         public static byte[] EncodeMatrix125(Image<Rgba32> image)

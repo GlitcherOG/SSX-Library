@@ -495,8 +495,10 @@ namespace SSX_Library.EATextureLibrary
                     Matrix = EAEncode.EncodeMatrix98(shapeImage.Image);
                     break;
                 case MatrixType.BGRA4444:
+                    Matrix = EAEncode.EncodeMatrix109(shapeImage.Image);
                     break;
                 case MatrixType.BGR565:
+                    Matrix = EAEncode.EncodeMatrix120(shapeImage.Image);
                     break;
                 case MatrixType.BGRA:
                     Matrix = EAEncode.EncodeMatrix125(shapeImage.Image);
