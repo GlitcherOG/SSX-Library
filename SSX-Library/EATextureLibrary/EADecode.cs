@@ -71,64 +71,186 @@ namespace SSX_Library.EATextureLibrary
         //21
         //25
         //30
-        public static Image<Rgba32> DecodeMatrix30(byte[] data, int width, int height)
+        public static Image<Rgba32> DecodeMatrix30(byte[] data,int width,int height)
         {
-            var decoder = new BcDecoder();
+            int blocksX = (width + 3) / 4;
+            int blocksY = (height + 3) / 4;
 
-            var img = new Image<Rgba32>(width, height);
+            int requiredSize = blocksX * blocksY * 8;
 
-            int tileCountX = width / 8;
-            int tileCountY = height / 8;
-
-            int offset = 0;
-
-            for (int ty = 0; ty < tileCountY; ty++)
+            if (data.Length < requiredSize)
             {
-                for (int tx = 0; tx < tileCountX; tx++)
+                throw new ArgumentException(
+                    $"CMPR data is too small. " +
+                    $"Expected at least {requiredSize} bytes, got {data.Length}.");
+            }
+
+            Image<Rgba32> image = new(width, height);
+
+            int sourceOffset = 0;
+
+            for (int macroY = 0; macroY < height; macroY += 8)
+            {
+                for (int macroX = 0; macroX < width; macroX += 8)
                 {
-                    // four BC1 blocks per tile, each 8 bytes
-                    DecodeBlock(decoder, img, data, ref offset, tx * 8, ty * 8);       // top-left
-                    DecodeBlock(decoder, img, data, ref offset, tx * 8 + 4, ty * 8);   // top-right
-                    DecodeBlock(decoder, img, data, ref offset, tx * 8, ty * 8 + 4);   // bottom-left
-                    DecodeBlock(decoder, img, data, ref offset, tx * 8 + 4, ty * 8 + 4); // bottom-right
+                    DecodeBlock(data,ref sourceOffset,image,macroX + 0,macroY + 0);
+
+                    DecodeBlock(data,ref sourceOffset,image,macroX + 4,macroY + 0);
+
+                    DecodeBlock(data,ref sourceOffset,image,macroX + 0,macroY + 4);
+
+                    DecodeBlock(data,ref sourceOffset,image,macroX + 4,macroY + 4);
                 }
             }
 
-            return img;
+            return image;
         }
 
         private static void DecodeBlock(
-            BcDecoder decoder,
-            Image<Rgba32> output,
             byte[] data,
             ref int offset,
-            int px,
-            int py)
+            Image<Rgba32> image,
+            int startX,
+            int startY)
         {
-            Span<byte> block = data.AsSpan(offset, 8);
+            if (offset + 8 > data.Length)
+                return;
+
+            // RGB565 colors are big-endian in the N64 CMPR data.
+            ushort color0 = ReadUInt16BE(data, offset + 0);
+            ushort color1 = ReadUInt16BE(data, offset + 2);
+
+            /*
+             * Four bytes containing 16 two-bit indices.
+             *
+             * Each pixel uses two bits:
+             *
+             * pixel 0 = bits 31-30
+             * pixel 1 = bits 29-28
+             * ...
+             * pixel 15 = bits 1-0
+             */
+            uint indices =
+                ((uint)data[offset + 4] << 24) |
+                ((uint)data[offset + 5] << 16) |
+                ((uint)data[offset + 6] << 8) |
+                data[offset + 7];
+
             offset += 8;
 
-            // decode BC1 block → ColorRgba32[16]
-            var decoded = decoder.DecodeBlock(block, CompressionFormat.Bc1).Span;
+            Rgba32[] colors = new Rgba32[4];
 
-            // Copy 4×4 block into output Memory2D<Rgba32>
-            for (int y = 0; y < decoded.Height; y++)
+            colors[0] = DecodeRGB565(color0);
+            colors[1] = DecodeRGB565(color1);
+
+            if (color0 > color1)
             {
-                if (py + y >= output.Height)
-                    continue;
+                // Four-color BC1 mode.
+                colors[2] = Interpolate(
+                    colors[0],
+                    colors[1],
+                    2,
+                    1);
 
-                var srcRow = decoded.GetRow(y);
-                var dstRow = output.DangerousGetPixelRowMemory(py + y).Span;
+                colors[3] = Interpolate(
+                    colors[0],
+                    colors[1],
+                    1,
+                    2);
+            }
+            else
+            {
+                // Three-color BC1 mode.
+                colors[2] = Interpolate(
+                    colors[0],
+                    colors[1],
+                    1,
+                    1);
 
-                for (int x = 0; x < decoded.Width; x++)
+                colors[3] = new Rgba32(
+                    0,
+                    0,
+                    0,
+                    0);
+            }
+
+            // Decode the 4x4 pixels.
+            for (int y = 0; y < 4; y++)
+            {
+                for (int x = 0; x < 4; x++)
                 {
-                    if (px + x >= output.Width)
-                        continue;
+                    int pixelIndex = y * 4 + x;
 
-                    ColorRgba32 c = srcRow[x];
-                    dstRow[px + x] = new Rgba32(c.r, c.g, c.b, c.a);
+                    int colorIndex =
+                        (int)((indices >> (30 - pixelIndex * 2)) & 3);
+
+                    int destX = startX + x;
+                    int destY = startY + y;
+
+                    if (destX >= image.Width ||
+                        destY >= image.Height)
+                    {
+                        continue;
+                    }
+
+                    image[destX, destY] = colors[colorIndex];
                 }
             }
+        }
+
+        private static ushort ReadUInt16BE(
+            byte[] data,
+            int offset)
+        {
+            return (ushort)(
+                (data[offset] << 8) |
+                data[offset + 1]);
+        }
+
+        private static Rgba32 DecodeRGB565(
+            ushort value)
+        {
+            int r = (value >> 11) & 0x1F;
+            int g = (value >> 5) & 0x3F;
+            int b = value & 0x1F;
+
+            // Expand 5/6-bit channels to 8-bit.
+            byte red = (byte)((r << 3) | (r >> 2));
+            byte green = (byte)((g << 2) | (g >> 4));
+            byte blue = (byte)((b << 3) | (b >> 2));
+
+            return new Rgba32(
+                red,
+                green,
+                blue,
+                255);
+        }
+
+        private static Rgba32 Interpolate(
+            Rgba32 a,
+            Rgba32 b,
+            int aWeight,
+            int bWeight)
+        {
+            int divisor = aWeight + bWeight;
+
+            byte r = (byte)(
+                (a.R * aWeight +
+                 b.R * bWeight) / divisor);
+
+            byte g = (byte)(
+                (a.G * aWeight +
+                 b.G * bWeight) / divisor);
+
+            byte blue = (byte)(
+                (a.B * aWeight +
+                 b.B * bWeight) / divisor);
+
+            return new Rgba32(
+                r,
+                g,
+                blue,
+                255);
         }
 
         //Xbox

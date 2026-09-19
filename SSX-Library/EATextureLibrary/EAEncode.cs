@@ -94,6 +94,289 @@ namespace SSX_Library.EATextureLibrary
             return Matrix;
         }
 
+        //Nintendo Wii/GC
+        //30 - N64 CMPR
+        public static byte[] EncodeMatrix30(Image<Rgba32> image)
+        {
+            int width = image.Width;
+            int height = image.Height;
+
+            int blocksX = (width + 3) / 4;
+            int blocksY = (height + 3) / 4;
+
+            byte[] output = new byte[blocksX * blocksY * 8];
+
+            int offset = 0;
+
+            // N64 CMPR is arranged in 8x8 macroblocks.
+            for (int macroY = 0; macroY < height; macroY += 8)
+            {
+                for (int macroX = 0; macroX < width; macroX += 8)
+                {
+                    EncodeBlock(
+                        image,
+                        macroX + 0,
+                        macroY + 0,
+                        output,
+                        ref offset);
+
+                    EncodeBlock(
+                        image,
+                        macroX + 4,
+                        macroY + 0,
+                        output,
+                        ref offset);
+
+                    EncodeBlock(
+                        image,
+                        macroX + 0,
+                        macroY + 4,
+                        output,
+                        ref offset);
+
+                    EncodeBlock(
+                        image,
+                        macroX + 4,
+                        macroY + 4,
+                        output,
+                        ref offset);
+                }
+            }
+
+            return output;
+        }
+
+        private static void EncodeBlock(
+            Image<Rgba32> image,
+            int startX,
+            int startY,
+            byte[] output,
+            ref int offset)
+        {
+            Rgba32[] pixels = new Rgba32[16];
+
+            // Read 4x4 pixels.
+            for (int y = 0; y < 4; y++)
+            {
+                for (int x = 0; x < 4; x++)
+                {
+                    int px = startX + x;
+                    int py = startY + y;
+
+                    if (px < image.Width && py < image.Height)
+                    {
+                        pixels[y * 4 + x] =
+                            image[px, py];
+                    }
+                    else
+                    {
+                        // Edge padding.
+                        pixels[y * 4 + x] =
+                            new Rgba32(0, 0, 0, 0);
+                    }
+                }
+            }
+
+            // Find RGB565 endpoints.
+            FindEndpoints(
+                pixels,
+                out ushort color0,
+                out ushort color1);
+
+            // Write RGB565 endpoints, big endian.
+            output[offset + 0] =
+                (byte)(color0 >> 8);
+
+            output[offset + 1] =
+                (byte)(color0 & 0xFF);
+
+            output[offset + 2] =
+                (byte)(color1 >> 8);
+
+            output[offset + 3] =
+                (byte)(color1 & 0xFF);
+
+            // Generate palette.
+            Rgba32[] palette = new Rgba32[4];
+
+            palette[0] = DecodeRGB565(color0);
+            palette[1] = DecodeRGB565(color1);
+
+            if (color0 > color1)
+            {
+                palette[2] = Interpolate(
+                    palette[0],
+                    palette[1],
+                    2,
+                    1);
+
+                palette[3] = Interpolate(
+                    palette[0],
+                    palette[1],
+                    1,
+                    2);
+            }
+            else
+            {
+                palette[2] = Interpolate(
+                    palette[0],
+                    palette[1],
+                    1,
+                    1);
+
+                palette[3] =
+                    new Rgba32(0, 0, 0, 0);
+            }
+
+            // Find the closest palette entry for each pixel.
+            uint indices = 0;
+
+            for (int i = 0; i < 16; i++)
+            {
+                int index = FindClosestColor(
+                    pixels[i],
+                    palette);
+
+                indices |=
+                    (uint)index << (30 - i * 2);
+            }
+
+            // Write indices.
+            output[offset + 4] =
+                (byte)(indices >> 24);
+
+            output[offset + 5] =
+                (byte)(indices >> 16);
+
+            output[offset + 6] =
+                (byte)(indices >> 8);
+
+            output[offset + 7] =
+                (byte)indices;
+
+            offset += 8;
+        }
+
+        private static void FindEndpoints(
+            Rgba32[] pixels,
+            out ushort color0,
+            out ushort color1)
+        {
+            int minR = 255;
+            int minG = 255;
+            int minB = 255;
+
+            int maxR = 0;
+            int maxG = 0;
+            int maxB = 0;
+
+            foreach (Rgba32 pixel in pixels)
+            {
+                minR = Math.Min(minR, pixel.R);
+                minG = Math.Min(minG, pixel.G);
+                minB = Math.Min(minB, pixel.B);
+
+                maxR = Math.Max(maxR, pixel.R);
+                maxG = Math.Max(maxG, pixel.G);
+                maxB = Math.Max(maxB, pixel.B);
+            }
+
+            color0 = EncodeRGB565(
+                (byte)maxR,
+                (byte)maxG,
+                (byte)maxB);
+
+            color1 = EncodeRGB565(
+                (byte)minR,
+                (byte)minG,
+                (byte)minB);
+
+            // Force four-color BC1 mode.
+            if (color0 <= color1)
+            {
+                (color0, color1) =
+                    (color1, color0);
+            }
+        }
+
+        private static ushort EncodeRGB565(
+            byte r,
+            byte g,
+            byte b)
+        {
+            int r5 = (r * 31 + 127) / 255;
+            int g6 = (g * 63 + 127) / 255;
+            int b5 = (b * 31 + 127) / 255;
+
+            return (ushort)(
+                (r5 << 11) |
+                (g6 << 5) |
+                b5);
+        }
+
+        private static Rgba32 DecodeRGB565(
+            ushort value)
+        {
+            int r = (value >> 11) & 0x1F;
+            int g = (value >> 5) & 0x3F;
+            int b = value & 0x1F;
+
+            return new Rgba32(
+                (byte)((r << 3) | (r >> 2)),
+                (byte)((g << 2) | (g >> 4)),
+                (byte)((b << 3) | (b >> 2)),
+                255);
+        }
+
+        private static Rgba32 Interpolate(
+            Rgba32 a,
+            Rgba32 b,
+            int aWeight,
+            int bWeight)
+        {
+            int divisor = aWeight + bWeight;
+
+            return new Rgba32(
+                (byte)((a.R * aWeight +
+                        b.R * bWeight) / divisor),
+
+                (byte)((a.G * aWeight +
+                        b.G * bWeight) / divisor),
+
+                (byte)((a.B * aWeight +
+                        b.B * bWeight) / divisor),
+
+                255);
+        }
+
+        private static int FindClosestColor(
+            Rgba32 pixel,
+            Rgba32[] palette)
+        {
+            int bestIndex = 0;
+            int bestDistance = int.MaxValue;
+
+            for (int i = 0; i < 4; i++)
+            {
+                int dr = pixel.R - palette[i].R;
+                int dg = pixel.G - palette[i].G;
+                int db = pixel.B - palette[i].B;
+
+                int distance =
+                    dr * dr +
+                    dg * dg +
+                    db * db;
+
+                if (distance < bestDistance)
+                {
+                    bestDistance = distance;
+                    bestIndex = i;
+                }
+            }
+
+            return bestIndex;
+        }
+
         //Xbox
         //96 - BCnEncoder.Shared.CompressionFormat.Bc1
         public static byte[] EncodeMatrixDXT1(Image<Rgba32> image)
@@ -254,7 +537,5 @@ namespace SSX_Library.EATextureLibrary
 
             return Matrixes.SelectMany(x => x).ToArray();
         }
-
-        //Nintendo Wii/GC
     }
 }

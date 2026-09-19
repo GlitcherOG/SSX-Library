@@ -142,18 +142,18 @@ namespace SSX_Library.EATextureLibrary
 
                     if (shape.MatrixFormat != MatrixType.LongName && shape.MatrixFormat != MatrixType.Unknown1 && shape.MatrixFormat != MatrixType.Unknown)
                     {
-                        shape.Size = StreamUtil.ReadUInt24(stream);
+                        shape.Size = StreamUtil.ReadUInt24(stream, BigEd);
 
-                        shape.Width = StreamUtil.ReadInt16(stream);
+                        shape.Width = StreamUtil.ReadInt16(stream, BigEd);
 
-                        shape.Height = StreamUtil.ReadInt16(stream);
+                        shape.Height = StreamUtil.ReadInt16(stream, BigEd);
 
-                        shape.Xaxis = StreamUtil.ReadInt16(stream);
+                        shape.Xaxis = StreamUtil.ReadInt16(stream, BigEd);
 
-                        shape.Yaxis = StreamUtil.ReadInt16(stream);
+                        shape.Yaxis = StreamUtil.ReadInt16(stream, BigEd);
 
                         //Add Other Flags Later
-                        shape.Flags = StreamUtil.ReadInt32(stream);
+                        shape.Flags = StreamUtil.ReadInt32(stream, BigEd);
 
                         if (shape.Size == 0 || shape.MatrixFormat == MatrixType.LongName)
                         {
@@ -227,7 +227,13 @@ namespace SSX_Library.EATextureLibrary
                     }
                 }
 
-                if(tempImage.MatrixType == MatrixType.EightBitXbox)
+                if (tempImage.MatrixType == MatrixType.EightBitGC)
+                {
+                    var colorShape = GetShapeHeader(tempImage, MatrixType.ColorPallet_GC);
+                    tempImage.colorsTable = GetColorTableGC(tempImage, MatrixType.ColorPallet_GC);
+                }
+
+                if (tempImage.MatrixType == MatrixType.EightBitXbox)
                 {
                     var colorShape = GetShapeHeader(tempImage, MatrixType.ColorPallet_Xbox);
                     tempImage.colorsTable = GetColorTable(tempImage, MatrixType.ColorPallet_Xbox);
@@ -252,6 +258,7 @@ namespace SSX_Library.EATextureLibrary
                     case MatrixType.EightBit:
                     case MatrixType.EightBitCompressed:
                     case MatrixType.EightBitXbox:
+                    case MatrixType.EightBitGC:
                     case MatrixType.EightBit_PSP:   
                         if (tempImage.SwizzledImage)
                         {
@@ -263,7 +270,7 @@ namespace SSX_Library.EATextureLibrary
                         tempImage.Image = EADecode.DecodeMatrix5(imageMatrix.Matrix, imageMatrix.Width, imageMatrix.Height);
                         tempImage.colorsTable = ImageUtil.GetBitmapColorsFast(tempImage.Image).ToList();
                         break;
-                    case MatrixType.N64:
+                    case MatrixType.N64_CMPR:
                         tempImage.Image = EADecode.DecodeMatrix30(imageMatrix.Matrix, imageMatrix.Width, imageMatrix.Height);
                         tempImage.colorsTable = ImageUtil.GetBitmapColorsFast(tempImage.Image).ToList();
                         break;
@@ -483,7 +490,8 @@ namespace SSX_Library.EATextureLibrary
                 case MatrixType.FullColor:
                     Matrix = EAEncode.EncodeMatrix5(shapeImage.Image);
                     break;
-                case MatrixType.N64:
+                case MatrixType.N64_CMPR:
+                    Matrix= EAEncode.EncodeMatrix30(shapeImage.Image);
                     break;
                 case MatrixType.BC1_PSP:
                 case MatrixType.BC1:
@@ -558,20 +566,20 @@ namespace SSX_Library.EATextureLibrary
         {
             StreamUtil.WriteUInt8(stream, (int)image.MatrixType);
 
-            StreamUtil.WriteInt24(stream, DataSize);
+            StreamUtil.WriteInt24(stream, DataSize, BigEd);
 
-            StreamUtil.WriteInt16(stream, image.Image.Width);
+            StreamUtil.WriteInt16(stream, image.Image.Width, BigEd);
 
-            StreamUtil.WriteInt16(stream, image.Image.Height);
+            StreamUtil.WriteInt16(stream, image.Image.Height, BigEd);
 
-            StreamUtil.WriteInt16(stream, image.Xaxis);
+            StreamUtil.WriteInt16(stream, image.Xaxis, BigEd);
 
-            StreamUtil.WriteInt16(stream, image.Yaxis);
+            StreamUtil.WriteInt16(stream, image.Yaxis, BigEd);
 
             int Flags = 0;
             Flags += (image.SwizzledImage ? 8192 : 0);
 
-            StreamUtil.WriteInt32(stream, Flags);
+            StreamUtil.WriteInt32(stream, Flags, BigEd);
         }
 
         public void WriteColourTable(Stream stream, ShapeImage image)
@@ -680,6 +688,71 @@ namespace SSX_Library.EATextureLibrary
             for (int i = 0; i < RealColour; i++)
             {
                 colors.Add(new Rgba32(colorShape.Matrix[i * 4], colorShape.Matrix[i * 4 + 1], colorShape.Matrix[i * 4 + 2], colorShape.Matrix[i * 4 + 3]));
+            }
+
+            return colors;
+        }
+
+        private List<Rgba32> GetColorTableGC(ShapeImage newSSHImage, MatrixType matrixType)
+        {
+            var colorShape = GetShapeHeader(newSSHImage, matrixType).Value;
+
+            //if(colorShape.MatrixFormat == MatrixType.Unknown)
+            //{
+            //    colorShape = GetShapeHeader(newSSHImage, MatrixType.ColorPallet_Xbox).Value;
+            //}
+            int RealColour = colorShape.Width * colorShape.Height;
+
+            if (colorShape.Size != 0)
+            {
+                RealColour = (colorShape.Size - 16) / 2;
+            }
+
+            if (newSSHImage.SwizzledColours)
+            {
+                colorShape.Matrix = ByteUtil.UnswizzlePalette(colorShape.Matrix, RealColour);
+            }
+
+            List<Rgba32> colors = new List<Rgba32>();
+
+            for (int i = 0; i < RealColour; i++)
+            {
+                ushort value = (ushort)(
+                    (colorShape.Matrix[i * 2] << 8) |
+                    colorShape.Matrix[i * 2 + 1]);
+
+                byte r;
+                byte g;
+                byte b;
+                byte a;
+
+                if ((value & 0x8000) != 0)
+                {
+                    // 1RRRRRGGGGGBBBBB
+                    int r5 = (value >> 10) & 0x1F;
+                    int g5 = (value >> 5) & 0x1F;
+                    int b5 = value & 0x1F;
+
+                    r = (byte)((r5 << 3) | (r5 >> 2));
+                    g = (byte)((g5 << 3) | (g5 >> 2));
+                    b = (byte)((b5 << 3) | (b5 >> 2));
+                    a = 255;
+                }
+                else
+                {
+                    // 0AAARRRRGGGGBBBB
+                    int a3 = (value >> 12) & 0x07;
+                    int r4 = (value >> 8) & 0x0F;
+                    int g4 = (value >> 4) & 0x0F;
+                    int b4 = value & 0x0F;
+
+                    r = (byte)((r4 << 4) | r4);
+                    g = (byte)((g4 << 4) | g4);
+                    b = (byte)((b4 << 4) | b4);
+                    a = (byte)((a3 << 5) | (a3 << 2) | (a3 >> 1));
+                }
+
+                colors.Add(new Rgba32(r, g, b, a));
             }
 
             return colors;
@@ -889,16 +962,17 @@ namespace SSX_Library.EATextureLibrary
             Unknown = 0,
 
             //PS2
-
             FourBit = 1,
             EightBit = 2,
             FullColor = 5,
 
             //N64
-            N64 = 30,
+            EightBitGC = 25,
+            N64_CMPR = 30,
 
             ColorPallet = 33,
             ColorPallet_Xbox = 42,
+            ColorPallet_GC = 50,
 
             //PSP
             ColorPallet_PSP = 57,
