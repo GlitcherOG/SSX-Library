@@ -402,6 +402,84 @@ internal class ByteUtil
         return unswizzled;
     }
 
+    public static byte[] N64I8Deswizzle(
+        byte[] source,
+        int width,
+        int height)
+    {
+        byte[] result = new byte[width * height];
+
+        int src = 0;
+
+        for (int y = 0; y < height; y += 4)
+        {
+            for (int x = 0; x < width; x += 8)
+            {
+                for (int row = 0; row < 4; row++)
+                {
+                    int py = y + row;
+
+                    if (py >= height)
+                        continue;
+
+                    for (int col = 0; col < 8; col++)
+                    {
+                        int px = x + col;
+
+                        if (px >= width)
+                            continue;
+
+                        if (src >= source.Length)
+                            continue;
+
+                        result[py * width + px] =
+                            source[src++];
+
+                    }
+                }
+            }
+        }
+
+        return result;
+    }
+
+    public static byte[] N64I8Swizzle(
+    byte[] source,
+    int width,
+    int height)
+    {
+        byte[] result = new byte[source.Length];
+
+        int dst = 0;
+
+        for (int y = 0; y < height; y += 4)
+        {
+            for (int x = 0; x < width; x += 8)
+            {
+                for (int row = 0; row < 4; row++)
+                {
+                    int py = y + row;
+
+                    if (py >= height)
+                        continue;
+
+                    for (int col = 0; col < 8; col++)
+                    {
+                        int px = x + col;
+
+                        if (px >= width)
+                            continue;
+
+                        result[dst++] =
+                            source[py * width + px];
+                    }
+                }
+            }
+        }
+
+        return result;
+    }
+
     public static float UintByteToFloat(int Int)
     {
         byte[] bytes = BitConverter.GetBytes(Int);

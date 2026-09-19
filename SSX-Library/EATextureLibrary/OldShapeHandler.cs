@@ -153,7 +153,9 @@ namespace SSX_Library.EATextureLibrary
                         shape.Yaxis = StreamUtil.ReadInt16(stream, BigEd);
 
                         //Add Other Flags Later
-                        shape.Flags = StreamUtil.ReadInt32(stream, BigEd);
+                        shape.Flags = StreamUtil.ReadInt16(stream, BigEd);
+
+                        stream.Position += 2;
 
                         if (shape.Size == 0 || shape.MatrixFormat == MatrixType.LongName)
                         {
@@ -258,11 +260,17 @@ namespace SSX_Library.EATextureLibrary
                     case MatrixType.EightBit:
                     case MatrixType.EightBitCompressed:
                     case MatrixType.EightBitXbox:
-                    case MatrixType.EightBitGC:
                     case MatrixType.EightBit_PSP:   
                         if (tempImage.SwizzledImage)
                         {
                             imageMatrix.Matrix = ByteUtil.Unswizzle8(imageMatrix.Matrix, imageMatrix.Width, imageMatrix.Height);
+                        }
+                        tempImage.Image = EADecode.DecodeMatrix2(imageMatrix.Matrix, tempImage.colorsTable, imageMatrix.Width, imageMatrix.Height);
+                        break;
+                    case MatrixType.EightBitGC:
+                        if (tempImage.SwizzledImage)
+                        {
+                            imageMatrix.Matrix = ByteUtil.N64I8Deswizzle(imageMatrix.Matrix, imageMatrix.Width, imageMatrix.Height);
                         }
                         tempImage.Image = EADecode.DecodeMatrix2(imageMatrix.Matrix, tempImage.colorsTable, imageMatrix.Width, imageMatrix.Height);
                         break;
@@ -579,7 +587,9 @@ namespace SSX_Library.EATextureLibrary
             int Flags = 0;
             Flags += (image.SwizzledImage ? 8192 : 0);
 
-            StreamUtil.WriteInt32(stream, Flags, BigEd);
+            StreamUtil.WriteInt16(stream, Flags, BigEd);
+
+            stream.Position += 2;
         }
 
         public void WriteColourTable(Stream stream, ShapeImage image)
