@@ -158,7 +158,7 @@ namespace SSX_Library.EATextureLibrary
                         if (shape.Size == 0 || shape.MatrixFormat == MatrixType.LongName)
                         {
                             int RealSize = shape.Width * shape.Height;
-                            if (shape.MatrixFormat == MatrixType.ColorPallet || shape.MatrixFormat == MatrixType.ColorPallet_Xbox || shape.MatrixFormat == MatrixType.FullColor)
+                            if (shape.MatrixFormat == MatrixType.ColorPallet || shape.MatrixFormat == MatrixType.ColorPallet_Xbox || shape.MatrixFormat == MatrixType.FullColor || shape.MatrixFormat == MatrixType.BGRA)
                             {
                                 RealSize = RealSize * 4;
                             }
@@ -482,14 +482,17 @@ namespace SSX_Library.EATextureLibrary
                     break;
                 case MatrixType.BC1_PSP:
                 case MatrixType.BC1:
+                    Matrix = EAEncode.EncodeMatrixDXT1(shapeImage.Image);
                     break;
                 case MatrixType.BC2:
+                    Matrix = EAEncode.EncodeMatrix97(shapeImage.Image);
                     break;
                 case MatrixType.BGRA4444:
                     break;
                 case MatrixType.BGR565:
                     break;
                 case MatrixType.BGRA:
+                    Matrix = EAEncode.EncodeMatrix125(shapeImage.Image);
                     break;
                 default:
                     Console.WriteLine(shapeImage.MatrixType + " Unknown Matrix");
@@ -530,7 +533,7 @@ namespace SSX_Library.EATextureLibrary
             }
 
             //Write Longname
-            if (shapeImage.Longname != "")
+            if (shapeImage.Longname != "" && shapeImage.Longname !=null)
             {
                 stream.WriteUInt32((byte)MatrixType.LongName, ByteOrder.LittleEndian);
                 stream.WriteAsciiWithLength(shapeImage.Longname, 12);
