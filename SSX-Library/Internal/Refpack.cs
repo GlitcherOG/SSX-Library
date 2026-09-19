@@ -138,102 +138,126 @@ internal static class Refpack
     /// <summary>
     /// Compresses an array of bytes to Refpack.
     /// </summary>
-    public static byte[] Compress(byte[] inputData)
+    public static byte[] Compress(byte[] input)
     {
-        bool endIsValid = false;
-        List<byte[]> compressedChunks = [];
-        int compressedIndex = 0;
-        int compressedLength = 0;
+        byte[] output;
 
-        // Is data too small to compress
-        if (inputData.Length < 16)
+        byte[] Signature = new byte[2];
+        int DecompressSize;
+        int CompressSize;
+
+        int BlockInterval = 1;
+        int SearchLength = 1;
+        int PrequeueLength = SearchLength / BlockInterval;
+        int QueueLength = 131000 / BlockInterval - PrequeueLength;
+        int SameValToTrack = 10;
+        int BruteForceLength = 64;
+
+        if (input.LongLength >= 0xFFFFFFFF)
         {
-            return inputData;
+            throw new InvalidOperationException("input data is too large");
         }
 
-        Queue<KeyValuePair<int, int>> blockTrackingQueue = new();
-        Queue<KeyValuePair<int, int>> blockPretrackingQueue = new();
+        var endIsValid = false;
+        var compressedChunks = new List<byte[]>();
+        var compressedIndex = 0;
+        var compressedLength = 0;
+        output = null;
 
-        // Used to prevent constant allocation/freeing
-        Queue<List<int>> unusedLists = new();
-        Dictionary<int, List<int>> latestBlocks = [];
-        int lastBlockStored = 0;
-
-        byte[] output;
-        while (compressedIndex < inputData.Length)
+        if (input.Length < 16)
         {
-            while (compressedIndex > lastBlockStored + CompressionLevelMax.BlockInterval
-            && inputData.Length - compressedIndex > 16)
-            {
-                if (blockPretrackingQueue.Count >= CompressionLevelMax.PrequeueLength)
-                {
-                    var tmpPair = blockPretrackingQueue.Dequeue();
-                    blockTrackingQueue.Enqueue(tmpPair);
+            return input;
+        }
 
-                    if (!latestBlocks.TryGetValue(tmpPair.Key, out List<int>? valueList) || valueList == null)
+        var blockTrackingQueue = new Queue<KeyValuePair<int, int>>();
+        var blockPretrackingQueue = new Queue<KeyValuePair<int, int>>();
+
+        // So lists aren't being freed and allocated so much
+        var unusedLists = new Queue<List<int>>();
+        var latestBlocks = new Dictionary<int, List<int>>();
+        var lastBlockStored = 0;
+
+        while (compressedIndex < input.Length)
+        {
+            while (compressedIndex > lastBlockStored + BlockInterval && input.Length - compressedIndex > 16)
+            {
+                if (blockPretrackingQueue.Count >= PrequeueLength)
+                {
+                    var tmppair = blockPretrackingQueue.Dequeue();
+                    blockTrackingQueue.Enqueue(tmppair);
+
+                    List<int> valueList;
+
+                    if (latestBlocks.TryGetValue(tmppair.Key, out valueList) == false)
                     {
-                        valueList = unusedLists.Count > 0 ? unusedLists.Dequeue() : [];
-                        latestBlocks[tmpPair.Key] = valueList;
+                        valueList = unusedLists.Count > 0 ? unusedLists.Dequeue() : new List<int>();
+                        latestBlocks[tmppair.Key] = valueList;
                     }
 
-                    if (valueList.Count >= CompressionLevelMax.SameValToTrack)
+                    if (valueList.Count >= SameValToTrack)
                     {
-                        int earliestIndex = 0;
-                        int earliestValue = valueList[0];
-                        for (int i = 1; i < valueList.Count; i++)
+                        var earliestIndex = 0;
+                        var earliestValue = valueList[0];
+
+                        for (int loop = 1; loop < valueList.Count; loop++)
                         {
-                            if (valueList[i] < earliestValue)
+                            if (valueList[loop] < earliestValue)
                             {
-                                earliestIndex = i;
-                                earliestValue = valueList[i];
+                                earliestIndex = loop;
+                                earliestValue = valueList[loop];
                             }
                         }
-                        valueList[earliestIndex] = tmpPair.Value;
+
+                        valueList[earliestIndex] = tmppair.Value;
                     }
                     else
                     {
-                        valueList.Add(tmpPair.Value);
+                        valueList.Add(tmppair.Value);
                     }
 
-                    if (blockTrackingQueue.Count > CompressionLevelMax.QueueLength)
+                    if (blockTrackingQueue.Count > QueueLength)
                     {
-                        var tmpPair2 = blockTrackingQueue.Dequeue();
-                        valueList = latestBlocks[tmpPair2.Key];
+                        var tmppair2 = blockTrackingQueue.Dequeue();
+                        valueList = latestBlocks[tmppair2.Key];
 
-                        for (int i = 0; i < valueList.Count; i++)
+                        for (int loop = 0; loop < valueList.Count; loop++)
                         {
-                            if (valueList[i] == tmpPair2.Value)
+                            if (valueList[loop] == tmppair2.Value)
                             {
-                                valueList.RemoveAt(i);
+                                valueList.RemoveAt(loop);
                                 break;
                             }
                         }
+
                         if (valueList.Count == 0)
                         {
-                            latestBlocks.Remove(tmpPair2.Key);
+                            latestBlocks.Remove(tmppair2.Key);
                             unusedLists.Enqueue(valueList);
                         }
                     }
                 }
 
-                KeyValuePair<int, int> newBlock = new(
-                    BitConverter.ToInt32(inputData,
-                    lastBlockStored),
-                    lastBlockStored
-                );
-                lastBlockStored += CompressionLevelMax.BlockInterval;
+                var newBlock = new KeyValuePair<int, int>(BitConverter.ToInt32(input, lastBlockStored),
+                                                          lastBlockStored);
+                lastBlockStored += BlockInterval;
                 blockPretrackingQueue.Enqueue(newBlock);
             }
 
-            if (inputData.Length - compressedIndex < 4)
+            if (input.Length - compressedIndex < 4)
             {
                 // Just copy the rest
-                byte[] chunk = new byte[inputData.Length - compressedIndex + 1];
-                chunk[0] = (byte)(0xFC | (inputData.Length - compressedIndex));
-                Array.Copy(inputData, compressedIndex, chunk, 1, inputData.Length - compressedIndex);
+                var chunk = new byte[input.Length - compressedIndex + 1];
+                chunk[0] = (byte)(0xFC | (input.Length - compressedIndex));
+                Array.Copy(input, compressedIndex, chunk, 1, input.Length - compressedIndex);
+
                 compressedChunks.Add(chunk);
                 compressedIndex += chunk.Length - 1;
                 compressedLength += chunk.Length;
+
+                // int toRead = 0;
+                // int toCopy2 = 0;
+                // int copyOffset = 0;
+
                 endIsValid = true;
                 continue;
             }
@@ -243,172 +267,463 @@ internal static class Refpack
             var sequenceLength = 0;
             var sequenceIndex = 0;
             var isSequence = false;
-            if (FindSequence(
-                inputData,
-                compressedIndex,
-                ref sequenceStart,
-                ref sequenceLength,
-                ref sequenceIndex,
-                latestBlocks))
+
+            if (FindSequence(input,
+                             compressedIndex,
+                             ref sequenceStart,
+                             ref sequenceLength,
+                             ref sequenceIndex,
+                             latestBlocks))
             {
                 isSequence = true;
             }
             else
             {
                 // Find the next sequence
-                for (
-                    int i = compressedIndex + 4;
-                    !isSequence && i + 3 < inputData.Length;
-                    i += 4)
+                for (int loop = compressedIndex + 4;
+                     isSequence == false && loop + 3 < input.Length;
+                     loop += 4)
                 {
-                    if (FindSequence(
-                        inputData,
-                        i,
-                        ref sequenceStart,
-                        ref sequenceLength,
-                        ref sequenceIndex,
-                        latestBlocks))
+                    if (FindSequence(input,
+                                     loop,
+                                     ref sequenceStart,
+                                     ref sequenceLength,
+                                     ref sequenceIndex,
+                                     latestBlocks))
                     {
-                        sequenceIndex += i - compressedIndex;
+                        sequenceIndex += loop - compressedIndex;
                         isSequence = true;
                     }
                 }
+
                 if (sequenceIndex == int.MaxValue)
                 {
-                    sequenceIndex = inputData.Length - compressedIndex;
+                    sequenceIndex = input.Length - compressedIndex;
                 }
 
                 // Copy all the data skipped over
                 while (sequenceIndex >= 4)
                 {
-                    int toCopy = sequenceIndex & ~3;
+                    int toCopy = (sequenceIndex & ~3);
                     if (toCopy > 112)
                     {
                         toCopy = 112;
                     }
 
-                    byte[] chunk = new byte[toCopy + 1];
+                    var chunk = new byte[toCopy + 1];
                     chunk[0] = (byte)(0xE0 | ((toCopy >> 2) - 1));
-                    Array.Copy(inputData, compressedIndex, chunk, 1, toCopy);
+                    Array.Copy(input, compressedIndex, chunk, 1, toCopy);
                     compressedChunks.Add(chunk);
                     compressedIndex += toCopy;
                     compressedLength += chunk.Length;
                     sequenceIndex -= toCopy;
+
+                    // int toRead = 0;
+                    // int toCopy2 = 0;
+                    // int copyOffset = 0;
                 }
             }
 
-            /*
-            * 00-7F  0oocccpp oooooooo
-            *   Read 0-3
-            *   Copy 3-10
-            *   Offset 0-1023
-            *   
-            * 80-BF  10cccccc ppoooooo oooooooo
-            *   Read 0-3
-            *   Copy 4-67
-            *   Offset 0-16383
-            *   
-            * C0-DF  110cccpp oooooooo oooooooo cccccccc
-            *   Read 0-3
-            *   Copy 5-1028
-            *   Offset 0-131071
-            *   
-            * E0-FC  111ppppp
-            *   Read 4-128 (Multiples of 4)
-            *   
-            * FD-FF  111111pp
-            *   Read 0-3
-            */
             if (isSequence)
             {
-                continue;
+                /*
+                 * 00-7F  0oocccpp oooooooo
+                 *   Read 0-3
+                 *   Copy 3-10
+                 *   Offset 0-1023
+                 *   
+                 * 80-BF  10cccccc ppoooooo oooooooo
+                 *   Read 0-3
+                 *   Copy 4-67
+                 *   Offset 0-16383
+                 *   
+                 * C0-DF  110cccpp oooooooo oooooooo cccccccc
+                 *   Read 0-3
+                 *   Copy 5-1028
+                 *   Offset 0-131071
+                 *   
+                 * E0-FC  111ppppp
+                 *   Read 4-128 (Multiples of 4)
+                 *   
+                 * FD-FF  111111pp
+                 *   Read 0-3
+                 */
+                if (FindRunLength(input, sequenceStart, compressedIndex + sequenceIndex) < sequenceLength)
+                {
+                    break;
+                }
+
+                while (sequenceLength > 0)
+                {
+                    int thisLength = sequenceLength;
+                    if (thisLength > 1028)
+                    {
+                        thisLength = 1028;
+                    }
+
+                    sequenceLength -= thisLength;
+                    int offset = compressedIndex - sequenceStart + sequenceIndex - 1;
+
+                    byte[] chunk;
+                    if (thisLength > 67 || offset > 16383)
+                    {
+                        chunk = new byte[sequenceIndex + 4];
+                        chunk[0] =
+                            (byte)
+                            (0xC0 | sequenceIndex | (((thisLength - 5) >> 6) & 0x0C) | ((offset >> 12) & 0x10));
+                        chunk[1] = (byte)((offset >> 8) & 0xFF);
+                        chunk[2] = (byte)(offset & 0xFF);
+                        chunk[3] = (byte)((thisLength - 5) & 0xFF);
+                    }
+                    else if (thisLength > 10 || offset > 1023)
+                    {
+                        chunk = new byte[sequenceIndex + 3];
+                        chunk[0] = (byte)(0x80 | ((thisLength - 4) & 0x3F));
+                        chunk[1] = (byte)(((sequenceIndex << 6) & 0xC0) | ((offset >> 8) & 0x3F));
+                        chunk[2] = (byte)(offset & 0xFF);
+                    }
+                    else
+                    {
+                        chunk = new byte[sequenceIndex + 2];
+                        chunk[0] =
+                            (byte)
+                            ((sequenceIndex & 0x3) | (((thisLength - 3) << 2) & 0x1C) | ((offset >> 3) & 0x60));
+                        chunk[1] = (byte)(offset & 0xFF);
+                    }
+
+                    if (sequenceIndex > 0)
+                    {
+                        Array.Copy(input, compressedIndex, chunk, chunk.Length - sequenceIndex, sequenceIndex);
+                    }
+
+                    compressedChunks.Add(chunk);
+                    compressedIndex += thisLength + sequenceIndex;
+                    compressedLength += chunk.Length;
+
+                    // int toRead = 0;
+                    // int toCopy = 0;
+                    // int copyOffset = 0;
+
+                    sequenceStart += thisLength;
+                    sequenceIndex = 0;
+                }
             }
-            if (FindRunLength(inputData, sequenceStart, compressedIndex + sequenceIndex) < sequenceLength)
+        }
+
+        if (/*compressedLength + 6 < input.Length*/true)
+        {
+            int chunkPosition;
+
+            if (input.Length > 0xFFFFFF)
             {
-                break;
+                output = new byte[compressedLength + 5 + (endIsValid ? 0 : 1)];
+                output[0] = 0x10 | 0x80; // 0x80 = length is 4 bytes
+                output[1] = 0xFB;
+                output[2] = (byte)(input.Length >> 24);
+                output[3] = (byte)(input.Length >> 16);
+                output[4] = (byte)(input.Length >> 8);
+                output[5] = (byte)(input.Length);
+                chunkPosition = 6;
             }
-            while (sequenceLength > 0)
+            else
             {
-                int thisLength = sequenceLength;
-                if (thisLength > 1028)
-                {
-                    thisLength = 1028;
-                }
-
-                sequenceLength -= thisLength;
-                int offset = compressedIndex - sequenceStart + sequenceIndex - 1;
-
-                byte[] chunk;
-                if (thisLength > 67 || offset > 16383)
-                {
-                    chunk = new byte[sequenceIndex + 4];
-                    chunk[0] = (byte)(0xC0 | sequenceIndex | (((thisLength - 5) >> 6) & 0x0C) | ((offset >> 12) & 0x10));
-                    chunk[1] = (byte)((offset >> 8) & 0xFF);
-                    chunk[2] = (byte)(offset & 0xFF);
-                    chunk[3] = (byte)((thisLength - 5) & 0xFF);
-                }
-                else if (thisLength > 10 || offset > 1023)
-                {
-                    chunk = new byte[sequenceIndex + 3];
-                    chunk[0] = (byte)(0x80 | ((thisLength - 4) & 0x3F));
-                    chunk[1] = (byte)(((sequenceIndex << 6) & 0xC0) | ((offset >> 8) & 0x3F));
-                    chunk[2] = (byte)(offset & 0xFF);
-                }
-                else
-                {
-                    chunk = new byte[sequenceIndex + 2];
-                    chunk[0] = (byte)((sequenceIndex & 0x3) | (((thisLength - 3) << 2) & 0x1C) | ((offset >> 3) & 0x60));
-                    chunk[1] = (byte)(offset & 0xFF);
-                }
-
-                if (sequenceIndex > 0)
-                {
-                    Array.Copy(inputData, compressedIndex, chunk, chunk.Length - sequenceIndex, sequenceIndex);
-                }
-                compressedChunks.Add(chunk);
-                compressedIndex += thisLength + sequenceIndex;
-                compressedLength += chunk.Length;
-                sequenceStart += thisLength;
-                sequenceIndex = 0;
+                output = new byte[compressedLength + 5 + (endIsValid ? 0 : 1)];
+                output[0] = 0x10;
+                output[1] = 0xFB;
+                output[2] = (byte)(input.Length >> 16);
+                output[3] = (byte)(input.Length >> 8);
+                output[4] = (byte)(input.Length);
+                chunkPosition = 5;
             }
+
+            foreach (byte[] t in compressedChunks)
+            {
+                Array.Copy(t, 0, output, chunkPosition, t.Length);
+                chunkPosition += t.Length;
+            }
+
+            if (!endIsValid)
+            {
+                output[output.Length - 1] = 0xFC;
+            }
+
+            return output;
         }
 
-        int chunkPosition;
-        if (inputData.Length > 0xFFFFFF)
-        {
-            output = new byte[compressedLength + 5 + (endIsValid ? 0 : 1)];
-            output[0] = 0x10 | 0x80; // 0x80 = length is 4 bytes
-            output[1] = 0xFB;
-            output[2] = (byte)(inputData.Length >> 24);
-            output[3] = (byte)(inputData.Length >> 16);
-            output[4] = (byte)(inputData.Length >> 8);
-            output[5] = (byte)inputData.Length;
-            chunkPosition = 6;
-        }
-        else
-        {
-            output = new byte[compressedLength + 5 + (endIsValid ? 0 : 1)];
-            output[0] = 0x10;
-            output[1] = 0xFB;
-            output[2] = (byte)(inputData.Length >> 16);
-            output[3] = (byte)(inputData.Length >> 8);
-            output[4] = (byte)inputData.Length;
-            chunkPosition = 5;
-        }
-
-        foreach (byte[] t in compressedChunks)
-        {
-            Array.Copy(t, 0, output, chunkPosition, t.Length);
-            chunkPosition += t.Length;
-        }
-
-        if (!endIsValid)
-        {
-            output[^1] = 0xFC;
-        }
-
-        return output;
+        return input;
     }
+
+    //public static byte[] Compress(byte[] inputData)
+    //{
+    //    bool endIsValid = false;
+    //    List<byte[]> compressedChunks = [];
+    //    int compressedIndex = 0;
+    //    int compressedLength = 0;
+
+    //    // Is data too small to compress
+    //    if (inputData.Length < 16)
+    //    {
+    //        return inputData;
+    //    }
+
+    //    Queue<KeyValuePair<int, int>> blockTrackingQueue = new();
+    //    Queue<KeyValuePair<int, int>> blockPretrackingQueue = new();
+
+    //    // Used to prevent constant allocation/freeing
+    //    Queue<List<int>> unusedLists = new();
+    //    Dictionary<int, List<int>> latestBlocks = [];
+    //    int lastBlockStored = 0;
+
+    //    byte[] output;
+    //    while (compressedIndex < inputData.Length)
+    //    {
+    //        while (compressedIndex > lastBlockStored + CompressionLevelMax.BlockInterval
+    //        && inputData.Length - compressedIndex > 16)
+    //        {
+    //            if (blockPretrackingQueue.Count >= CompressionLevelMax.PrequeueLength)
+    //            {
+    //                var tmpPair = blockPretrackingQueue.Dequeue();
+    //                blockTrackingQueue.Enqueue(tmpPair);
+
+    //                if (!latestBlocks.TryGetValue(tmpPair.Key, out List<int>? valueList) || valueList == null)
+    //                {
+    //                    valueList = unusedLists.Count > 0 ? unusedLists.Dequeue() : [];
+    //                    latestBlocks[tmpPair.Key] = valueList;
+    //                }
+
+    //                if (valueList.Count >= CompressionLevelMax.SameValToTrack)
+    //                {
+    //                    int earliestIndex = 0;
+    //                    int earliestValue = valueList[0];
+    //                    for (int i = 1; i < valueList.Count; i++)
+    //                    {
+    //                        if (valueList[i] < earliestValue)
+    //                        {
+    //                            earliestIndex = i;
+    //                            earliestValue = valueList[i];
+    //                        }
+    //                    }
+    //                    valueList[earliestIndex] = tmpPair.Value;
+    //                }
+    //                else
+    //                {
+    //                    valueList.Add(tmpPair.Value);
+    //                }
+
+    //                if (blockTrackingQueue.Count > CompressionLevelMax.QueueLength)
+    //                {
+    //                    var tmpPair2 = blockTrackingQueue.Dequeue();
+    //                    valueList = latestBlocks[tmpPair2.Key];
+
+    //                    for (int i = 0; i < valueList.Count; i++)
+    //                    {
+    //                        if (valueList[i] == tmpPair2.Value)
+    //                        {
+    //                            valueList.RemoveAt(i);
+    //                            break;
+    //                        }
+    //                    }
+    //                    if (valueList.Count == 0)
+    //                    {
+    //                        latestBlocks.Remove(tmpPair2.Key);
+    //                        unusedLists.Enqueue(valueList);
+    //                    }
+    //                }
+    //            }
+
+    //            KeyValuePair<int, int> newBlock = new(
+    //                BitConverter.ToInt32(inputData,
+    //                lastBlockStored),
+    //                lastBlockStored
+    //            );
+    //            lastBlockStored += CompressionLevelMax.BlockInterval;
+    //            blockPretrackingQueue.Enqueue(newBlock);
+    //        }
+
+    //        if (inputData.Length - compressedIndex < 4)
+    //        {
+    //            // Just copy the rest
+    //            byte[] chunk = new byte[inputData.Length - compressedIndex + 1];
+    //            chunk[0] = (byte)(0xFC | (inputData.Length - compressedIndex));
+    //            Array.Copy(inputData, compressedIndex, chunk, 1, inputData.Length - compressedIndex);
+    //            compressedChunks.Add(chunk);
+    //            compressedIndex += chunk.Length - 1;
+    //            compressedLength += chunk.Length;
+    //            endIsValid = true;
+    //            continue;
+    //        }
+
+    //        // Search ahead the next 3 bytes for the "best" sequence to copy
+    //        var sequenceStart = 0;
+    //        var sequenceLength = 0;
+    //        var sequenceIndex = 0;
+    //        var isSequence = false;
+    //        if (FindSequence(
+    //            inputData,
+    //            compressedIndex,
+    //            ref sequenceStart,
+    //            ref sequenceLength,
+    //            ref sequenceIndex,
+    //            latestBlocks))
+    //        {
+    //            isSequence = true;
+    //        }
+    //        else
+    //        {
+    //            // Find the next sequence
+    //            for (
+    //                int i = compressedIndex + 4;
+    //                !isSequence && i + 3 < inputData.Length;
+    //                i += 4)
+    //            {
+    //                if (FindSequence(
+    //                    inputData,
+    //                    i,
+    //                    ref sequenceStart,
+    //                    ref sequenceLength,
+    //                    ref sequenceIndex,
+    //                    latestBlocks))
+    //                {
+    //                    sequenceIndex += i - compressedIndex;
+    //                    isSequence = true;
+    //                }
+    //            }
+    //            if (sequenceIndex == int.MaxValue)
+    //            {
+    //                sequenceIndex = inputData.Length - compressedIndex;
+    //            }
+
+    //            // Copy all the data skipped over
+    //            while (sequenceIndex >= 4)
+    //            {
+    //                int toCopy = sequenceIndex & ~3;
+    //                if (toCopy > 112)
+    //                {
+    //                    toCopy = 112;
+    //                }
+
+    //                byte[] chunk = new byte[toCopy + 1];
+    //                chunk[0] = (byte)(0xE0 | ((toCopy >> 2) - 1));
+    //                Array.Copy(inputData, compressedIndex, chunk, 1, toCopy);
+    //                compressedChunks.Add(chunk);
+    //                compressedIndex += toCopy;
+    //                compressedLength += chunk.Length;
+    //                sequenceIndex -= toCopy;
+    //            }
+    //        }
+
+    //        /*
+    //        * 00-7F  0oocccpp oooooooo
+    //        *   Read 0-3
+    //        *   Copy 3-10
+    //        *   Offset 0-1023
+    //        *   
+    //        * 80-BF  10cccccc ppoooooo oooooooo
+    //        *   Read 0-3
+    //        *   Copy 4-67
+    //        *   Offset 0-16383
+    //        *   
+    //        * C0-DF  110cccpp oooooooo oooooooo cccccccc
+    //        *   Read 0-3
+    //        *   Copy 5-1028
+    //        *   Offset 0-131071
+    //        *   
+    //        * E0-FC  111ppppp
+    //        *   Read 4-128 (Multiples of 4)
+    //        *   
+    //        * FD-FF  111111pp
+    //        *   Read 0-3
+    //        */
+    //        if (isSequence)
+    //        {
+    //            continue;
+    //        }
+    //        if (FindRunLength(inputData, sequenceStart, compressedIndex + sequenceIndex) < sequenceLength)
+    //        {
+    //            break;
+    //        }
+    //        while (sequenceLength > 0)
+    //        {
+    //            int thisLength = sequenceLength;
+    //            if (thisLength > 1028)
+    //            {
+    //                thisLength = 1028;
+    //            }
+
+    //            sequenceLength -= thisLength;
+    //            int offset = compressedIndex - sequenceStart + sequenceIndex - 1;
+
+    //            byte[] chunk;
+    //            if (thisLength > 67 || offset > 16383)
+    //            {
+    //                chunk = new byte[sequenceIndex + 4];
+    //                chunk[0] = (byte)(0xC0 | sequenceIndex | (((thisLength - 5) >> 6) & 0x0C) | ((offset >> 12) & 0x10));
+    //                chunk[1] = (byte)((offset >> 8) & 0xFF);
+    //                chunk[2] = (byte)(offset & 0xFF);
+    //                chunk[3] = (byte)((thisLength - 5) & 0xFF);
+    //            }
+    //            else if (thisLength > 10 || offset > 1023)
+    //            {
+    //                chunk = new byte[sequenceIndex + 3];
+    //                chunk[0] = (byte)(0x80 | ((thisLength - 4) & 0x3F));
+    //                chunk[1] = (byte)(((sequenceIndex << 6) & 0xC0) | ((offset >> 8) & 0x3F));
+    //                chunk[2] = (byte)(offset & 0xFF);
+    //            }
+    //            else
+    //            {
+    //                chunk = new byte[sequenceIndex + 2];
+    //                chunk[0] = (byte)((sequenceIndex & 0x3) | (((thisLength - 3) << 2) & 0x1C) | ((offset >> 3) & 0x60));
+    //                chunk[1] = (byte)(offset & 0xFF);
+    //            }
+
+    //            if (sequenceIndex > 0)
+    //            {
+    //                Array.Copy(inputData, compressedIndex, chunk, chunk.Length - sequenceIndex, sequenceIndex);
+    //            }
+    //            compressedChunks.Add(chunk);
+    //            compressedIndex += thisLength + sequenceIndex;
+    //            compressedLength += chunk.Length;
+    //            sequenceStart += thisLength;
+    //            sequenceIndex = 0;
+    //        }
+    //    }
+
+    //    int chunkPosition;
+    //    if (inputData.Length > 0xFFFFFF)
+    //    {
+    //        output = new byte[compressedLength + 5 + (endIsValid ? 0 : 1)];
+    //        output[0] = 0x10 | 0x80; // 0x80 = length is 4 bytes
+    //        output[1] = 0xFB;
+    //        output[2] = (byte)(inputData.Length >> 24);
+    //        output[3] = (byte)(inputData.Length >> 16);
+    //        output[4] = (byte)(inputData.Length >> 8);
+    //        output[5] = (byte)inputData.Length;
+    //        chunkPosition = 6;
+    //    }
+    //    else
+    //    {
+    //        output = new byte[compressedLength + 5 + (endIsValid ? 0 : 1)];
+    //        output[0] = 0x10;
+    //        output[1] = 0xFB;
+    //        output[2] = (byte)(inputData.Length >> 16);
+    //        output[3] = (byte)(inputData.Length >> 8);
+    //        output[4] = (byte)inputData.Length;
+    //        chunkPosition = 5;
+    //    }
+
+    //    foreach (byte[] t in compressedChunks)
+    //    {
+    //        Array.Copy(t, 0, output, chunkPosition, t.Length);
+    //        chunkPosition += t.Length;
+    //    }
+
+    //    if (!endIsValid)
+    //    {
+    //        output[^1] = 0xFC;
+    //    }
+
+    //    return output;
+    //}
 
     private static bool FindSequence(
         byte[] data,
