@@ -205,7 +205,7 @@ namespace SSX_Library.EATextureLibrary
                 tempImage.SwizzledImage = (imageMatrix.Flags & 8192) == 8192;
 
                 //Uncompress
-                if (imageMatrix.Matrix != null && imageMatrix.Matrix.Length > 0 && imageMatrix.MatrixFormat == MatrixType.EightBitCompressed) 
+                if (imageMatrix.Matrix != null && imageMatrix.Matrix.Length > 0 && (imageMatrix.MatrixFormat == MatrixType.EightBitCompressed || imageMatrix.MatrixFormat == MatrixType.BGRACompressed)) 
                 {
                     imageMatrix.Matrix = Refpack.Decompress(imageMatrix.Matrix);
                 }
@@ -288,6 +288,7 @@ namespace SSX_Library.EATextureLibrary
                         tempImage.Image = EADecode.DecodeMatrix120(imageMatrix.Matrix, imageMatrix.Width, imageMatrix.Height);
                         tempImage.colorsTable = ImageUtil.GetBitmapColorsFast(tempImage.Image).ToList();
                         break;
+                    case MatrixType.BGRACompressed:
                     case MatrixType.BGRA:
                         tempImage.Image = EADecode.DecodeMatrix125(imageMatrix.Matrix, imageMatrix.Width, imageMatrix.Height);
                         tempImage.colorsTable = ImageUtil.GetBitmapColorsFast(tempImage.Image).ToList();
@@ -500,6 +501,7 @@ namespace SSX_Library.EATextureLibrary
                 case MatrixType.BGR565:
                     Matrix = EAEncode.EncodeMatrix120(shapeImage.Image);
                     break;
+                case MatrixType.BGRACompressed:
                 case MatrixType.BGRA:
                     Matrix = EAEncode.EncodeMatrix125(shapeImage.Image);
                     break;
@@ -509,7 +511,7 @@ namespace SSX_Library.EATextureLibrary
             }
 
             //Compress Image
-            if (shapeImage.MatrixType == MatrixType.EightBitCompressed)
+            if (shapeImage.MatrixType == MatrixType.EightBitCompressed || shapeImage.MatrixType == MatrixType.BGRACompressed)
             {
                 //Compress Image
                 byte[] TempBytes = Refpack.Compress(Matrix);
@@ -919,6 +921,7 @@ namespace SSX_Library.EATextureLibrary
             Unknown1 = 124,
 
             EightBitCompressed = 130,
+            BGRACompressed = 253,
         }
     }
 }
