@@ -353,6 +353,14 @@ namespace SSX_Library.EATextureLibrary
                 case TextureType.OldGC: //GameCube
                     MagicWord = "SHPG";
                     break;
+                case TextureType.OldPSP: //PSP
+                    MagicWord = "SHPM";
+                    break;
+            }
+
+            if (ConsoleVersion == TextureType.OldGC)
+            {
+                BigEd = true;
             }
 
             //Write Header
@@ -365,7 +373,7 @@ namespace SSX_Library.EATextureLibrary
             tempByte = new byte[4];
             stream.Write(tempByte, 0, tempByte.Length);
 
-            StreamUtil.WriteInt32(stream, ShapeImages.Count);
+            StreamUtil.WriteInt32(stream, ShapeImages.Count, BigEd);
 
             StreamUtil.WriteString(stream, Format, 4);
 
@@ -387,7 +395,7 @@ namespace SSX_Library.EATextureLibrary
             {
                 int TempPos = (int)stream.Position;
                 stream.Position = intPos[i];
-                StreamUtil.WriteInt32(stream, TempPos);
+                StreamUtil.WriteInt32(stream, TempPos, BigEd);
                 stream.Position = TempPos;
 
                 var TempMatrix = ImageWrite(ShapeImages[i]);
@@ -442,38 +450,50 @@ namespace SSX_Library.EATextureLibrary
             var Matrix = new byte[0];
             var Colours = new List<Rgba32>();
 
-            if (shapeImage.MatrixType == MatrixType.FourBit)
+            //Process into image
+            switch (shapeImage.MatrixType)
             {
-                var EncodedImage = EAEncode.EncodeMatrix1(shapeImage.Image);
-                Matrix = EncodedImage.Matrix;
-                Colours = EncodedImage.ColourTable;
-                if (shapeImage.SwizzledImage)
-                {
-                    //Swizzle the Image
-                    Matrix = ByteUtil.Swizzle4bpp(Matrix, shapeImage.Image.Width, shapeImage.Image.Height);
-                }
-            }
-            else if (shapeImage.MatrixType == MatrixType.EightBit || shapeImage.MatrixType == MatrixType.EightBitXbox || shapeImage.MatrixType == MatrixType.EightBitCompressed)
-            {
-                var EncodedImage = EAEncode.EncodeMatrix2(shapeImage.Image);
-                Matrix = EncodedImage.Matrix;
-                Colours = EncodedImage.ColourTable;
-                if (shapeImage.SwizzledImage)
-                {
-                    Matrix = ByteUtil.Swizzle8(Matrix, shapeImage.Image.Width, shapeImage.Image.Height);
-                }
-            }
-            else if (shapeImage.MatrixType == MatrixType.FullColor)
-            {
-                Matrix = EAEncode.EncodeMatrix5(shapeImage.Image);
-                if (shapeImage.SwizzledImage)
-                {
-                    //Swizzle the Image
-                }
-            }
-            else
-            {
-                Console.WriteLine(shapeImage.MatrixType + " Unknown Matrix");
+                case MatrixType.FourBit:
+                    var EncodedImage = EAEncode.EncodeMatrix1(shapeImage.Image);
+                    Matrix = EncodedImage.Matrix;
+                    Colours = EncodedImage.ColourTable;
+                    if (shapeImage.SwizzledImage)
+                    {
+                        //Swizzle the Image
+                        Matrix = ByteUtil.Swizzle4bpp(Matrix, shapeImage.Image.Width, shapeImage.Image.Height);
+                    }
+                    break;
+                case MatrixType.EightBit:
+                case MatrixType.EightBitCompressed:
+                case MatrixType.EightBitXbox:
+                case MatrixType.EightBit_PSP:
+                    var EncodedImage1 = EAEncode.EncodeMatrix2(shapeImage.Image);
+                    Matrix = EncodedImage1.Matrix;
+                    Colours = EncodedImage1.ColourTable;
+                    if (shapeImage.SwizzledImage)
+                    {
+                        Matrix = ByteUtil.Swizzle8(Matrix, shapeImage.Image.Width, shapeImage.Image.Height);
+                    }
+                    break;
+                case MatrixType.FullColor:
+                    Matrix = EAEncode.EncodeMatrix5(shapeImage.Image);
+                    break;
+                case MatrixType.N64:
+                    break;
+                case MatrixType.BC1_PSP:
+                case MatrixType.BC1:
+                    break;
+                case MatrixType.BC2:
+                    break;
+                case MatrixType.BGRA4444:
+                    break;
+                case MatrixType.BGR565:
+                    break;
+                case MatrixType.BGRA:
+                    break;
+                default:
+                    Console.WriteLine(shapeImage.MatrixType + " Unknown Matrix");
+                    break;
             }
 
             //Compress Image
