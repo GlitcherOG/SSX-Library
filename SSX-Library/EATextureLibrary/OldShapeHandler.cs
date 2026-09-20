@@ -562,7 +562,7 @@ namespace SSX_Library.EATextureLibrary
             //Might not be needed
             StreamUtil.AlignBy16(stream);
 
-            if (shapeImage.MatrixType == MatrixType.FourBit || shapeImage.MatrixType == MatrixType.EightBit)
+            if (shapeImage.MatrixType == MatrixType.FourBit || shapeImage.MatrixType == MatrixType.EightBit || shapeImage.MatrixType == MatrixType.EightBitCompressed || shapeImage.MatrixType == MatrixType.EightBitXbox)
             {
                 //Generate Colour Table Matrix
                 WriteColourTable(stream, shapeImage);
