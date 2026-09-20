@@ -161,12 +161,36 @@ namespace SSXLibrary.FileHandlers.LevelFiles.OnTourPS2
                     if(MagicWords=="CEND")
                     {
                         Start= false;
-                        var file = File.Create(extractPath + FilePos + ".bin");
                         DataMemoryStream.Position = 0;
-                        DataMemoryStream.CopyTo(file);
-                        DataMemoryStream.Dispose();
+
+                        while (DataMemoryStream.Position < DataMemoryStream.Length - 1)
+                        {
+                            int ID = StreamUtil.ReadUInt24(DataMemoryStream);
+
+                            int encoded = StreamUtil.ReadUInt24(DataMemoryStream);
+
+                            int Flags = encoded & 0x3;
+                            int ChunkSize = encoded >> 2;
+                            int TrackID = StreamUtil.ReadUInt8(DataMemoryStream);
+                            int RID = StreamUtil.ReadUInt24(DataMemoryStream);
+
+                            MemoryStream ChunkStream = new MemoryStream();
+
+                            byte[] Bytes = StreamUtil.ReadBytes(DataMemoryStream, ChunkSize);
+
+                            StreamUtil.WriteBytes(ChunkStream, Bytes);
+
+                            var file = File.Create(extractPath + "\\" + TrackID + "-" + RID + ".bin" + ID);
+                            ChunkStream.Position = 0;
+                            ChunkStream.CopyTo(file);
+                            ChunkStream.Dispose();
+                            ChunkStream = new MemoryStream();
+                            file.Close();
+                        }
+
                         DataMemoryStream = new MemoryStream();
-                        file.Close();
+
+
                         FilePos++;
                     }
                 }
