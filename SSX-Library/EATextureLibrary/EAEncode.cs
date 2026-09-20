@@ -47,6 +47,7 @@ namespace SSX_Library.EATextureLibrary
         }
         //2 (8 Bit, 256 Colour Index)
         //123 Xbox (8 Bit, 256 Colour Index)
+        //25 GC (8 bit, BGR5A3 Colour Index)
         public static (byte[] Matrix, List<Rgba32> ColourTable) EncodeMatrix2(Image<Rgba32> image)
         {
             List<Rgba32> colourTable = new List<Rgba32>();

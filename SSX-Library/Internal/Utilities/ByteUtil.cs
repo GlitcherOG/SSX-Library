@@ -480,6 +480,121 @@ internal class ByteUtil
         return result;
     }
 
+    public static byte[] N64_BGR5A3_Deswizzle(
+    byte[] data,
+    int width,
+    int height)
+    {
+        int tileWidth = 4;
+        int tileHeight = 4;
+        int bytesPerPixel = 2;
+        int tileSize = 32;
+
+        int tilesX = (width + 3) / 4;
+        int tilesY = (height + 3) / 4;
+
+        byte[] result = new byte[width * height * 2];
+
+        int src = 0;
+
+        for (int tileY = 0; tileY < tilesY; tileY++)
+        {
+            for (int tileX = 0; tileX < tilesX; tileX++)
+            {
+                for (int y = 0; y < tileHeight; y++)
+                {
+                    for (int x = 0; x < tileWidth; x++)
+                    {
+                        int px = tileX * tileWidth + x;
+                        int py = tileY * tileHeight + y;
+
+                        int localPixel =
+                            y * tileWidth + x;
+
+                        int sourceOffset =
+                            src + localPixel * bytesPerPixel;
+
+                        if (px >= width || py >= height)
+                            continue;
+
+                        int destinationOffset =
+                            (py * width + px) * bytesPerPixel;
+
+                        result[destinationOffset] =
+                            data[sourceOffset];
+
+                        result[destinationOffset + 1] =
+                            data[sourceOffset + 1];
+                    }
+                }
+
+                src += tileSize;
+            }
+        }
+
+        return result;
+    }
+
+
+    /// <summary>
+    /// Converts normal linear row-major 16-bit texture data
+    /// into N64 texture ordering.
+    /// </summary>
+    public static byte[] N64_BGR5A3_Swizzle(
+        byte[] data,
+        int width,
+        int height)
+    {
+        int bytesPerPixel = 2;
+        int rowBytes = width * bytesPerPixel;
+
+        // N64 rows are aligned to 8 bytes.
+        int stride = (rowBytes + 7) & ~7;
+
+        byte[] result = new byte[stride * height];
+
+        for (int y = 0; y < height; y++)
+        {
+            int rowOffset = y * stride;
+
+            // Even rows are unchanged.
+            if ((y & 1) == 0)
+            {
+                Buffer.BlockCopy(
+                    data,
+                    rowOffset,
+                    result,
+                    rowOffset,
+                    stride);
+
+                continue;
+            }
+
+            // Odd rows:
+            //
+            // [AAAA][BBBB] -> [BBBB][AAAA]
+            for (int x = 0; x < stride; x += 8)
+            {
+                int offset = rowOffset + x;
+
+                if (offset + 8 > data.Length)
+                    break;
+
+                result[offset + 0] = data[offset + 4];
+                result[offset + 1] = data[offset + 5];
+                result[offset + 2] = data[offset + 6];
+                result[offset + 3] = data[offset + 7];
+
+                result[offset + 4] = data[offset + 0];
+                result[offset + 5] = data[offset + 1];
+                result[offset + 6] = data[offset + 2];
+                result[offset + 7] = data[offset + 3];
+            }
+        }
+
+        return result;
+    }
+
     public static float UintByteToFloat(int Int)
     {
         byte[] bytes = BitConverter.GetBytes(Int);

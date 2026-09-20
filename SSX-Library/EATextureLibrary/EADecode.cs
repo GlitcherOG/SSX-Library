@@ -69,6 +69,55 @@ namespace SSX_Library.EATextureLibrary
 
         //Nintendo Wii/GC
         //21
+        public static Image<Rgba32> DecodeMatrix21(byte[] Matrix, int width, int height)
+        {
+            Image<Rgba32> NewImage = new Image<Rgba32>(width, height);
+
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    ushort value = (ushort)(
+       (Matrix[(x+width * y) * 2] << 8) |
+       Matrix[(x+width * y) * 2 + 1]);
+
+                    byte r;
+                    byte g;
+                    byte b;
+                    byte a;
+
+                    if ((value & 0x8000) != 0)
+                    {
+                        // 1RRRRRGGGGGBBBBB
+                        int r5 = (value >> 10) & 0x1F;
+                        int g5 = (value >> 5) & 0x1F;
+                        int b5 = value & 0x1F;
+
+                        r = (byte)((r5 << 3) | (r5 >> 2));
+                        g = (byte)((g5 << 3) | (g5 >> 2));
+                        b = (byte)((b5 << 3) | (b5 >> 2));
+                        a = 255;
+                    }
+                    else
+                    {
+                        // 0AAARRRRGGGGBBBB
+                        int a3 = (value >> 12) & 0x07;
+                        int r4 = (value >> 8) & 0x0F;
+                        int g4 = (value >> 4) & 0x0F;
+                        int b4 = value & 0x0F;
+
+                        r = (byte)((r4 << 4) | r4);
+                        g = (byte)((g4 << 4) | g4);
+                        b = (byte)((b4 << 4) | b4);
+                        a = (byte)((a3 << 5) | (a3 << 2) | (a3 >> 1));
+                    }
+
+                    NewImage[x, y] = new Rgba32(r, g, b, a);
+                }
+            }
+            return NewImage;
+        }
+
         //25
         //30
         public static Image<Rgba32> DecodeMatrix30(byte[] data,int width,int height)

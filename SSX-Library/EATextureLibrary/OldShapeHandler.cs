@@ -184,9 +184,9 @@ namespace SSX_Library.EATextureLibrary
                     }
                     else if (shape.MatrixFormat == MatrixType.Unknown1)
                     {
-                        shape.Size = StreamUtil.ReadUInt24(stream);
+                        shape.Size = StreamUtil.ReadUInt24(stream, BigEd);
 
-                        shape.Width = StreamUtil.ReadInt16(stream);
+                        shape.Width = StreamUtil.ReadInt32(stream, BigEd);
 
                         shape.Matrix = StreamUtil.ReadBytes(stream, shape.Width*8);
 
@@ -276,6 +276,14 @@ namespace SSX_Library.EATextureLibrary
                         break;
                     case MatrixType.FullColor:
                         tempImage.Image = EADecode.DecodeMatrix5(imageMatrix.Matrix, imageMatrix.Width, imageMatrix.Height);
+                        tempImage.colorsTable = ImageUtil.GetBitmapColorsFast(tempImage.Image).ToList();
+                        break;
+                    case MatrixType.BGR5A3:
+                        if (tempImage.SwizzledImage)
+                        {
+                            imageMatrix.Matrix = ByteUtil.N64_BGR5A3_Deswizzle(imageMatrix.Matrix, imageMatrix.Width, imageMatrix.Height);
+                        }
+                        tempImage.Image = EADecode.DecodeMatrix21(imageMatrix.Matrix, imageMatrix.Width, imageMatrix.Height);
                         tempImage.colorsTable = ImageUtil.GetBitmapColorsFast(tempImage.Image).ToList();
                         break;
                     case MatrixType.N64_CMPR:
@@ -497,6 +505,9 @@ namespace SSX_Library.EATextureLibrary
                     break;
                 case MatrixType.FullColor:
                     Matrix = EAEncode.EncodeMatrix5(shapeImage.Image);
+                    break;
+                case MatrixType.BGR5A3:
+                    
                     break;
                 case MatrixType.N64_CMPR:
                     Matrix= EAEncode.EncodeMatrix30(shapeImage.Image);
@@ -977,6 +988,7 @@ namespace SSX_Library.EATextureLibrary
             FullColor = 5,
 
             //N64
+            BGR5A3 = 21,
             EightBitGC = 25,
             N64_CMPR = 30,
 
