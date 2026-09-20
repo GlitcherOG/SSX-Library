@@ -3,6 +3,7 @@ using SixLabors.ImageSharp.PixelFormats;
 using SSX_Library.Internal;
 using SSX_Library.Internal.Utilities;
 using SSX_Library.Internal.Utilities.StreamExtensions;
+using System.Drawing;
 using System.Text;
 
 
@@ -360,8 +361,8 @@ namespace SSX_Library.EATextureLibrary
                     Console.WriteLine("Over 16 Colour Limit " + sshImage.Shortname + " (" + i + "/" + ShapeImages.Count + ")");
                     sshImage.Image = ImageUtil.ReduceBitmapColorsFast(sshImage.Image, 16);
                 }
-                if (sshImage.colorsTable.Count > 256 && sshImage.MatrixType == MatrixType.EightBit && sshImage.MatrixType == MatrixType.EightBitCompressed 
-                    && sshImage.MatrixType == MatrixType.EightBitXbox)
+                if (sshImage.colorsTable.Count > 256 && (sshImage.MatrixType == MatrixType.EightBit || sshImage.MatrixType == MatrixType.EightBitCompressed 
+                    || sshImage.MatrixType == MatrixType.EightBitXbox|| sshImage.MatrixType == MatrixType.EightBitGC))
                 {
                     Console.WriteLine("Over 256 Colour Limit " + sshImage.Shortname + " (" + i + "/" + ShapeImages.Count + ")");
                     sshImage.Image = ImageUtil.ReduceBitmapColorsFast(sshImage.Image, 256);
@@ -503,6 +504,15 @@ namespace SSX_Library.EATextureLibrary
                         Matrix = ByteUtil.Swizzle8(Matrix, shapeImage.Image.Width, shapeImage.Image.Height);
                     }
                     break;
+                case MatrixType.EightBitGC:
+                    var EncodedImage2 = EAEncode.EncodeMatrix2(shapeImage.Image);
+                    Matrix = EncodedImage2.Matrix;
+                    Colours = EncodedImage2.ColourTable;
+                    if (shapeImage.SwizzledImage)
+                    {
+                        Matrix = ByteUtil.N64I8Swizzle(Matrix, shapeImage.Image.Width, shapeImage.Image.Height);
+                    }
+                    break;
                 case MatrixType.FullColor:
                     Matrix = EAEncode.EncodeMatrix5(shapeImage.Image);
                     break;
@@ -556,6 +566,14 @@ namespace SSX_Library.EATextureLibrary
             {
                 //Generate Colour Table Matrix
                 WriteColourTable(stream, shapeImage);
+
+                StreamUtil.AlignBy16(stream);
+            }
+
+            if (shapeImage.MatrixType == MatrixType.EightBitGC)
+            {
+                //Generate Colour Table Matrix
+                WriteColourTableGC(stream, shapeImage);
 
                 StreamUtil.AlignBy16(stream);
             }
@@ -630,29 +648,91 @@ namespace SSX_Library.EATextureLibrary
                 //Limit Matrix to Remove Bloat
             }
 
-            WriteColourHeader(stream, image, Matrix.Length+16);
+            WriteColourHeader(stream, image, Matrix.Length+16, 33);
 
             StreamUtil.WriteBytes(stream, Matrix);
         }
 
-        public void WriteColourHeader(Stream stream, ShapeImage image, int Size)
+        public void WriteColourTableGC(Stream stream, ShapeImage image)
         {
-            StreamUtil.WriteUInt8(stream, 33);
+            int MatrixSize = StreamUtil.AlignbyMath(2 * image.colorsTable.Count, 16);
 
-            StreamUtil.WriteInt24(stream, Size);
+            byte[] Matrix = new byte[MatrixSize];
 
-            StreamUtil.WriteInt16(stream, image.colorsTable.Count);
+            for (int i = 0; i < image.colorsTable.Count; i++)
+            {
+                Rgba32 color = image.colorsTable[i];
 
-            StreamUtil.WriteInt16(stream, 1);
+                ushort value;
 
-            StreamUtil.WriteInt16(stream, image.colorsTable.Count);
+                // RGB5
+                // 1RRRRRGGGGGBBBBB
+                // Used when alpha is fully opaque.
+                if (color.A == 255)
+                {
+                    ushort r = (ushort)(color.R >> 3);
+                    ushort g = (ushort)(color.G >> 3);
+                    ushort b = (ushort)(color.B >> 3);
 
-            StreamUtil.WriteInt16(stream, 0);
+                    value = (ushort)(
+                        0x8000 |
+                        (r << 10) |
+                        (g << 5) |
+                        b
+                    );
+                }
+                // A3R4G4B4
+                // 0AAARRRRGGGGBBBB
+                else
+                {
+                    ushort a = (ushort)(color.A >> 5);
+                    ushort r = (ushort)(color.R >> 4);
+                    ushort g = (ushort)(color.G >> 4);
+                    ushort b = (ushort)(color.B >> 4);
+
+                    value = (ushort)(
+                        (a << 12) |
+                        (r << 8) |
+                        (g << 4) |
+                        b
+                    );
+                }
+
+                // GameCube texture data is big-endian.
+                Matrix[i * 2] = (byte)(value >> 8);
+                Matrix[i * 2 + 1] = (byte)(value & 0xFF);
+            }
+
+            //if (image.SwizzledColours)
+            //{
+            //    //Swizzle Colours
+            //    Matrix = ByteUtil.SwizzlePalette(Matrix, image.colorsTable.Count);
+            //    //Limit Matrix to Remove Bloat
+            //}
+
+            WriteColourHeader(stream, image, Matrix.Length + 16, 50);
+
+            StreamUtil.WriteBytes(stream, Matrix);
+        }
+
+        public void WriteColourHeader(Stream stream, ShapeImage image, int Size, int Matrix)
+        {
+            StreamUtil.WriteUInt8(stream, Matrix);
+
+            StreamUtil.WriteInt24(stream, Size, BigEd);
+
+            StreamUtil.WriteInt16(stream, image.colorsTable.Count, BigEd);
+
+            StreamUtil.WriteInt16(stream, 1, BigEd);
+
+            StreamUtil.WriteInt16(stream, image.colorsTable.Count, BigEd);
+
+            StreamUtil.WriteInt16(stream, 0, BigEd);
 
             int Flags = 0;
             Flags += (image.SwizzledColours ? 8192 : 0);
 
-            StreamUtil.WriteInt32(stream, Flags);
+            StreamUtil.WriteInt32(stream, Flags, BigEd);
         }
 
         public void AddImage(MatrixType matrixType, string name = "", string path = "")
