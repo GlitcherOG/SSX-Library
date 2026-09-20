@@ -986,6 +986,18 @@ namespace SSX_Library.EATextureLibrary
             ShapeImages[i] = temp;
         }
 
+        public void ExtractSingleMetalImage(string path, int i)
+        {
+            ShapeImages[i].Metal.SaveAsPng(path);
+        }
+
+        public void LoadSingleMetalImage(string path, int i)
+        {
+            var temp = ShapeImages[i];
+            temp.Metal = (Image<A8>)Image.Load(path);
+            ShapeImages[i] = temp;
+        }
+
         //Neg 1 possibly not required
         //test
         public void BrightenImage(int i)
