@@ -517,7 +517,11 @@ namespace SSX_Library.EATextureLibrary
                     Matrix = EAEncode.EncodeMatrix5(shapeImage.Image);
                     break;
                 case MatrixType.BGR5A3:
-                    
+                    Matrix = EAEncode.EncodeMatrix21(shapeImage.Image);
+                    if (shapeImage.SwizzledImage)
+                    {
+                        Matrix = ByteUtil.N64_BGR5A3_Swizzle(Matrix, shapeImage.Image.Width, shapeImage.Image.Height);
+                    }
                     break;
                 case MatrixType.N64_CMPR:
                     Matrix= EAEncode.EncodeMatrix30(shapeImage.Image);

@@ -68,7 +68,7 @@ namespace SSX_Library.EATextureLibrary
         }
 
         //Nintendo Wii/GC
-        //21
+        //21 - BGR5A3
         public static Image<Rgba32> DecodeMatrix21(byte[] Matrix, int width, int height)
         {
             Image<Rgba32> NewImage = new Image<Rgba32>(width, height);

@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using SixLabors.ImageSharp.PixelFormats;
+using System.Collections;
 
 namespace SSX_Library.Internal.Utilities;
 
@@ -545,50 +546,52 @@ internal class ByteUtil
         int width,
         int height)
     {
+        int tileWidth = 4;
+        int tileHeight = 4;
         int bytesPerPixel = 2;
-        int rowBytes = width * bytesPerPixel;
+        int tileSize = 32;
 
-        // N64 rows are aligned to 8 bytes.
-        int stride = (rowBytes + 7) & ~7;
+        int tilesX = (width + 3) / 4;
+        int tilesY = (height + 3) / 4;
 
-        byte[] result = new byte[stride * height];
+        // GameCube stores complete 4x4 tiles,
+        // so the output may be padded to a multiple of 4.
+        int paddedWidth = tilesX * tileWidth;
+        int paddedHeight = tilesY * tileHeight;
 
-        for (int y = 0; y < height; y++)
+        byte[] result = new byte[paddedWidth * paddedHeight * bytesPerPixel];
+
+        int dst = 0;
+
+        for (int tileY = 0; tileY < tilesY; tileY++)
         {
-            int rowOffset = y * stride;
-
-            // Even rows are unchanged.
-            if ((y & 1) == 0)
+            for (int tileX = 0; tileX < tilesX; tileX++)
             {
-                Buffer.BlockCopy(
-                    data,
-                    rowOffset,
-                    result,
-                    rowOffset,
-                    stride);
+                for (int y = 0; y < tileHeight; y++)
+                {
+                    for (int x = 0; x < tileWidth; x++)
+                    {
+                        int px = tileX * tileWidth + x;
+                        int py = tileY * tileHeight + y;
 
-                continue;
-            }
+                        if (px >= width || py >= height)
+                            continue;
 
-            // Odd rows:
-            //
-            // [AAAA][BBBB] -> [BBBB][AAAA]
-            for (int x = 0; x < stride; x += 8)
-            {
-                int offset = rowOffset + x;
+                        int sourceOffset =
+                            (py * width + px) * bytesPerPixel;
 
-                if (offset + 8 > data.Length)
-                    break;
+                        int destinationOffset =
+                            dst + (y * tileWidth + x) * bytesPerPixel;
 
-                result[offset + 0] = data[offset + 4];
-                result[offset + 1] = data[offset + 5];
-                result[offset + 2] = data[offset + 6];
-                result[offset + 3] = data[offset + 7];
+                        result[destinationOffset] =
+                            data[sourceOffset];
 
-                result[offset + 4] = data[offset + 0];
-                result[offset + 5] = data[offset + 1];
-                result[offset + 6] = data[offset + 2];
-                result[offset + 7] = data[offset + 3];
+                        result[destinationOffset + 1] =
+                            data[sourceOffset + 1];
+                    }
+                }
+
+                dst += tileSize;
             }
         }
 

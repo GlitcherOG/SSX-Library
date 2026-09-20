@@ -4,6 +4,7 @@ using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using SSX_Library.Internal.Utilities;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Text;
 
 namespace SSX_Library.EATextureLibrary
@@ -96,6 +97,63 @@ namespace SSX_Library.EATextureLibrary
         }
 
         //Nintendo Wii/GC
+        //21 - BGR5A3
+        public static byte[] EncodeMatrix21(Image<Rgba32> image)
+        {
+            int MatrixSize = StreamUtil.AlignbyMath(image.Height * image.Width * 2, 16);
+
+            byte[] Matrix = new byte[MatrixSize];
+
+            for (int y = 0; y < image.Height; y++)
+            {
+                for (int x = 0; x < image.Width; x++)
+                {
+                    var Pixel = image[x, y];
+
+                    ushort value;
+
+                    // RGB5
+                    // 1RRRRRGGGGGBBBBB
+                    // Used when alpha is fully opaque.
+                    if (Pixel.A == 255)
+                    {
+                        ushort r = (ushort)(Pixel.R >> 3);
+                        ushort g = (ushort)(Pixel.G >> 3);
+                        ushort b = (ushort)(Pixel.B >> 3);
+
+                        value = (ushort)(
+                            0x8000 |
+                            (r << 10) |
+                            (g << 5) |
+                            b
+                        );
+                    }
+                    // A3R4G4B4
+                    // 0AAARRRRGGGGBBBB
+                    else
+                    {
+                        ushort a = (ushort)(Pixel.A >> 5);
+                        ushort r = (ushort)(Pixel.R >> 4);
+                        ushort g = (ushort)(Pixel.G >> 4);
+                        ushort b = (ushort)(Pixel.B >> 4);
+
+                        value = (ushort)(
+                            (a << 12) |
+                            (r << 8) |
+                            (g << 4) |
+                            b
+                        );
+                    }
+
+                    // GameCube texture data is big-endian.
+                    Matrix[(image.Width * y + x) * 2] = (byte)(value >> 8);
+                    Matrix[(image.Width * y + x) * 2 + 1] = (byte)(value & 0xFF);
+                }
+            }
+
+            return Matrix;
+        }
+
         //30 - N64 CMPR
         public static byte[] EncodeMatrix30(Image<Rgba32> image)
         {
