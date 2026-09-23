@@ -1,5 +1,6 @@
 ﻿using SSX_Library.Internal;
 using SSX_Library.Internal.Utilities;
+using SSXLibrary.FileHandlers.LevelFiles.SSXOnTourPS2.SSBOnTourData;
 using System.Diagnostics;
 using System.IO;
 using static System.Runtime.InteropServices.JavaScript.JSType;
@@ -77,14 +78,14 @@ namespace SSXLibrary.FileHandlers.LevelFiles.OnTourPS2
 
                         while (DataMemoryStream.Position < DataMemoryStream.Length - 1)
                         {
-                            int ID = StreamUtil.ReadUInt24(DataMemoryStream);
+                            int ID = StreamUtil.ReadUInt8(DataMemoryStream);
 
                             int encoded = StreamUtil.ReadUInt24(DataMemoryStream);
 
                             int Flags = encoded & 0x3;
                             int ChunkSize = encoded >> 2;
-                            int TrackID = StreamUtil.ReadUInt8(DataMemoryStream);
-                            int RID = StreamUtil.ReadUInt24(DataMemoryStream);
+                            int TrackID = StreamUtil.ReadUInt16(DataMemoryStream);
+                            int RID = StreamUtil.ReadUInt16(DataMemoryStream);
 
                             MemoryStream ChunkStream = new MemoryStream();
 
@@ -92,12 +93,34 @@ namespace SSXLibrary.FileHandlers.LevelFiles.OnTourPS2
 
                             StreamUtil.WriteBytes(ChunkStream, Bytes);
 
-                            var file = File.Create(extractPath + "\\" + TrackID + "-" + RID + ".bin" + ID);
-                            ChunkStream.Position = 0;
-                            ChunkStream.CopyTo(file);
+                            if(ID==9)
+                            {
+                                if (!File.Exists(extractPath + "//Textures//" + RID + ".png"))
+                                {
+                                    Console.WriteLine(extractPath + "//Textures//" + RID + ".png");
+                                    WorldSSH worldOldSSH = new WorldSSH();
+
+                                    try
+                                    {
+                                        worldOldSSH.Load(ChunkStream);
+
+                                        worldOldSSH.SaveImage(extractPath + "//Textures//" + TrackID + "-" + RID + ".png");
+                                    }
+                                    catch
+                                    {
+
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                var file = File.Create(extractPath + "\\" + TrackID + "-" + RID + ".bin" + ID);
+                                ChunkStream.Position = 0;
+                                ChunkStream.CopyTo(file);
+                                file.Close();
+                            }
                             ChunkStream.Dispose();
                             ChunkStream = new MemoryStream();
-                            file.Close();
                         }
 
                         DataMemoryStream = new MemoryStream();
