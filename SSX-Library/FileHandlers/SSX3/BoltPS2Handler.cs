@@ -36,7 +36,7 @@ namespace SSXLibrary.FileHandlers
                     ItemEntries temp1 = new ItemEntries();
                     temp1.CharacterID = stream.ReadByte(); //1
                     temp1.unkownInt1 = stream.ReadByte(); //2 //Parent Model ID?
-                    temp1.Unlock = stream.ReadByte(); //3
+                    temp1.UnlockCondition = stream.ReadByte(); //3
                     temp1.TextureType = stream.ReadByte(); //4 //Texture ID
                     temp1.ItemID = StreamUtil.ReadInt16(stream);
                     temp1.ParentID = StreamUtil.ReadInt16(stream);
@@ -69,7 +69,7 @@ namespace SSXLibrary.FileHandlers
                     {
                         Character tempSlot = new Character();
                         tempSlot.entries = new List<ItemEntries>();
-                        tempSlot.unkown2s = new List<Unkown2>();
+                        tempSlot.equipLinks = new List<EquipLink>();
                         tempSlot.defaultOutfits = new List<DefaultOutfit>();
                         tempSlot.handMatch = new List<HandMatch>();
                         tempSlot.entries.Add(temp1);
@@ -89,22 +89,22 @@ namespace SSXLibrary.FileHandlers
                 for (int i = 0; i < ammount2; i++)
                 {
                     //Read 12 bytes
-                    Unkown2 temp2 = new Unkown2();
+                    EquipLink temp2 = new EquipLink();
                     temp2.CharacterID = stream.ReadByte();
-                    temp2.BoolInt = stream.ReadByte(); //Effects what can be equiped with what
-                    temp2.UnkownInt = StreamUtil.ReadInt16(stream); //Effects model loading (Possible Item ID)
+                    temp2.MainItemEquip = stream.ReadByte(); //Effects what can be equiped with what
+                    temp2.MainItemID = StreamUtil.ReadInt16(stream); //Effects model loading (Possible Item ID)
                     temp2.UnkownInt2 = stream.ReadByte(); // No idea
 
                     //All seem to be relyant on the next
-                    temp2.UnkownInt3 = stream.ReadByte(); //No idea
-                    temp2.UnkownInt4 = StreamUtil.ReadInt16(stream);
+                    temp2.IfEquipBool = stream.ReadByte(); //No idea
+                    temp2.IfEquipID = StreamUtil.ReadInt16(stream);
                     temp2.UnkownInt5 = stream.ReadByte();
-                    temp2.BoolInt2 = stream.ReadByte();
-                    temp2.UnkownInt7 = StreamUtil.ReadInt16(stream);
+                    temp2.SecondaryItemEquip = stream.ReadByte();
+                    temp2.SecondaryItemID = StreamUtil.ReadInt16(stream);
 
 
                     var tempSlot = characters[temp2.CharacterID];
-                    tempSlot.unkown2s.Add(temp2);
+                    tempSlot.equipLinks.Add(temp2);
                     characters[temp2.CharacterID] = tempSlot;
 
                 }
@@ -245,7 +245,7 @@ namespace SSXLibrary.FileHandlers
                     var TempEntry = TempCharEntry.entries[a];
                     stream.WriteByte((byte)TempEntry.CharacterID);
                     stream.WriteByte((byte)TempEntry.unkownInt1);
-                    stream.WriteByte((byte)TempEntry.Unlock);
+                    stream.WriteByte((byte)TempEntry.UnlockCondition);
                     stream.WriteByte((byte)TempEntry.TextureType);
 
                     StreamUtil.WriteInt16(stream, TempEntry.ItemID);
@@ -282,7 +282,7 @@ namespace SSXLibrary.FileHandlers
 
             for (int i = 0; i < characters.Count; i++)
             {
-                for (int a = 0; a < characters[i].unkown2s.Count; a++)
+                for (int a = 0; a < characters[i].equipLinks.Count; a++)
                 {
                     ListCount++;
                 }
@@ -293,19 +293,19 @@ namespace SSXLibrary.FileHandlers
             {
                 var TempCharEntry = characters[j];
 
-                for (int i = 0; i < TempCharEntry.unkown2s.Count; i++)
+                for (int i = 0; i < TempCharEntry.equipLinks.Count; i++)
                 {
-                    var TempEntry = TempCharEntry.unkown2s[i];
+                    var TempEntry = TempCharEntry.equipLinks[i];
 
                     stream.WriteByte((byte)TempEntry.CharacterID);
-                    stream.WriteByte((byte)TempEntry.BoolInt);
-                    StreamUtil.WriteInt16(stream, TempEntry.UnkownInt);
+                    stream.WriteByte((byte)TempEntry.MainItemEquip);
+                    StreamUtil.WriteInt16(stream, TempEntry.MainItemID);
                     stream.WriteByte((byte)TempEntry.UnkownInt2);
-                    stream.WriteByte((byte)TempEntry.UnkownInt3);
-                    StreamUtil.WriteInt16(stream, TempEntry.UnkownInt4);
+                    stream.WriteByte((byte)TempEntry.IfEquipBool);
+                    StreamUtil.WriteInt16(stream, TempEntry.IfEquipID);
                     stream.WriteByte((byte)TempEntry.UnkownInt5);
-                    stream.WriteByte((byte)TempEntry.BoolInt2);
-                    StreamUtil.WriteInt16(stream, TempEntry.UnkownInt7);
+                    stream.WriteByte((byte)TempEntry.SecondaryItemEquip);
+                    StreamUtil.WriteInt16(stream, TempEntry.SecondaryItemID);
                 }
             }
 
@@ -405,7 +405,7 @@ namespace SSXLibrary.FileHandlers
     public struct Character
     {
         public List<ItemEntries> entries;
-        public List<Unkown2> unkown2s;
+        public List<EquipLink> equipLinks;
         public List<DefaultOutfit> defaultOutfits;
         public List<HandMatch> handMatch;
     }
@@ -413,16 +413,16 @@ namespace SSXLibrary.FileHandlers
     public struct ItemEntries
     {
         public int CharacterID;
-        public int unkownInt1;
-        public int Unlock;
+        public int unkownInt1; //Category Mesh ID?
+        public int UnlockCondition;
         public int TextureType; 
         //0-Suit,1-Head,2-alph,3-Boot,4-Board,5-extback,6-exthead/top?,
         public int ItemID;
-        public int ParentID; //Effects Equip Postion??
+        public int ParentID;
         public int category;
         public int buyable;
         public int menuOrder;
-        public int unkownInt5;
+        public int unkownInt5; //UI Menu Type?
         public int weight;
         public int Cost;
         public int FileID;
@@ -451,18 +451,18 @@ namespace SSXLibrary.FileHandlers
         public int unkownInt6; //Effects Equip??
     }
 
-    public struct Unkown2
+    public struct EquipLink
     {
         public int CharacterID;
-        public int BoolInt;
-        public int UnkownInt;
+        public int MainItemEquip;
+        public int MainItemID;
         public int UnkownInt2;
-        public int UnkownInt3;
-        public int UnkownInt4;
+        public int IfEquipBool;
+        public int IfEquipID;
         public int UnkownInt5;
         public int UnkownInt6;
-        public int BoolInt2;
-        public int UnkownInt7;
+        public int SecondaryItemEquip;
+        public int SecondaryItemID;
     }
 
     public struct HandMatch
