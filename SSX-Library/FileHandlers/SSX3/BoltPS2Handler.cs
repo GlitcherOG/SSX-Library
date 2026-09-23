@@ -15,7 +15,6 @@ namespace SSXLibrary.FileHandlers
         public List<Character> characters = new List<Character>();
         int ammount2;
         int ammount3;
-        public List<Unkown3> unkown3 = new List<Unkown3>();
         int ammount4;
         int StringListLength; // Matches The Used Portion of the List
         public List<string> StringList = new List<string>();
@@ -72,6 +71,7 @@ namespace SSXLibrary.FileHandlers
                         tempSlot.entries = new List<ItemEntries>();
                         tempSlot.unkown2s = new List<Unkown2>();
                         tempSlot.defaultOutfits = new List<DefaultOutfit>();
+                        tempSlot.handMatch = new List<HandMatch>();
                         tempSlot.entries.Add(temp1);
                         characters.Add(tempSlot);
                     }
@@ -115,11 +115,15 @@ namespace SSXLibrary.FileHandlers
                 for (int i = 0; i < ammount3; i++)
                 {
                     //Read 8 bytes
-                    Unkown3 temp3 = new Unkown3();
-                    temp3.UnkownInt = StreamUtil.ReadUInt32(stream);
-                    temp3.UnkownInt2 = StreamUtil.ReadInt16(stream);
-                    temp3.UnkownInt3 = StreamUtil.ReadInt16(stream);
-                    unkown3.Add(temp3);
+                    HandMatch temp3 = new HandMatch();
+                    temp3.CharID = StreamUtil.ReadUInt32(stream);
+                    temp3.LeftHand = StreamUtil.ReadInt16(stream);
+                    temp3.RightHand = StreamUtil.ReadInt16(stream);
+                    //HandMatch.Add(temp3);
+
+                    var tempSlot = characters[temp3.CharID];
+                    tempSlot.handMatch.Add(temp3);
+                    characters[temp3.CharID] = tempSlot;
                 }
 
                 //88
@@ -305,15 +309,30 @@ namespace SSXLibrary.FileHandlers
                 }
             }
 
-            StreamUtil.WriteInt32(stream, unkown3.Count);
+            ListCount = 0;
 
-            for (int i = 0; i < unkown3.Count; i++)
+            for (int i = 0; i < characters.Count; i++)
             {
-                var TempEntry = unkown3[i];
+                for (int a = 0; a < characters[i].handMatch.Count; a++)
+                {
+                    ListCount++;
+                }
+            }
 
-                StreamUtil.WriteInt32(stream, TempEntry.UnkownInt);
-                StreamUtil.WriteInt16(stream, TempEntry.UnkownInt2);
-                StreamUtil.WriteInt16(stream, TempEntry.UnkownInt3);
+            StreamUtil.WriteInt32(stream, ListCount);
+
+            for (int j = 0; j < characters.Count; j++)
+            {
+                var TempCharEntry = characters[j];
+
+                for (int i = 0; i < TempCharEntry.handMatch.Count; i++)
+                {
+                    var TempEntry = TempCharEntry.handMatch[i];
+
+                    StreamUtil.WriteInt32(stream, TempEntry.CharID);
+                    StreamUtil.WriteInt16(stream, TempEntry.LeftHand);
+                    StreamUtil.WriteInt16(stream, TempEntry.RightHand);
+                }
             }
 
             ListCount = 0;
@@ -332,7 +351,7 @@ namespace SSXLibrary.FileHandlers
             {
                 var TempCharEntry = characters[j];
 
-                for (int i = 0; i < TempCharEntry.unkown2s.Count; i++)
+                for (int i = 0; i < TempCharEntry.defaultOutfits.Count; i++)
                 {
                     var TempEntry = TempCharEntry.defaultOutfits[i];
 
@@ -388,6 +407,7 @@ namespace SSXLibrary.FileHandlers
         public List<ItemEntries> entries;
         public List<Unkown2> unkown2s;
         public List<DefaultOutfit> defaultOutfits;
+        public List<HandMatch> handMatch;
     }
 
     public struct ItemEntries
@@ -445,11 +465,11 @@ namespace SSXLibrary.FileHandlers
         public int UnkownInt7;
     }
 
-    public struct Unkown3
+    public struct HandMatch
     {
-        public int UnkownInt;
-        public int UnkownInt2;
-        public int UnkownInt3;
+        public int CharID;
+        public int LeftHand;
+        public int RightHand;
     }
 
     public struct DefaultOutfit
