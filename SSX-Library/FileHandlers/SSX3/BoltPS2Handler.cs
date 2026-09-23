@@ -17,7 +17,6 @@ namespace SSXLibrary.FileHandlers
         int ammount3;
         public List<Unkown3> unkown3 = new List<Unkown3>();
         int ammount4;
-        public List<Unkown3> unkown4 = new List<Unkown3>();
         int StringListLength; // Matches The Used Portion of the List
         public List<string> StringList = new List<string>();
         public List<int> StringPos = new List<int>();
@@ -37,9 +36,9 @@ namespace SSXLibrary.FileHandlers
                     //Read 56 bytes
                     ItemEntries temp1 = new ItemEntries();
                     temp1.CharacterID = stream.ReadByte(); //1
-                    temp1.unkownInt1 = stream.ReadByte(); //2
+                    temp1.unkownInt1 = stream.ReadByte(); //2 //Parent Model ID?
                     temp1.Unlock = stream.ReadByte(); //3
-                    temp1.unkownInt2 = stream.ReadByte(); //4
+                    temp1.TextureType = stream.ReadByte(); //4 //Texture ID
                     temp1.ItemID = StreamUtil.ReadInt16(stream);
                     temp1.ParentID = StreamUtil.ReadInt16(stream);
 
@@ -72,6 +71,7 @@ namespace SSXLibrary.FileHandlers
                         Character tempSlot = new Character();
                         tempSlot.entries = new List<ItemEntries>();
                         tempSlot.unkown2s = new List<Unkown2>();
+                        tempSlot.defaultOutfits = new List<DefaultOutfit>();
                         tempSlot.entries.Add(temp1);
                         characters.Add(tempSlot);
                     }
@@ -128,11 +128,14 @@ namespace SSXLibrary.FileHandlers
                 for (int i = 0; i < ammount4; i++)
                 {
                     //Read 8 Bytes
-                    Unkown3 temp4 = new Unkown3();
-                    temp4.UnkownInt = StreamUtil.ReadUInt32(stream);
-                    temp4.UnkownInt2 = StreamUtil.ReadInt16(stream);
-                    temp4.UnkownInt3 = StreamUtil.ReadInt16(stream);
-                    unkown4.Add(temp4);
+                    DefaultOutfit temp4 = new DefaultOutfit();
+                    temp4.CharID = StreamUtil.ReadUInt32(stream);
+                    temp4.CategoryID = StreamUtil.ReadInt16(stream);
+                    temp4.ItemID = StreamUtil.ReadInt16(stream);
+
+                    var tempSlot = characters[temp4.CharID];
+                    tempSlot.defaultOutfits.Add(temp4);
+                    characters[temp4.CharID] = tempSlot;
                 }
 
                 //181173
@@ -239,7 +242,7 @@ namespace SSXLibrary.FileHandlers
                     stream.WriteByte((byte)TempEntry.CharacterID);
                     stream.WriteByte((byte)TempEntry.unkownInt1);
                     stream.WriteByte((byte)TempEntry.Unlock);
-                    stream.WriteByte((byte)TempEntry.unkownInt2);
+                    stream.WriteByte((byte)TempEntry.TextureType);
 
                     StreamUtil.WriteInt16(stream, TempEntry.ItemID);
                     StreamUtil.WriteInt16(stream, TempEntry.ParentID);
@@ -313,15 +316,30 @@ namespace SSXLibrary.FileHandlers
                 StreamUtil.WriteInt16(stream, TempEntry.UnkownInt3);
             }
 
-            StreamUtil.WriteInt32(stream, unkown4.Count);
+            ListCount = 0;
 
-            for (int i = 0; i < unkown4.Count; i++)
+            for (int i = 0; i < characters.Count; i++)
             {
-                var TempEntry = unkown4[i];
+                for (int a = 0; a < characters[i].defaultOutfits.Count; a++)
+                {
+                    ListCount++;
+                }
+            }
 
-                StreamUtil.WriteInt32(stream, TempEntry.UnkownInt);
-                StreamUtil.WriteInt16(stream, TempEntry.UnkownInt2);
-                StreamUtil.WriteInt16(stream, TempEntry.UnkownInt3);
+            StreamUtil.WriteInt32(stream, ListCount);
+
+            for (int j = 0; j < characters.Count; j++)
+            {
+                var TempCharEntry = characters[j];
+
+                for (int i = 0; i < TempCharEntry.unkown2s.Count; i++)
+                {
+                    var TempEntry = TempCharEntry.defaultOutfits[i];
+
+                    StreamUtil.WriteInt32(stream, TempEntry.CharID);
+                    StreamUtil.WriteInt16(stream, TempEntry.CategoryID);
+                    StreamUtil.WriteInt16(stream, TempEntry.ItemID);
+                }
             }
 
             StreamUtil.WriteInt32(stream, (int)streamString.Position);
@@ -369,6 +387,7 @@ namespace SSXLibrary.FileHandlers
     {
         public List<ItemEntries> entries;
         public List<Unkown2> unkown2s;
+        public List<DefaultOutfit> defaultOutfits;
     }
 
     public struct ItemEntries
@@ -376,7 +395,8 @@ namespace SSXLibrary.FileHandlers
         public int CharacterID;
         public int unkownInt1;
         public int Unlock;
-        public int unkownInt2;
+        public int TextureType; 
+        //0-Suit,1-Head,2-alph,3-Boot,4-Board,5-extback,6-exthead/top?,
         public int ItemID;
         public int ParentID; //Effects Equip Postion??
         public int category;
@@ -430,5 +450,12 @@ namespace SSXLibrary.FileHandlers
         public int UnkownInt;
         public int UnkownInt2;
         public int UnkownInt3;
+    }
+
+    public struct DefaultOutfit
+    {
+        public int CharID;
+        public int CategoryID;
+        public int ItemID;
     }
 }
