@@ -42,7 +42,8 @@ namespace SSXLibrary.FileHandlers
                     temp1.ParentID = StreamUtil.ReadInt16(stream);
 
                     temp1.category = stream.ReadByte(); //9
-                    temp1.buyable = stream.ReadByte(); //10
+                    temp1.buyable = stream.ReadByte() == 0; //10
+
                     temp1.menuOrder = stream.ReadByte(); //11
 
                     temp1.unkownInt5 = stream.ReadByte(); //12
@@ -252,7 +253,7 @@ namespace SSXLibrary.FileHandlers
                     StreamUtil.WriteInt16(stream, TempEntry.ParentID);
 
                     stream.WriteByte((byte)TempEntry.category);
-                    stream.WriteByte((byte)TempEntry.buyable);
+                    stream.WriteByte((byte)(TempEntry.buyable ? 0 : 255));
                     stream.WriteByte((byte)TempEntry.menuOrder);
 
                     stream.WriteByte((byte)TempEntry.unkownInt5);
@@ -420,7 +421,7 @@ namespace SSXLibrary.FileHandlers
         public int ItemID;
         public int ParentID;
         public int category;
-        public int buyable;
+        public bool buyable;
         public int menuOrder;
         public int unkownInt5; //UI Menu Type?
         public int weight;
