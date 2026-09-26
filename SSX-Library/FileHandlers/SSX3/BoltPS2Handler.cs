@@ -37,11 +37,11 @@ namespace SSXLibrary.FileHandlers
                     temp1.CharacterID = stream.ReadByte(); //1
                     temp1.unkownInt1 = stream.ReadByte(); //2 //Parent Model ID?
                     temp1.UnlockCondition = stream.ReadByte(); //3
-                    temp1.TextureType = stream.ReadByte(); //4 //Texture ID
+                    temp1.TextureType = StreamUtil.ReadInt8(stream); //4 //Texture ID
                     temp1.ItemID = StreamUtil.ReadInt16(stream);
                     temp1.ParentID = StreamUtil.ReadInt16(stream);
 
-                    temp1.category = stream.ReadByte(); //9
+                    temp1.category = StreamUtil.ReadInt8(stream); //9
                     temp1.buyable = stream.ReadByte() == 0; //10
 
                     temp1.menuOrder = stream.ReadByte(); //11
@@ -50,10 +50,10 @@ namespace SSXLibrary.FileHandlers
                     
                     temp1.weight = StreamUtil.ReadInt16(stream); //13-14
                     temp1.Cost = StreamUtil.ReadInt16(stream); //15-16
-                    temp1.FileID = stream.ReadByte(); //17
-                    temp1.SpecialID = stream.ReadByte(); //18
-                    temp1.SpecialID2 = stream.ReadByte(); //19
-                    temp1.SpecialID3 = stream.ReadByte(); //20
+                    temp1.FileID = StreamUtil.ReadInt8(stream); ; //17
+                    temp1.SpecialID = StreamUtil.ReadInt8(stream); //18
+                    temp1.SpecialID2 = StreamUtil.ReadInt8(stream); //19
+                    temp1.SpecialID3 = StreamUtil.ReadInt8(stream); //20
 
                     temp1.nameOffset = StreamUtil.ReadUInt32(stream);
                     temp1.ModelIDOffset = StreamUtil.ReadUInt32(stream);
@@ -399,6 +399,18 @@ namespace SSXLibrary.FileHandlers
                 }
             }
             StreamUtil.WriteInt32(stream, offset);
+        }
+
+        public int GetItemIndex(int CharID, int ID)
+        {
+            for (int i = 0; i < characters[CharID].entries.Count; i++)
+            {
+                if (characters[CharID].entries[i].ItemID==ID)
+                {
+                    return i;
+                }
+            }
+            return -1;
         }
 
     }
