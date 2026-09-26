@@ -413,6 +413,42 @@ namespace SSXLibrary.FileHandlers
             return -1;
         }
 
+        public bool ItemParentIDValid(int Char, int ID, int NewParentID)
+        {
+            var CharEntry = characters[Char];
+
+            int EntryIndex = GetItemIndex(Char, NewParentID);
+
+            if(ID==NewParentID)
+            {
+                return false;
+            }
+
+            if(EntryIndex!=-1)
+            {
+                return CheckItemChildLoop(Char, ID, CharEntry.entries[EntryIndex].ParentID);
+            }
+
+            return true;
+        }
+
+        private bool CheckItemChildLoop(int Char, int ItemID, int CheckChildID)
+        {
+            var CharEntry = characters[Char];
+            int EntryIndex = GetItemIndex(Char, CheckChildID);
+
+            if (ItemID == CheckChildID)
+            {
+                return false;
+            }
+            if (EntryIndex != -1)
+            {
+                return CheckItemChildLoop(Char, ItemID, CharEntry.entries[EntryIndex].ParentID);
+            }
+
+            return true;
+        }
+
     }
 
     public struct Character
