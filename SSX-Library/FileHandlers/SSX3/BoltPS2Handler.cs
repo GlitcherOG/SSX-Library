@@ -35,7 +35,7 @@ namespace SSXLibrary.FileHandlers
                     //Read 56 bytes
                     ItemEntries temp1 = new ItemEntries();
                     temp1.CharacterID = stream.ReadByte(); //1
-                    temp1.unkownInt1 = stream.ReadByte(); //2 //Parent Model ID?
+                    temp1.unkownInt1 = StreamUtil.ReadInt8(stream); //2 //Parent Model ID?
                     temp1.UnlockCondition = stream.ReadByte(); //3
                     temp1.TextureType = StreamUtil.ReadInt8(stream); //4 //Texture ID
                     temp1.ItemID = StreamUtil.ReadInt16(stream);
