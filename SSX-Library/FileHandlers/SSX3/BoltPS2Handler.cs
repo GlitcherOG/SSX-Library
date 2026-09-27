@@ -252,7 +252,7 @@ namespace SSXLibrary.FileHandlers
                     StreamUtil.WriteInt16(stream, TempEntry.ItemID);
                     StreamUtil.WriteInt16(stream, TempEntry.ParentID);
 
-                    stream.WriteByte((byte)TempEntry.category);
+                    StreamUtil.WriteUInt8(stream, (byte)TempEntry.category);
                     stream.WriteByte((byte)(TempEntry.buyable ? 0 : 255));
                     stream.WriteByte((byte)TempEntry.menuOrder);
 
