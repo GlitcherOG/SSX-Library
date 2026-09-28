@@ -10,6 +10,8 @@ namespace SSXLibrary.FileHandlers
 {
     public class BoltPS2Handler
     {
+        bool BigEd = false;
+
         int unknown; //Store items?
         int ItemEntryAmmount; //Possibly Textures?
         public List<Character> characters = new List<Character>();
@@ -27,8 +29,16 @@ namespace SSXLibrary.FileHandlers
 
                 unknown = StreamUtil.ReadUInt32(stream);
 
+                if (unknown != 910)
+                {
+                    BigEd = true;
+                    stream.Position = 0;
+                    unknown = StreamUtil.ReadUInt32(stream, BigEd);
+                }
+
+
                 //4829
-                ItemEntryAmmount = StreamUtil.ReadUInt32(stream);
+                ItemEntryAmmount = StreamUtil.ReadUInt32(stream, BigEd);
 
                 for (int i = 0; i < ItemEntryAmmount; i++)
                 {
@@ -38,8 +48,8 @@ namespace SSXLibrary.FileHandlers
                     temp1.unkownInt1 = StreamUtil.ReadInt8(stream); //2 //Parent Model ID?
                     temp1.UnlockCondition = stream.ReadByte(); //3
                     temp1.TextureType = StreamUtil.ReadInt8(stream); //4 //Texture ID
-                    temp1.ItemID = StreamUtil.ReadInt16(stream);
-                    temp1.ParentID = StreamUtil.ReadInt16(stream);
+                    temp1.ItemID = StreamUtil.ReadInt16(stream, BigEd);
+                    temp1.ParentID = StreamUtil.ReadInt16(stream, BigEd);
 
                     temp1.category = StreamUtil.ReadInt8(stream); //9
                     temp1.buyable = stream.ReadByte() == 0; //10
@@ -48,23 +58,23 @@ namespace SSXLibrary.FileHandlers
 
                     temp1.unkownInt5 = stream.ReadByte(); //12
                     
-                    temp1.weight = StreamUtil.ReadInt16(stream); //13-14
-                    temp1.Cost = StreamUtil.ReadInt16(stream); //15-16
+                    temp1.weight = StreamUtil.ReadInt16(stream, BigEd); //13-14
+                    temp1.Cost = StreamUtil.ReadInt16(stream, BigEd); //15-16
                     temp1.FileID = StreamUtil.ReadInt8(stream); ; //17
                     temp1.SpecialID = StreamUtil.ReadInt8(stream); //18
                     temp1.SpecialID2 = StreamUtil.ReadInt8(stream); //19
                     temp1.SpecialID3 = StreamUtil.ReadInt8(stream); //20
 
-                    temp1.nameOffset = StreamUtil.ReadUInt32(stream);
-                    temp1.ModelIDOffset = StreamUtil.ReadUInt32(stream);
-                    temp1.ModelID2Offset = StreamUtil.ReadUInt32(stream);
-                    temp1.ModelID3Offset = StreamUtil.ReadUInt32(stream);
-                    temp1.ModelID4Offset = StreamUtil.ReadUInt32(stream);
-                    temp1.ModelPathOffset = StreamUtil.ReadUInt32(stream);
-                    temp1.TexturePathOffset = StreamUtil.ReadUInt32(stream);
-                    temp1.SmallIconOffset = StreamUtil.ReadUInt32(stream);
+                    temp1.nameOffset = StreamUtil.ReadUInt32(stream, BigEd);
+                    temp1.ModelIDOffset = StreamUtil.ReadUInt32(stream, BigEd);
+                    temp1.ModelID2Offset = StreamUtil.ReadUInt32(stream, BigEd);
+                    temp1.ModelID3Offset = StreamUtil.ReadUInt32(stream, BigEd);
+                    temp1.ModelID4Offset = StreamUtil.ReadUInt32(stream, BigEd);
+                    temp1.ModelPathOffset = StreamUtil.ReadUInt32(stream, BigEd);
+                    temp1.TexturePathOffset = StreamUtil.ReadUInt32(stream, BigEd);
+                    temp1.SmallIconOffset = StreamUtil.ReadUInt32(stream, BigEd);
 
-                    temp1.unkownInt6 = StreamUtil.ReadUInt32(stream);
+                    temp1.unkownInt6 = StreamUtil.ReadUInt32(stream, BigEd);
                     
                     if(characters.Count-1 != temp1.CharacterID)
                     {
@@ -85,7 +95,7 @@ namespace SSXLibrary.FileHandlers
                 }
 
                 //7327
-                ammount2 = StreamUtil.ReadUInt32(stream);
+                ammount2 = StreamUtil.ReadUInt32(stream, BigEd);
 
                 for (int i = 0; i < ammount2; i++)
                 {
@@ -93,15 +103,15 @@ namespace SSXLibrary.FileHandlers
                     EquipLink temp2 = new EquipLink();
                     temp2.CharacterID = stream.ReadByte();
                     temp2.MainItemEquip = stream.ReadByte(); //Effects what can be equiped with what
-                    temp2.MainItemID = StreamUtil.ReadInt16(stream); //Effects model loading (Possible Item ID)
+                    temp2.MainItemID = StreamUtil.ReadInt16(stream, BigEd); //Effects model loading (Possible Item ID)
                     temp2.UnkownInt2 = stream.ReadByte(); // No idea
 
                     //All seem to be relyant on the next
                     temp2.IfEquipBool = stream.ReadByte(); //No idea
-                    temp2.IfEquipID = StreamUtil.ReadInt16(stream);
+                    temp2.IfEquipID = StreamUtil.ReadInt16(stream, BigEd);
                     temp2.UnkownInt5 = stream.ReadByte();
                     temp2.SecondaryItemEquip = stream.ReadByte();
-                    temp2.SecondaryItemID = StreamUtil.ReadInt16(stream);
+                    temp2.SecondaryItemID = StreamUtil.ReadInt16(stream, BigEd);
 
 
                     var tempSlot = characters[temp2.CharacterID];
@@ -111,15 +121,15 @@ namespace SSXLibrary.FileHandlers
                 }
 
                 //152
-                ammount3 = StreamUtil.ReadUInt32(stream);
+                ammount3 = StreamUtil.ReadUInt32(stream, BigEd);
 
                 for (int i = 0; i < ammount3; i++)
                 {
                     //Read 8 bytes
                     HandMatch temp3 = new HandMatch();
-                    temp3.CharID = StreamUtil.ReadUInt32(stream);
-                    temp3.LeftHand = StreamUtil.ReadInt16(stream);
-                    temp3.RightHand = StreamUtil.ReadInt16(stream);
+                    temp3.CharID = StreamUtil.ReadInt32(stream);
+                    temp3.LeftHand = StreamUtil.ReadInt16(stream, BigEd);
+                    temp3.RightHand = StreamUtil.ReadInt16(stream, BigEd);
                     //HandMatch.Add(temp3);
 
                     var tempSlot = characters[temp3.CharID];
@@ -128,15 +138,15 @@ namespace SSXLibrary.FileHandlers
                 }
 
                 //88
-                ammount4 = StreamUtil.ReadUInt32(stream);
+                ammount4 = StreamUtil.ReadUInt32(stream, BigEd);
 
                 for (int i = 0; i < ammount4; i++)
                 {
                     //Read 8 Bytes
                     DefaultOutfit temp4 = new DefaultOutfit();
-                    temp4.CharID = StreamUtil.ReadUInt32(stream);
-                    temp4.CategoryID = StreamUtil.ReadInt16(stream);
-                    temp4.ItemID = StreamUtil.ReadInt16(stream);
+                    temp4.CharID = StreamUtil.ReadInt32(stream);
+                    temp4.CategoryID = StreamUtil.ReadInt16(stream, BigEd);
+                    temp4.ItemID = StreamUtil.ReadInt16(stream, BigEd);
 
                     var tempSlot = characters[temp4.CharID];
                     tempSlot.defaultOutfits.Add(temp4);
@@ -144,7 +154,7 @@ namespace SSXLibrary.FileHandlers
                 }
 
                 //181173
-                StringListLength = StreamUtil.ReadUInt32(stream);
+                StringListLength = StreamUtil.ReadUInt32(stream, BigEd);
                 long startpos = stream.Position;
 
                 while (stream.Position < stream.Length - 1)
@@ -222,7 +232,7 @@ namespace SSXLibrary.FileHandlers
             Stream stream = new MemoryStream();
             Stream streamString = new MemoryStream();
 
-            StreamUtil.WriteInt32(stream, unknown);
+            StreamUtil.WriteInt32(stream, unknown, BigEd);
             int ListCount = 0;
 
             for (int i = 0; i < characters.Count; i++)
@@ -233,7 +243,7 @@ namespace SSXLibrary.FileHandlers
                 }
             }
 
-            StreamUtil.WriteInt32(stream, ListCount);
+            StreamUtil.WriteInt32(stream, ListCount, BigEd);
 
             StringList = new List<string>();
             StringPos = new List<int>();
@@ -249,8 +259,8 @@ namespace SSXLibrary.FileHandlers
                     stream.WriteByte((byte)TempEntry.UnlockCondition);
                     stream.WriteByte((byte)TempEntry.TextureType);
 
-                    StreamUtil.WriteInt16(stream, TempEntry.ItemID);
-                    StreamUtil.WriteInt16(stream, TempEntry.ParentID);
+                    StreamUtil.WriteInt16(stream, TempEntry.ItemID, BigEd);
+                    StreamUtil.WriteInt16(stream, TempEntry.ParentID, BigEd);
 
                     StreamUtil.WriteUInt8(stream, (byte)TempEntry.category);
                     stream.WriteByte((byte)(TempEntry.buyable ? 0 : 255));
@@ -258,8 +268,8 @@ namespace SSXLibrary.FileHandlers
 
                     stream.WriteByte((byte)TempEntry.unkownInt5);
 
-                    StreamUtil.WriteInt16(stream, TempEntry.weight);
-                    StreamUtil.WriteInt16(stream, TempEntry.Cost);
+                    StreamUtil.WriteInt16(stream, TempEntry.weight, BigEd);
+                    StreamUtil.WriteInt16(stream, TempEntry.Cost, BigEd);
 
                     stream.WriteByte((byte)TempEntry.FileID);
                     stream.WriteByte((byte)TempEntry.SpecialID);
@@ -289,7 +299,7 @@ namespace SSXLibrary.FileHandlers
                 }
             }
 
-            StreamUtil.WriteInt32(stream, ListCount);
+            StreamUtil.WriteInt32(stream, ListCount, BigEd);
             for (int j = 0; j < characters.Count; j++)
             {
                 var TempCharEntry = characters[j];
@@ -300,13 +310,13 @@ namespace SSXLibrary.FileHandlers
 
                     stream.WriteByte((byte)TempEntry.CharacterID);
                     stream.WriteByte((byte)TempEntry.MainItemEquip);
-                    StreamUtil.WriteInt16(stream, TempEntry.MainItemID);
+                    StreamUtil.WriteInt16(stream, TempEntry.MainItemID, BigEd);
                     stream.WriteByte((byte)TempEntry.UnkownInt2);
                     stream.WriteByte((byte)TempEntry.IfEquipBool);
-                    StreamUtil.WriteInt16(stream, TempEntry.IfEquipID);
+                    StreamUtil.WriteInt16(stream, TempEntry.IfEquipID, BigEd);
                     stream.WriteByte((byte)TempEntry.UnkownInt5);
                     stream.WriteByte((byte)TempEntry.SecondaryItemEquip);
-                    StreamUtil.WriteInt16(stream, TempEntry.SecondaryItemID);
+                    StreamUtil.WriteInt16(stream, TempEntry.SecondaryItemID, BigEd);
                 }
             }
 
@@ -320,7 +330,7 @@ namespace SSXLibrary.FileHandlers
                 }
             }
 
-            StreamUtil.WriteInt32(stream, ListCount);
+            StreamUtil.WriteInt32(stream, ListCount, BigEd);
 
             for (int j = 0; j < characters.Count; j++)
             {
@@ -331,8 +341,8 @@ namespace SSXLibrary.FileHandlers
                     var TempEntry = TempCharEntry.handMatch[i];
 
                     StreamUtil.WriteInt32(stream, TempEntry.CharID);
-                    StreamUtil.WriteInt16(stream, TempEntry.LeftHand);
-                    StreamUtil.WriteInt16(stream, TempEntry.RightHand);
+                    StreamUtil.WriteInt16(stream, TempEntry.LeftHand, BigEd);
+                    StreamUtil.WriteInt16(stream, TempEntry.RightHand, BigEd);
                 }
             }
 
@@ -346,7 +356,7 @@ namespace SSXLibrary.FileHandlers
                 }
             }
 
-            StreamUtil.WriteInt32(stream, ListCount);
+            StreamUtil.WriteInt32(stream, ListCount, BigEd);
 
             for (int j = 0; j < characters.Count; j++)
             {
@@ -357,12 +367,12 @@ namespace SSXLibrary.FileHandlers
                     var TempEntry = TempCharEntry.defaultOutfits[i];
 
                     StreamUtil.WriteInt32(stream, TempEntry.CharID);
-                    StreamUtil.WriteInt16(stream, TempEntry.CategoryID);
-                    StreamUtil.WriteInt16(stream, TempEntry.ItemID);
+                    StreamUtil.WriteInt16(stream, TempEntry.CategoryID, BigEd);
+                    StreamUtil.WriteInt16(stream, TempEntry.ItemID, BigEd);
                 }
             }
 
-            StreamUtil.WriteInt32(stream, (int)streamString.Position);
+            StreamUtil.WriteInt32(stream, (int)streamString.Position, BigEd);
 
             streamString.Position = 0;
             byte[] bytes = new byte[streamString.Length];
@@ -398,7 +408,7 @@ namespace SSXLibrary.FileHandlers
                     StreamUtil.WriteNullString(stream1, StringTest);
                 }
             }
-            StreamUtil.WriteInt32(stream, offset);
+            StreamUtil.WriteInt32(stream, offset, BigEd);
         }
 
         public int GetItemIndex(int CharID, int ID)
