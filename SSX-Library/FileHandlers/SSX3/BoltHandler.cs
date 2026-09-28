@@ -8,7 +8,7 @@ using SSX_Library.Internal.Utilities;
 
 namespace SSXLibrary.FileHandlers
 {
-    public class BoltPS2Handler
+    public class BoltHandler
     {
         bool BigEd = false;
 
