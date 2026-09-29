@@ -20,7 +20,7 @@ namespace SSX_Library.EATextureLibrary
         public string EndingString;
         public List<ShapeImage> ShapeImages = new List<ShapeImage>();
 
-        public bool BigEd = false;
+        public bool GCFile = false;
 
 
         public void LoadShape(string path)
@@ -38,12 +38,12 @@ namespace SSX_Library.EATextureLibrary
 
                     if(ConsoleVersion == TextureType.OldGC)
                     {
-                        BigEd = true;
+                        GCFile = true;
                     }
 
                     FileSize = StreamUtil.ReadUInt32(stream);
 
-                    ImageCount = StreamUtil.ReadUInt32(stream, BigEd);
+                    ImageCount = StreamUtil.ReadUInt32(stream, GCFile);
 
                     Format = StreamUtil.ReadString(stream, 4);
 
@@ -53,7 +53,7 @@ namespace SSX_Library.EATextureLibrary
 
                         tempImage.Shortname = StreamUtil.ReadString(stream, 4);
 
-                        tempImage.Offset = StreamUtil.ReadUInt32(stream, BigEd);
+                        tempImage.Offset = StreamUtil.ReadUInt32(stream, GCFile);
 
                         //SSX OG Simple Check onsize should work
 
@@ -143,18 +143,18 @@ namespace SSX_Library.EATextureLibrary
 
                     if (shape.MatrixFormat != MatrixType.LongName && shape.MatrixFormat != MatrixType.Unknown1 && shape.MatrixFormat != MatrixType.Unknown)
                     {
-                        shape.Size = StreamUtil.ReadUInt24(stream, BigEd);
+                        shape.Size = StreamUtil.ReadUInt24(stream, GCFile);
 
-                        shape.Width = StreamUtil.ReadInt16(stream, BigEd);
+                        shape.Width = StreamUtil.ReadInt16(stream, GCFile);
 
-                        shape.Height = StreamUtil.ReadInt16(stream, BigEd);
+                        shape.Height = StreamUtil.ReadInt16(stream, GCFile);
 
-                        shape.Xaxis = StreamUtil.ReadInt16(stream, BigEd);
+                        shape.Xaxis = StreamUtil.ReadInt16(stream, GCFile);
 
-                        shape.Yaxis = StreamUtil.ReadInt16(stream, BigEd);
+                        shape.Yaxis = StreamUtil.ReadInt16(stream, GCFile);
 
                         //Add Other Flags Later
-                        shape.Flags = StreamUtil.ReadInt16(stream, BigEd);
+                        shape.Flags = StreamUtil.ReadInt16(stream, GCFile);
 
                         stream.Position += 2;
 
@@ -185,9 +185,9 @@ namespace SSX_Library.EATextureLibrary
                     }
                     else if (shape.MatrixFormat == MatrixType.Unknown1)
                     {
-                        shape.Size = StreamUtil.ReadUInt24(stream, BigEd);
+                        shape.Size = StreamUtil.ReadUInt24(stream, GCFile);
 
-                        shape.Width = StreamUtil.ReadInt32(stream, BigEd);
+                        shape.Width = StreamUtil.ReadInt32(stream, GCFile);
 
                         shape.Matrix = StreamUtil.ReadBytes(stream, shape.Width*8);
 
@@ -389,7 +389,7 @@ namespace SSX_Library.EATextureLibrary
 
             if (ConsoleVersion == TextureType.OldGC)
             {
-                BigEd = true;
+                GCFile = true;
             }
 
             //Write Header
@@ -402,7 +402,7 @@ namespace SSX_Library.EATextureLibrary
             tempByte = new byte[4];
             stream.Write(tempByte, 0, tempByte.Length);
 
-            StreamUtil.WriteInt32(stream, ShapeImages.Count, BigEd);
+            StreamUtil.WriteInt32(stream, ShapeImages.Count, GCFile);
 
             StreamUtil.WriteString(stream, Format, 4);
 
@@ -424,7 +424,7 @@ namespace SSX_Library.EATextureLibrary
             {
                 int TempPos = (int)stream.Position;
                 stream.Position = intPos[i];
-                StreamUtil.WriteInt32(stream, TempPos, BigEd);
+                StreamUtil.WriteInt32(stream, TempPos, GCFile);
                 stream.Position = TempPos;
 
                 var TempMatrix = ImageWrite(ShapeImages[i]);
@@ -607,20 +607,20 @@ namespace SSX_Library.EATextureLibrary
         {
             StreamUtil.WriteUInt8(stream, (int)image.MatrixType);
 
-            StreamUtil.WriteInt24(stream, DataSize, BigEd);
+            StreamUtil.WriteInt24(stream, DataSize, GCFile);
 
-            StreamUtil.WriteInt16(stream, image.Image.Width, BigEd);
+            StreamUtil.WriteInt16(stream, image.Image.Width, GCFile);
 
-            StreamUtil.WriteInt16(stream, image.Image.Height, BigEd);
+            StreamUtil.WriteInt16(stream, image.Image.Height, GCFile);
 
-            StreamUtil.WriteInt16(stream, image.Xaxis, BigEd);
+            StreamUtil.WriteInt16(stream, image.Xaxis, GCFile);
 
-            StreamUtil.WriteInt16(stream, image.Yaxis, BigEd);
+            StreamUtil.WriteInt16(stream, image.Yaxis, GCFile);
 
             int Flags = 0;
             Flags += (image.SwizzledImage ? 8192 : 0);
 
-            StreamUtil.WriteInt16(stream, Flags, BigEd);
+            StreamUtil.WriteInt16(stream, Flags, GCFile);
 
             stream.Position += 2;
         }
@@ -723,20 +723,20 @@ namespace SSX_Library.EATextureLibrary
         {
             StreamUtil.WriteUInt8(stream, Matrix);
 
-            StreamUtil.WriteInt24(stream, Size, BigEd);
+            StreamUtil.WriteInt24(stream, Size, GCFile);
 
-            StreamUtil.WriteInt16(stream, image.colorsTable.Count, BigEd);
+            StreamUtil.WriteInt16(stream, image.colorsTable.Count, GCFile);
 
-            StreamUtil.WriteInt16(stream, 1, BigEd);
+            StreamUtil.WriteInt16(stream, 1, GCFile);
 
-            StreamUtil.WriteInt16(stream, image.colorsTable.Count, BigEd);
+            StreamUtil.WriteInt16(stream, image.colorsTable.Count, GCFile);
 
-            StreamUtil.WriteInt16(stream, 0, BigEd);
+            StreamUtil.WriteInt16(stream, 0, GCFile);
 
             int Flags = 0;
             Flags += (image.SwizzledColours ? 8192 : 0);
 
-            StreamUtil.WriteInt32(stream, Flags, BigEd);
+            StreamUtil.WriteInt32(stream, Flags, GCFile);
         }
 
         public void AddImage(MatrixType matrixType, string name = "", string path = "")
