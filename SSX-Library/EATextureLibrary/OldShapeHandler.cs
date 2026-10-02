@@ -66,6 +66,8 @@ namespace SSX_Library.EATextureLibrary
                         ShapeImages.Add(tempImage);
                     }
 
+                    long SavePos = stream.Position;
+
                     for (int i = 0; i < ShapeImages.Count; i++)
                     {
                         var TempImage = ShapeImages[i];
@@ -88,6 +90,8 @@ namespace SSX_Library.EATextureLibrary
 
                         ShapeImages[i] = TempImage;
                     }
+
+                    stream.Position = SavePos;
 
                     EndingString = StreamUtil.ReadString(stream, 8);
 
@@ -348,28 +352,6 @@ namespace SSX_Library.EATextureLibrary
 
         public void SaveShape(string path)
         {
-            //Limit Colours for Saving
-            for (int i = 0; i < ShapeImages.Count; i++)
-            {
-                var sshImage = ShapeImages[i];
-
-                sshImage.colorsTable = ImageUtil.GetBitmapColorsFast(sshImage.Image).ToList();
-
-                //if metal bin combine images and then reduce
-                if (sshImage.colorsTable.Count > 16 && sshImage.MatrixType == MatrixType.FourBit)
-                {
-                    Console.WriteLine("Over 16 Colour Limit " + sshImage.Shortname + " (" + i + "/" + ShapeImages.Count + ")");
-                    sshImage.Image = ImageUtil.ReduceBitmapColorsFast(sshImage.Image, 16);
-                }
-                if (sshImage.colorsTable.Count > 256 && (sshImage.MatrixType == MatrixType.EightBit || sshImage.MatrixType == MatrixType.EightBitCompressed 
-                    || sshImage.MatrixType == MatrixType.EightBitXbox|| sshImage.MatrixType == MatrixType.EightBitGC))
-                {
-                    Console.WriteLine("Over 256 Colour Limit " + sshImage.Shortname + " (" + i + "/" + ShapeImages.Count + ")");
-                    sshImage.Image = ImageUtil.ReduceBitmapColorsFast(sshImage.Image, 256);
-                }
-                ShapeImages[i] = sshImage;
-            }
-
             //Pick Magic
             switch (ConsoleVersion)
             {
@@ -432,8 +414,6 @@ namespace SSX_Library.EATextureLibrary
                 StreamUtil.WriteBytes(stream, TempMatrix);
 
                 StreamUtil.AlignBy16(stream);
-                StreamUtil.WriteString(stream, "Buy ERTS", 8);
-                StreamUtil.AlignBy16(stream);
             }
 
             //Go back and write headers idiot
@@ -460,7 +440,7 @@ namespace SSX_Library.EATextureLibrary
             shapeImage.Offset = (int)stream.Position;
 
             //If Metal Alpha combine textures
-            if(shapeImage.MetalAlpha)
+            if (shapeImage.MetalAlpha)
             {
                 var NewImage = new Image<Rgba32>(shapeImage.Image.Height, shapeImage.Image.Width);
 
@@ -475,6 +455,23 @@ namespace SSX_Library.EATextureLibrary
 
                 shapeImage.Image = NewImage;
             }
+
+            //Limit Colours for Saving
+            shapeImage.colorsTable = ImageUtil.GetBitmapColorsFast(shapeImage.Image).ToList();
+
+            //if metal bin combine images and then reduce
+            if (shapeImage.colorsTable.Count > 16 && shapeImage.MatrixType == MatrixType.FourBit)
+            {
+                Console.WriteLine("Over 16 Colour Limit " + shapeImage.Shortname);
+                shapeImage.Image = ImageUtil.ReduceBitmapColorsFast(shapeImage.Image, 16);
+            }
+            if (shapeImage.colorsTable.Count > 256 && (shapeImage.MatrixType == MatrixType.EightBit || shapeImage.MatrixType == MatrixType.EightBitCompressed
+                || shapeImage.MatrixType == MatrixType.EightBitXbox || shapeImage.MatrixType == MatrixType.EightBitGC))
+            {
+                Console.WriteLine("Over 256 Colour Limit " + shapeImage.Shortname);
+                shapeImage.Image = ImageUtil.ReduceBitmapColorsFast(shapeImage.Image, 256);
+            }
+            shapeImage.colorsTable = ImageUtil.GetBitmapColorsFast(shapeImage.Image).ToList();
 
             var Matrix = new byte[0];
             var Colours = new List<Rgba32>();
@@ -524,7 +521,7 @@ namespace SSX_Library.EATextureLibrary
                     }
                     break;
                 case MatrixType.N64_CMPR:
-                    Matrix= EAEncode.EncodeMatrix30(shapeImage.Image);
+                    Matrix = EAEncode.EncodeMatrix30(shapeImage.Image);
                     break;
                 case MatrixType.BC1_PSP:
                 case MatrixType.BC1:
@@ -559,7 +556,7 @@ namespace SSX_Library.EATextureLibrary
                 Matrix = TempBytes;
             }
 
-            WriteImageHeader(stream, shapeImage, Matrix.Length+16);
+            WriteImageHeader(stream, shapeImage, Matrix.Length + 16);
 
             StreamUtil.WriteBytes(stream, Matrix);
 
@@ -593,7 +590,7 @@ namespace SSX_Library.EATextureLibrary
             }
 
             //Write Longname
-            if (shapeImage.Longname != "" && shapeImage.Longname !=null)
+            if (shapeImage.Longname != "" && shapeImage.Longname != null)
             {
                 stream.WriteUInt32((byte)MatrixType.LongName, ByteOrder.LittleEndian);
                 stream.WriteAsciiWithLength(shapeImage.Longname, 12);
@@ -652,7 +649,7 @@ namespace SSX_Library.EATextureLibrary
                 //Limit Matrix to Remove Bloat
             }
 
-            WriteColourHeader(stream, image, Matrix.Length+16, 33);
+            WriteColourHeader(stream, image, MatrixSize + 16, 33);
 
             StreamUtil.WriteBytes(stream, Matrix);
         }
