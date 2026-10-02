@@ -755,7 +755,7 @@ namespace SSX_Library.EATextureLibrary
             {
                 if(File.Exists(path))
                 {
-                    NewSSHImage.Image = (Image<Rgba32>)Image.Load(path);
+                    NewSSHImage.Image = Image.Load(path).CloneAs<Rgba32>();
                 }
                 else
                 {
@@ -981,7 +981,7 @@ namespace SSX_Library.EATextureLibrary
         public void LoadSingleImage(string path, int i)
         {
             var temp = ShapeImages[i];
-            temp.Image = (Image<Rgba32>)Image.Load(path);
+            temp.Image = Image.Load(path).CloneAs<Rgba32>();
             temp.colorsTable = ImageUtil.GetBitmapColorsFast(temp.Image).ToList();
             ShapeImages[i] = temp;
         }
@@ -994,7 +994,7 @@ namespace SSX_Library.EATextureLibrary
         public void LoadSingleMetalImage(string path, int i)
         {
             var temp = ShapeImages[i];
-            temp.Metal = (Image<A8>)Image.Load(path);
+            temp.Metal = Image.Load(path).CloneAs<A8>();
             ShapeImages[i] = temp;
         }
 
