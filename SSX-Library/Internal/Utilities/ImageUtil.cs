@@ -49,15 +49,16 @@ namespace SSX_Library.Internal.Utilities
             var reducedPalette = ReduceColors(pixelColors, maxColors);
 
             // Step 3: Recolor image using nearest palette color (parallel)
-            Parallel.For(0, height, y =>
+            img.ProcessPixelRows(accessor =>
             {
-                Span<Rgba32> row = img.DangerousGetPixelRowMemory(y).Span;
-
-                for (int x = 0; x < width; x++)
+                for (int y = 0; y < height; y++)
                 {
-                    var nearest = FindNearestColor(row[x], reducedPalette);
-
-                    row[x] = new Rgba32(nearest.R, nearest.G, nearest.B, nearest.A);
+                    Span<Rgba32> row = accessor.GetRowSpan(y);
+                    for (int x = 0; x < width; x++)
+                    {
+                        var nearest = FindNearestColor(row[x], reducedPalette);
+                        row[x] = new Rgba32(nearest.R, nearest.G, nearest.B, nearest.A);
+                    }
                 }
             });
 
@@ -74,9 +75,9 @@ namespace SSX_Library.Internal.Utilities
             var vectors = inputColors.Select(c => new float[] { c.R, c.G, c.B }).ToList();
             var clusters = KMeans(vectors, maxColors);
             return clusters.Select(v => new Rgba32(
-                (int)Math.Round(v[0]),
-                (int)Math.Round(v[1]),
-                (int)Math.Round(v[2])
+                (byte)Math.Clamp((int)Math.Round(v[0]), 0, 255),
+                (byte)Math.Clamp((int)Math.Round(v[1]), 0, 255),
+                (byte)Math.Clamp((int)Math.Round(v[2]), 0, 255)
             )).ToList();
         }
 

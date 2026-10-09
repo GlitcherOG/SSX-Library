@@ -8,16 +8,16 @@ using SSX_Library.Internal.Utilities;
 
 namespace SSXLibrary.FileHandlers
 {
-    public class BoltPS2Handler
+    public class BoltHandler
     {
+        public bool GCFile = false;
+
         int unknown; //Store items?
         int ItemEntryAmmount; //Possibly Textures?
         public List<Character> characters = new List<Character>();
         int ammount2;
         int ammount3;
-        public List<Unkown3> unkown3 = new List<Unkown3>();
         int ammount4;
-        public List<Unkown3> unkown4 = new List<Unkown3>();
         int StringListLength; // Matches The Used Portion of the List
         public List<string> StringList = new List<string>();
         public List<int> StringPos = new List<int>();
@@ -29,49 +29,60 @@ namespace SSXLibrary.FileHandlers
 
                 unknown = StreamUtil.ReadUInt32(stream);
 
+                if (unknown != 910)
+                {
+                    GCFile = true;
+                    stream.Position = 0;
+                    unknown = StreamUtil.ReadUInt32(stream, GCFile);
+                }
+
+
                 //4829
-                ItemEntryAmmount = StreamUtil.ReadUInt32(stream);
+                ItemEntryAmmount = StreamUtil.ReadUInt32(stream, GCFile);
 
                 for (int i = 0; i < ItemEntryAmmount; i++)
                 {
                     //Read 56 bytes
                     ItemEntries temp1 = new ItemEntries();
                     temp1.CharacterID = stream.ReadByte(); //1
-                    temp1.unkownInt1 = stream.ReadByte(); //2
-                    temp1.Unlock = stream.ReadByte(); //3
-                    temp1.unkownInt2 = stream.ReadByte(); //4
-                    temp1.ItemID = StreamUtil.ReadInt16(stream);
-                    temp1.ParentID = StreamUtil.ReadInt16(stream);
+                    temp1.unkownInt1 = StreamUtil.ReadInt8(stream); //2 //Parent Model ID?
+                    temp1.UnlockCondition = stream.ReadByte(); //3
+                    temp1.TextureType = StreamUtil.ReadInt8(stream); //4 //Texture ID
+                    temp1.ItemID = StreamUtil.ReadInt16(stream, GCFile);
+                    temp1.ParentID = StreamUtil.ReadInt16(stream, GCFile);
 
-                    temp1.category = stream.ReadByte(); //9
-                    temp1.buyable = stream.ReadByte(); //10
+                    temp1.category = StreamUtil.ReadInt8(stream); //9
+                    temp1.buyable = stream.ReadByte() == 0; //10
+
                     temp1.menuOrder = stream.ReadByte(); //11
 
                     temp1.unkownInt5 = stream.ReadByte(); //12
                     
-                    temp1.weight = StreamUtil.ReadInt16(stream); //13-14
-                    temp1.Cost = StreamUtil.ReadInt16(stream); //15-16
-                    temp1.FileID = stream.ReadByte(); //17
-                    temp1.SpecialID = stream.ReadByte(); //18
-                    temp1.SpecialID2 = stream.ReadByte(); //19
-                    temp1.SpecialID3 = stream.ReadByte(); //20
+                    temp1.weight = StreamUtil.ReadInt16(stream, GCFile); //13-14
+                    temp1.Cost = StreamUtil.ReadInt16(stream, GCFile); //15-16
+                    temp1.FileID = StreamUtil.ReadInt8(stream); ; //17
+                    temp1.SpecialID = StreamUtil.ReadInt8(stream); //18
+                    temp1.SpecialID2 = StreamUtil.ReadInt8(stream); //19
+                    temp1.SpecialID3 = StreamUtil.ReadInt8(stream); //20
 
-                    temp1.nameOffset = StreamUtil.ReadUInt32(stream);
-                    temp1.ModelIDOffset = StreamUtil.ReadUInt32(stream);
-                    temp1.ModelID2Offset = StreamUtil.ReadUInt32(stream);
-                    temp1.ModelID3Offset = StreamUtil.ReadUInt32(stream);
-                    temp1.ModelID4Offset = StreamUtil.ReadUInt32(stream);
-                    temp1.ModelPathOffset = StreamUtil.ReadUInt32(stream);
-                    temp1.TexturePathOffset = StreamUtil.ReadUInt32(stream);
-                    temp1.SmallIconOffset = StreamUtil.ReadUInt32(stream);
+                    temp1.nameOffset = StreamUtil.ReadUInt32(stream, GCFile);
+                    temp1.ModelIDOffset = StreamUtil.ReadUInt32(stream, GCFile);
+                    temp1.ModelID2Offset = StreamUtil.ReadUInt32(stream, GCFile);
+                    temp1.ModelID3Offset = StreamUtil.ReadUInt32(stream, GCFile);
+                    temp1.ModelID4Offset = StreamUtil.ReadUInt32(stream, GCFile);
+                    temp1.ModelPathOffset = StreamUtil.ReadUInt32(stream, GCFile);
+                    temp1.TexturePathOffset = StreamUtil.ReadUInt32(stream, GCFile);
+                    temp1.SmallIconOffset = StreamUtil.ReadUInt32(stream, GCFile);
 
-                    temp1.unkownInt6 = StreamUtil.ReadUInt32(stream);
+                    temp1.unkownInt6 = StreamUtil.ReadUInt32(stream, GCFile);
                     
                     if(characters.Count-1 != temp1.CharacterID)
                     {
                         Character tempSlot = new Character();
                         tempSlot.entries = new List<ItemEntries>();
-                        tempSlot.unkown2s = new List<Unkown2>();
+                        tempSlot.equipLinks = new List<EquipLink>();
+                        tempSlot.defaultOutfits = new List<DefaultOutfit>();
+                        tempSlot.handMatch = new List<HandMatch>();
                         tempSlot.entries.Add(temp1);
                         characters.Add(tempSlot);
                     }
@@ -84,59 +95,66 @@ namespace SSXLibrary.FileHandlers
                 }
 
                 //7327
-                ammount2 = StreamUtil.ReadUInt32(stream);
+                ammount2 = StreamUtil.ReadUInt32(stream, GCFile);
 
                 for (int i = 0; i < ammount2; i++)
                 {
                     //Read 12 bytes
-                    Unkown2 temp2 = new Unkown2();
+                    EquipLink temp2 = new EquipLink();
                     temp2.CharacterID = stream.ReadByte();
-                    temp2.BoolInt = stream.ReadByte(); //Effects what can be equiped with what
-                    temp2.UnkownInt = StreamUtil.ReadInt16(stream); //Effects model loading (Possible Item ID)
+                    temp2.MainItemEquip = stream.ReadByte(); //Effects what can be equiped with what
+                    temp2.MainItemID = StreamUtil.ReadInt16(stream, GCFile); //Effects model loading (Possible Item ID)
                     temp2.UnkownInt2 = stream.ReadByte(); // No idea
 
                     //All seem to be relyant on the next
-                    temp2.UnkownInt3 = stream.ReadByte(); //No idea
-                    temp2.UnkownInt4 = StreamUtil.ReadInt16(stream);
+                    temp2.IfEquipBool = stream.ReadByte(); //No idea
+                    temp2.IfEquipID = StreamUtil.ReadInt16(stream, GCFile);
                     temp2.UnkownInt5 = stream.ReadByte();
-                    temp2.BoolInt2 = stream.ReadByte();
-                    temp2.UnkownInt7 = StreamUtil.ReadInt16(stream);
+                    temp2.SecondaryItemEquip = stream.ReadByte();
+                    temp2.SecondaryItemID = StreamUtil.ReadInt16(stream, GCFile);
 
 
                     var tempSlot = characters[temp2.CharacterID];
-                    tempSlot.unkown2s.Add(temp2);
+                    tempSlot.equipLinks.Add(temp2);
                     characters[temp2.CharacterID] = tempSlot;
 
                 }
 
                 //152
-                ammount3 = StreamUtil.ReadUInt32(stream);
+                ammount3 = StreamUtil.ReadUInt32(stream, GCFile);
 
                 for (int i = 0; i < ammount3; i++)
                 {
                     //Read 8 bytes
-                    Unkown3 temp3 = new Unkown3();
-                    temp3.UnkownInt = StreamUtil.ReadUInt32(stream);
-                    temp3.UnkownInt2 = StreamUtil.ReadInt16(stream);
-                    temp3.UnkownInt3 = StreamUtil.ReadInt16(stream);
-                    unkown3.Add(temp3);
+                    HandMatch temp3 = new HandMatch();
+                    temp3.CharID = StreamUtil.ReadInt32(stream);
+                    temp3.LeftHand = StreamUtil.ReadInt16(stream, GCFile);
+                    temp3.RightHand = StreamUtil.ReadInt16(stream, GCFile);
+                    //HandMatch.Add(temp3);
+
+                    var tempSlot = characters[temp3.CharID];
+                    tempSlot.handMatch.Add(temp3);
+                    characters[temp3.CharID] = tempSlot;
                 }
 
                 //88
-                ammount4 = StreamUtil.ReadUInt32(stream);
+                ammount4 = StreamUtil.ReadUInt32(stream, GCFile);
 
                 for (int i = 0; i < ammount4; i++)
                 {
                     //Read 8 Bytes
-                    Unkown3 temp4 = new Unkown3();
-                    temp4.UnkownInt = StreamUtil.ReadUInt32(stream);
-                    temp4.UnkownInt2 = StreamUtil.ReadInt16(stream);
-                    temp4.UnkownInt3 = StreamUtil.ReadInt16(stream);
-                    unkown4.Add(temp4);
+                    DefaultOutfit temp4 = new DefaultOutfit();
+                    temp4.CharID = StreamUtil.ReadInt32(stream);
+                    temp4.CategoryID = StreamUtil.ReadInt16(stream, GCFile);
+                    temp4.ItemID = StreamUtil.ReadInt16(stream, GCFile);
+
+                    var tempSlot = characters[temp4.CharID];
+                    tempSlot.defaultOutfits.Add(temp4);
+                    characters[temp4.CharID] = tempSlot;
                 }
 
                 //181173
-                StringListLength = StreamUtil.ReadUInt32(stream);
+                StringListLength = StreamUtil.ReadUInt32(stream, GCFile);
                 long startpos = stream.Position;
 
                 while (stream.Position < stream.Length - 1)
@@ -214,7 +232,7 @@ namespace SSXLibrary.FileHandlers
             Stream stream = new MemoryStream();
             Stream streamString = new MemoryStream();
 
-            StreamUtil.WriteInt32(stream, unknown);
+            StreamUtil.WriteInt32(stream, unknown, GCFile);
             int ListCount = 0;
 
             for (int i = 0; i < characters.Count; i++)
@@ -225,7 +243,7 @@ namespace SSXLibrary.FileHandlers
                 }
             }
 
-            StreamUtil.WriteInt32(stream, ListCount);
+            StreamUtil.WriteInt32(stream, ListCount, GCFile);
 
             StringList = new List<string>();
             StringPos = new List<int>();
@@ -238,20 +256,20 @@ namespace SSXLibrary.FileHandlers
                     var TempEntry = TempCharEntry.entries[a];
                     stream.WriteByte((byte)TempEntry.CharacterID);
                     stream.WriteByte((byte)TempEntry.unkownInt1);
-                    stream.WriteByte((byte)TempEntry.Unlock);
-                    stream.WriteByte((byte)TempEntry.unkownInt2);
+                    stream.WriteByte((byte)TempEntry.UnlockCondition);
+                    stream.WriteByte((byte)TempEntry.TextureType);
 
-                    StreamUtil.WriteInt16(stream, TempEntry.ItemID);
-                    StreamUtil.WriteInt16(stream, TempEntry.ParentID);
+                    StreamUtil.WriteInt16(stream, TempEntry.ItemID, GCFile);
+                    StreamUtil.WriteInt16(stream, TempEntry.ParentID, GCFile);
 
-                    stream.WriteByte((byte)TempEntry.category);
-                    stream.WriteByte((byte)TempEntry.buyable);
+                    StreamUtil.WriteUInt8(stream, (byte)TempEntry.category);
+                    stream.WriteByte((byte)(TempEntry.buyable ? 0 : 255));
                     stream.WriteByte((byte)TempEntry.menuOrder);
 
                     stream.WriteByte((byte)TempEntry.unkownInt5);
 
-                    StreamUtil.WriteInt16(stream, TempEntry.weight);
-                    StreamUtil.WriteInt16(stream, TempEntry.Cost);
+                    StreamUtil.WriteInt16(stream, TempEntry.weight, GCFile);
+                    StreamUtil.WriteInt16(stream, TempEntry.Cost, GCFile);
 
                     stream.WriteByte((byte)TempEntry.FileID);
                     stream.WriteByte((byte)TempEntry.SpecialID);
@@ -275,56 +293,86 @@ namespace SSXLibrary.FileHandlers
 
             for (int i = 0; i < characters.Count; i++)
             {
-                for (int a = 0; a < characters[i].unkown2s.Count; a++)
+                for (int a = 0; a < characters[i].equipLinks.Count; a++)
                 {
                     ListCount++;
                 }
             }
 
-            StreamUtil.WriteInt32(stream, ListCount);
+            StreamUtil.WriteInt32(stream, ListCount, GCFile);
             for (int j = 0; j < characters.Count; j++)
             {
                 var TempCharEntry = characters[j];
 
-                for (int i = 0; i < TempCharEntry.unkown2s.Count; i++)
+                for (int i = 0; i < TempCharEntry.equipLinks.Count; i++)
                 {
-                    var TempEntry = TempCharEntry.unkown2s[i];
+                    var TempEntry = TempCharEntry.equipLinks[i];
 
                     stream.WriteByte((byte)TempEntry.CharacterID);
-                    stream.WriteByte((byte)TempEntry.BoolInt);
-                    StreamUtil.WriteInt16(stream, TempEntry.UnkownInt);
+                    stream.WriteByte((byte)TempEntry.MainItemEquip);
+                    StreamUtil.WriteInt16(stream, TempEntry.MainItemID, GCFile);
                     stream.WriteByte((byte)TempEntry.UnkownInt2);
-                    stream.WriteByte((byte)TempEntry.UnkownInt3);
-                    StreamUtil.WriteInt16(stream, TempEntry.UnkownInt4);
+                    stream.WriteByte((byte)TempEntry.IfEquipBool);
+                    StreamUtil.WriteInt16(stream, TempEntry.IfEquipID, GCFile);
                     stream.WriteByte((byte)TempEntry.UnkownInt5);
-                    stream.WriteByte((byte)TempEntry.BoolInt2);
-                    StreamUtil.WriteInt16(stream, TempEntry.UnkownInt7);
+                    stream.WriteByte((byte)TempEntry.SecondaryItemEquip);
+                    StreamUtil.WriteInt16(stream, TempEntry.SecondaryItemID, GCFile);
                 }
             }
 
-            StreamUtil.WriteInt32(stream, unkown3.Count);
+            ListCount = 0;
 
-            for (int i = 0; i < unkown3.Count; i++)
+            for (int i = 0; i < characters.Count; i++)
             {
-                var TempEntry = unkown3[i];
-
-                StreamUtil.WriteInt32(stream, TempEntry.UnkownInt);
-                StreamUtil.WriteInt16(stream, TempEntry.UnkownInt2);
-                StreamUtil.WriteInt16(stream, TempEntry.UnkownInt3);
+                for (int a = 0; a < characters[i].handMatch.Count; a++)
+                {
+                    ListCount++;
+                }
             }
 
-            StreamUtil.WriteInt32(stream, unkown4.Count);
+            StreamUtil.WriteInt32(stream, ListCount, GCFile);
 
-            for (int i = 0; i < unkown4.Count; i++)
+            for (int j = 0; j < characters.Count; j++)
             {
-                var TempEntry = unkown4[i];
+                var TempCharEntry = characters[j];
 
-                StreamUtil.WriteInt32(stream, TempEntry.UnkownInt);
-                StreamUtil.WriteInt16(stream, TempEntry.UnkownInt2);
-                StreamUtil.WriteInt16(stream, TempEntry.UnkownInt3);
+                for (int i = 0; i < TempCharEntry.handMatch.Count; i++)
+                {
+                    var TempEntry = TempCharEntry.handMatch[i];
+
+                    StreamUtil.WriteInt32(stream, TempEntry.CharID);
+                    StreamUtil.WriteInt16(stream, TempEntry.LeftHand, GCFile);
+                    StreamUtil.WriteInt16(stream, TempEntry.RightHand, GCFile);
+                }
             }
 
-            StreamUtil.WriteInt32(stream, (int)streamString.Position);
+            ListCount = 0;
+
+            for (int i = 0; i < characters.Count; i++)
+            {
+                for (int a = 0; a < characters[i].defaultOutfits.Count; a++)
+                {
+                    ListCount++;
+                }
+            }
+
+            StreamUtil.WriteInt32(stream, ListCount, GCFile);
+
+            for (int j = 0; j < characters.Count; j++)
+            {
+                var TempCharEntry = characters[j];
+
+                for (int i = 0; i < TempCharEntry.defaultOutfits.Count; i++)
+                {
+                    var TempEntry = TempCharEntry.defaultOutfits[i];
+
+                    StreamUtil.WriteInt32(stream, TempEntry.CharID);
+                    StreamUtil.WriteInt16(stream, TempEntry.CategoryID, GCFile);
+                    StreamUtil.WriteInt16(stream, TempEntry.ItemID, GCFile);
+                }
+            }
+
+            StreamUtil.WriteInt32(stream, (int)streamString.Position, GCFile);
 
             streamString.Position = 0;
             byte[] bytes = new byte[streamString.Length];
@@ -360,7 +408,55 @@ namespace SSXLibrary.FileHandlers
                     StreamUtil.WriteNullString(stream1, StringTest);
                 }
             }
-            StreamUtil.WriteInt32(stream, offset);
+            StreamUtil.WriteInt32(stream, offset, GCFile);
+        }
+
+        public int GetItemIndex(int CharID, int ID)
+        {
+            for (int i = 0; i < characters[CharID].entries.Count; i++)
+            {
+                if (characters[CharID].entries[i].ItemID==ID)
+                {
+                    return i;
+                }
+            }
+            return -1;
+        }
+
+        public bool ItemParentIDValid(int Char, int ID, int NewParentID)
+        {
+            var CharEntry = characters[Char];
+
+            int EntryIndex = GetItemIndex(Char, NewParentID);
+
+            if(ID==NewParentID)
+            {
+                return false;
+            }
+
+            if(EntryIndex!=-1)
+            {
+                return CheckItemChildLoop(Char, ID, CharEntry.entries[EntryIndex].ParentID);
+            }
+
+            return true;
+        }
+
+        private bool CheckItemChildLoop(int Char, int ItemID, int CheckChildID)
+        {
+            var CharEntry = characters[Char];
+            int EntryIndex = GetItemIndex(Char, CheckChildID);
+
+            if (ItemID == CheckChildID)
+            {
+                return false;
+            }
+            if (EntryIndex != -1)
+            {
+                return CheckItemChildLoop(Char, ItemID, CharEntry.entries[EntryIndex].ParentID);
+            }
+
+            return true;
         }
 
     }
@@ -368,21 +464,24 @@ namespace SSXLibrary.FileHandlers
     public struct Character
     {
         public List<ItemEntries> entries;
-        public List<Unkown2> unkown2s;
+        public List<EquipLink> equipLinks;
+        public List<DefaultOutfit> defaultOutfits;
+        public List<HandMatch> handMatch;
     }
 
     public struct ItemEntries
     {
         public int CharacterID;
-        public int unkownInt1;
-        public int Unlock;
-        public int unkownInt2;
+        public int unkownInt1; //Category Mesh ID?
+        public int UnlockCondition;
+        public int TextureType;
+        //0-Suit,1-Head,2-alph,3-Boot,4-Board,5-extback,6-exthead/top?,
         public int ItemID;
-        public int ParentID; //Effects Equip Postion??
+        public int ParentID;
         public int category;
-        public int buyable;
+        public bool buyable;
         public int menuOrder;
-        public int unkownInt5;
+        public int unkownInt5; //UI Menu Type?
         public int weight;
         public int Cost;
         public int FileID;
@@ -411,24 +510,31 @@ namespace SSXLibrary.FileHandlers
         public int unkownInt6; //Effects Equip??
     }
 
-    public struct Unkown2
+    public struct EquipLink
     {
         public int CharacterID;
-        public int BoolInt;
-        public int UnkownInt;
+        public int MainItemEquip;
+        public int MainItemID;
         public int UnkownInt2;
-        public int UnkownInt3;
-        public int UnkownInt4;
+        public int IfEquipBool;
+        public int IfEquipID;
         public int UnkownInt5;
         public int UnkownInt6;
-        public int BoolInt2;
-        public int UnkownInt7;
+        public int SecondaryItemEquip;
+        public int SecondaryItemID;
     }
 
-    public struct Unkown3
+    public struct HandMatch
     {
-        public int UnkownInt;
-        public int UnkownInt2;
-        public int UnkownInt3;
+        public int CharID;
+        public int LeftHand;
+        public int RightHand;
+    }
+
+    public struct DefaultOutfit
+    {
+        public int CharID;
+        public int CategoryID;
+        public int ItemID;
     }
 }

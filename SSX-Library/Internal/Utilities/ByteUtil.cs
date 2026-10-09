@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using SixLabors.ImageSharp.PixelFormats;
+using System.Collections;
 
 namespace SSX_Library.Internal.Utilities;
 
@@ -400,6 +401,201 @@ internal class ByteUtil
         }
 
         return unswizzled;
+    }
+
+    public static byte[] N64I8Deswizzle(
+        byte[] source,
+        int width,
+        int height)
+    {
+        byte[] result = new byte[width * height];
+
+        int src = 0;
+
+        for (int y = 0; y < height; y += 4)
+        {
+            for (int x = 0; x < width; x += 8)
+            {
+                for (int row = 0; row < 4; row++)
+                {
+                    int py = y + row;
+
+                    if (py >= height)
+                        continue;
+
+                    for (int col = 0; col < 8; col++)
+                    {
+                        int px = x + col;
+
+                        if (px >= width)
+                            continue;
+
+                        if (src >= source.Length)
+                            continue;
+
+                        result[py * width + px] =
+                            source[src++];
+
+                    }
+                }
+            }
+        }
+
+        return result;
+    }
+
+    public static byte[] N64I8Swizzle(
+    byte[] source,
+    int width,
+    int height)
+    {
+        byte[] result = new byte[source.Length];
+
+        int dst = 0;
+
+        for (int y = 0; y < height; y += 4)
+        {
+            for (int x = 0; x < width; x += 8)
+            {
+                for (int row = 0; row < 4; row++)
+                {
+                    int py = y + row;
+
+                    if (py >= height)
+                        continue;
+
+                    for (int col = 0; col < 8; col++)
+                    {
+                        int px = x + col;
+
+                        if (px >= width)
+                            continue;
+
+                        result[dst++] =
+                            source[py * width + px];
+                    }
+                }
+            }
+        }
+
+        return result;
+    }
+
+    public static byte[] N64_BGR5A3_Deswizzle(
+    byte[] data,
+    int width,
+    int height)
+    {
+        int tileWidth = 4;
+        int tileHeight = 4;
+        int bytesPerPixel = 2;
+        int tileSize = 32;
+
+        int tilesX = (width + 3) / 4;
+        int tilesY = (height + 3) / 4;
+
+        byte[] result = new byte[width * height * 2];
+
+        int src = 0;
+
+        for (int tileY = 0; tileY < tilesY; tileY++)
+        {
+            for (int tileX = 0; tileX < tilesX; tileX++)
+            {
+                for (int y = 0; y < tileHeight; y++)
+                {
+                    for (int x = 0; x < tileWidth; x++)
+                    {
+                        int px = tileX * tileWidth + x;
+                        int py = tileY * tileHeight + y;
+
+                        int localPixel =
+                            y * tileWidth + x;
+
+                        int sourceOffset =
+                            src + localPixel * bytesPerPixel;
+
+                        if (px >= width || py >= height)
+                            continue;
+
+                        int destinationOffset =
+                            (py * width + px) * bytesPerPixel;
+
+                        result[destinationOffset] =
+                            data[sourceOffset];
+
+                        result[destinationOffset + 1] =
+                            data[sourceOffset + 1];
+                    }
+                }
+
+                src += tileSize;
+            }
+        }
+
+        return result;
+    }
+
+
+    /// <summary>
+    /// Converts normal linear row-major 16-bit texture data
+    /// into N64 texture ordering.
+    /// </summary>
+    public static byte[] N64_BGR5A3_Swizzle(
+        byte[] data,
+        int width,
+        int height)
+    {
+        int tileWidth = 4;
+        int tileHeight = 4;
+        int bytesPerPixel = 2;
+        int tileSize = 32;
+
+        int tilesX = (width + 3) / 4;
+        int tilesY = (height + 3) / 4;
+
+        // GameCube stores complete 4x4 tiles,
+        // so the output may be padded to a multiple of 4.
+        int paddedWidth = tilesX * tileWidth;
+        int paddedHeight = tilesY * tileHeight;
+
+        byte[] result = new byte[paddedWidth * paddedHeight * bytesPerPixel];
+
+        int dst = 0;
+
+        for (int tileY = 0; tileY < tilesY; tileY++)
+        {
+            for (int tileX = 0; tileX < tilesX; tileX++)
+            {
+                for (int y = 0; y < tileHeight; y++)
+                {
+                    for (int x = 0; x < tileWidth; x++)
+                    {
+                        int px = tileX * tileWidth + x;
+                        int py = tileY * tileHeight + y;
+
+                        if (px >= width || py >= height)
+                            continue;
+
+                        int sourceOffset =
+                            (py * width + px) * bytesPerPixel;
+
+                        int destinationOffset =
+                            dst + (y * tileWidth + x) * bytesPerPixel;
+
+                        result[destinationOffset] =
+                            data[sourceOffset];
+
+                        result[destinationOffset + 1] =
+                            data[sourceOffset + 1];
+                    }
+                }
+
+                dst += tileSize;
+            }
+        }
+
+        return result;
     }
 
     public static float UintByteToFloat(int Int)
