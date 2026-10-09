@@ -42,7 +42,7 @@ namespace SSXLibrary
         public SplineJsonHandler splineJsonHandler = new SplineJsonHandler();
         public ModelJsonHandler prefabJsonHandler = new ModelJsonHandler();
         public ParticleModelJsonHandler particleModelJsonHandler = new ParticleModelJsonHandler();
-        public CameraJSONHandler cameraJSONHandler  = new CameraJSONHandler();
+        public CameraJSONHandler cameraJSONHandler = new CameraJSONHandler();
         public SSFJsonHandler ssfJsonHandler = new SSFJsonHandler();
 
         //Skybox JSON
@@ -140,16 +140,16 @@ namespace SSXLibrary
 
                 patch.Points = new float[16, 3];
 
-                for (int a= 0; a < 16; a++)
+                for (int a = 0; a < 16; a++)
                 {
-                    patch.Points = ArrayConv.Vector3ToArray2D(patch.Points,bezierUtil.RawPoints[a], a);
+                    patch.Points = ArrayConv.Vector3ToArray2D(patch.Points, bezierUtil.RawPoints[a], a);
                 }
 
                 patch.SurfaceType = pbdHandler.Patches[i].SurfaceType;
 
-                if (pbdHandler.Patches[i].PatchVisablity<0)
+                if (pbdHandler.Patches[i].PatchVisablity < 0)
                 {
-                    patch.TrickOnlyPatch =true;
+                    patch.TrickOnlyPatch = true;
                 }
                 patch.TexturePath = TextureHandler.ShapeImages[pbdHandler.Patches[i].TextureAssigment].Shortname + ".png";
                 patch.LightmapID = pbdHandler.Patches[i].LightmapID;
@@ -207,7 +207,7 @@ namespace SSXLibrary
                 int FindHash = -1;
                 for (int a = 0; a < pbdHandler.hashData.InstanceHash.Count; a++)
                 {
-                    if(i== pbdHandler.hashData.InstanceHash[a].ObjectUID)
+                    if (i == pbdHandler.hashData.InstanceHash[a].ObjectUID)
                     {
                         FindHash = pbdHandler.hashData.InstanceHash[a].Hash;
                         instanceJson.Hash = FindHash;
@@ -271,7 +271,7 @@ namespace SSXLibrary
                     instanceJson.PlayerCollision = bitArray[5];
                     instanceJson.PlayerBounce = bitArray[7];
                     instanceJson.Unknown241 = bitArray[12];
-                    instanceJson.UVScroll  = bitArray[13];
+                    instanceJson.UVScroll = bitArray[13];
 
 
                     instanceJson.SurfaceType = ssfHandler.ObjectProperties[StatePos].SurfaceType;
@@ -281,7 +281,7 @@ namespace SSXLibrary
                     instanceJson.U8 = ssfHandler.ObjectProperties[StatePos].U8;
 
                     int CollsionPos = ssfHandler.ObjectProperties[StatePos].CollisonModelIndex;
-                    if (CollsionPos!=-1 && CollsionPos<ssfHandler.CollisonModelPointers.Count && instanceJson.CollsionMode!=3)
+                    if (CollsionPos != -1 && CollsionPos < ssfHandler.CollisonModelPointers.Count && instanceJson.CollsionMode != 3)
                     {
                         instanceJson.CollsionModelPaths = new string[ssfHandler.CollisonModelPointers[CollsionPos].Models.Count];
 
@@ -542,7 +542,7 @@ namespace SSXLibrary
                         TempPrefabObject.Scale = ArrayConv.Vector3ToArray(Scale);
                     }
 
-                    if(pbdHandler.modelData[i].ModelObjects[a].IncludeAnimation)
+                    if (pbdHandler.modelData[i].ModelObjects[a].IncludeAnimation)
                     {
                         var TempAnimation = new ModelJsonHandler.ObjectAnimation();
                         TempPrefabObject.IncludeAnimation = true;
@@ -660,7 +660,7 @@ namespace SSXLibrary
 
                 for (int a = 0; a < TempCamera.AnimationInitial.AnimationHeaders.Count; a++)
                 {
-                    var NewAnimationHeader  = new CameraJSONHandler.CameraAnimationHeader();
+                    var NewAnimationHeader = new CameraJSONHandler.CameraAnimationHeader();
                     NewAnimationHeader.Action = TempCamera.AnimationInitial.AnimationHeaders[a].Action;
                     NewAnimationHeader.AnimationDatas = new List<CameraJSONHandler.CameraAnimationData>();
 
@@ -746,7 +746,7 @@ namespace SSXLibrary
                     Console.WriteLine("AI Paths: " + (i + 1) + "/" + aip.AIPath.PathAs.Count);
                     var NewAIPath = new AIPSOPJsonHandler.PathA();
 
-                    if(aip.AIPath.PathAs[i].Type!=2|| aip.AIPath.PathAs[i].U1 != 100 || aip.AIPath.PathAs[i].U4 != 101 || aip.AIPath.PathAs[i].U5 != 4)
+                    if (aip.AIPath.PathAs[i].Type != 2 || aip.AIPath.PathAs[i].U1 != 100 || aip.AIPath.PathAs[i].U4 != 101 || aip.AIPath.PathAs[i].U5 != 4)
                     {
                         //MessageBox.Show("Archy is an idiot 1");
                     }
@@ -854,7 +854,7 @@ namespace SSXLibrary
                 sopJson.AIPaths = new List<AIPSOPJsonHandler.PathA>();
                 for (int i = 0; i < sop.AIPath.PathAs.Count; i++)
                 {
-                    Console.WriteLine("SOP AI Paths: " +(i+1)+ "/" + sop.AIPath.PathAs.Count);
+                    Console.WriteLine("SOP AI Paths: " + (i + 1) + "/" + sop.AIPath.PathAs.Count);
 
                     var NewAIPath = new AIPSOPJsonHandler.PathA();
 
@@ -991,7 +991,7 @@ namespace SSXLibrary
                     var TempEffect = ssfHandler.EffectHeaders[i].Effects[a];
                     NewEffectHeader.Effects.Add(SSFJsonHandler.EffectToJSON(TempEffect));
                 }
-                
+
 
                 ssfJsonHandler.EffectHeaders.Add(NewEffectHeader);
             }
@@ -1271,7 +1271,7 @@ namespace SSXLibrary
                 LightmapHandler.LoadShape(LoadPath.Substring(0, LoadPath.Length - 1) + "_L.ssh");
                 for (int i = 0; i < LightmapHandler.ShapeImages.Count; i++)
                 {
-                    Console.WriteLine("Lightmap Textures: " + (i+1) + "/" + LightmapHandler.ShapeImages.Count);
+                    Console.WriteLine("Lightmap Textures: " + (i + 1) + "/" + LightmapHandler.ShapeImages.Count);
                     LightmapHandler.BrightenImage(i);
                     LightmapHandler.ExtractSingleImage(ExportPath + "\\Lightmaps\\" + LightmapHandler.ShapeImages[i].Shortname + ".png", i);
                 }
@@ -1327,7 +1327,7 @@ namespace SSXLibrary
                 for (int i = 0; i < patchPoints.Patches.Count; i++)
                 {
                     //ErrorManager.ErrorMessage = "Error with Patch (" + i + ") " + patchPoints.Patches[i].PatchName; 
-                    Console.WriteLine("Patch: " +(i+1)+ "/" + patchPoints.Patches.Count + " " + patchPoints.Patches[i].PatchName);
+                    Console.WriteLine("Patch: " + (i + 1) + "/" + patchPoints.Patches.Count + " " + patchPoints.Patches[i].PatchName);
                     Patch patch = new Patch();
                     var ImportPatch = patchPoints.Patches[i];
                     patch.LightMapPoint = ArrayConv.ArrayToVector4(ImportPatch.LightMapPoint);
@@ -1449,7 +1449,7 @@ namespace SSXLibrary
                 for (int i = 0; i < splineJsonHandler.Splines.Count; i++)
                 {
                     //ErrorManager.ErrorMessage = "Error with Spline (" + i + ") " + splineJsonHandler.Splines[i].SplineName;
-                    Console.WriteLine("Spline: " +(i+1)+ "/" + splineJsonHandler.Splines.Count + " " + splineJsonHandler.Splines[i].SplineName);
+                    Console.WriteLine("Spline: " + (i + 1) + "/" + splineJsonHandler.Splines.Count + " " + splineJsonHandler.Splines[i].SplineName);
                     var TempSpline = splineJsonHandler.Splines[i];
                     Spline spline = new Spline();
                     spline.SplineSegmentPosition = SegmentPos;
@@ -1530,7 +1530,7 @@ namespace SSXLibrary
                     spline.LowestXYZ = LowestXYZSpline;
                     spline.HighestXYZ = HighestXYZSpline;
 
-                    if(SSFGenerate)
+                    if (SSFGenerate)
                     {
                         var NewSpline = new SSFHandler.Spline();
 
@@ -1561,7 +1561,7 @@ namespace SSXLibrary
                 for (int i = 0; i < instancesJson.Instances.Count; i++)
                 {
                     //ErrorManager.ErrorMessage = "Error with Instance (" + i + ") " + instancesJson.Instances[i].InstanceName;
-                    Console.WriteLine("Instance: " +(i+1)+ "/" + instancesJson.Instances.Count + " " + instancesJson.Instances[i].InstanceName);
+                    Console.WriteLine("Instance: " + (i + 1) + "/" + instancesJson.Instances.Count + " " + instancesJson.Instances[i].InstanceName);
                     var Oldinstance = instancesJson.Instances[i];
                     Instance NewInstance = new Instance();
 
@@ -1602,7 +1602,7 @@ namespace SSXLibrary
                     TempUnknownHash.ObjectUID = i;
                     pbdHandler.hashData.InstanceHash.Add(TempUnknownHash);
 
-                    if(Oldinstance.IncludeSound && Oldinstance.Sounds!=null && ADLGenerate)
+                    if (Oldinstance.IncludeSound && Oldinstance.Sounds != null && ADLGenerate)
                     {
                         var NewSound = new ADLHandler.HashSound();
                         NewSound.Hash = Oldinstance.Hash;
@@ -1614,7 +1614,7 @@ namespace SSXLibrary
                         {
                             var NewExternalSound = new ADLHandler.ExternalSound();
 
-                            NewExternalSound.U0= Oldinstance.Sounds.Value.ExternalSounds[a].U0;
+                            NewExternalSound.U0 = Oldinstance.Sounds.Value.ExternalSounds[a].U0;
                             NewExternalSound.SoundIndex = Oldinstance.Sounds.Value.ExternalSounds[a].SoundIndex;
                             NewExternalSound.U2 = Oldinstance.Sounds.Value.ExternalSounds[a].U2;
                             NewExternalSound.U3 = Oldinstance.Sounds.Value.ExternalSounds[a].U3;
@@ -1623,13 +1623,13 @@ namespace SSXLibrary
                             NewExternalSound.U6 = Oldinstance.Sounds.Value.ExternalSounds[a].U6;
 
                             NewSound.Sound.ExternalSounds.Add(NewExternalSound);
-                             
+
                         }
 
                         adlHandler.HashSounds.Add(NewSound);
                     }
 
-                    if(SSFGenerate)
+                    if (SSFGenerate)
                     {
                         int CollsionIndex = -1;
 
@@ -1750,7 +1750,7 @@ namespace SSXLibrary
                         }
 
 
-                        if(!Test1)
+                        if (!Test1)
                         {
                             ssfHandler.ObjectProperties.Add(NewObjectProperties);
                             ssfHandler.InstanceState.Add(ssfHandler.ObjectProperties.Count - 1);
@@ -1767,7 +1767,7 @@ namespace SSXLibrary
                 }
                 pbdHandler.hashData.InstanceHash.Sort((s1, s2) => s1.Hash.CompareTo(s2.Hash));
 
-                if (ADLGenerate && adlHandler.HashSounds.Count !=0)
+                if (ADLGenerate && adlHandler.HashSounds.Count != 0)
                 {
                     //ErrorManager.ErrorMessage = "Error with Sorting Instance Hash";
                     Console.WriteLine("Hash Sorting Sounds");
@@ -1784,7 +1784,7 @@ namespace SSXLibrary
                 for (int i = 0; i < particleInstanceJson.Particles.Count; i++)
                 {
                     //ErrorManager.ErrorMessage = "Error with Particle Instance (" + i + ") " + particleInstanceJson.Particles[i].ParticleName;
-                    Console.WriteLine("Particle Instance: " +(i+1)+ "/" + particleInstanceJson.Particles.Count + " " + particleInstanceJson.Particles[i].ParticleName);
+                    Console.WriteLine("Particle Instance: " + (i + 1) + "/" + particleInstanceJson.Particles.Count + " " + particleInstanceJson.Particles[i].ParticleName);
                     ParticleInstance TempParticle = new ParticleInstance();
 
                     Matrix4x4 scale = Matrix4x4.CreateScale(ArrayConv.ArrayToVector3(particleInstanceJson.Particles[i].Scale));
@@ -1819,7 +1819,7 @@ namespace SSXLibrary
                 for (int i = 0; i < prefabJsonHandler.Models.Count; i++)
                 {
                     //ErrorManager.ErrorMessage = "Error with Rebuilding Material Blocks (" + i + ") ";
-                    Console.WriteLine("Materials Animations: " +(i+1)+ "/" + prefabJsonHandler.Models.Count);
+                    Console.WriteLine("Materials Animations: " + (i + 1) + "/" + prefabJsonHandler.Models.Count);
                     var TempPrefab = prefabJsonHandler.Models[i];
                     var NewMaterialBlock = new MaterialBlock();
 
@@ -1849,7 +1849,7 @@ namespace SSXLibrary
                 for (int i = 0; i < prefabJsonHandler.Models.Count; i++)
                 {
                     //ErrorManager.ErrorMessage = "Error with Material Blocks (" + i + ") " + prefabJsonHandler.Models[i].ModelName;
-                    Console.WriteLine("Models: " + (i+1)+ "/" + prefabJsonHandler.Models.Count + " " + prefabJsonHandler.Models[i].ModelName);
+                    Console.WriteLine("Models: " + (i + 1) + "/" + prefabJsonHandler.Models.Count + " " + prefabJsonHandler.Models[i].ModelName);
                     var NewPrefab = new Models();
                     var TempPrefab = prefabJsonHandler.Models[i];
                     NewPrefab.MaterialBlockID = i;
@@ -1899,7 +1899,7 @@ namespace SSXLibrary
                             }
                         }
 
-                        if (TempObject.IncludeAnimation && TempObject.Animation !=null)
+                        if (TempObject.IncludeAnimation && TempObject.Animation != null)
                         {
                             NewObject.IncludeAnimation = true;
                             NewObject.objectAnimation = new ObjectAnimation();
@@ -1964,7 +1964,7 @@ namespace SSXLibrary
                 for (int i = 0; i < materialJson.Materials.Count; i++)
                 {
                     //ErrorManager.ErrorMessage = "Error with Material (" + i + ") " + materialJson.Materials[i].MaterialName;
-                    Console.WriteLine("Materials: " +(i+1)+ "/" + prefabJsonHandler.Models.Count + " " + materialJson.Materials[i].MaterialName);
+                    Console.WriteLine("Materials: " + (i + 1) + "/" + prefabJsonHandler.Models.Count + " " + materialJson.Materials[i].MaterialName);
 
                     var NewMaterial = new TrickyMaterial();
 
@@ -2058,7 +2058,7 @@ namespace SSXLibrary
                 for (int i = 0; i < lightJsonHandler.Lights.Count; i++)
                 {
                     //ErrorManager.ErrorMessage = "Error with Light (" + i + ") " + lightJsonHandler.Lights[i].LightName;
-                    Console.WriteLine("Light: " +(i+1)+ "/" + lightJsonHandler.Lights.Count + " " + lightJsonHandler.Lights[i].LightName);
+                    Console.WriteLine("Light: " + (i + 1) + "/" + lightJsonHandler.Lights.Count + " " + lightJsonHandler.Lights[i].LightName);
 
                     Light TempLight = new Light();
                     TempLight.Type = lightJsonHandler.Lights[i].Type;
@@ -2100,7 +2100,7 @@ namespace SSXLibrary
                 for (int i = 0; i < particleModelJsonHandler.ParticlePrefabs.Count; i++)
                 {
                     //ErrorManager.ErrorMessage = "Error with Particle Model (" + i + ") " + particleModelJsonHandler.ParticlePrefabs[i].ParticleModelName;
-                    Console.WriteLine("Particle Model: " +(i+1)+ "/" + particleModelJsonHandler.ParticlePrefabs.Count + " " + particleModelJsonHandler.ParticlePrefabs[i].ParticleModelName);
+                    Console.WriteLine("Particle Model: " + (i + 1) + "/" + particleModelJsonHandler.ParticlePrefabs.Count + " " + particleModelJsonHandler.ParticlePrefabs[i].ParticleModelName);
 
                     var ParticleModel = new ParticleModel();
 
@@ -2151,7 +2151,7 @@ namespace SSXLibrary
                 for (int i = 0; i < cameraJSONHandler.Cameras.Count; i++)
                 {
                     //ErrorManager.ErrorMessage = "Error with Camera (" + i + ") " + cameraJSONHandler.Cameras[i].CameraName;
-                    Console.WriteLine("Camera: " +(i+1)+ "/" + cameraJSONHandler.Cameras.Count + " " + cameraJSONHandler.Cameras[i].CameraName);
+                    Console.WriteLine("Camera: " + (i + 1) + "/" + cameraJSONHandler.Cameras.Count + " " + cameraJSONHandler.Cameras[i].CameraName);
 
                     var TempCamera = cameraJSONHandler.Cameras[i];
                     var NewCameraInstance = new CameraInstance();
@@ -2247,7 +2247,7 @@ namespace SSXLibrary
                 {
                     ltgHandler.RegenerateCentreLTG(pbdHandler);
                 }
-                else if(LTGGenerateMode==1)
+                else if (LTGGenerateMode == 1)
                 {
                     ltgHandler.RegenerateOriginLTG(pbdHandler);
                 }
@@ -2256,9 +2256,9 @@ namespace SSXLibrary
                     ltgHandler.RegenerateCentreLTG(pbdHandler);
                 }
 
-                Vector3 BboxLower = new Vector3(trickyConfig.BBox[0,0], trickyConfig.BBox[0, 1], trickyConfig.BBox[0, 2]);
+                Vector3 BboxLower = new Vector3(trickyConfig.BBox[0, 0], trickyConfig.BBox[0, 1], trickyConfig.BBox[0, 2]);
                 Vector3 BboxHigher = new Vector3(trickyConfig.BBox[1, 0], trickyConfig.BBox[1, 1], trickyConfig.BBox[1, 2]);
-                if(BboxLower != Vector3.Zero && BboxHigher != Vector3.Zero)
+                if (BboxLower != Vector3.Zero && BboxHigher != Vector3.Zero)
                 {
                     ltgHandler.WorldBounds1 = BboxLower;
                     ltgHandler.WorldBounds2 = BboxHigher;
@@ -2284,7 +2284,7 @@ namespace SSXLibrary
                 for (int i = 0; i < aip.AIPaths.Count; i++)
                 {
                     //ErrorManager.ErrorMessage = "Error with AIP AI Path (" + i + ") " + aip.AIPaths[i].Name;
-                    Console.WriteLine("AI Paths: " +(i+1)+ "/" + aip.AIPaths.Count);
+                    Console.WriteLine("AI Paths: " + (i + 1) + "/" + aip.AIPaths.Count);
                     var NewAIPATH = new AIPSOPHandler.PathA();
 
                     NewAIPATH.Type = 2;
@@ -2334,7 +2334,7 @@ namespace SSXLibrary
                 for (int i = 0; i < aip.RaceLines.Count; i++)
                 {
                     //ErrorManager.ErrorMessage = "Error with AIP Race Line (" + i + ") " + aip.RaceLines[i].Name;
-                    Console.WriteLine("Race Line Paths: " +(i+1)+ "/" + aip.RaceLines.Count);
+                    Console.WriteLine("Race Line Paths: " + (i + 1) + "/" + aip.RaceLines.Count);
                     var NewAIPATH = new AIPSOPHandler.PathB();
 
                     NewAIPATH.Type = 1;
@@ -2392,7 +2392,7 @@ namespace SSXLibrary
                 for (int i = 0; i < sop.AIPaths.Count; i++)
                 {
                     //ErrorManager.ErrorMessage = "Error with SOP AI Path (" + i + ") " + sop.AIPaths[i].Name;
-                    Console.WriteLine("SOP AI Paths: " +(i+1)+ "/" + sop.AIPaths.Count);
+                    Console.WriteLine("SOP AI Paths: " + (i + 1) + "/" + sop.AIPaths.Count);
                     var NewAIPATH = new AIPSOPHandler.PathA();
 
                     NewAIPATH.Type = 2;
@@ -2442,7 +2442,7 @@ namespace SSXLibrary
                 for (int i = 0; i < sop.RaceLines.Count; i++)
                 {
                     //ErrorManager.ErrorMessage = "Error with SOP Race Line (" + i + ") " + sop.RaceLines[i].Name;
-                    Console.WriteLine("SOP Race Line Paths: " +(i+1)+ "/" + sop.RaceLines.Count);
+                    Console.WriteLine("SOP Race Line Paths: " + (i + 1) + "/" + sop.RaceLines.Count);
 
                     var NewAIPATH = new AIPSOPHandler.PathB();
 
@@ -2496,7 +2496,7 @@ namespace SSXLibrary
 
                 for (int i = 0; i < ImageFiles.Count; i++)
                 {
-                    Console.WriteLine("Textures: " +(i+1)+ "/" + ImageFiles.Count);
+                    Console.WriteLine("Textures: " + (i + 1) + "/" + ImageFiles.Count);
                     TextureHandler.AddImage(OldShapeHandler.MatrixType.EightBit, i.ToString().PadLeft(4, '0'), LoadPath + "/Textures/" + ImageFiles[i]);
                     TextureHandler.DarkenImage(i);
                     var temp = TextureHandler.ShapeImages[i];
@@ -2508,7 +2508,7 @@ namespace SSXLibrary
                 TextureHandler.SaveShape(ExportPath + ".ssh");
             }
 
-            if(SSFGenerate)
+            if (SSFGenerate)
             {
                 ssfJsonHandler = new SSFJsonHandler();
                 ssfJsonHandler = SSFJsonHandler.Load(LoadPath + "/SSFLogic.json");
@@ -2517,7 +2517,7 @@ namespace SSXLibrary
                 for (int i = 0; i < ssfJsonHandler.EffectSlots.Count; i++)
                 {
                     //ErrorManager.ErrorMessage = "Error with Effect Slot (" + i + ") " + ssfJsonHandler.EffectSlots[i].EffectSlotName;
-                    Console.WriteLine("Effect Slots: " +(i+1)+ "/" + ssfJsonHandler.EffectSlots.Count +" " + ssfJsonHandler.EffectSlots[i].EffectSlotName);
+                    Console.WriteLine("Effect Slots: " + (i + 1) + "/" + ssfJsonHandler.EffectSlots.Count + " " + ssfJsonHandler.EffectSlots[i].EffectSlotName);
                     var NewEffectSlot = new SSFHandler.EffectSlot();
                     NewEffectSlot.Slot1 = ssfJsonHandler.EffectSlots[i].PersistantEffectSlot;
                     NewEffectSlot.Slot2 = ssfJsonHandler.EffectSlots[i].CollisionEffectSlot;
@@ -2535,7 +2535,7 @@ namespace SSXLibrary
                 for (int i = 0; i < ssfJsonHandler.PhysicsHeaders.Count; i++)
                 {
                     //ErrorManager.ErrorMessage = "Error with Physics (" + i + ") " + ssfJsonHandler.PhysicsHeaders[i].PhysicsName;
-                    Console.WriteLine("Physics: " +(i+1)+ "/" + ssfJsonHandler.PhysicsHeaders.Count + " " + ssfJsonHandler.PhysicsHeaders[i].PhysicsName);
+                    Console.WriteLine("Physics: " + (i + 1) + "/" + ssfJsonHandler.PhysicsHeaders.Count + " " + ssfJsonHandler.PhysicsHeaders[i].PhysicsName);
                     var NewPhysicsHeader = new SSFHandler.PhysicsHeader();
                     NewPhysicsHeader.PhysicsDatas = new List<SSFHandler.PhysicsData>();
 
@@ -2597,7 +2597,7 @@ namespace SSXLibrary
                 for (int i = 0; i < ssfJsonHandler.EffectHeaders.Count; i++)
                 {
                     //ErrorManager.ErrorMessage = "Error with Effect Headers (" + i + ") " + ssfJsonHandler.EffectHeaders[i].EffectName;
-                    Console.WriteLine("Effect Headers: " +(i+1)+ "/" + ssfJsonHandler.EffectHeaders.Count +" " + ssfJsonHandler.EffectHeaders[i].EffectName);
+                    Console.WriteLine("Effect Headers: " + (i + 1) + "/" + ssfJsonHandler.EffectHeaders.Count + " " + ssfJsonHandler.EffectHeaders[i].EffectName);
                     var NewEffectHeader = new SSFHandler.EffectHeaderStruct();
 
                     NewEffectHeader.Effects = new List<SSFHandler.Effect>();
@@ -2616,7 +2616,7 @@ namespace SSXLibrary
                 for (int i = 0; i < ssfJsonHandler.Functions.Count; i++)
                 {
                     //ErrorManager.ErrorMessage = "Error with Function (" + i + ") " + ssfJsonHandler.Functions[i].FunctionName;
-                    Console.WriteLine("Effect Functions: " +(i+1)+ "/" + ssfJsonHandler.Functions.Count + " " + ssfJsonHandler.Functions[i].FunctionName);
+                    Console.WriteLine("Effect Functions: " + (i + 1) + "/" + ssfJsonHandler.Functions.Count + " " + ssfJsonHandler.Functions[i].FunctionName);
 
                     var NewEffectHeader = new SSFHandler.Function();
                     NewEffectHeader.FunctionName = ssfJsonHandler.Functions[i].FunctionName;
@@ -2654,7 +2654,7 @@ namespace SSXLibrary
                 for (int i = 0; i < SkyMaterialJson.Materials.Count; i++)
                 {
                     //ErrorManager.ErrorMessage = "Error with Skybox Material (" + i + ") " + SkyMaterialJson.Materials[i].MaterialName;
-                    Console.WriteLine("Skybox Materials: " +(i+1)+ "/" + SkyMaterialJson.Materials.Count);
+                    Console.WriteLine("Skybox Materials: " + (i + 1) + "/" + SkyMaterialJson.Materials.Count);
 
                     var NewMaterial = new TrickyMaterial();
 
@@ -2700,7 +2700,7 @@ namespace SSXLibrary
                 for (int i = 0; i < SkyPrefabJsonHandler.Models.Count; i++)
                 {
                     //ErrorManager.ErrorMessage = "Error with Material Block (" + i + ")";
-                    Console.WriteLine("Skybox Materials Blocks: " +(i+1)+ "/" + SkyPrefabJsonHandler.Models.Count);
+                    Console.WriteLine("Skybox Materials Blocks: " + (i + 1) + "/" + SkyPrefabJsonHandler.Models.Count);
 
                     var TempPrefab = SkyPrefabJsonHandler.Models[i];
                     var NewMaterialBlock = new MaterialBlock();
@@ -2731,7 +2731,7 @@ namespace SSXLibrary
                 {
                     //ErrorManager.ErrorMessage = "Error with Skybox Model (" + i + ") " + SkyPrefabJsonHandler.Models[i].ModelName;
 
-                    Console.WriteLine("Skybox Models: " +(i+1)+ "/" + SkyPrefabJsonHandler.Models.Count);
+                    Console.WriteLine("Skybox Models: " + (i + 1) + "/" + SkyPrefabJsonHandler.Models.Count);
 
                     var NewPrefab = new Models();
                     var TempPrefab = SkyPrefabJsonHandler.Models[i];
@@ -2782,7 +2782,7 @@ namespace SSXLibrary
                             }
                         }
 
-                        if (TempObject.IncludeAnimation && TempObject.Animation!=null)
+                        if (TempObject.IncludeAnimation && TempObject.Animation != null)
                         {
                             NewObject.IncludeAnimation = true;
                             NewObject.objectAnimation = new ObjectAnimation();
@@ -2847,7 +2847,7 @@ namespace SSXLibrary
 
                     for (int i = 0; i < SkyboxImageFiles.Count; i++)
                     {
-                        Console.WriteLine("Skybox Textures: " + (i+1) + "/" + SkyboxImageFiles.Count);
+                        Console.WriteLine("Skybox Textures: " + (i + 1) + "/" + SkyboxImageFiles.Count);
                         SkyboxHandler.AddImage(OldShapeHandler.MatrixType.EightBit, i.ToString().PadLeft(4, '0'), LoadPath + "/Skybox/Textures/" + SkyboxImageFiles[i]);
                         SkyboxHandler.DarkenImage(i);
                         var temp = SkyboxHandler.ShapeImages[i];
@@ -2871,7 +2871,7 @@ namespace SSXLibrary
                     string[] LightmapFiles = Directory.GetFiles(LoadPath + "/Lightmaps", "*.png");
                     for (int i = 0; i < LightmapFiles.Length; i++)
                     {
-                        Console.WriteLine("Lightmap Textures: " +(i+1)+ "/" + LightmapFiles.Length);
+                        Console.WriteLine("Lightmap Textures: " + (i + 1) + "/" + LightmapFiles.Length);
                         LightmapHandler.AddImage(OldShapeHandler.MatrixType.FullColor, i.ToString().PadLeft(4, '0'), LightmapFiles[i]);
                         LightmapHandler.DarkenImage(i);
                     }
@@ -2879,7 +2879,7 @@ namespace SSXLibrary
                 else
                 {
                     //pbdHandler = LightmapGenerator.GenerateNewLightmapPoints(pbdHandler);
-                   //LightmapHandler = LightmapGenerator.GenerateUnlitLightmap(pbdHandler);
+                    //LightmapHandler = LightmapGenerator.GenerateUnlitLightmap(pbdHandler);
                 }
                 //ErrorManager.ErrorMessage = "Error with Saving SSH Lightmap";
                 LightmapHandler.SaveShape(ExportPath + "_L.ssh");
@@ -2917,6 +2917,68 @@ namespace SSXLibrary
             SkyPrefabJsonHandler = ModelJsonHandler.Load(LoadPath + "/Skybox/Models.json");
 
 
+        }
+
+        public void GenerateTemplate(string TemplatePath)
+        {
+            Directory.CreateDirectory(TemplatePath + "/Meshes");
+            Directory.CreateDirectory(TemplatePath + "/Textures");
+            Directory.CreateDirectory(TemplatePath + "/Skybox");
+            Directory.CreateDirectory(TemplatePath + "/Skybox/Textures");
+            Directory.CreateDirectory(TemplatePath + "/Skybox/Meshes");
+            Directory.CreateDirectory(TemplatePath + "/Lightmaps");
+            Directory.CreateDirectory(TemplatePath + "/Collision");
+
+            patchPoints = new PatchesJsonHandler();
+            instancesJson = new InstanceJsonHandler();
+            particleInstanceJson = new ParticleInstanceJsonHandler();
+            materialJson = new MaterialJsonHandler();
+            lightJsonHandler = new LightJsonHandler();
+            splineJsonHandler = new SplineJsonHandler();
+            prefabJsonHandler = new ModelJsonHandler();
+            particleModelJsonHandler = new ParticleModelJsonHandler();
+            cameraJSONHandler = new CameraJSONHandler();
+            ssfJsonHandler = new SSFJsonHandler();
+
+            //Skybox JSON
+            SkyMaterialJson = new MaterialJsonHandler();
+            SkyPrefabJsonHandler = new ModelJsonHandler();
+
+            patchPoints.CreateJson(TemplatePath + "/Patches.json", InlineExporting);
+            instancesJson.CreateJson(TemplatePath + "/Instances.json", InlineExporting);
+            particleInstanceJson.CreateJson(TemplatePath + "/ParticleInstances.json", InlineExporting);
+            materialJson.CreateJson(TemplatePath + "/Materials.json", InlineExporting);
+            lightJsonHandler.CreateJson(TemplatePath + "/Lights.json", InlineExporting);
+            splineJsonHandler.CreateJson(TemplatePath + "/Splines.json", InlineExporting);
+            prefabJsonHandler.CreateJson(TemplatePath + "/Models.json", InlineExporting);
+            particleModelJsonHandler.CreateJson(TemplatePath + "/ParticleModels.json", InlineExporting);
+            cameraJSONHandler.CreateJson(TemplatePath + "/Cameras.json", InlineExporting);
+            ssfJsonHandler.CreateJson(TemplatePath + "/SSFLogic.json", InlineExporting);
+
+            SkyMaterialJson.CreateJson(TemplatePath + "/Skybox/Materials.json", InlineExporting);
+            SkyPrefabJsonHandler.CreateJson(TemplatePath + "/Skybox/Models.json", InlineExporting);
+
+            AIPSOPJsonHandler aipJson = new AIPSOPJsonHandler();
+            aipJson.CreateJson(TemplatePath + "/AIP.json", InlineExporting);
+            aipJson.CreateJson(TemplatePath + "/SOP.json", InlineExporting);
+
+            SSXTrickyConfig trickyConfig = new SSXTrickyConfig();
+
+            trickyConfig.BuildUniLightmap = true;
+            trickyConfig.BuildPBDGenerate = true;
+            trickyConfig.BuildSSHGenerate = true;
+            trickyConfig.BuildLSSHGenerate = true;
+            trickyConfig.BuildLTGGenerate = true;
+            trickyConfig.BuildMAPGenerate = true;
+            trickyConfig.BuildSkyPBDGenerate = true;
+            trickyConfig.BuildSkySSHGenerate = true;
+            trickyConfig.BuildADLGenerate = true;
+            trickyConfig.BuildSSFGenerate = true;
+            trickyConfig.BuildAIPGenerate = true;
+            trickyConfig.BuildSOPGenerate = true;
+            trickyConfig.BuildLTGGenerateMode = 1;
+
+            trickyConfig.CreateJson(TemplatePath + "/ConfigTricky.ssx");
         }
     }
 }
