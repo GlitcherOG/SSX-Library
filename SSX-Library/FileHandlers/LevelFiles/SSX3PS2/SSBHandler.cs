@@ -1,10 +1,11 @@
-﻿using System.IO;
-using System.IO.Pipelines;
+﻿using SixLabors.ImageSharp.Drawing;
 using SSX_Library.Internal;
 using SSX_Library.Internal.Utilities;
 using SSX_Library.Internal.Utilities.StreamExtensions;
 using SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData;
 using SSXLibrary.JsonFiles.SSX3;
+using System.IO;
+using System.IO.Pipelines;
 
 namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2
 {
@@ -355,6 +356,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2
             ssx3Config.CreateJson(extractPath + "//ConfigSSX3.ssx");
         }
 
+        //Test Generated with Claude to delete and alter later
         struct IDSSB
         {
             public int ChunkID;
@@ -365,133 +367,31 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2
             public int Type;
         }
 
-        //public void PackSSB(string Folder, string BuildPath)
-        //{
-        //    MemoryStream memoryStream = new MemoryStream();
-        //    string[] AllFiles = Directory.GetFiles(Folder, "*.*");
-
-        //    List<IDSSB> iDSSBs = new List<IDSSB>();
-        //    for (int i = 0; i < AllFiles.Length; i++)
-        //    {
-        //        IDSSB TempiDSSB = new IDSSB();
-
-        //        string FileID = Path.GetFileName(AllFiles[i]);
-
-        //        TempiDSSB.ChunkID = int.Parse(FileID.Split("-")[0]);
-        //        TempiDSSB.ID = int.Parse(FileID.Split("-")[1]);
-        //        TempiDSSB.Files = AllFiles[i];
-
-        //        iDSSBs.Add(TempiDSSB);
-        //    }
-
-        //    iDSSBs.Sort((a, b) => a.ID.CompareTo(b.ID));
-
-        //    int ChunkID = 0;
-        //    int WritePoint = 0;
-        //    bool WriteChunk = false;
-        //    int ReadLenght = 40000;
-        //    //Final Output Regardless needs to be 32768 bytes long when compressed
-        //    byte[] output = new byte[ReadLenght];
-
-
-        //    for (int i = 0; i < iDSSBs.Count; i++)
-        //    {
-        //        //Start reading files into byte stream
-        //        //Once hitting lenght or passing it compress to correct chunk type
-        //        //If file is end of chunk
-        //        bool EndChunk = false;
-        //        bool ChunkFull = false;
-        //        using (Stream stream = File.Open(iDSSBs[i].Files, FileMode.Open))
-        //        {
-        //            if (WritePoint + stream.Length < ReadLenght)
-        //            {
-        //                //Write chunk
-        //                byte[] Input = StreamUtil.ReadBytes(stream, (int)stream.Length);
-        //                Array.Copy(Input, 0, output, 0, Input.Length);
-        //                WritePoint += Input.Length;
-        //            }
-        //            else
-        //            {
-        //                ChunkFull = true;
-        //                WriteChunk = true;
-        //                i--;
-        //                byte[] CompressedOutput = new byte[ReadLenght];
-        //                Array.Copy(output, 0, CompressedOutput, 0, WritePoint);
-        //                //Compress chunk and confirm safe
-        //                output = Refpack.Compress(output);
-        //                //If not error
-        //                if(output.Length > 32768)
-        //                {
-        //                    throw new Exception("Lenght Error");
-        //                }
-        //                //will need to swap out for better data
-        //            }
-        //        }
-
-        //        //Extra Conditions
-        //        if (!ChunkFull)
-        //        {
-        //            if (iDSSBs.Count < i + 1)
-        //            {
-        //                WriteChunk = true;
-        //                EndChunk = true;
-        //            }
-        //            else if (iDSSBs.Count < i)
-        //            {
-        //                if (ChunkID != iDSSBs[i + 1].ChunkID)
-        //                {
-        //                    WriteChunk = true;
-        //                    EndChunk = true;
-        //                }
-        //            }
-        //        }
-
-        //        if (WriteChunk)
-        //        {
-        //            if (EndChunk)
-        //            {
-        //                StreamUtil.WriteString(memoryStream, "CBSX");
-        //            }
-        //            else
-        //            {
-        //                StreamUtil.WriteString(memoryStream, "CEND");
-        //            }
-
-        //            StreamUtil.WriteInt32(memoryStream, 32768);
-
-        //            StreamUtil.WriteBytes(memoryStream, output);
-
-        //            StreamUtil.AlignBy(memoryStream, 32768);
-
-        //            output = new byte[ReadLenght];
-        //            ChunkFull = false;
-        //            EndChunk = false;
-        //            WriteChunk = false;
-        //            WritePoint = 0;
-        //        }
-        //    }
-        //    if (File.Exists(BuildPath))
-        //    {
-        //        File.Delete(BuildPath);
-        //    }
-        //    var file = File.Create(BuildPath);
-        //    memoryStream.Position = 0;
-        //    memoryStream.CopyTo(file);
-        //    memoryStream.Dispose();
-        //    file.Close();
-        //    GC.Collect();
-        //}
-
         const int BlockSize = 32768;
-        const int HeaderSize = 8;                          // magic + int32
-        const int MaxCompressed = BlockSize - HeaderSize-16;  // compressed data must fit in one aligned block
+        const int HeaderSize = 8;                             // magic + int32
+        const int MaxCompressed = BlockSize - HeaderSize - 16; // compressed data must fit in one aligned block
+        const int MaxUncompressed = 0x14000;                  // largest decompressed block in the original files
+        const int SDBOffsetUnit = 256;                        // SDB chunkOffset is in 256 byte units
 
-        public void PackSSB(string Folder, string BuildPath)
+        /// <summary>
+        /// Packs a folder of raw resources into an SSB and writes a matching SDB next to it.
+        /// Files are named ChunkID-Order-TrackID-RID.Type and hold the resource data without its 8 byte header.
+        /// The SDB at SourceSDBPath (defaults to the .sdb next to BuildPath) is used as the template; its
+        /// chunk offsets, unpacked sizes and resource counts are recalculated from the packed data.
+        /// With KeepOriginalOffsets, each chunk stays at the template's offset when it still fits there
+        /// (the gap left by a smaller chunk is zero filled); only chunks pushed back by a larger one move.
+        /// </summary>
+        public void PackSSB(string Folder, string BuildPath, string SourceSDBPath = null, bool KeepOriginalOffsets = false)
         {
+            string BuildSDBPath = System.IO.Path.ChangeExtension(BuildPath, ".sdb");
+
+            SDBHandler sdbHandler = new SDBHandler();
+            sdbHandler.LoadSBD(SourceSDBPath ?? BuildSDBPath);
+
             List<IDSSB> iDSSBs = new List<IDSSB>();
             foreach (string path in Directory.GetFiles(Folder, "*.*"))
             {
-                string[] parts = Path.GetFileName(path).Split("-");
+                string[] parts = System.IO.Path.GetFileName(path).Split("-");
                 iDSSBs.Add(new IDSSB
                 {
                     ChunkID = int.Parse(parts[0]),
@@ -502,34 +402,123 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2
                     Files = path
                 });
             }
-            iDSSBs.Sort((a, b) => a.ID.CompareTo(b.ID));
 
-            using MemoryStream memoryStream = new MemoryStream();
+            // Resource order within a chunk is the ID
+            iDSSBs.Sort((a, b) => a.ChunkID != b.ChunkID ? a.ChunkID.CompareTo(b.ChunkID) : a.ID.CompareTo(b.ID));
 
-            // Group consecutive files by ChunkID, join each group, then split it into blocks
-            int start = 0;
-            while (start < iDSSBs.Count)
+            const int ResourceTypeCount = 23;      // resource type IDs 0-22
+            const int StreamingResourceTypes = 13; // types 0-12 are counted per streaming chunk and in unpackedSize
+
+            int chunkCount = sdbHandler.streamingChunkInfos.Count;
+            int[,] chunkTypeCounts = new int[chunkCount, ResourceTypeCount];
+
+            using (FileStream ssbStream = File.Create(BuildPath))
             {
-                int end = start;
-                while (end < iDSSBs.Count && iDSSBs[end].ChunkID == iDSSBs[start].ChunkID)
-                    end++;
-
-                using MemoryStream chunkData = new MemoryStream();
-                for (int i = start; i < end; i++)
+                int start = 0;
+                for (int chunkID = 0; chunkID < chunkCount; chunkID++)
                 {
-                    byte[] fileBytes = File.ReadAllBytes(iDSSBs[i].Files);
-                    chunkData.WriteByte((byte)iDSSBs[i].Type);
-                    chunkData.WriteUInt24((uint)fileBytes.Length, SSX_Library.ByteOrder.LittleEndian);
-                    chunkData.WriteByte((byte)iDSSBs[i].TrackID);
-                    chunkData.WriteUInt24((uint)iDSSBs[i].RID, SSX_Library.ByteOrder.LittleEndian);
-                    chunkData.Write(fileBytes, 0, fileBytes.Length);
+                    int end = start;
+                    while (end < iDSSBs.Count && iDSSBs[end].ChunkID == chunkID)
+                        end++;
+
+                    if (end == start)
+                    {
+                        throw new Exception($"No files found for streaming chunk {chunkID}. Adding or removing chunks is not supported.");
+                    }
+
+                    // Rebuild each resource's 8 byte header in front of its data
+                    int unpackedSize = 0;
+                    using MemoryStream chunkData = new MemoryStream();
+                    for (int i = start; i < end; i++)
+                    {
+                        byte[] fileBytes = File.ReadAllBytes(iDSSBs[i].Files);
+                        chunkData.WriteByte((byte)iDSSBs[i].Type);
+                        chunkData.WriteUInt24((uint)fileBytes.Length, SSX_Library.ByteOrder.LittleEndian);
+                        chunkData.WriteByte((byte)iDSSBs[i].TrackID);
+                        chunkData.WriteUInt24((uint)iDSSBs[i].RID, SSX_Library.ByteOrder.LittleEndian);
+                        chunkData.Write(fileBytes, 0, fileBytes.Length);
+
+                        chunkTypeCounts[chunkID, iDSSBs[i].Type]++;
+                        if (iDSSBs[i].Type < StreamingResourceTypes)
+                        {
+                            unpackedSize += fileBytes.Length + 8;
+                        }
+                    }
+
+                    var streamingChunk = sdbHandler.streamingChunkInfos[chunkID];
+
+                    long originalPosition = (long)streamingChunk.chunkOffset * SDBOffsetUnit;
+                    if (KeepOriginalOffsets && originalPosition > ssbStream.Position)
+                    {
+                        StreamUtil.WriteBytes(ssbStream, new byte[originalPosition - ssbStream.Position]);
+                    }
+
+                    streamingChunk.numResources = end - start;
+                    streamingChunk.chunkOffset = (int)(ssbStream.Position / SDBOffsetUnit);
+                    streamingChunk.unpackedSize = unpackedSize;
+                    streamingChunk.numMaterials = chunkTypeCounts[chunkID, 0];
+                    streamingChunk.numPatches = chunkTypeCounts[chunkID, 1];
+                    streamingChunk.numWorldMDR = chunkTypeCounts[chunkID, 2];
+                    streamingChunk.numInstance = chunkTypeCounts[chunkID, 3];
+                    streamingChunk.numParticleModel = chunkTypeCounts[chunkID, 4];
+                    streamingChunk.numParticleInstance = chunkTypeCounts[chunkID, 5];
+                    streamingChunk.numLights = chunkTypeCounts[chunkID, 6];
+                    streamingChunk.numHalo = chunkTypeCounts[chunkID, 7];
+                    streamingChunk.numSplines = chunkTypeCounts[chunkID, 8];
+                    streamingChunk.numShapes = chunkTypeCounts[chunkID, 9];
+                    streamingChunk.numShapeLightmap = chunkTypeCounts[chunkID, 10];
+                    streamingChunk.numVisCurtains = chunkTypeCounts[chunkID, 11];
+                    streamingChunk.numCollision = chunkTypeCounts[chunkID, 12];
+                    sdbHandler.streamingChunkInfos[chunkID] = streamingChunk;
+
+                    WriteChunk(ssbStream, chunkData.ToArray());
+                    start = end;
                 }
 
-                WriteChunk(memoryStream, chunkData.ToArray());
-                start = end;
+                if (start != iDSSBs.Count)
+                {
+                    throw new Exception($"Found files for chunk {iDSSBs[start].ChunkID}, but the SDB only has {chunkCount} streaming chunks.");
+                }
             }
 
-            File.WriteAllBytes(BuildPath, memoryStream.ToArray()); // overwrites, no need to delete first
+            // Location counts are totals over the location's streaming chunks, except shapes and
+            // shape lightmaps which are always 0 in the original files
+            for (int i = 0; i < sdbHandler.locations.Count; i++)
+            {
+                var location = sdbHandler.locations[i];
+                int first = location.posEndStreamingChunk - location.numStreamingChunks + 1;
+
+                int[] totals = new int[ResourceTypeCount];
+                for (int chunkID = first; chunkID <= location.posEndStreamingChunk; chunkID++)
+                    for (int type = 0; type < ResourceTypeCount; type++)
+                        totals[type] += chunkTypeCounts[chunkID, type];
+
+                location.numMaterials = totals[0];
+                location.numPatches = totals[1];
+                location.numWorldMDR = totals[2];
+                location.numInstance = totals[3];
+                location.numParticleModel = totals[4];
+                location.numParticleInstance = totals[5];
+                location.numLights = totals[6];
+                location.numHalo = totals[7];
+                location.numSplines = totals[8];
+                // numShape (9) and numShapelightmap (10) are left as they are
+                location.numVisCurtains = totals[11];
+                location.numCollision = totals[12];
+                location.numSoundTrigger = totals[13];
+                location.numAIP = totals[14];
+                location.numWorldPainter = totals[15];
+                location.numScripts = totals[16];
+                location.numCameraTrigger = totals[17];
+                location.numNISTable = totals[18];
+                location.numMissions = totals[19];
+                location.numAudioBanks = totals[20];
+                location.numRadar = totals[21];
+                location.numAvalancheAnimation = totals[22];
+                sdbHandler.locations[i] = location;
+            }
+
+            sdbHandler.Save(BuildSDBPath);
         }
 
         void WriteChunk(Stream output, byte[] data)
@@ -537,23 +526,26 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2
             using MemoryStream input = new MemoryStream(data);
             using MemoryStream block = new MemoryStream();
 
-            while (input.Position < input.Length)
+            // do-while so an empty chunk still gets its CEND block
+            RefpackStreamResult result;
+            do
             {
                 block.SetLength(0);
-                RefpackStreamResult result = RefpackStream.Compress(input, block, MaxCompressed);
+                result = RefpackStream.Compress(input, block, MaxCompressed, MaxUncompressed);
 
                 if (result == RefpackStreamResult.Failed)
                 {
                     throw new Exception($"Could not fit data at offset {input.Position} into a block");
                 }
 
-                bool lastBlock = result == RefpackStreamResult.Complete;
-
-                StreamUtil.WriteString(output, lastBlock ? "CEND" : "CBXS");
+                StreamUtil.WriteString(output, result == RefpackStreamResult.Complete ? "CEND" : "CBXS");
                 StreamUtil.WriteInt32(output, BlockSize);
                 StreamUtil.WriteBytes(output, block.ToArray());
-                StreamUtil.AlignBy(output, BlockSize);
+
+                // Write the padding instead of seeking past it, so the last block is full size too
+                StreamUtil.WriteBytes(output, new byte[(BlockSize - (int)(output.Position % BlockSize)) % BlockSize]);
             }
+            while (result != RefpackStreamResult.Complete);
         }
     }
 }
