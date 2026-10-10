@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.IO.Pipelines;
 using SSX_Library.Internal;
 using SSX_Library.Internal.Utilities;
 using SSX_Library.Internal.Utilities.StreamExtensions;
@@ -87,38 +88,53 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2
 
                 MemoryStream memoryStream = new MemoryStream();
                 List<int> ints = new List<int>();
-                int a = 0;
                 int splitCount = 1;
                 int FilePos = 0;
-                int ChunkID = -1;
                 Directory.CreateDirectory(extractPath + "//Textures");
                 Directory.CreateDirectory(extractPath + "//Lightmaps");
                 Directory.CreateDirectory(extractPath + "//Levels");
-                while (true)
+                for (int i = 0; i < sdbHandler.locations.Count; i++)
                 {
-                    if (stream.Position >= stream.Length - 1)
-                    {
-                        break;
-                    }
-                    string MagicWords = StreamUtil.ReadString(stream, 4);
+                    Directory.CreateDirectory(extractPath + "//Levels//" + sdbHandler.locations[i].Name);
+                    Directory.CreateDirectory(extractPath + "//Levels//" + sdbHandler.locations[i].Name + "//Models");
+                    Directory.CreateDirectory(extractPath + "//Levels//" + sdbHandler.locations[i].Name + "//Sounds");
+                    Directory.CreateDirectory(extractPath + "//Levels//" + sdbHandler.locations[i].Name + "//Collision");
 
-                    int Size = StreamUtil.ReadUInt32(stream);
-                    byte[] Data = new byte[Size - 8];
-                    byte[] DecompressedData = new byte[1];
-                    Data = StreamUtil.ReadBytes(stream, Size - 8);
+                    int StreamingChunkNum = sdbHandler.locations[i].numStreamingChunks;
+                    int StreamingChunkPos = sdbHandler.locations[i].posEndStreamingChunk - StreamingChunkNum + 1;
 
-                    DecompressedData = Refpack.Decompress(Data);
-                    StreamUtil.WriteBytes(memoryStream, DecompressedData);
-                    if (MagicWords.ToUpper() == "CEND")
+                    string LevelExtractPath = extractPath + "//Levels//" + sdbHandler.locations[i].Name + "//";
+
+                    for (int j = 0; j < StreamingChunkNum; j++)
                     {
-                        ChunkID = sdbHandler.FindLocationChunk(a);
-                        Directory.CreateDirectory(extractPath + "//Levels//" + sdbHandler.locations[ChunkID].Name);
-                        Directory.CreateDirectory(extractPath + "//Levels//" + sdbHandler.locations[ChunkID].Name + "//Models");
-                        Directory.CreateDirectory(extractPath + "//Levels//" + sdbHandler.locations[ChunkID].Name + "//Sounds");
-                        Directory.CreateDirectory(extractPath + "//Levels//" + sdbHandler.locations[ChunkID].Name + "//Collision");
+                        var StreamingChunk = sdbHandler.streamingChunkInfos[StreamingChunkPos+j];
+                        stream.Position = StreamingChunk.chunkOffset * 256;
+
+                        while (true)
+                        {
+                            string MagicWords = StreamUtil.ReadString(stream, 4);
+
+                            int Size = StreamUtil.ReadUInt32(stream);
+                            byte[] Data = new byte[Size - 8];
+                            byte[] DecompressedData = new byte[1];
+                            Data = StreamUtil.ReadBytes(stream, Size - 8);
+
+                            DecompressedData = Refpack.Decompress(Data);
+                            StreamUtil.WriteBytes(memoryStream, DecompressedData);
+                            if (MagicWords.ToUpper() == "CEND")
+                            {
+                                break;
+                            }
+                        }
+
+                        //CheckSize
+                        if(memoryStream.Length!= StreamingChunk.unpackedSize)
+                        {
+                            //throw new Exception("Size Missmatch");
+                        }
+
                         memoryStream.Position = 0;
-
-                        while (memoryStream.Position < memoryStream.Length)
+                        for (int k = 0; k < StreamingChunk.numResources; k++)
                         {
                             MemoryStream memoryStream1 = new MemoryStream();
                             int ID = StreamUtil.ReadUInt8(memoryStream);
@@ -129,8 +145,6 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2
                             byte[] NewData = StreamUtil.ReadBytes(memoryStream, ChunkSize);
                             StreamUtil.WriteBytes(memoryStream1, NewData);
                             memoryStream1.Position = 0;
-
-                            string LevelExtractPath = extractPath + "//Levels//" + sdbHandler.locations[ChunkID].Name + "//";
                             string Path = RID + "-" + TrackID + "-" + FilePos;
 
                             if (ID == 0)
@@ -208,14 +222,13 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2
                             }
                             else if (ID == 10)
                             {
-                                Console.WriteLine(extractPath + "//Lightmaps//" + Path + ".png");
-                                WorldSSH worldOldSSH = new WorldSSH();
-
-                                worldOldSSH.Load(memoryStream1);
-                                //worldOldSSH.SaveImage(ExtractPath + "//Lightmaps//" + Path + ".png");
-
                                 if (!File.Exists(extractPath + "//Lightmaps//" + RID.ToString().PadLeft(4, '0') + ".png"))
                                 {
+                                    Console.WriteLine(extractPath + "//Lightmaps//" + Path + ".png");
+                                    WorldSSH worldOldSSH = new WorldSSH();
+
+                                    worldOldSSH.Load(memoryStream1);
+                                    //worldOldSSH.SaveImage(ExtractPath + "//Lightmaps//" + Path + ".png");
                                     worldOldSSH.SaveImage(extractPath + "//Lightmaps//" + RID.ToString().PadLeft(4, '0') + ".png");
                                 }
                             }
@@ -226,7 +239,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2
 
                                 visCurtainJsonHandler.VisCurtains.Add(worldBin11.ToJSON());
                             }
-                            else if (ID==12)
+                            else if (ID == 12)
                             {
                                 WorldCollision worldBin12 = new WorldCollision();
                                 worldBin12.LoadData(memoryStream1, TrackID, RID);
@@ -286,45 +299,41 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2
 
                             FilePos++;
                         }
-                        int TempChunkID = sdbHandler.FindLocationChunk(a+1);
-                        if (TempChunkID != ChunkID || stream.Position >= stream.Length - 1)
-                        {
-                            Console.WriteLine(extractPath + "//Levels//" + sdbHandler.locations[ChunkID].Name + "//Patches.json");
-                            patchesJsonHandler.CreateJson(extractPath + "//Levels//" + sdbHandler.locations[ChunkID].Name + "//Patches.json");
-
-                            Console.WriteLine(extractPath + "//Levels///" + sdbHandler.locations[ChunkID].Name + "//Bin0.json");
-                            bin0JsonHandler.CreateJson(extractPath + "//Levels//" + sdbHandler.locations[ChunkID].Name + "//Bin0.json");
-
-                            Console.WriteLine(extractPath + "//Levels//" + sdbHandler.locations[ChunkID].Name + "//Instances.json");
-                            bin3JsonHandler.CreateJson(extractPath + "//Levels//" + sdbHandler.locations[ChunkID].Name + "//Instances.json");
-
-                            Console.WriteLine(extractPath + "//Levels//" + sdbHandler.locations[ChunkID].Name + "//ParticleInstances.json");
-                            particleInstanceJsonHandler.CreateJson(extractPath + "//Levels//" + sdbHandler.locations[ChunkID].Name + "//ParticleInstances.json");
-
-                            Console.WriteLine(extractPath + "//Levels//" + sdbHandler.locations[ChunkID].Name + "//Bin6.json");
-                            bin6JsonHandler.CreateJson(extractPath + "//Levels//" + sdbHandler.locations[ChunkID].Name + "//Bin6.json");
-
-                            Console.WriteLine(extractPath + "//Levels//" + sdbHandler.locations[ChunkID].Name + "//Bin11.json");
-                            visCurtainJsonHandler.CreateJson(extractPath + "//Levels//" + sdbHandler.locations[ChunkID].Name + "//VisCurtain.json");
-
-                            Console.WriteLine(extractPath + "//Levels//" + sdbHandler.locations[ChunkID].Name + "//Splines.json");
-                            splineJsonHandler.CreateJson(extractPath + "//Levels//" + sdbHandler.locations[ChunkID].Name + "//Splines.json");
-
-                            Console.WriteLine(extractPath + "//Levels//" + sdbHandler.locations[ChunkID].Name + "//Prefabs.json");
-                            mdrJsonHandler.CreateJson(extractPath + "//Levels//" + sdbHandler.locations[ChunkID].Name + "//Prefabs.json");
-
-                            patchesJsonHandler = new PatchesJsonHandler();
-                            bin0JsonHandler = new Bin0JsonHandler();
-                            bin3JsonHandler = new InstanceJsonHandler();
-                            particleInstanceJsonHandler = new ParticleInstanceJsonHandler();
-                            bin6JsonHandler = new Bin6JsonHandler();
-                            visCurtainJsonHandler = new VisCurtainJsonHandler();
-                            splineJsonHandler = new SplineJsonHandler();
-                            mdrJsonHandler = new MDRJsonHandler();
-                        }
-                        a++;
                         memoryStream = new MemoryStream();
                     }
+
+                    Console.WriteLine(extractPath + "//Levels//" + sdbHandler.locations[i].Name + "//Patches.json");
+                    patchesJsonHandler.CreateJson(extractPath + "//Levels//" + sdbHandler.locations[i].Name + "//Patches.json");
+
+                    Console.WriteLine(extractPath + "//Levels///" + sdbHandler.locations[i].Name + "//Bin0.json");
+                    bin0JsonHandler.CreateJson(extractPath + "//Levels//" + sdbHandler.locations[i].Name + "//Bin0.json");
+
+                    Console.WriteLine(extractPath + "//Levels//" + sdbHandler.locations[i].Name + "//Instances.json");
+                    bin3JsonHandler.CreateJson(extractPath + "//Levels//" + sdbHandler.locations[i].Name + "//Instances.json");
+
+                    Console.WriteLine(extractPath + "//Levels//" + sdbHandler.locations[i].Name + "//ParticleInstances.json");
+                    particleInstanceJsonHandler.CreateJson(extractPath + "//Levels//" + sdbHandler.locations[i].Name + "//ParticleInstances.json");
+
+                    Console.WriteLine(extractPath + "//Levels//" + sdbHandler.locations[i].Name + "//Bin6.json");
+                    bin6JsonHandler.CreateJson(extractPath + "//Levels//" + sdbHandler.locations[i].Name + "//Bin6.json");
+
+                    Console.WriteLine(extractPath + "//Levels//" + sdbHandler.locations[i].Name + "//Bin11.json");
+                    visCurtainJsonHandler.CreateJson(extractPath + "//Levels//" + sdbHandler.locations[i].Name + "//VisCurtain.json");
+
+                    Console.WriteLine(extractPath + "//Levels//" + sdbHandler.locations[i].Name + "//Splines.json");
+                    splineJsonHandler.CreateJson(extractPath + "//Levels//" + sdbHandler.locations[i].Name + "//Splines.json");
+
+                    Console.WriteLine(extractPath + "//Levels//" + sdbHandler.locations[i].Name + "//Prefabs.json");
+                    mdrJsonHandler.CreateJson(extractPath + "//Levels//" + sdbHandler.locations[i].Name + "//Prefabs.json");
+
+                    patchesJsonHandler = new PatchesJsonHandler();
+                    bin0JsonHandler = new Bin0JsonHandler();
+                    bin3JsonHandler = new InstanceJsonHandler();
+                    particleInstanceJsonHandler = new ParticleInstanceJsonHandler();
+                    bin6JsonHandler = new Bin6JsonHandler();
+                    visCurtainJsonHandler = new VisCurtainJsonHandler();
+                    splineJsonHandler = new SplineJsonHandler();
+                    mdrJsonHandler = new MDRJsonHandler();
                 }
             }
 

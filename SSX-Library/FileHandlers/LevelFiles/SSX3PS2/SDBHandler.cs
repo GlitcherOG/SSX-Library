@@ -36,8 +36,8 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2
                     TempLocation.Name = StreamUtil.ReadString(stream, 16);
                     TempLocation.numStreamingChunks = StreamUtil.ReadUInt32(stream);
                     TempLocation.numChunks = StreamUtil.ReadUInt32(stream);
+                    TempLocation.posEndStreamingChunk = StreamUtil.ReadUInt32(stream);
                     TempLocation.posChunks = StreamUtil.ReadUInt32(stream);
-                    TempLocation.posStreamingChunk = StreamUtil.ReadUInt32(stream);
 
                     TempLocation.numMaterials = StreamUtil.ReadInt16(stream);
                     TempLocation.numPatches = StreamUtil.ReadInt16(stream);
@@ -105,11 +105,9 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2
                 {
                     var TempUnknown2 = new StreamingChunkInfo();
                     TempUnknown2.numResources = StreamUtil.ReadUInt16(stream);
-                    TempUnknown2.subChunkID = StreamUtil.ReadUInt16(stream);
-                    TempUnknown2.UnknownInt3 = StreamUtil.ReadUInt16(stream);
-                    TempUnknown2.UnknownInt4 = StreamUtil.ReadUInt16(stream);
-                    TempUnknown2.UnknownInt5 = StreamUtil.ReadUInt16(stream);
-                    TempUnknown2.UnknownInt6 = StreamUtil.ReadUInt16(stream);
+                    TempUnknown2.subChunkID = StreamUtil.ReadUInt24(stream);
+                    TempUnknown2.chunkOffset = StreamUtil.ReadUInt24(stream);
+                    TempUnknown2.unpackedSize = StreamUtil.ReadUInt32(stream);
                     TempUnknown2.numMaterials = StreamUtil.ReadUInt16(stream); //0
                     TempUnknown2.numPatches = StreamUtil.ReadUInt16(stream); //1
                     TempUnknown2.numWorldMDR = StreamUtil.ReadUInt16(stream); //WorldMDR Count - ID 2
@@ -136,36 +134,6 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2
                 }
             }
 
-        }
-
-        public int FindLocationChunk(int ID)
-        {
-            if(locations.Count==1)
-            {
-                return 0;
-            }
-
-
-            for (int i = 0; i < locations.Count; i++)
-            {
-                int EndPos = locations[i].posChunks;
-
-                if(i== locations.Count-1)
-                {
-                    EndPos = chunksInfo.Count;
-                }
-                else
-                {
-                    EndPos += locations[i+1].numChunks;
-                }
-
-                if (locations[i].posChunks<=ID&& EndPos>ID)
-                {
-                    return i;
-                }
-            }
-
-            return -1;
         }
 
         public void Save(string path)
@@ -285,8 +253,8 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2
                                 //Int32s
             public int numStreamingChunks;
             public int numChunks;
-            public int posChunks; //Chunks
-            public int posStreamingChunk;
+            public int posEndStreamingChunk;
+            public int posChunks; 
             //Int16s
             public int numMaterials;
             public int numPatches;
@@ -351,10 +319,8 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2
             //Int32
             public int numResources;
             public int subChunkID;
-            public int UnknownInt3;
-            public int UnknownInt4;
-            public int UnknownInt5;
-            public int UnknownInt6;
+            public int chunkOffset;
+            public int unpackedSize;
             public int numMaterials;
             public int numPatches;
             public int numWorldMDR;
