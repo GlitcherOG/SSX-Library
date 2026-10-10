@@ -39,34 +39,34 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2
                     TempLocation.posChunks = StreamUtil.ReadUInt32(stream);
                     TempLocation.posSubChunks = StreamUtil.ReadUInt32(stream);
 
-                    TempLocation.Unknown5 = StreamUtil.ReadInt16(stream);
-                    TempLocation.Unknown6 = StreamUtil.ReadInt16(stream);
-                    TempLocation.Unknown7 = StreamUtil.ReadInt16(stream);
-                    TempLocation.Unknown8 = StreamUtil.ReadInt16(stream);
-                    TempLocation.Unknown9 = StreamUtil.ReadInt16(stream);
-                    TempLocation.Unknown10 = StreamUtil.ReadInt16(stream);
-                    TempLocation.Unknown11 = StreamUtil.ReadInt16(stream);
-                    TempLocation.Unknown12 = StreamUtil.ReadInt16(stream);
-                    TempLocation.Unknown13 = StreamUtil.ReadInt16(stream);
-                    TempLocation.Unknown14 = StreamUtil.ReadInt16(stream);
-                    TempLocation.Unknown15 = StreamUtil.ReadInt16(stream);
-                    TempLocation.Unknown16 = StreamUtil.ReadInt16(stream);
-                    TempLocation.Unknown17 = StreamUtil.ReadInt16(stream);
-                    TempLocation.Unknown18 = StreamUtil.ReadInt16(stream); //13
-                    TempLocation.Unknown19 = StreamUtil.ReadInt16(stream); //14
-                    TempLocation.Unknown20 = StreamUtil.ReadInt16(stream); //15
-                    TempLocation.Unknown21 = StreamUtil.ReadInt16(stream); //16
-                    TempLocation.Unknown22 = StreamUtil.ReadInt16(stream); //17
-                    TempLocation.Unknown23 = StreamUtil.ReadInt16(stream); //18
-                    TempLocation.Unknown24 = StreamUtil.ReadInt16(stream); //19
-                    TempLocation.Unknown25 = StreamUtil.ReadInt16(stream); //20
-                    TempLocation.Unknown26 = StreamUtil.ReadInt16(stream); //21
-                    TempLocation.Unknown27 = StreamUtil.ReadInt16(stream); //22
-                    TempLocation.Unknown28 = StreamUtil.ReadInt16(stream);
-                    TempLocation.Unknown29 = StreamUtil.ReadInt16(stream);
-                    TempLocation.Unknown30 = StreamUtil.ReadInt16(stream);
-                    TempLocation.Unknown31 = StreamUtil.ReadInt16(stream);
-                    TempLocation.Unknown32 = StreamUtil.ReadInt16(stream);
+                    TempLocation.numMaterials = StreamUtil.ReadInt16(stream);
+                    TempLocation.numPatches = StreamUtil.ReadInt16(stream);
+                    TempLocation.numWorldMDR = StreamUtil.ReadInt16(stream);
+                    TempLocation.numInstance = StreamUtil.ReadInt16(stream);
+                    TempLocation.numParticleModel = StreamUtil.ReadInt16(stream);
+                    TempLocation.numParticleInstance = StreamUtil.ReadInt16(stream);
+                    TempLocation.numLights = StreamUtil.ReadInt16(stream);
+                    TempLocation.numHalo = StreamUtil.ReadInt16(stream);
+                    TempLocation.numSplines = StreamUtil.ReadInt16(stream);
+                    TempLocation.numShape = StreamUtil.ReadInt16(stream);
+                    TempLocation.numShapelightmap = StreamUtil.ReadInt16(stream);
+                    TempLocation.numVisCurtains = StreamUtil.ReadInt16(stream);
+                    TempLocation.numCollision = StreamUtil.ReadInt16(stream);
+                    TempLocation.numSoundTrigger = StreamUtil.ReadInt16(stream);
+                    TempLocation.numAIP = StreamUtil.ReadInt16(stream);
+                    TempLocation.numWorldPainter = StreamUtil.ReadInt16(stream);
+                    TempLocation.numScripts = StreamUtil.ReadInt16(stream);
+                    TempLocation.numCameraTrigger = StreamUtil.ReadInt16(stream);
+                    TempLocation.numNISTable = StreamUtil.ReadInt16(stream);
+                    TempLocation.numMissions = StreamUtil.ReadInt16(stream);
+                    TempLocation.numAudioBanks = StreamUtil.ReadInt16(stream);
+                    TempLocation.numRadar = StreamUtil.ReadInt16(stream);
+                    TempLocation.numAvalancheAnimation = StreamUtil.ReadInt16(stream);
+                    TempLocation.U1 = StreamUtil.ReadInt16(stream);
+                    TempLocation.U2 = StreamUtil.ReadInt16(stream);
+                    TempLocation.U3 = StreamUtil.ReadInt16(stream);
+                    TempLocation.U4 = StreamUtil.ReadInt16(stream);
+                    TempLocation.U5 = StreamUtil.ReadInt16(stream);
 
                     locations.Add(TempLocation);
                 }
@@ -288,34 +288,34 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2
             public int posChunks; //Chunks
             public int posSubChunks;
             //Int16s
-            public int Unknown5;
-            public int Unknown6;
-            public int Unknown7;
-            public int Unknown8;
-            public int Unknown9;
-            public int Unknown10;
-            public int Unknown11;
-            public int Unknown12;
-            public int Unknown13;
-            public int Unknown14;
-            public int Unknown15;
-            public int Unknown16;
-            public int Unknown17;
-            public int Unknown18;
-            public int Unknown19;
-            public int Unknown20;
-            public int Unknown21;
-            public int Unknown22;
-            public int Unknown23;
-            public int Unknown24;
-            public int Unknown25;
-            public int Unknown26;
-            public int Unknown27;
-            public int Unknown28;
-            public int Unknown29;
-            public int Unknown30;
-            public int Unknown31;
-            public int Unknown32;
+            public int numMaterials;
+            public int numPatches;
+            public int numWorldMDR;
+            public int numInstance;
+            public int numParticleModel;
+            public int numParticleInstance;
+            public int numLights;
+            public int numHalo;
+            public int numSplines;
+            public int numShape; 
+            public int numShapelightmap;
+            public int numVisCurtains;
+            public int numCollision;
+            public int numSoundTrigger;
+            public int numAIP; //AIP
+            public int numWorldPainter;
+            public int numScripts;
+            public int numCameraTrigger;
+            public int numNISTable;
+            public int numMissions;
+            public int numAudioBanks;
+            public int numRadar;
+            public int numAvalancheAnimation;
+            public int U1;
+            public int U2;
+            public int U3;
+            public int U4;
+            public int U5;
         }
 
         //96 bytes
