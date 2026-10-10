@@ -9,12 +9,12 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2
         public float UnknownFloat;
         public int numLocations; //4
         public int numChunks; //4
-        public int numSubChunks; //4
+        public int numStreamingChunks; //4
         public byte[] UnknownBytes2 = new byte[60];
 
         public List<Location> locations = new List<Location>();
         public List<ChunkInfo> chunksInfo = new List<ChunkInfo>();
-        public List<SubChunkInfo> subChunksInfo = new List<SubChunkInfo>();
+        public List<StreamingChunkInfo> streamingChunkInfos = new List<StreamingChunkInfo>();
 
         public void LoadSBD(string path)
         {
@@ -24,7 +24,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2
                 UnknownFloat = StreamUtil.ReadFloat(stream);
                 numLocations = StreamUtil.ReadUInt32(stream);
                 numChunks = StreamUtil.ReadUInt32(stream);
-                numSubChunks = StreamUtil.ReadUInt32(stream);
+                numStreamingChunks = StreamUtil.ReadUInt32(stream);
                 UnknownBytes2 = StreamUtil.ReadBytes(stream, 60);
 
                 int TempData = 0;
@@ -34,10 +34,10 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2
                 {
                     var TempLocation = new Location();
                     TempLocation.Name = StreamUtil.ReadString(stream, 16);
-                    TempLocation.numSubChunks = StreamUtil.ReadUInt32(stream);
+                    TempLocation.numStreamingChunks = StreamUtil.ReadUInt32(stream);
                     TempLocation.numChunks = StreamUtil.ReadUInt32(stream);
                     TempLocation.posChunks = StreamUtil.ReadUInt32(stream);
-                    TempLocation.posSubChunks = StreamUtil.ReadUInt32(stream);
+                    TempLocation.posStreamingChunk = StreamUtil.ReadUInt32(stream);
 
                     TempLocation.numMaterials = StreamUtil.ReadInt16(stream);
                     TempLocation.numPatches = StreamUtil.ReadInt16(stream);
@@ -99,40 +99,40 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2
                     chunksInfo.Add(TempUnknown1);
                 }
 
-                subChunksInfo = new List<SubChunkInfo>();
+                streamingChunkInfos = new List<StreamingChunkInfo>();
 
-                for (int i = 0; i < numSubChunks; i++)
+                for (int i = 0; i < numStreamingChunks; i++)
                 {
-                    var TempUnknown2 = new SubChunkInfo();
+                    var TempUnknown2 = new StreamingChunkInfo();
                     TempUnknown2.numResources = StreamUtil.ReadUInt16(stream);
                     TempUnknown2.subChunkID = StreamUtil.ReadUInt16(stream);
                     TempUnknown2.UnknownInt3 = StreamUtil.ReadUInt16(stream);
                     TempUnknown2.UnknownInt4 = StreamUtil.ReadUInt16(stream);
                     TempUnknown2.UnknownInt5 = StreamUtil.ReadUInt16(stream);
                     TempUnknown2.UnknownInt6 = StreamUtil.ReadUInt16(stream);
-                    TempUnknown2.UnknownInt7 = StreamUtil.ReadUInt16(stream); //0
-                    TempUnknown2.UnknownInt8 = StreamUtil.ReadUInt16(stream); //1
-                    TempUnknown2.UnknownInt9 = StreamUtil.ReadUInt16(stream); //WorldMDR Count - ID 2
-                    TempUnknown2.UnknownInt10 = StreamUtil.ReadUInt16(stream); //3
-                    TempUnknown2.UnknownInt11 = StreamUtil.ReadUInt16(stream); //4
-                    TempUnknown2.UnknownInt12 = StreamUtil.ReadUInt16(stream); //5
-                    TempUnknown2.UnknownInt13 = StreamUtil.ReadUInt16(stream); //6
-                    TempUnknown2.UnknownInt14 = StreamUtil.ReadUInt16(stream); //7
-                    TempUnknown2.UnknownInt15 = StreamUtil.ReadUInt16(stream); //8
-                    TempUnknown2.UnknownInt16 = StreamUtil.ReadUInt16(stream); //Shape Count - ID 9
-                    TempUnknown2.UnknownInt17 = StreamUtil.ReadUInt16(stream); //10
-                    TempUnknown2.UnknownInt18 = StreamUtil.ReadUInt16(stream); //11
-                    TempUnknown2.UnknownInt19 = StreamUtil.ReadUInt16(stream); //12
+                    TempUnknown2.numMaterials = StreamUtil.ReadUInt16(stream); //0
+                    TempUnknown2.numPatches = StreamUtil.ReadUInt16(stream); //1
+                    TempUnknown2.numWorldMDR = StreamUtil.ReadUInt16(stream); //WorldMDR Count - ID 2
+                    TempUnknown2.numInstance = StreamUtil.ReadUInt16(stream); //3
+                    TempUnknown2.numParticleModel = StreamUtil.ReadUInt16(stream); //4
+                    TempUnknown2.numParticleInstance = StreamUtil.ReadUInt16(stream); //5
+                    TempUnknown2.numParticleInstance = StreamUtil.ReadUInt16(stream); //6
+                    TempUnknown2.numLights = StreamUtil.ReadUInt16(stream); //7
+                    TempUnknown2.numHalo = StreamUtil.ReadUInt16(stream); //8
+                    TempUnknown2.numShapes = StreamUtil.ReadUInt16(stream); //Shape Count - ID 9
+                    TempUnknown2.numShapeLightmap = StreamUtil.ReadUInt16(stream); //10
+                    TempUnknown2.numVisCurtains = StreamUtil.ReadUInt16(stream); //11
+                    TempUnknown2.numCollision = StreamUtil.ReadUInt16(stream); //12
 
-                    TempUnknown2.UnknownInt20 = StreamUtil.ReadUInt16(stream);
-                    TempUnknown2.UnusedUnknownInt11 = StreamUtil.ReadUInt32(stream);
-                    TempUnknown2.UnusedUnknownInt12 = StreamUtil.ReadUInt32(stream);
-                    TempUnknown2.UnusedUnknownInt13 = StreamUtil.ReadUInt32(stream);
-                    TempUnknown2.UnusedUnknownInt14 = StreamUtil.ReadUInt32(stream);
-                    TempUnknown2.UnusedUnknownInt15 = StreamUtil.ReadUInt32(stream);
-                    TempUnknown2.UnusedUnknownInt16 = StreamUtil.ReadUInt32(stream);
-                    TempUnknown2.UnusedUnknownInt17 = StreamUtil.ReadUInt32(stream);
-                    subChunksInfo.Add(TempUnknown2);
+                    TempUnknown2.U1 = StreamUtil.ReadUInt16(stream);
+                    TempUnknown2.U2 = StreamUtil.ReadUInt32(stream);
+                    TempUnknown2.U3 = StreamUtil.ReadUInt32(stream);
+                    TempUnknown2.U4 = StreamUtil.ReadUInt32(stream);
+                    TempUnknown2.U5 = StreamUtil.ReadUInt32(stream);
+                    TempUnknown2.U6 = StreamUtil.ReadUInt32(stream);
+                    TempUnknown2.U7 = StreamUtil.ReadUInt32(stream);
+                    TempUnknown2.U8 = StreamUtil.ReadUInt32(stream);
+                    streamingChunkInfos.Add(TempUnknown2);
                 }
             }
 
@@ -283,10 +283,10 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2
         {
             public string Name; //16
                                 //Int32s
-            public int numSubChunks;
+            public int numStreamingChunks;
             public int numChunks;
             public int posChunks; //Chunks
-            public int posSubChunks;
+            public int posStreamingChunk;
             //Int16s
             public int numMaterials;
             public int numPatches;
@@ -346,7 +346,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2
         }
 
         //68 Bytes
-        public struct SubChunkInfo
+        public struct StreamingChunkInfo
         {
             //Int32
             public int numResources;
@@ -355,29 +355,40 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2
             public int UnknownInt4;
             public int UnknownInt5;
             public int UnknownInt6;
-            public int UnknownInt7;
-            public int UnknownInt8;
-            public int UnknownInt9;
-            public int UnknownInt10;
-            public int UnknownInt11;
-            public int UnknownInt12;
-            public int UnknownInt13;
-            public int UnknownInt14;
-            public int UnknownInt15;
-            public int UnknownInt16;
-            public int UnknownInt17;
-            public int UnknownInt18;
-            public int UnknownInt19;
-            public int UnknownInt20;
+            public int numMaterials;
+            public int numPatches;
+            public int numWorldMDR;
+            public int numInstance;
+            public int numParticleModel;
+            public int numParticleInstance;
+            public int numLights;
+            public int numHalo;
+            public int numSplines;
+            public int numShapes;
+            public int numShapeLightmap;
+            public int numVisCurtains;
+            public int numCollision;
 
-            //Doesnt Seem to Change
-            public int UnusedUnknownInt11;
-            public int UnusedUnknownInt12;
-            public int UnusedUnknownInt13;
-            public int UnusedUnknownInt14;
-            public int UnusedUnknownInt15;
-            public int UnusedUnknownInt16;
-            public int UnusedUnknownInt17;
+            //Doesnt Seem to Change but probably some variation on the below if used
+            public int U1;
+            public int U2;
+            public int U3;
+            public int U4;
+            public int U5;
+            public int U6;
+            public int U7;
+            public int U8;
+
+            //public int numSoundTrigger;
+            //public int numAIP; //AIP
+            //public int numWorldPainter;
+            //public int numScripts;
+            //public int numCameraTrigger;
+            //public int numNISTable;
+            //public int numMissions;
+            //public int numAudioBanks;
+            //public int numRadar;
+            //public int numAvalancheAnimation;
         }
     }
 }
