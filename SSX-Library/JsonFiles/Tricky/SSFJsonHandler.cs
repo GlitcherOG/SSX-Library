@@ -938,7 +938,7 @@ namespace SSXLibrary.JsonFiles.Tricky
             }
             else if (NewEffect.MainType == 12)
             {
-                var NewHUDEffect = new HUDTextEffect();
+                var NewHUDEffect = new SSFHandler.HUDTextEffect();
 
                 NewHUDEffect.HudText = TempEffect.hudTextEffect.Value.HudText;
                 //A document that names no colour gets white, which is what the banner draws anyway.

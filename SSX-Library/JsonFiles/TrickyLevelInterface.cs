@@ -29,11 +29,6 @@ namespace SSXLibrary
 
         public bool Unilightmap;
 
-        // ISO-repack: seed the texture-name list so a TexturePath's index becomes its original ssh slot
-        // number (not appearance order), letting the verbatim ssh be reused. Names = the slots in index
-        // order ("0000.png", "0001.png", ...); leave null for the normal appearance-order behaviour.
-        public List<string>? SeedImageFiles = null;
-
         public int LTGGenerateMode = 1;
         //0 - Centre
         //1 - Origin
@@ -54,26 +49,6 @@ namespace SSXLibrary
 
         public MaterialJsonHandler SkyMaterialJson = new MaterialJsonHandler();
         public ModelJsonHandler SkyPrefabJsonHandler = new ModelJsonHandler();
-
-        /// <summary>Shortname of a shape-bank page, or null (with a console warning) when the index is
-        /// outside the bank - a pbd can carry texture IDs its ssh never shipped, and extraction should
-        /// report those instead of throwing.</summary>
-        private static string? ShapeNameOrNull(OldShapeHandler bank, int id, string context)
-        {
-            if (id >= 0 && id < bank.ShapeImages.Count) return bank.ShapeImages[id].Shortname;
-            Console.WriteLine($"WARN: {context} references texture {id} but the ssh has {bank.ShapeImages.Count} pages - TexturePath left unset.");
-            return null;
-        }
-
-        //Custom courses can declare more objects in the .pbd than the .map linker tables
-        //name. Snow Belline has 59 particle instances in the pbd against 9 in the map,
-        //and 69 splines against 50. The name is cosmetic, since every transform and bound
-        //comes from the pbd, so fall back to a synthetic one rather than throwing part
-        //way through an extraction.
-        static string LinkerName(List<LinkerItem> items, int i, string Prefix)
-        {
-            return i < items.Count ? items[i].Name : Prefix + "_" + i;
-        }
 
         public void ExtractTrickyLevelFiles(string LoadPath, string ExportPath)
         {
@@ -1322,7 +1297,7 @@ namespace SSXLibrary
 
         public void BuildTrickyLevelFiles(string LoadPath, string ExportPath)
         {
-            List<string> ImageFiles = SeedImageFiles != null ? new List<string>(SeedImageFiles) : new List<string>();
+            List<string> ImageFiles = new List<string>();
 
             ExportPath = ExportPath.Substring(0, ExportPath.Length - 4);
 
@@ -2277,7 +2252,10 @@ namespace SSXLibrary
                 // Header texture count (0x34) sizes the .ssh index space; without it every TextureAssigment
                 // is out of range and terrain renders untextured. The build never set it otherwise. When
                 // reusing the original ssh (seeded), match its page count exactly, not the appended list.
-                pbdHandler.NumTextures = SeedImageFiles != null ? SeedImageFiles.Count : ImageFiles.Count;
+
+                //Not a used value
+                //pbdHandler.NumTextures = ImageFiles.Count;
+
                 //ErrorManager.ErrorMessage = "Error Saving PDB File";
                 Console.WriteLine("Saving PDB File");
                 pbdHandler.SaveNew(ExportPath + ".pbd");
@@ -2938,6 +2916,26 @@ namespace SSXLibrary
             SkyPrefabJsonHandler = ModelJsonHandler.Load(LoadPath + "/Skybox/Models.json");
 
 
+        }
+
+        /// <summary>Shortname of a shape-bank page, or null (with a console warning) when the index is
+        /// outside the bank - a pbd can carry texture IDs its ssh never shipped, and extraction should
+        /// report those instead of throwing.</summary>
+        private static string? ShapeNameOrNull(OldShapeHandler bank, int id, string context)
+        {
+            if (id >= 0 && id < bank.ShapeImages.Count) return bank.ShapeImages[id].Shortname;
+            Console.WriteLine($"WARN: {context} references texture {id} but the ssh has {bank.ShapeImages.Count} pages - TexturePath left unset.");
+            return null;
+        }
+
+        //Custom courses can declare more objects in the .pbd than the .map linker tables
+        //name. Snow Belline has 59 particle instances in the pbd against 9 in the map,
+        //and 69 splines against 50. The name is cosmetic, since every transform and bound
+        //comes from the pbd, so fall back to a synthetic one rather than throwing part
+        //way through an extraction.
+        static string LinkerName(List<LinkerItem> items, int i, string Prefix)
+        {
+            return i < items.Count ? items[i].Name : Prefix + "_" + i;
         }
     }
 }
