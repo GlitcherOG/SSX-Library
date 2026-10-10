@@ -48,7 +48,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
         public Vector4 U7;
         public ObjectID objectID;
         public int U10;
-        public int U11;
+        public int StreamingChunkID;
 
         public Vector3 Point1;
         public Vector3 Point2;
@@ -102,7 +102,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
             U7 = StreamUtil.ReadVector4(stream);
             objectID = WorldCommon.ObjectIDLoad(stream);
             U10 = StreamUtil.ReadInt16(stream);
-            U11 = StreamUtil.ReadInt16(stream);
+            StreamingChunkID = StreamUtil.ReadInt16(stream);
 
             Point1 = StreamUtil.ReadVector3(stream);
             Point2 = StreamUtil.ReadVector3(stream);
@@ -184,7 +184,6 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
             patchJson.RID = objectID.RID;
 
             patchJson.U10 = U10;
-            patchJson.U11 = U11;
             patchJson.TextureRID = TextureRID;
             patchJson.LightmapRID = LightmapRID;
             patchJson.U14 = U14;
