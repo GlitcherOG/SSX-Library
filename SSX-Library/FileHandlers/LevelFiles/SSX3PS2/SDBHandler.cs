@@ -34,8 +34,8 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2
                 {
                     var TempLocation = new Location();
                     TempLocation.Name = StreamUtil.ReadString(stream, 16);
-                    TempLocation.numStreamingChunks = StreamUtil.ReadUInt32(stream);
                     TempLocation.numChunks = StreamUtil.ReadUInt32(stream);
+                    TempLocation.numStreamingChunks = StreamUtil.ReadUInt32(stream);
                     TempLocation.posEndStreamingChunk = StreamUtil.ReadUInt32(stream);
                     TempLocation.posChunks = StreamUtil.ReadUInt32(stream);
 
@@ -114,9 +114,9 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2
                     TempUnknown2.numInstance = StreamUtil.ReadUInt16(stream); //3
                     TempUnknown2.numParticleModel = StreamUtil.ReadUInt16(stream); //4
                     TempUnknown2.numParticleInstance = StreamUtil.ReadUInt16(stream); //5
-                    TempUnknown2.numParticleInstance = StreamUtil.ReadUInt16(stream); //6
-                    TempUnknown2.numLights = StreamUtil.ReadUInt16(stream); //7
-                    TempUnknown2.numHalo = StreamUtil.ReadUInt16(stream); //8
+                    TempUnknown2.numLights = StreamUtil.ReadUInt16(stream); //6
+                    TempUnknown2.numHalo = StreamUtil.ReadUInt16(stream); //7
+                    TempUnknown2.numSplines = StreamUtil.ReadUInt16(stream); //8
                     TempUnknown2.numShapes = StreamUtil.ReadUInt16(stream); //Shape Count - ID 9
                     TempUnknown2.numShapeLightmap = StreamUtil.ReadUInt16(stream); //10
                     TempUnknown2.numVisCurtains = StreamUtil.ReadUInt16(stream); //11
@@ -251,10 +251,10 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2
         {
             public string Name; //16
                                 //Int32s
+            public int numChunks; //ChunkInfo entries
             public int numStreamingChunks;
-            public int numChunks;
-            public int posEndStreamingChunk;
-            public int posChunks; 
+            public int posEndStreamingChunk; //Index of this location's last streaming chunk
+            public int posChunks; //Index of this location's first ChunkInfo
             //Int16s
             public int numMaterials;
             public int numPatches;
