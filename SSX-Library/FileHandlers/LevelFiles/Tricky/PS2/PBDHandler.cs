@@ -71,16 +71,6 @@ namespace SSX_Library.FileHandlers.LevelFiles.Tricky.PS2
 
         public byte[] MeshData;
 
-        /// <summary>Encode one signed-normalized normal component without letting +1 wrap through Int16.
-        /// The old direct <c>(int)(v * 32768)</c> produced 32768 for +1, and WriteInt16's cast turned that
-        /// into -32768: every positive cardinal normal therefore became its negative in a rebuilt PBD.</summary>
-        private static int PackNormalComponent(float value)
-        {
-            if (!float.IsFinite(value)) return 0;
-            int scaled = (int)(Math.Clamp(value, -1f, 1f) * 32768f);
-            return Math.Clamp(scaled, short.MinValue, short.MaxValue);
-        }
-
         public void LoadPBD(string LoadPath)
         {
             using (Stream stream = File.Open(LoadPath, FileMode.Open))
@@ -2310,6 +2300,15 @@ namespace SSX_Library.FileHandlers.LevelFiles.Tricky.PS2
             }
         }
 
+        /// <summary>Encode one signed-normalized normal component without letting +1 wrap through Int16.
+        /// The old direct <c>(int)(v * 32768)</c> produced 32768 for +1, and WriteInt16's cast turned that
+        /// into -32768: every positive cardinal normal therefore became its negative in a rebuilt PBD.</summary>
+        private static int PackNormalComponent(float value)
+        {
+            if (!float.IsFinite(value)) return 0;
+            int scaled = (int)(Math.Clamp(value, -1f, 1f) * 32768f);
+            return Math.Clamp(scaled, short.MinValue, short.MaxValue);
+        }
     }
 
 
@@ -2413,16 +2412,7 @@ namespace SSX_Library.FileHandlers.LevelFiles.Tricky.PS2
     public struct ParticleInstance
     {
         public Matrix4x4 matrix4X4;
-        // Record +0x40: zero-based index into the PBD particle-model table.
-        // Multiple particle instances may reference the same particle model.
         public int ParticleModelIndex;
-        // Source-compatibility alias for callers using the previous public field name.
-        [Obsolete("Use ParticleModelIndex instead.")]
-        public int UnknownInt1
-        {
-            readonly get => ParticleModelIndex;
-            set => ParticleModelIndex = value;
-        }
         public Vector3 LowestXYZ;
         public Vector3 HighestXYZ;
         public int UnknownInt8;
