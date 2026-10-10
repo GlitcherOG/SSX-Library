@@ -5,11 +5,11 @@ The library serves as a framework for GUI/CLI modding tools, but it can also be 
 
 The library was made to isolate the backend from the Windows only [SSX Collection Multitool](https://github.com/GlitcherOG/SSX-Collection-Multitool). Currently we're refactoring every part of the library to make it maintainable and cross-platform. We have a general checklist of the things we need to do, though many will be combined or removed. 
 ## SSX Projects Using as Submodule
-https://github.com/GlitcherOG/SSX-Collection-Multitool
-https://github.com/IceSawTeam/Ice-Saw-2
-https://github.com/GlitcherOG/SSXModManager
-https://github.com/andersfischernielsen/ThreeJSSX
-https://github.com/swax/OpenSlope
+https://github.com/GlitcherOG/SSX-Collection-Multitool<br>
+https://github.com/IceSawTeam/Ice-Saw-2<br>
+https://github.com/GlitcherOG/SSXModManager<br>
+https://github.com/andersfischernielsen/ThreeJSSX<br>
+https://github.com/swax/OpenSlope<br>
 
 ## Special Thanks
 https://github.com/Erickson400/SSXTrickyModelExporter <br>
