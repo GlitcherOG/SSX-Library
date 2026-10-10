@@ -44,9 +44,6 @@ namespace SSXLibrary.JsonFiles.Tricky
             public float[] Scale;
 
             public int ParticleModelIndex;
-            // Input-only alias for JSON written with the previous public field name.
-            [JsonProperty("UnknownInt1")]
-            private int LegacyParticleModelIndex { set => ParticleModelIndex = value; }
             public float[] LowestXYZ;
             public float[] HighestXYZ;
             public int UnknownInt8;
