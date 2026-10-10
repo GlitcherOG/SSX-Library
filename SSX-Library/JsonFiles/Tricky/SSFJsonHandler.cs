@@ -484,10 +484,14 @@ namespace SSXLibrary.JsonFiles.Tricky
             }
             else if (NewEffect.MainType == 12)
             {
-                NewEffect.HudText = TempEffect.HudText;
-                NewEffect.HudRed = TempEffect.HudRed;
-                NewEffect.HudGreen = TempEffect.HudGreen;
-                NewEffect.HudBlue = TempEffect.HudBlue;
+                var NewHudEffect = new HUDTextEffect();
+
+                NewHudEffect.HudText = TempEffect.hudTextEffect.Value.HudText;
+                NewHudEffect.HudRed = TempEffect.hudTextEffect.Value.HudRed;
+                NewHudEffect.HudGreen = TempEffect.hudTextEffect.Value.HudGreen;
+                NewHudEffect.HudBlue = TempEffect.hudTextEffect.Value.HudBlue;
+
+                NewEffect.hudTextEffect = NewHudEffect;
             }
             else
             {
@@ -934,11 +938,15 @@ namespace SSXLibrary.JsonFiles.Tricky
             }
             else if (NewEffect.MainType == 12)
             {
-                NewEffect.HudText = TempEffect.HudText;
+                var NewHUDEffect = new HUDTextEffect();
+
+                NewHUDEffect.HudText = TempEffect.hudTextEffect.Value.HudText;
                 //A document that names no colour gets white, which is what the banner draws anyway.
-                NewEffect.HudRed = TempEffect.HudRed ?? 1f;
-                NewEffect.HudGreen = TempEffect.HudGreen ?? 1f;
-                NewEffect.HudBlue = TempEffect.HudBlue ?? 1f;
+                NewHUDEffect.HudRed = TempEffect.hudTextEffect.Value.HudRed;
+                NewHUDEffect.HudGreen = TempEffect.hudTextEffect.Value.HudGreen;
+                NewHUDEffect.HudBlue = TempEffect.hudTextEffect.Value.HudBlue;
+
+                NewEffect.hudTextEffect = NewHUDEffect;
             }
             else
             {
@@ -1034,6 +1042,7 @@ namespace SSXLibrary.JsonFiles.Tricky
             public int? SoundPlay;
             public Type9? type9;
 
+            public HUDTextEffect? hudTextEffect;
             public float? type13;
             public float? MultiplierScore;
             public float? type17;
@@ -1042,10 +1051,6 @@ namespace SSXLibrary.JsonFiles.Tricky
             public int? TeleportInstanceIndex;
             public SplineEffect? Spline;
 
-            public string? HudText;            //12 - inline UTF-16LE text
-            public float? HudRed;              //12 - colour channels, 0..1, ahead of the text
-            public float? HudGreen;
-            public float? HudBlue;
             public byte[]? UnknownPayload;     //any main type this library has no branch for
         }
 
@@ -1403,6 +1408,15 @@ namespace SSXLibrary.JsonFiles.Tricky
         {
             public int U0;
             public float U1;
+        }
+
+        public struct HUDTextEffect
+        {          
+            public float HudRed; 
+            public float HudGreen;
+            public float HudBlue;
+
+            public string HudText;
         }
 
         public struct SplineEffect

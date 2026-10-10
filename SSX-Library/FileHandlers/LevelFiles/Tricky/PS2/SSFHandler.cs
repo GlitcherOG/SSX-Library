@@ -1,4 +1,5 @@
 ﻿using SSX_Library.Internal.Utilities;
+using SSX_Library.Internal.Utilities.StreamExtensions;
 using System.Globalization;
 using System.Numerics;
 
@@ -819,17 +820,14 @@ namespace SSX_Library.FileHandlers.LevelFiles.Tricky.PS2
             } //Done
             else if (NewEffect.MainType == 12)
             {
-                int payload = PayloadLength(NewEffect);
-                if (payload < HudColourBytes)
-                {
-                    throw new InvalidDataException(
-                        $"SSF HUD-message node at 0x{NewEffect.Offset:X} declares {payload} payload bytes; " +
-                        $"it must carry at least the {HudColourBytes}-byte colour.");
-                }
-                NewEffect.HudRed = StreamUtil.ReadFloat(stream);
-                NewEffect.HudGreen = StreamUtil.ReadFloat(stream);
-                NewEffect.HudBlue = StreamUtil.ReadFloat(stream);
-                NewEffect.HudText = StreamUtil.ReadString16(stream, payload - HudColourBytes);
+                var NewMainType = new HUDTextEffect();
+
+                NewMainType.HudRed = StreamUtil.ReadFloat(stream);
+                NewMainType.HudGreen = StreamUtil.ReadFloat(stream);
+                NewMainType.HudBlue = StreamUtil.ReadFloat(stream);
+                NewMainType.HudText = stream.ReadUtf16NullTerminated();
+
+                NewEffect.hudTextEffect = NewMainType;
             }
             else
             {
@@ -1266,10 +1264,10 @@ namespace SSX_Library.FileHandlers.LevelFiles.Tricky.PS2
                 //multiple of 4 bytes. The padding is load bearing rather than tidy: the chain walker
                 //advances by the size field and reads the next node's main type with a word load, which
                 //faults on the EE if that lands unaligned.
-                StreamUtil.WriteFloat32(stream, EffectData.HudRed);
-                StreamUtil.WriteFloat32(stream, EffectData.HudGreen);
-                StreamUtil.WriteFloat32(stream, EffectData.HudBlue);
-                StreamUtil.WriteString16(stream, EffectData.HudText ?? "");
+                StreamUtil.WriteFloat32(stream, EffectData.hudTextEffect.Value.HudRed);
+                StreamUtil.WriteFloat32(stream, EffectData.hudTextEffect.Value.HudGreen);
+                StreamUtil.WriteFloat32(stream, EffectData.hudTextEffect.Value.HudBlue);
+                StreamUtil.WriteString16(stream, EffectData.hudTextEffect.Value.HudText ?? "");
                 StreamUtil.WriteInt16(stream, 0);
 
                 long PayloadBytes = stream.Position - (ByteSize + 4);
@@ -1814,7 +1812,7 @@ namespace SSX_Library.FileHandlers.LevelFiles.Tricky.PS2
             public InstanceEffect? Instance;
             public int SoundPlay;
             public Type9? type9;
-
+            public HUDTextEffect? hudTextEffect;
             public float type13; //Reset Value
             public float MultiplierScore;
             public float type17;
@@ -1822,24 +1820,6 @@ namespace SSX_Library.FileHandlers.LevelFiles.Tricky.PS2
             public int FunctionRunIndex; //Script Used By Screenlogo
             public int TeleportInstanceIndex;
             public SplineEffect? Spline;
-
-            //12 - HUD message. Retail authors no main type 12 and the retail dispatcher sends it to
-            //the inert default, so a node carrying one is a no-op on a stock executable. The payload
-            //is an inline UTF-16LE string, NUL-terminated: node payloads are variable length (the
-            //size field below is what the engine's chain walker advances by), so the text needs no
-            //side table and travels with the level.
-            public string? HudText;
-            //12 - the message's colour, as three 0..1 channels ahead of the text. They sit BEFORE the
-            //string so the one pointer the engine carries reaches both: the patch's shim finds them at a
-            //fixed negative offset from the text it was handed.
-            //No default here - Effect is a struct, so these start at 0 (invisible). Whoever builds a
-            //node owns the colour: the JSON conversion substitutes white for an absent one, and the
-            //reader always fills them from the payload.
-            public float HudRed, HudGreen, HudBlue;
-
-            //Any main type this reader has no branch for, kept verbatim so a round trip preserves it.
-            //Without this an unknown opcode used to return null, which made the caller abandon the
-            //rest of its chain and silently drop every node after it.
             public byte[]? UnknownPayload;
         }
 
@@ -2199,6 +2179,14 @@ namespace SSX_Library.FileHandlers.LevelFiles.Tricky.PS2
         {
             public int InstanceIndex;
             public int EffectIndex;
+        }
+        public struct HUDTextEffect
+        {
+            public float HudRed;
+            public float HudGreen;
+            public float HudBlue;
+
+            public string HudText;
         }
 
         public struct Type9

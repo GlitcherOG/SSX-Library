@@ -169,6 +169,22 @@ internal static class Reader
         return Encoding.ASCII.GetString(buf);
     }
 
+    public static string ReadUtf16NullTerminated(this Stream stream)
+    {
+        List<byte> text = [];
+        while (true)
+        {
+            int low = stream.ReadByte();
+            int high = stream.ReadByte();
+            if (low == 0 && high == 0)
+                break;
+
+            text.Add((byte)low);
+            text.Add((byte)high);
+        }
+        return Encoding.Unicode.GetString([.. text]);
+    }
+
     /// <param name="removeNullChars"> Remove null characters if within the string</param>
     public static string ReadUtf16WithByteLength(this Stream stream, int byteLength, bool removeNullChars)
     {
