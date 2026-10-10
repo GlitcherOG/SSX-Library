@@ -26,7 +26,10 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
         public Vector3 V1;
         public Vector3 V2;
 
-        public int U4;
+        public int U4; //Unknown int16 (offset 0x7C), common values 2048, 4096, 6144, 7680, 11520
+        //Global SDB streaming chunk ID of the leaf chunk that holds this instance's model textures, or the location chunk
+        //for skies/TRANSP (offset 0x7E). Has to be updated if the streaming chunks are regenerated (see SSBStreamingRebuild.SetStreamingChunkID)
+        public int StreamingChunkID;
 
         public ObjectID ModelID;
 
@@ -58,7 +61,8 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
             V2 = StreamUtil.ReadVector3(stream);
 
             objectID = WorldCommon.ObjectIDLoad(stream); 
-            U4 = StreamUtil.ReadInt32(stream);
+            U4 = StreamUtil.ReadUInt16(stream);
+            StreamingChunkID = StreamUtil.ReadInt16(stream);
 
             ModelID = WorldCommon.ObjectIDLoad(stream);
 

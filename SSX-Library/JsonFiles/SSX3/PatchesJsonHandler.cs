@@ -62,7 +62,6 @@ namespace SSXLibrary.JsonFiles.SSX3
             public int TrackID;
             public int RID;
             public int U10;
-            public int U11;
 
             public int TextureRID;
             public int LightmapRID;
