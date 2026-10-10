@@ -78,22 +78,13 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2
                     var TempUnknown1 = new ChunkInfo();
                     TempUnknown1.BboxLow = StreamUtil.ReadVector4(stream);
                     TempUnknown1.BboxHigh = StreamUtil.ReadVector4(stream);
-                    TempUnknown1.UnknownFloat9 = StreamUtil.ReadFloat(stream);
-                    TempUnknown1.UnknownFloat10 = StreamUtil.ReadFloat(stream);
-                    TempUnknown1.UnknownFloat11 = StreamUtil.ReadFloat(stream);
-                    TempUnknown1.UnknownFloat12 = StreamUtil.ReadFloat(stream);
-                    TempUnknown1.UnknownFloat13 = StreamUtil.ReadFloat(stream);
-                    TempUnknown1.UnknownFloat14 = StreamUtil.ReadFloat(stream);
-                    TempUnknown1.UnknownFloat15 = StreamUtil.ReadFloat(stream);
-                    TempUnknown1.UnknownFloat16 = StreamUtil.ReadFloat(stream);
-                    TempUnknown1.UnknownFloat17 = StreamUtil.ReadFloat(stream);
-                    TempUnknown1.UnknownFloat18 = StreamUtil.ReadFloat(stream);
-                    TempUnknown1.UnknownFloat19 = StreamUtil.ReadFloat(stream);
-                    TempUnknown1.UnknownFloat20 = StreamUtil.ReadFloat(stream);
+                    TempUnknown1.Child1EdgePlane = StreamUtil.ReadVector4(stream);
+                    TempUnknown1.Child2EdgePlane = StreamUtil.ReadVector4(stream);
+                    TempUnknown1.SplitPlane = StreamUtil.ReadVector4(stream);
 
-                    TempUnknown1.UnknownInt1 = StreamUtil.ReadUInt32(stream);
-                    TempUnknown1.UnknownInt2 = StreamUtil.ReadUInt32(stream);
-                    TempUnknown1.UnknownInt3 = StreamUtil.ReadUInt32(stream);
+                    TempUnknown1.Child1 = StreamUtil.ReadUInt32(stream);
+                    TempUnknown1.Child2 = StreamUtil.ReadUInt32(stream);
+                    TempUnknown1.StreamingChunkID = StreamUtil.ReadUInt32(stream);
                     TempUnknown1.UnknownInt4 = StreamUtil.ReadUInt32(stream);
 
                     chunksInfo.Add(TempUnknown1);
@@ -195,21 +186,12 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2
                 var chunk = chunksInfo[i];
                 StreamUtil.WriteVector4(stream, chunk.BboxLow);
                 StreamUtil.WriteVector4(stream, chunk.BboxHigh);
-                StreamUtil.WriteFloat32(stream, chunk.UnknownFloat9);
-                StreamUtil.WriteFloat32(stream, chunk.UnknownFloat10);
-                StreamUtil.WriteFloat32(stream, chunk.UnknownFloat11);
-                StreamUtil.WriteFloat32(stream, chunk.UnknownFloat12);
-                StreamUtil.WriteFloat32(stream, chunk.UnknownFloat13);
-                StreamUtil.WriteFloat32(stream, chunk.UnknownFloat14);
-                StreamUtil.WriteFloat32(stream, chunk.UnknownFloat15);
-                StreamUtil.WriteFloat32(stream, chunk.UnknownFloat16);
-                StreamUtil.WriteFloat32(stream, chunk.UnknownFloat17);
-                StreamUtil.WriteFloat32(stream, chunk.UnknownFloat18);
-                StreamUtil.WriteFloat32(stream, chunk.UnknownFloat19);
-                StreamUtil.WriteFloat32(stream, chunk.UnknownFloat20);
-                StreamUtil.WriteInt32(stream, chunk.UnknownInt1);
-                StreamUtil.WriteInt32(stream, chunk.UnknownInt2);
-                StreamUtil.WriteInt32(stream, chunk.UnknownInt3);
+                StreamUtil.WriteVector4(stream, chunk.Child1EdgePlane);
+                StreamUtil.WriteVector4(stream, chunk.Child2EdgePlane);
+                StreamUtil.WriteVector4(stream, chunk.SplitPlane);
+                StreamUtil.WriteInt32(stream, chunk.Child1);
+                StreamUtil.WriteInt32(stream, chunk.Child2);
+                StreamUtil.WriteInt32(stream, chunk.StreamingChunkID);
                 StreamUtil.WriteInt32(stream, chunk.UnknownInt4);
             }
 
@@ -289,30 +271,22 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2
         }
 
         //96 bytes
+        //A node in the location's texture streaming tree. Nodes are numbered breadth first from Location.posChunks
         public struct ChunkInfo
         {
-            public Vector4 BboxLow;
+            public Vector4 BboxLow; //Node bounds (child bounds overlap around the split)
             public Vector4 BboxHigh;
 
-            public float UnknownFloat9;
-            public float UnknownFloat10;
-            public float UnknownFloat11;
-            public float UnknownFloat12;
+            //Planes are normal xyz + d, a point p is on the plane when dot(normal, p) + d = 0
+            //Only used on split nodes, all zeros on leaves
+            public Vector4 Child1EdgePlane; //Child1's far edge (in front = outside Child1's box)
+            public Vector4 Child2EdgePlane; //Child2's near edge (in front = outside Child2's box)
+            public Vector4 SplitPlane; //dot(normal, p) + d < 0 goes to Child1, otherwise Child2
 
-            public float UnknownFloat13;
-            public float UnknownFloat14;
-            public float UnknownFloat15;
-            public float UnknownFloat16;
-
-            public float UnknownFloat17;
-            public float UnknownFloat18;
-            public float UnknownFloat19;
-            public float UnknownFloat20;
-
-            public int UnknownInt1;
-            public int UnknownInt2;
-            public int UnknownInt3;
-            public int UnknownInt4;
+            public int Child1; //Index of the first child ChunkInfo, -1 on leaves
+            public int Child2; //Index of the second child ChunkInfo, -1 on leaves
+            public int StreamingChunkID; //Leaf's texture streaming chunk, -1 on split nodes (and on sky/TRANSP)
+            public int UnknownInt4; //Always 0 in bam.sdb
         }
 
         //68 Bytes
