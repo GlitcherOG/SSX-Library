@@ -1,4 +1,5 @@
 ﻿using SSX_Library.Internal.Utilities;
+using SSX_Library.Internal.Utilities.StreamExtensions;
 using System.Globalization;
 using System.Numerics;
 
@@ -386,12 +387,12 @@ namespace SSX_Library.FileHandlers.LevelFiles.Tricky.PS2
                 if (NewMainType.SubType == 10)
                 {
                     var NewSubType = new UVScrolling();
-                    NewSubType.U0 = StreamUtil.ReadUInt32(stream); //Scroll Mode 
-                    NewSubType.U1 = StreamUtil.ReadFloat(stream); //Horozontal Scroll
-                    NewSubType.U2 = StreamUtil.ReadFloat(stream); //Vertical Scroll
-                    NewSubType.U3 = StreamUtil.ReadFloat(stream); //Horozontal Scroll Length
-                    NewSubType.U4 = StreamUtil.ReadFloat(stream); //Vertical Scroll Length
-                    NewSubType.U5 = StreamUtil.ReadUInt32(stream);
+                    NewSubType.U0 = StreamUtil.ReadUInt32(stream); // Mode: 0 linear, 1 eased ping-pong, 2 constant ping-pong
+                    NewSubType.U1 = StreamUtil.ReadFloat(stream); // Horizontal UV units per tick
+                    NewSubType.U2 = StreamUtil.ReadFloat(stream); // Vertical UV units per tick
+                    NewSubType.U3 = StreamUtil.ReadFloat(stream); // Active duration (seconds)
+                    NewSubType.U4 = StreamUtil.ReadFloat(stream); // Pause duration (seconds)
+                    NewSubType.U5 = StreamUtil.ReadFloat(stream); // Total lifetime (seconds; 0 = until slot unload)
                     NewMainType.UVScroll = NewSubType;
                 }
                 else
@@ -586,7 +587,7 @@ namespace SSX_Library.FileHandlers.LevelFiles.Tricky.PS2
                     NewSubType.U7 = StreamUtil.ReadFloat(stream);
 
                     NewSubType.U8 = StreamUtil.ReadFloat(stream);
-                    NewSubType.U9 = StreamUtil.ReadUInt32(stream);
+                    NewSubType.U9 = StreamUtil.ReadFloat(stream);
                     NewSubType.U10 = StreamUtil.ReadFloat(stream);
                     NewSubType.U11 = StreamUtil.ReadFloat(stream);
 
@@ -817,13 +818,50 @@ namespace SSX_Library.FileHandlers.LevelFiles.Tricky.PS2
 
                 NewEffect.Spline = NewMainType;
             } //Done
+            else if (NewEffect.MainType == 12)
+            {
+                var NewMainType = new HUDTextEffect();
+
+                NewMainType.HudRed = StreamUtil.ReadFloat(stream);
+                NewMainType.HudGreen = StreamUtil.ReadFloat(stream);
+                NewMainType.HudBlue = StreamUtil.ReadFloat(stream);
+                NewMainType.HudText = stream.ReadUtf16NullTerminated();
+
+                NewEffect.hudTextEffect = NewMainType;
+            }
             else
             {
-                //MessageBox.Show("Missing Type " + NewEffect.MainType.ToString());
-                return null;
+                //An opcode with no branch here. The engine dispatches more main types than the
+                //shipped corpus authors, so this is a real case rather than a corrupt-file one:
+                //keep the bytes and let the writer put them back. Returning null instead - which is
+                //what this did - makes the caller break out of the chain loop, so the unknown node
+                //AND every node after it in that chain vanish with no diagnostic.
+                NewEffect.UnknownPayload = StreamUtil.ReadBytes(stream, PayloadLength(NewEffect));
             }
 
             return NewEffect;
+        }
+
+        /// <summary>Payload bytes of one effect node: its size field counts the whole node, main type
+        /// and size included, so the payload is what is left after those two words.</summary>
+        /// <remarks>A size that cannot be a whole node would seek the chain loop backwards and hang
+        /// it, so this refuses rather than trusting the file.</remarks>
+        /// <summary>R, G and B as f32, the fixed head of a main-type-12 payload.</summary>
+        const int HudColourBytes = 12;
+
+        static int PayloadLength(Effect effect)
+        {
+            const int HeaderBytes = 8; // MainType + ByteSize
+
+            if (effect.ByteSize < HeaderBytes || (effect.ByteSize % 4) != 0)
+            {
+                throw new InvalidDataException(
+                    $"SSF effect at 0x{effect.Offset:X} declares ByteSize {effect.ByteSize}; a node is at " +
+                    $"least {HeaderBytes} bytes and always a multiple of 4 (the engine reads the next " +
+                    "node's main type with a word load, which faults when unaligned).");
+            }
+
+            return effect.ByteSize - HeaderBytes;
         }
 
         public void SaveEffectData(Stream stream, Effect EffectData)
@@ -873,7 +911,7 @@ namespace SSX_Library.FileHandlers.LevelFiles.Tricky.PS2
                     StreamUtil.WriteFloat32(stream, Type0Temp.UVScroll.Value.U2);
                     StreamUtil.WriteFloat32(stream, Type0Temp.UVScroll.Value.U3);
                     StreamUtil.WriteFloat32(stream, Type0Temp.UVScroll.Value.U4);
-                    StreamUtil.WriteInt32(stream, Type0Temp.UVScroll.Value.U5);
+                    StreamUtil.WriteFloat32(stream, Type0Temp.UVScroll.Value.U5);
                 }
                 else if (EffectData.type0.Value.SubType == 11)
                 {
@@ -1219,6 +1257,31 @@ namespace SSX_Library.FileHandlers.LevelFiles.Tricky.PS2
             {
                 StreamUtil.WriteInt32(stream, EffectData.Spline.Value.SplineIndex);
                 StreamUtil.WriteInt32(stream, EffectData.Spline.Value.Effect);
+            }
+            else if (EffectData.MainType == 12)
+            {
+                //Colour first, then UTF-16LE text, NUL-terminated, then zero-padded so the node stays a
+                //multiple of 4 bytes. The padding is load bearing rather than tidy: the chain walker
+                //advances by the size field and reads the next node's main type with a word load, which
+                //faults on the EE if that lands unaligned.
+                StreamUtil.WriteFloat32(stream, EffectData.hudTextEffect.Value.HudRed);
+                StreamUtil.WriteFloat32(stream, EffectData.hudTextEffect.Value.HudGreen);
+                StreamUtil.WriteFloat32(stream, EffectData.hudTextEffect.Value.HudBlue);
+                StreamUtil.WriteString16(stream, EffectData.hudTextEffect.Value.HudText ?? "");
+                StreamUtil.WriteInt16(stream, 0);
+
+                long PayloadBytes = stream.Position - (ByteSize + 4);
+                int Padding = (int)((4 - (PayloadBytes % 4)) % 4);
+                if (Padding != 0)
+                {
+                    StreamUtil.WriteBytes(stream, new byte[Padding]);
+                }
+            }
+            else if (EffectData.UnknownPayload != null)
+            {
+                //An opcode the reader had no branch for. Put its bytes back exactly, so a main type
+                //this library does not understand survives a round trip instead of being erased.
+                StreamUtil.WriteBytes(stream, EffectData.UnknownPayload);
             }
             else
             {
@@ -1749,7 +1812,7 @@ namespace SSX_Library.FileHandlers.LevelFiles.Tricky.PS2
             public InstanceEffect? Instance;
             public int SoundPlay;
             public Type9? type9;
-
+            public HUDTextEffect? hudTextEffect;
             public float type13; //Reset Value
             public float MultiplierScore;
             public float type17;
@@ -1757,6 +1820,7 @@ namespace SSX_Library.FileHandlers.LevelFiles.Tricky.PS2
             public int FunctionRunIndex; //Script Used By Screenlogo
             public int TeleportInstanceIndex;
             public SplineEffect? Spline;
+            public byte[]? UnknownPayload;
         }
 
         #region Type0
@@ -1824,7 +1888,7 @@ namespace SSX_Library.FileHandlers.LevelFiles.Tricky.PS2
             public float U2;
             public float U3;
             public float U4;
-            public int U5;
+            public float U5;
         }
 
         public struct TextureFlipEffect
@@ -1982,7 +2046,7 @@ namespace SSX_Library.FileHandlers.LevelFiles.Tricky.PS2
             public float U6;
             public float U7;
             public float U8;
-            public int U9;
+            public float U9;
             public float U10;
             public float U11;
             public float U12;
@@ -2115,6 +2179,14 @@ namespace SSX_Library.FileHandlers.LevelFiles.Tricky.PS2
         {
             public int InstanceIndex;
             public int EffectIndex;
+        }
+        public struct HUDTextEffect
+        {
+            public float HudRed;
+            public float HudGreen;
+            public float HudBlue;
+
+            public string HudText;
         }
 
         public struct Type9

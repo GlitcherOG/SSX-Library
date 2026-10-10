@@ -213,6 +213,25 @@ namespace SSX_Library.FileHandlers.LevelFiles.Tricky
             file.Close();
         }
 
+        /// <summary>
+        /// Bounds of a path's reconstructed polyline: the tight hull of the cumulative points, seeded at
+        /// the path origin. Shipped path files carry exactly this hull (matches the accumulated points to
+        /// float precision), and the engine's path broadphase (race-line / respawn nearest-path selection)
+        /// measures distance to the box.
+        /// </summary>
+        public static void ComputePathBounds(Vector3 pathPos, List<Vector3> deltas, out Vector3 min, out Vector3 max)
+        {
+            Vector3 cursor = pathPos;
+            min = cursor;
+            max = cursor;
+            foreach (Vector3 delta in deltas)
+            {
+                cursor += delta;
+                min = Vector3.Min(min, cursor);
+                max = Vector3.Max(max, cursor);
+            }
+        }
+
         public static List<Vector4> GenerateNewVectors(List<Vector3> PathPoints)
         {
             //Turn Points Into Vectors
@@ -221,6 +240,10 @@ namespace SSX_Library.FileHandlers.LevelFiles.Tricky
             {
                 Vector3 Vector = PathPoints[a] /*- PathPoints[a - 1]*/;
                 float Distance = length2D(Vector.X, Vector.Y);
+                // A zero-horizontal step encodes no segment in the engine's W metric (the direction
+                // would divide to NaN). Point lists that lead with a [0,0,0] row double the (0,0,0)
+                // seed above and land here.
+                if (Distance <= 0f) continue;
                 Vector4 NewPoint = new Vector4(Vector.X / Distance, Vector.Y / Distance, Vector.Z / Distance, Distance);
                 Vectors.Add(NewPoint);
             }

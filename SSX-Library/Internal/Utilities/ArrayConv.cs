@@ -32,8 +32,8 @@ internal static class ArrayConv
 
     public static Vector3 Array2DToVector3(float[,] floats, int ArrayPos)
     {
-        Debug.Assert(floats.GetLength(0) == 4, "Multi-Dimentional array is not size [4, 3]");
-        Debug.Assert(floats.GetLength(1) == 3, "Multi-Dimentional array is not size [4, 3]");
+        Debug.Assert(floats.GetLength(0) > ArrayPos, "ArrayPos is out of range");
+        Debug.Assert(floats.GetLength(1) == 3, "Multi-Dimentional array rows are not Vector3-sized");
         return new Vector3(floats[ArrayPos, 0], floats[ArrayPos,1], floats[ArrayPos,2]);
     }
 

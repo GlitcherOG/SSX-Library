@@ -151,16 +151,16 @@ namespace SSX_Library.FileHandlers.LevelFiles.Tricky.PS2
                     patch.Point4 = StreamUtil.ReadVector4(stream);
 
                     patch.SurfaceType = StreamUtil.ReadUInt32(stream);
-                    patch.Unknown2 = StreamUtil.ReadInt16(stream);
+                    patch.ResourceKindTags = StreamUtil.ReadInt16(stream);
                     patch.PatchVisablity = StreamUtil.ReadInt16(stream);
                     patch.TextureAssigment = StreamUtil.ReadInt16(stream);
 
                     patch.LightmapID = StreamUtil.ReadInt16(stream);
 
-                    //Always the same
-                    patch.Unknown4 = StreamUtil.ReadUInt32(stream); //Negitive one
-                    patch.Unknown5 = StreamUtil.ReadUInt32(stream);
-                    patch.Unknown6 = StreamUtil.ReadUInt32(stream);
+                    patch.UnusedResourceId2 = StreamUtil.ReadInt16(stream);
+                    patch.UnusedResourceId3 = StreamUtil.ReadInt16(stream);
+                    patch.UnusedTailWord1 = StreamUtil.ReadUInt32(stream);
+                    patch.UnusedTailWord2 = StreamUtil.ReadUInt32(stream);
 
 
                     Patches.Add(patch);
@@ -210,7 +210,7 @@ namespace SSX_Library.FileHandlers.LevelFiles.Tricky.PS2
                 {
                     ParticleInstance TempParticle = new ParticleInstance();
                     TempParticle.matrix4X4 = StreamUtil.ReadMatrix4x4(stream);
-                    TempParticle.UnknownInt1 = StreamUtil.ReadUInt32(stream);
+                    TempParticle.ParticleModelIndex = StreamUtil.ReadUInt32(stream);
                     TempParticle.LowestXYZ = StreamUtil.ReadVector3(stream);
                     TempParticle.HighestXYZ = StreamUtil.ReadVector3(stream);
                     TempParticle.UnknownInt8 = StreamUtil.ReadUInt32(stream);
@@ -511,7 +511,7 @@ namespace SSX_Library.FileHandlers.LevelFiles.Tricky.PS2
                 //Particle Model Pointers
                 stream.Position = ParticleModelPointerOffset;
                 ParticleModelPointers = new List<int>();
-                for (int i = 0; i < NumParticleInstances; i++)
+                for (int i = 0; i < NumParticleModel; i++)
                 {
                     ParticleModelPointers.Add(StreamUtil.ReadUInt32(stream));
                 }
@@ -890,13 +890,14 @@ namespace SSX_Library.FileHandlers.LevelFiles.Tricky.PS2
                 StreamUtil.WriteVector4(stream, TempPatch.Point4);
 
                 StreamUtil.WriteInt32(stream, TempPatch.SurfaceType);
-                StreamUtil.WriteInt16(stream, TempPatch.Unknown2); //41
+                StreamUtil.WriteInt16(stream, TempPatch.ResourceKindTags);
                 StreamUtil.WriteInt16(stream, TempPatch.PatchVisablity);
                 StreamUtil.WriteInt16(stream, TempPatch.TextureAssigment);
                 StreamUtil.WriteInt16(stream, TempPatch.LightmapID);
-                StreamUtil.WriteInt32(stream, TempPatch.Unknown4);
-                StreamUtil.WriteInt32(stream, TempPatch.Unknown5);
-                StreamUtil.WriteInt32(stream, TempPatch.Unknown6);
+                StreamUtil.WriteInt16(stream, TempPatch.UnusedResourceId2);
+                StreamUtil.WriteInt16(stream, TempPatch.UnusedResourceId3);
+                StreamUtil.WriteInt32(stream, TempPatch.UnusedTailWord1);
+                StreamUtil.WriteInt32(stream, TempPatch.UnusedTailWord2);
             }
 
             //Instances
@@ -957,7 +958,7 @@ namespace SSX_Library.FileHandlers.LevelFiles.Tricky.PS2
             {
                 var TempParticle = particleInstances[i];
                 StreamUtil.WriteMatrix4x4(stream, TempParticle.matrix4X4);
-                StreamUtil.WriteInt32(stream, TempParticle.UnknownInt1);
+                StreamUtil.WriteInt32(stream, TempParticle.ParticleModelIndex);
                 StreamUtil.WriteVector3(stream, TempParticle.LowestXYZ);
                 StreamUtil.WriteVector3(stream, TempParticle.HighestXYZ);
                 StreamUtil.WriteInt32(stream, TempParticle.UnknownInt8);
@@ -1675,7 +1676,9 @@ namespace SSX_Library.FileHandlers.LevelFiles.Tricky.PS2
                                 output += "vn " + Normals[z].X.ToString(CultureInfo.InvariantCulture.NumberFormat) + " " + Normals[z].Y.ToString(CultureInfo.InvariantCulture.NumberFormat) + " " + Normals[z].Z.ToString(CultureInfo.InvariantCulture.NumberFormat) + "\n";
                             }
                             output += outputString;
-                            File.AppendAllText(path + "/" + modelData[a].ModelObjects[ax].objectData.MeshOffsets[i].MeshID.ToString() + ".obj", output);
+                            // One file per MeshID, overwritten: each block restarts its v/vt/vn indices at 1,
+                            // so a second block in the same file only re-draws the first block's triangles.
+                            File.WriteAllText(path + "/" + modelData[a].ModelObjects[ax].objectData.MeshOffsets[i].MeshID.ToString() + ".obj", output);
                         }
                     }
                 }
@@ -2087,9 +2090,9 @@ namespace SSX_Library.FileHandlers.LevelFiles.Tricky.PS2
                                     //Normals Generation
                                     for (int i = 0; i < TempMeshChunk.normals.Count; i++)
                                     {
-                                        StreamUtil.WriteInt16(memoryStream, (int)((TempMeshChunk.normals[i].X) * 32768f));
-                                        StreamUtil.WriteInt16(memoryStream, (int)((TempMeshChunk.normals[i].Y) * 32768f));
-                                        StreamUtil.WriteInt16(memoryStream, (int)((TempMeshChunk.normals[i].Z) * 32768f));
+                                        StreamUtil.WriteInt16(memoryStream, PackNormalComponent(TempMeshChunk.normals[i].X));
+                                        StreamUtil.WriteInt16(memoryStream, PackNormalComponent(TempMeshChunk.normals[i].Y));
+                                        StreamUtil.WriteInt16(memoryStream, PackNormalComponent(TempMeshChunk.normals[i].Z));
                                     }
                                     StreamUtil.AlignBy16(memoryStream);
                                     #endregion
@@ -2297,6 +2300,15 @@ namespace SSX_Library.FileHandlers.LevelFiles.Tricky.PS2
             }
         }
 
+        /// <summary>Encode one signed-normalized normal component without letting +1 wrap through Int16.
+        /// The old direct <c>(int)(v * 32768)</c> produced 32768 for +1, and WriteInt16's cast turned that
+        /// into -32768: every positive cardinal normal therefore became its negative in a rebuilt PBD.</summary>
+        private static int PackNormalComponent(float value)
+        {
+            if (!float.IsFinite(value)) return 0;
+            int scaled = (int)(Math.Clamp(value, -1f, 1f) * 32768f);
+            return Math.Clamp(scaled, short.MinValue, short.MaxValue);
+        }
     }
 
 
@@ -2355,13 +2367,14 @@ namespace SSX_Library.FileHandlers.LevelFiles.Tricky.PS2
         //18 - Show Off Ramp/Metal
         public int SurfaceType; //Type
 
-        public int Unknown2;
+        public int ResourceKindTags; //i16: four packed 3-bit resource-kind tags
         public int PatchVisablity;
         public int TextureAssigment; // Texture Assigment 
         public int LightmapID;
-        public int Unknown4; //Negative one
-        public int Unknown5; //Same
-        public int Unknown6; //Same
+        public int UnusedResourceId2; //i16: unused resource slot, -1 in retail
+        public int UnusedResourceId3; //i16: unused resource slot, -1 in retail
+        public int UnusedTailWord1; //u32: unconsumed retail level-compiler residue
+        public int UnusedTailWord2; //u32: unconsumed retail level-compiler residue
     }
 
     public struct Instance
@@ -2399,7 +2412,7 @@ namespace SSX_Library.FileHandlers.LevelFiles.Tricky.PS2
     public struct ParticleInstance
     {
         public Matrix4x4 matrix4X4;
-        public int UnknownInt1;
+        public int ParticleModelIndex;
         public Vector3 LowestXYZ;
         public Vector3 HighestXYZ;
         public int UnknownInt8;

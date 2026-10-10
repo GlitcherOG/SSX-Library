@@ -50,16 +50,6 @@ namespace SSXLibrary
         public MaterialJsonHandler SkyMaterialJson = new MaterialJsonHandler();
         public ModelJsonHandler SkyPrefabJsonHandler = new ModelJsonHandler();
 
-        //Custom courses can declare more objects in the .pbd than the .map linker tables
-        //name. Snow Belline has 59 particle instances in the pbd against 9 in the map,
-        //and 69 splines against 50. The name is cosmetic, since every transform and bound
-        //comes from the pbd, so fall back to a synthetic one rather than throwing part
-        //way through an extraction.
-        static string LinkerName(List<LinkerItem> items, int i, string Prefix)
-        {
-            return i < items.Count ? items[i].Name : Prefix + "_" + i;
-        }
-
         public void ExtractTrickyLevelFiles(string LoadPath, string ExportPath)
         {
             Console.WriteLine("Loading ADL File");
@@ -151,7 +141,8 @@ namespace SSXLibrary
                 {
                     patch.TrickOnlyPatch = true;
                 }
-                patch.TexturePath = TextureHandler.ShapeImages[pbdHandler.Patches[i].TextureAssigment].Shortname + ".png";
+                string? patchTex = ShapeNameOrNull(TextureHandler, pbdHandler.Patches[i].TextureAssigment, $"patch {i}");
+                if (patchTex != null) patch.TexturePath = patchTex + ".png";
                 patch.LightmapID = pbdHandler.Patches[i].LightmapID;
                 patchPoints.Patches.Add(patch);
             }
@@ -240,6 +231,11 @@ namespace SSXLibrary
                                 NewExternalSound.U4 = adlHandler.HashSounds[a].Sound.ExternalSounds[b].U4;
                                 NewExternalSound.U5 = adlHandler.HashSounds[a].Sound.ExternalSounds[b].U5;
                                 NewExternalSound.U6 = adlHandler.HashSounds[a].Sound.ExternalSounds[b].U6;
+                                NewExternalSound.U7 = adlHandler.HashSounds[a].Sound.ExternalSounds[b].U7;
+                                NewExternalSound.U8 = adlHandler.HashSounds[a].Sound.ExternalSounds[b].U8;
+                                NewExternalSound.U9 = adlHandler.HashSounds[a].Sound.ExternalSounds[b].U9;
+                                NewExternalSound.U10 = adlHandler.HashSounds[a].Sound.ExternalSounds[b].U10;
+                                NewExternalSound.U11 = adlHandler.HashSounds[a].Sound.ExternalSounds[b].U11;
                                 NewSound.ExternalSounds.Add(NewExternalSound);
                             }
                             instanceJson.Sounds = NewSound;
@@ -314,7 +310,7 @@ namespace SSXLibrary
                 TempParticle.Rotation = ArrayConv.QuaternionToArray(Rotation);
                 TempParticle.Scale = ArrayConv.Vector3ToArray(Scale);
 
-                TempParticle.UnknownInt1 = pbdHandler.particleInstances[i].UnknownInt1;
+                TempParticle.ParticleModelIndex = pbdHandler.particleInstances[i].ParticleModelIndex;
                 TempParticle.LowestXYZ = ArrayConv.Vector3ToArray(pbdHandler.particleInstances[i].LowestXYZ);
                 TempParticle.HighestXYZ = ArrayConv.Vector3ToArray(pbdHandler.particleInstances[i].HighestXYZ);
                 TempParticle.UnknownInt8 = pbdHandler.particleInstances[i].UnknownInt8;
@@ -337,7 +333,8 @@ namespace SSXLibrary
 
                 if (pbdHandler.materials[i].TextureID != -1)
                 {
-                    TempMaterial.TexturePath = TextureHandler.ShapeImages[pbdHandler.materials[i].TextureID].Shortname + ".png";
+                    string? matTex = ShapeNameOrNull(TextureHandler, pbdHandler.materials[i].TextureID, $"material {i} ({mapHandler.Materials[i].Name})");
+                    if (matTex != null) TempMaterial.TexturePath = matTex + ".png";
                 }
                 TempMaterial.UnknownInt2 = pbdHandler.materials[i].UnknownInt2;
                 TempMaterial.UnknownInt3 = pbdHandler.materials[i].UnknownInt3;
@@ -362,7 +359,8 @@ namespace SSXLibrary
                 {
                     for (int a = 0; a < pbdHandler.textureFlipbooks[pbdHandler.materials[i].TextureFlipbookID].ImagePositions.Count; a++)
                     {
-                        TempMaterial.TextureFlipbook.Add(TextureHandler.ShapeImages[pbdHandler.textureFlipbooks[pbdHandler.materials[i].TextureFlipbookID].ImagePositions[a]].Shortname + ".png");
+                        string? flipTex = ShapeNameOrNull(TextureHandler, pbdHandler.textureFlipbooks[pbdHandler.materials[i].TextureFlipbookID].ImagePositions[a], $"material {i} flipbook frame {a}");
+                        if (flipTex != null) TempMaterial.TextureFlipbook.Add(flipTex + ".png");
                     }
                 }
                 TempMaterial.UnknownInt20 = pbdHandler.materials[i].UnknownInt20;
@@ -1124,7 +1122,8 @@ namespace SSXLibrary
 
                     TempMaterial.MaterialName = "Skybox Material " + i.ToString();
 
-                    TempMaterial.TexturePath = SkyboxHandler.ShapeImages[skypbdHandler.materials[i].TextureID].Shortname + ".png";
+                    string? skyTex = ShapeNameOrNull(SkyboxHandler, skypbdHandler.materials[i].TextureID, $"sky material {i}");
+                    if (skyTex != null) TempMaterial.TexturePath = skyTex + ".png";
                     TempMaterial.UnknownInt2 = skypbdHandler.materials[i].UnknownInt2;
                     TempMaterial.UnknownInt3 = skypbdHandler.materials[i].UnknownInt3;
                     TempMaterial.UnknownFloat1 = skypbdHandler.materials[i].UnknownFloat1;
@@ -1406,7 +1405,12 @@ namespace SSXLibrary
                     patch.Point4 = VectorConv.Vector3ToVector4(bezierUtil.RawPoints[15]);
 
                     patch.SurfaceType = ImportPatch.SurfaceType;
-                    patch.Unknown2 = 41;
+                    // Four packed 3-bit resource-kind tags for the four i16 slots below:
+                    // texture (1), lightmap (5), unused (0), unused (0).
+                    patch.ResourceKindTags = 0x29;
+                    // The load-time resource remapper walks all four slots, so keep the unused IDs null.
+                    patch.UnusedResourceId2 = -1;
+                    patch.UnusedResourceId3 = -1;
                     if (ImportPatch.TrickOnlyPatch)
                     {
                         patch.PatchVisablity = 32768;
@@ -1519,7 +1523,7 @@ namespace SSXLibrary
                         segments.LowestXYZ = LowestXYZSegment;
                         LowestXYZSpline = Vector3.Min(LowestXYZSpline, LowestXYZSegment);
 
-                        segments.SegmentDisatnce = LineStrip.Distance(bezierUtil.RawPoints[..4]);
+                        segments.SegmentDisatnce = bezierUtil.ArcLength;
                         segments.PreviousSegmentsDistance = PreviousSegmentDiffrence;
                         PreviousSegmentDiffrence += segments.SegmentDisatnce;
                         segments.Unknown32 = 4311823;
@@ -1621,6 +1625,11 @@ namespace SSXLibrary
                             NewExternalSound.U4 = Oldinstance.Sounds.Value.ExternalSounds[a].U4;
                             NewExternalSound.U5 = Oldinstance.Sounds.Value.ExternalSounds[a].U5;
                             NewExternalSound.U6 = Oldinstance.Sounds.Value.ExternalSounds[a].U6;
+                            NewExternalSound.U7 = Oldinstance.Sounds.Value.ExternalSounds[a].U7;
+                            NewExternalSound.U8 = Oldinstance.Sounds.Value.ExternalSounds[a].U8;
+                            NewExternalSound.U9 = Oldinstance.Sounds.Value.ExternalSounds[a].U9;
+                            NewExternalSound.U10 = Oldinstance.Sounds.Value.ExternalSounds[a].U10;
+                            NewExternalSound.U11 = Oldinstance.Sounds.Value.ExternalSounds[a].U11;
 
                             NewSound.Sound.ExternalSounds.Add(NewExternalSound);
 
@@ -1794,7 +1803,7 @@ namespace SSXLibrary
 
                     TempParticle.matrix4X4 = matrix4X4;
 
-                    TempParticle.UnknownInt1 = particleInstanceJson.Particles[i].UnknownInt1;
+                    TempParticle.ParticleModelIndex = particleInstanceJson.Particles[i].ParticleModelIndex;
                     TempParticle.LowestXYZ = ArrayConv.ArrayToVector3(particleInstanceJson.Particles[i].LowestXYZ);
                     TempParticle.HighestXYZ = ArrayConv.ArrayToVector3(particleInstanceJson.Particles[i].HighestXYZ);
                     TempParticle.UnknownInt8 = particleInstanceJson.Particles[i].UnknownInt8;
@@ -1976,6 +1985,11 @@ namespace SSXLibrary
                         }
                         else
                         {
+                            // A texture name outside the current list mints the next index. When the texture
+                            // bank is not regenerated alongside (SSHGenerate off, e.g. a seeded verbatim
+                            // bank), that index has no page behind it and ships dangling.
+                            if (!SSHGenerate)
+                                Console.WriteLine($"WARN: material {materialJson.Materials[i].MaterialName} references texture '{materialJson.Materials[i].TexturePath}' not in the texture list - index {ImageFiles.Count} has no page in a bank that is not regenerated.");
                             ImageFiles.Add(materialJson.Materials[i].TexturePath);
                             NewMaterial.TextureID = ImageFiles.Count - 1;
                         }
@@ -2020,6 +2034,8 @@ namespace SSXLibrary
                                 }
                                 else
                                 {
+                                    if (!SSHGenerate)
+                                        Console.WriteLine($"WARN: material {materialJson.Materials[i].MaterialName} flipbook references texture '{materialJson.Materials[i].TextureFlipbook[a]}' not in the texture list - index {ImageFiles.Count} has no page in a bank that is not regenerated.");
                                     ImageFiles.Add(materialJson.Materials[i].TextureFlipbook[a]);
                                     textureFlipbook.ImagePositions.Add(ImageFiles.Count - 1);
                                 }
@@ -2233,6 +2249,13 @@ namespace SSXLibrary
 
             if (PBDGenerate)
             {
+                // Header texture count (0x34) sizes the .ssh index space; without it every TextureAssigment
+                // is out of range and terrain renders untextured. The build never set it otherwise. When
+                // reusing the original ssh (seeded), match its page count exactly, not the appended list.
+
+                //Not a used value
+                //pbdHandler.NumTextures = ImageFiles.Count;
+
                 //ErrorManager.ErrorMessage = "Error Saving PDB File";
                 Console.WriteLine("Saving PDB File");
                 pbdHandler.SaveNew(ExportPath + ".pbd");
@@ -2304,13 +2327,7 @@ namespace SSXLibrary
                         Points.Add(new Vector3(aip.AIPaths[i].PathPoints[a, 0], aip.AIPaths[i].PathPoints[a, 1], aip.AIPaths[i].PathPoints[a, 2]));
                     }
 
-                    NewAIPATH.BBoxMax = NewAIPATH.PathPos;
-                    NewAIPATH.BBoxMin = NewAIPATH.PathPos;
-                    for (int a = 0; a < Points.Count; a++)
-                    {
-                        NewAIPATH.BBoxMax = Vector3.Max(NewAIPATH.BBoxMax, Points[a] + NewAIPATH.PathPos);
-                        NewAIPATH.BBoxMin = Vector3.Min(NewAIPATH.BBoxMin, Points[a] + NewAIPATH.PathPos);
-                    }
+                    AIPSOPHandler.ComputePathBounds(NewAIPATH.PathPos, Points, out NewAIPATH.BBoxMin, out NewAIPATH.BBoxMax);
 
                     NewAIPATH.VectorPoints = AIPSOPHandler.GenerateNewVectors(Points);
 
@@ -2351,13 +2368,7 @@ namespace SSXLibrary
                         Points.Add(new Vector3(aip.RaceLines[i].PathPoints[a, 0], aip.RaceLines[i].PathPoints[a, 1], aip.RaceLines[i].PathPoints[a, 2]));
                     }
 
-                    NewAIPATH.BBoxMax = NewAIPATH.PathPos;
-                    NewAIPATH.BBoxMin = NewAIPATH.PathPos;
-                    for (int a = 0; a < Points.Count; a++)
-                    {
-                        NewAIPATH.BBoxMax = Vector3.Max(NewAIPATH.BBoxMax, Points[a] + NewAIPATH.PathPos);
-                        NewAIPATH.BBoxMin = Vector3.Min(NewAIPATH.BBoxMin, Points[a] + NewAIPATH.PathPos);
-                    }
+                    AIPSOPHandler.ComputePathBounds(NewAIPATH.PathPos, Points, out NewAIPATH.BBoxMin, out NewAIPATH.BBoxMax);
 
                     NewAIPATH.VectorPoints = AIPSOPHandler.GenerateNewVectors(Points);
 
@@ -2412,13 +2423,7 @@ namespace SSXLibrary
                         Points.Add(new Vector3(sop.AIPaths[i].PathPoints[a, 0], sop.AIPaths[i].PathPoints[a, 1], sop.AIPaths[i].PathPoints[a, 2]));
                     }
 
-                    NewAIPATH.BBoxMax = NewAIPATH.PathPos;
-                    NewAIPATH.BBoxMin = NewAIPATH.PathPos;
-                    for (int a = 0; a < Points.Count; a++)
-                    {
-                        NewAIPATH.BBoxMax = Vector3.Max(NewAIPATH.BBoxMax, Points[a] + NewAIPATH.PathPos);
-                        NewAIPATH.BBoxMin = Vector3.Min(NewAIPATH.BBoxMin, Points[a] + NewAIPATH.PathPos);
-                    }
+                    AIPSOPHandler.ComputePathBounds(NewAIPATH.PathPos, Points, out NewAIPATH.BBoxMin, out NewAIPATH.BBoxMax);
 
                     NewAIPATH.VectorPoints = AIPSOPHandler.GenerateNewVectors(Points);
 
@@ -2460,13 +2465,7 @@ namespace SSXLibrary
                         Points.Add(new Vector3(sop.RaceLines[i].PathPoints[a, 0], sop.RaceLines[i].PathPoints[a, 1], sop.RaceLines[i].PathPoints[a, 2]));
                     }
 
-                    NewAIPATH.BBoxMax = NewAIPATH.PathPos;
-                    NewAIPATH.BBoxMin = NewAIPATH.PathPos;
-                    for (int a = 0; a < Points.Count; a++)
-                    {
-                        NewAIPATH.BBoxMax = Vector3.Max(NewAIPATH.BBoxMax, Points[a] + NewAIPATH.PathPos);
-                        NewAIPATH.BBoxMin = Vector3.Min(NewAIPATH.BBoxMin, Points[a] + NewAIPATH.PathPos);
-                    }
+                    AIPSOPHandler.ComputePathBounds(NewAIPATH.PathPos, Points, out NewAIPATH.BBoxMin, out NewAIPATH.BBoxMax);
 
                     NewAIPATH.VectorPoints = AIPSOPHandler.GenerateNewVectors(Points);
 
@@ -2917,6 +2916,26 @@ namespace SSXLibrary
             SkyPrefabJsonHandler = ModelJsonHandler.Load(LoadPath + "/Skybox/Models.json");
 
 
+        }
+
+        /// <summary>Shortname of a shape-bank page, or null (with a console warning) when the index is
+        /// outside the bank - a pbd can carry texture IDs its ssh never shipped, and extraction should
+        /// report those instead of throwing.</summary>
+        private static string? ShapeNameOrNull(OldShapeHandler bank, int id, string context)
+        {
+            if (id >= 0 && id < bank.ShapeImages.Count) return bank.ShapeImages[id].Shortname;
+            Console.WriteLine($"WARN: {context} references texture {id} but the ssh has {bank.ShapeImages.Count} pages - TexturePath left unset.");
+            return null;
+        }
+
+        //Custom courses can declare more objects in the .pbd than the .map linker tables
+        //name. Snow Belline has 59 particle instances in the pbd against 9 in the map,
+        //and 69 splines against 50. The name is cosmetic, since every transform and bound
+        //comes from the pbd, so fall back to a synthetic one rather than throwing part
+        //way through an extraction.
+        static string LinkerName(List<LinkerItem> items, int i, string Prefix)
+        {
+            return i < items.Count ? items[i].Name : Prefix + "_" + i;
         }
 
         public void GenerateTemplate(string TemplatePath)

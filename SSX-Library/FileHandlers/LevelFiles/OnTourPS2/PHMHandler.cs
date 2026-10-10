@@ -10,7 +10,6 @@ namespace SSXLibrary.FileHandlers.LevelFiles.OnTourPS2
         public int NumArrays;
 
         public List<ResourceLink> resourceLinks = new List<ResourceLink>();
-        
         public void LoadPHM(string path)
         {
             using (Stream stream = File.Open(path, FileMode.Open))

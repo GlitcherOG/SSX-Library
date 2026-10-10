@@ -32,7 +32,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSXOnTourPS2.SSBOnTourData
                 var shape = new ShapeHeader();
 
                 shape.MatrixFormat = (MatrixType)StreamUtil.ReadUInt8(stream);
-                shape.Flags1 = StreamUtil.ReadUInt8(stream); //Bit Flags? +1 - Image?, +2 - Compressed,  
+                shape.Flags1 = StreamUtil.ReadUInt8(stream); //Bit Flags? +1 - Image?, +2 - Compressed,
                 shape.Flags2 = StreamUtil.ReadUInt8(stream); //Flags? +64 - Swizzled,
                 shape.Flags3 = StreamUtil.ReadUInt8(stream);
                 shape.Size = StreamUtil.ReadUInt32(stream);
@@ -47,7 +47,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSXOnTourPS2.SSBOnTourData
                 }
 
                 stream.Position += 96;
-                
+
                 if (shape.Size == 0)
                 {
                     shape.Matrix = StreamUtil.ReadBytes(stream, shape.DataSize);
@@ -61,7 +61,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSXOnTourPS2.SSBOnTourData
 
                 if(shape.MatrixFormat==MatrixType.FourBit)
                 {
-                    
+
                     return;
                 }
 

@@ -110,8 +110,13 @@ namespace SSXLibrary.JsonFiles.Tricky
             public float U2;
             public float U3;
             public float U4;
-            public float U5; //Radius?
+            public float U5;
             public float U6;
+            public float U7;
+            public float U8;
+            public float U9;
+            public float U10;
+            public float U11;
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using SSX_Library.Internal;
+using SSX_Library.Internal;
 using SSX_Library.Internal.Utilities;
 using SSXLibrary.FileHandlers.LevelFiles.SSXOnTourPS2.SSBOnTourData;
 using System.Diagnostics;
@@ -10,14 +10,13 @@ namespace SSXLibrary.FileHandlers.LevelFiles.OnTourPS2
     public class SSBHandler
     {
         /*
-            
         All IDS
 
         9 - Shape
         10 - Old Shape Lightmaps
 
          */
-        
+
         public void LoadAndExtractSSBFromSBD(string path, string extractPath)
         {
             SDBHandler sdbHandler = new SDBHandler();

@@ -474,7 +474,7 @@ namespace SSXLibrary.FileHandlers
         public int CharacterID;
         public int unkownInt1; //Category Mesh ID?
         public int UnlockCondition;
-        public int TextureType; 
+        public int TextureType;
         //0-Suit,1-Head,2-alph,3-Boot,4-Board,5-extback,6-exthead/top?,
         public int ItemID;
         public int ParentID;

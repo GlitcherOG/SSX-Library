@@ -326,20 +326,20 @@ internal static class Refpack
                  *   Read 0-3
                  *   Copy 3-10
                  *   Offset 0-1023
-                 *   
+                 *
                  * 80-BF  10cccccc ppoooooo oooooooo
                  *   Read 0-3
                  *   Copy 4-67
                  *   Offset 0-16383
-                 *   
+                 *
                  * C0-DF  110cccpp oooooooo oooooooo cccccccc
                  *   Read 0-3
                  *   Copy 5-1028
                  *   Offset 0-131071
-                 *   
+                 *
                  * E0-FC  111ppppp
                  *   Read 4-128 (Multiples of 4)
-                 *   
+                 *
                  * FD-FF  111111pp
                  *   Read 0-3
                  */
@@ -614,20 +614,20 @@ internal static class Refpack
     //        *   Read 0-3
     //        *   Copy 3-10
     //        *   Offset 0-1023
-    //        *   
+    //        *
     //        * 80-BF  10cccccc ppoooooo oooooooo
     //        *   Read 0-3
     //        *   Copy 4-67
     //        *   Offset 0-16383
-    //        *   
+    //        *
     //        * C0-DF  110cccpp oooooooo oooooooo cccccccc
     //        *   Read 0-3
     //        *   Copy 5-1028
     //        *   Offset 0-131071
-    //        *   
+    //        *
     //        * E0-FC  111ppppp
     //        *   Read 4-128 (Multiples of 4)
-    //        *   
+    //        *
     //        * FD-FF  111111pp
     //        *   Read 0-3
     //        */

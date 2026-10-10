@@ -482,9 +482,22 @@ namespace SSXLibrary.JsonFiles.Tricky
 
                 NewEffect.Spline = NewSpline;
             }
+            else if (NewEffect.MainType == 12)
+            {
+                var NewHudEffect = new HUDTextEffect();
+
+                NewHudEffect.HudText = TempEffect.hudTextEffect.Value.HudText;
+                NewHudEffect.HudRed = TempEffect.hudTextEffect.Value.HudRed;
+                NewHudEffect.HudGreen = TempEffect.hudTextEffect.Value.HudGreen;
+                NewHudEffect.HudBlue = TempEffect.hudTextEffect.Value.HudBlue;
+
+                NewEffect.hudTextEffect = NewHudEffect;
+            }
             else
             {
-                //MessageBox.Show("ERROR Converting to Json Format SSF " + NewEffect.MainType);
+                //Carry an unrecognised opcode's bytes through the JSON rather than dropping it, so
+                //the document round trip is as lossless as the binary one.
+                NewEffect.UnknownPayload = TempEffect.UnknownPayload;
             }
 
             return NewEffect;
@@ -923,9 +936,21 @@ namespace SSXLibrary.JsonFiles.Tricky
 
                 NewEffect.Spline = NewSpline;
             }
+            else if (NewEffect.MainType == 12)
+            {
+                var NewHUDEffect = new SSFHandler.HUDTextEffect();
+
+                NewHUDEffect.HudText = TempEffect.hudTextEffect.Value.HudText;
+                //A document that names no colour gets white, which is what the banner draws anyway.
+                NewHUDEffect.HudRed = TempEffect.hudTextEffect.Value.HudRed;
+                NewHUDEffect.HudGreen = TempEffect.hudTextEffect.Value.HudGreen;
+                NewHUDEffect.HudBlue = TempEffect.hudTextEffect.Value.HudBlue;
+
+                NewEffect.hudTextEffect = NewHUDEffect;
+            }
             else
             {
-                //MessageBox.Show("ERROR Converting to Json Format SSF " + NewEffect.MainType);
+                NewEffect.UnknownPayload = TempEffect.UnknownPayload;
             }
 
             return NewEffect;
@@ -1017,6 +1042,7 @@ namespace SSXLibrary.JsonFiles.Tricky
             public int? SoundPlay;
             public Type9? type9;
 
+            public HUDTextEffect? hudTextEffect;
             public float? type13;
             public float? MultiplierScore;
             public float? type17;
@@ -1024,6 +1050,8 @@ namespace SSXLibrary.JsonFiles.Tricky
             public int? FunctionRunIndex;
             public int? TeleportInstanceIndex;
             public SplineEffect? Spline;
+
+            public byte[]? UnknownPayload;     //any main type this library has no branch for
         }
 
         #region Type0
@@ -1083,7 +1111,7 @@ namespace SSXLibrary.JsonFiles.Tricky
             public float U2;
             public float U3;
             public float U4;
-            public int U5;
+            public float U5;
         }
 
         public struct TextureFlipEffect
@@ -1241,7 +1269,7 @@ namespace SSXLibrary.JsonFiles.Tricky
             public float U6;
             public float U7;
             public float U8;
-            public int U9;
+            public float U9;
             public float U10;
             public float U11;
             public float U12;
@@ -1380,6 +1408,15 @@ namespace SSXLibrary.JsonFiles.Tricky
         {
             public int U0;
             public float U1;
+        }
+
+        public struct HUDTextEffect
+        {          
+            public float HudRed; 
+            public float HudGreen;
+            public float HudBlue;
+
+            public string HudText;
         }
 
         public struct SplineEffect

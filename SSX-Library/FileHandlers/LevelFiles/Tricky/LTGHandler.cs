@@ -196,8 +196,6 @@ namespace SSX_Library.FileHandlers.LevelFiles.Tricky
                 WorldBounds2 = Vector3.Max(WorldBounds2, pbdHandler.particleInstances[i].HighestXYZ);
             }
 
-            //Apparently was missing?
-            WorldBounds3 = Vector3.Lerp(WorldBounds1, WorldBounds2, 0.5f);
 
 
             mainBboxSize = NewMainBoxSize;
@@ -285,6 +283,7 @@ namespace SSX_Library.FileHandlers.LevelFiles.Tricky
             bool[] LightBools = new bool[pbdHandler.lights.Count];
             bool[] ParticleBools = new bool[pbdHandler.particleInstances.Count];
 
+
             //SetBoxes
             for (int y = 0; y < pointerListCount; y++)
             {
@@ -295,9 +294,17 @@ namespace SSX_Library.FileHandlers.LevelFiles.Tricky
                     TempMainBox.patchIndex = new List<int>();
                     for (int i = 0; i < pbdHandler.Patches.Count; i++)
                     {
-                        Vector3 MidPoint = Vector3.Lerp(pbdHandler.Patches[i].LowestXYZ, pbdHandler.Patches[i].HighestXYZ, 0.5f);
-
-                        if (AABB.IntersectsPoint(MidPoint, TempMainBox.WorldBounds1, TempMainBox.WorldBounds2) && !Patchbools[i])
+                        // Original-faithful: each patch is listed in exactly ONE cell - the one containing its
+                        // bbox CENTRE (measured on gari.ltg: 3885 patches, zero multi-listed, listing node
+                        // contains the centre 3884/3885). The engine's query handles patches that extend past
+                        // the listed cell (original rides its own single-listed data without fall-through).
+                        // Listing a patch in every overlapped cell multiplies the per-cell lists ~4.7x, which
+                        // the renderer pays for every frame (the GS Blending=Full 30fps regression).
+                        float pcx = (pbdHandler.Patches[i].LowestXYZ.X + pbdHandler.Patches[i].HighestXYZ.X) * 0.5f;
+                        float pcy = (pbdHandler.Patches[i].LowestXYZ.Y + pbdHandler.Patches[i].HighestXYZ.Y) * 0.5f;
+                        if (!Patchbools[i]
+                            && pcx >= TempMainBox.WorldBounds1.X && pcx < TempMainBox.WorldBounds2.X
+                            && pcy >= TempMainBox.WorldBounds1.Y && pcy < TempMainBox.WorldBounds2.Y)
                         {
                             TempMainBox.Modified = true;
                             Patchbools[i] = true;
@@ -330,27 +337,18 @@ namespace SSX_Library.FileHandlers.LevelFiles.Tricky
                             TempMainBox.splineIndex.Add(i);
                         }
                     }
-                    //Lights
+                    //Lights - original-faithful: the per-cell light lists ship EMPTY on the original disc
+                    //(measured on gari.ltg: totalLightCount 0 in every cell/node; only the crossing lists
+                    //carry light indices). Populating them fed the engine extra per-cell light work.
                     TempMainBox.lightIndex = new List<int>();
-                    for (int i = 0; i < pbdHandler.lights.Count; i++)
-                    {
-                        if (AABB.IntersectsPoint(pbdHandler.lights[i].Position, TempMainBox.WorldBounds1, TempMainBox.WorldBounds2) && !LightBools[i] && pbdHandler.lights[i].spriteRes != 0)
-                        {
-                            TempMainBox.Modified = true;
-                            LightBools[i] = true;
-                            TempMainBox.lightIndex.Add(i);
-                        }
-                    }
 
-                    //Find out What Light Corssing
+                    //Find out What Light Corssing. Original crossing lists have NO duplicate indices, so a
+                    //Type-3 (ambient) light is added once - whether by its bbox or its type - never twice.
                     TempMainBox.lightCrossingIndex = new List<int>();
                     for (int i = 0; i < pbdHandler.lights.Count; i++)
                     {
-                        if (AABB.IntersectsAABB(TempMainBox.WorldBounds1, TempMainBox.WorldBounds2, pbdHandler.lights[i].LowestXYZ, pbdHandler.lights[i].HighestXYZ))
-                        {
-                            TempMainBox.lightCrossingIndex.Add(i);
-                        }
-                        if (pbdHandler.lights[i].Type == 3)
+                        if (AABB.IntersectingSquares(TempMainBox.WorldBounds1, TempMainBox.WorldBounds2, pbdHandler.lights[i].LowestXYZ, pbdHandler.lights[i].HighestXYZ)
+                            || pbdHandler.lights[i].Type == 3)
                         {
                             TempMainBox.lightCrossingIndex.Add(i);
                         }
@@ -381,16 +379,21 @@ namespace SSX_Library.FileHandlers.LevelFiles.Tricky
                         for (int x1 = 0; x1 < nodeBoxWidth; x1++)
                         {
                             var TempNodeBox = TempMainBox.nodeBBoxes[x1, y1];
-                            //Generate Patches List
+                            //Generate Patches List - original-faithful single listing: the ONE node containing
+                            //the patch's bbox centre (see the main-cell loop; same rule one level down).
                             TempNodeBox.PatchIndex = new List<int>();
                             for (int i = 0; i < TempMainBox.patchIndex.Count; i++)
                             {
-                                Vector3 MidPoint = Vector3.Lerp(pbdHandler.Patches[TempMainBox.patchIndex[i]].LowestXYZ, pbdHandler.Patches[TempMainBox.patchIndex[i]].HighestXYZ, 0.5f);
-                                if (AABB.IntersectsPoint(MidPoint, TempNodeBox.WorldBounds1, TempNodeBox.WorldBounds2) && !NodePatchBools[i])
+                                int pi = TempMainBox.patchIndex[i];
+                                float ncx = (pbdHandler.Patches[pi].LowestXYZ.X + pbdHandler.Patches[pi].HighestXYZ.X) * 0.5f;
+                                float ncy = (pbdHandler.Patches[pi].LowestXYZ.Y + pbdHandler.Patches[pi].HighestXYZ.Y) * 0.5f;
+                                if (!NodePatchBools[i]
+                                    && ncx >= TempNodeBox.WorldBounds1.X && ncx < TempNodeBox.WorldBounds2.X
+                                    && ncy >= TempNodeBox.WorldBounds1.Y && ncy < TempNodeBox.WorldBounds2.Y)
                                 {
                                     TempNodeBox.Modified = true;
                                     NodePatchBools[i] = true;
-                                    TempNodeBox.PatchIndex.Add(TempMainBox.patchIndex[i]);
+                                    TempNodeBox.PatchIndex.Add(pi);
                                 }
                             }
                             //Generate Instance List
@@ -450,15 +453,13 @@ namespace SSX_Library.FileHandlers.LevelFiles.Tricky
                                 }
                             }
 
-                            //Generate LightCrossing List
+                            //Generate LightCrossing List - like the main-cell list, no duplicates (original
+                            //crossing lists never repeat an index; a Type-3 ambient is added exactly once).
                             TempNodeBox.LightCrossingIndex = new List<int>();
                             for (int i = 0; i < TempMainBox.lightCrossingIndex.Count; i++)
                             {
-                                if (AABB.IntersectsAABB(TempNodeBox.WorldBounds1, TempNodeBox.WorldBounds2, pbdHandler.lights[TempMainBox.lightCrossingIndex[i]].LowestXYZ, pbdHandler.lights[TempMainBox.lightCrossingIndex[i]].HighestXYZ))
-                                {
-                                    TempNodeBox.LightCrossingIndex.Add(TempMainBox.lightCrossingIndex[i]);
-                                }
-                                if(pbdHandler.lights[TempMainBox.lightCrossingIndex[i]].Type==3)
+                                if (AABB.IntersectingSquares(TempNodeBox.WorldBounds1, TempNodeBox.WorldBounds2, pbdHandler.lights[TempMainBox.lightCrossingIndex[i]].LowestXYZ, pbdHandler.lights[TempMainBox.lightCrossingIndex[i]].HighestXYZ)
+                                    || pbdHandler.lights[TempMainBox.lightCrossingIndex[i]].Type == 3)
                                 {
                                     TempNodeBox.LightCrossingIndex.Add(TempMainBox.lightCrossingIndex[i]);
                                 }
@@ -520,7 +521,8 @@ namespace SSX_Library.FileHandlers.LevelFiles.Tricky
                             {
                                 if (NodeInstanceBools[i])
                                 {
-                                    //MessageBox.Show("Instance Not Added To LTG " + TempMainBox.instanceIndex[i]);
+                                    // Was MessageBox.Show in the WinForms tool; just warn to stderr here.
+                                    Console.Error.WriteLine("Instance Not Added To LTG " + TempMainBox.instanceIndex[i]);
                                 }
                             }
                         }

@@ -169,6 +169,12 @@ internal class BezierUtil
     #endregion
 
     #region Spline Coefficients
+    /// <summary>
+    /// Arc length of the sampled curve in world units, from the last CalcCoefficients call.
+    /// This is the value the game stores as a spline segment's SegmentDistance.
+    /// </summary>
+    public float ArcLength;
+
     public Vector3 GetPoint(float t)
     {
         float u = 1f - t;
@@ -206,6 +212,8 @@ internal class BezierUtil
             total += MathF.Sqrt(dx * dx + dy * dy + dz * dz);
             dists.Add(total);
         }
+
+        ArcLength = total;
 
         // Convert to meters
         var lengths = new List<float>();

@@ -85,6 +85,7 @@ namespace SSXLibrary.FileHandlers.Models.OnTour
 
 
                     MPFHeader modelHandler = ModelList[i];
+                    modelHandler.Matrix = StreamUtil.ReadBytes(stream, EntrySize);
                     modelHandler.Matrix = Refpack.Decompress(modelHandler.Matrix);
                     ModelList[i] = modelHandler;
                 }

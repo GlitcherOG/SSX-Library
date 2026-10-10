@@ -47,7 +47,20 @@ namespace SSX_Library.FileHandlers.LevelFiles.Tricky
                         NewUStruct2.U3 = StreamUtil.ReadFloat(stream);
                         NewUStruct2.U4 = StreamUtil.ReadFloat(stream);
                         NewUStruct2.U5 = StreamUtil.ReadFloat(stream);
-                        NewUStruct2.U6 = StreamUtil.ReadFloat(stream);
+                        // ExternalSound records are variable-sized. The retail runtime walks them with exactly
+                        // these strides: type0=0x1c, type1/2=0x30, type3=0x18. The former fixed seven-field read
+                        // truncated rare type1/2 volume records and misaligned every following sibling record.
+                        if (NewUStruct2.U0 != 3) NewUStruct2.U6 = StreamUtil.ReadFloat(stream);
+                        if (NewUStruct2.U0 == 1 || NewUStruct2.U0 == 2)
+                        {
+                            NewUStruct2.U7 = StreamUtil.ReadFloat(stream);
+                            NewUStruct2.U8 = StreamUtil.ReadFloat(stream);
+                            NewUStruct2.U9 = StreamUtil.ReadFloat(stream);
+                            NewUStruct2.U10 = StreamUtil.ReadFloat(stream);
+                            NewUStruct2.U11 = StreamUtil.ReadFloat(stream);
+                        }
+                        else if (NewUStruct2.U0 != 0 && NewUStruct2.U0 != 3)
+                            throw new InvalidDataException($"Unknown ADL ExternalSound type {NewUStruct2.U0}.");
                         NewUStruct.Sound.ExternalSounds.Add(NewUStruct2);
                     }
                     stream.Position = TempPos;
@@ -88,7 +101,12 @@ namespace SSX_Library.FileHandlers.LevelFiles.Tricky
                                 || first.ExternalSounds[b].U3 != second.ExternalSounds[b].U3
                                 || first.ExternalSounds[b].U4 != second.ExternalSounds[b].U4
                                 || first.ExternalSounds[b].U5 != second.ExternalSounds[b].U5
-                                || first.ExternalSounds[b].U6 != second.ExternalSounds[b].U6)
+                                || first.ExternalSounds[b].U6 != second.ExternalSounds[b].U6
+                                || first.ExternalSounds[b].U7 != second.ExternalSounds[b].U7
+                                || first.ExternalSounds[b].U8 != second.ExternalSounds[b].U8
+                                || first.ExternalSounds[b].U9 != second.ExternalSounds[b].U9
+                                || first.ExternalSounds[b].U10 != second.ExternalSounds[b].U10
+                                || first.ExternalSounds[b].U11 != second.ExternalSounds[b].U11)
                             {
                                 TestFail = true;
                                 break;
@@ -137,14 +155,24 @@ namespace SSX_Library.FileHandlers.LevelFiles.Tricky
 
                 for (int a = 0; a < TempUstruct1.ExternalSounds.Count; a++)
                 {
-                    //7
-                    StreamUtil.WriteInt32(stream, TempUstruct1.ExternalSounds[a].U0);
-                    StreamUtil.WriteInt32(stream, TempUstruct1.ExternalSounds[a].SoundIndex);
-                    StreamUtil.WriteFloat32(stream, TempUstruct1.ExternalSounds[a].U2);
-                    StreamUtil.WriteFloat32(stream, TempUstruct1.ExternalSounds[a].U3);
-                    StreamUtil.WriteFloat32(stream, TempUstruct1.ExternalSounds[a].U4);
-                    StreamUtil.WriteFloat32(stream, TempUstruct1.ExternalSounds[a].U5); //Radius?
-                    StreamUtil.WriteFloat32(stream, TempUstruct1.ExternalSounds[a].U6);
+                    var sound = TempUstruct1.ExternalSounds[a];
+                    StreamUtil.WriteInt32(stream, sound.U0);
+                    StreamUtil.WriteInt32(stream, sound.SoundIndex);
+                    StreamUtil.WriteFloat32(stream, sound.U2);
+                    StreamUtil.WriteFloat32(stream, sound.U3);
+                    StreamUtil.WriteFloat32(stream, sound.U4);
+                    StreamUtil.WriteFloat32(stream, sound.U5);
+                    if (sound.U0 != 3) StreamUtil.WriteFloat32(stream, sound.U6);
+                    if (sound.U0 == 1 || sound.U0 == 2)
+                    {
+                        StreamUtil.WriteFloat32(stream, sound.U7);
+                        StreamUtil.WriteFloat32(stream, sound.U8);
+                        StreamUtil.WriteFloat32(stream, sound.U9);
+                        StreamUtil.WriteFloat32(stream, sound.U10);
+                        StreamUtil.WriteFloat32(stream, sound.U11);
+                    }
+                    else if (sound.U0 != 0 && sound.U0 != 3)
+                        throw new InvalidDataException($"Unknown ADL ExternalSound type {sound.U0}.");
                 }
 
                 ExternalSoundsList[i] = TempUstruct1;
@@ -198,8 +226,13 @@ namespace SSX_Library.FileHandlers.LevelFiles.Tricky
             public float U2;
             public float U3;
             public float U4;
-            public float U5; //Radius?
+            public float U5;
             public float U6;
+            public float U7;
+            public float U8;
+            public float U9;
+            public float U10;
+            public float U11;
         }
     }
 }

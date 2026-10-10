@@ -114,7 +114,7 @@ internal static class Writer
     /// </summary>
     public static void WriteAsciiWithLength(this Stream stream, string text, int length)
     {
-        byte[] textBytes = Encoding.ASCII.GetBytes(text);
+        byte[] textBytes = Encoding.ASCII.GetBytes(text ?? "");
         byte[] buf = new byte[length];
         Buffer.BlockCopy(textBytes, 0, buf, 0, Math.Min(length, textBytes.Length));
         stream.Write(buf);

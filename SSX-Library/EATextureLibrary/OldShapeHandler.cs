@@ -1,5 +1,7 @@
 ﻿using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
+using SixLabors.ImageSharp.Processing.Processors.Quantization;
 using SSX_Library.Internal;
 using SSX_Library.Internal.Utilities;
 using SSX_Library.Internal.Utilities.StreamExtensions;
@@ -212,7 +214,7 @@ namespace SSX_Library.EATextureLibrary
                 tempImage.SwizzledImage = (imageMatrix.Flags & 8192) == 8192;
 
                 //Uncompress
-                if (imageMatrix.Matrix != null && imageMatrix.Matrix.Length > 0 && (imageMatrix.MatrixFormat == MatrixType.EightBitCompressed || imageMatrix.MatrixFormat == MatrixType.BGRACompressed)) 
+                if (imageMatrix.Matrix != null && imageMatrix.Matrix.Length > 0 && (imageMatrix.MatrixFormat == MatrixType.EightBitCompressed || imageMatrix.MatrixFormat == MatrixType.BGRACompressed))
                 {
                     imageMatrix.Matrix = Refpack.Decompress(imageMatrix.Matrix);
                 }
@@ -265,7 +267,7 @@ namespace SSX_Library.EATextureLibrary
                     case MatrixType.EightBit:
                     case MatrixType.EightBitCompressed:
                     case MatrixType.EightBitXbox:
-                    case MatrixType.EightBit_PSP:   
+                    case MatrixType.EightBit_PSP:
                         if (tempImage.SwizzledImage)
                         {
                             imageMatrix.Matrix = ByteUtil.Unswizzle8(imageMatrix.Matrix, imageMatrix.Width, imageMatrix.Height);
@@ -469,7 +471,8 @@ namespace SSX_Library.EATextureLibrary
                 || shapeImage.MatrixType == MatrixType.EightBitXbox || shapeImage.MatrixType == MatrixType.EightBitGC))
             {
                 Console.WriteLine("Over 256 Colour Limit " + shapeImage.Shortname);
-                shapeImage.Image = ImageUtil.ReduceBitmapColorsFast(shapeImage.Image, 256);
+                // Keep transparency when limiting indexed textures; the RGB-only reducer drops alpha.
+                shapeImage.Image.Mutate(x => x.Quantize(new WuQuantizer(new QuantizerOptions { MaxColors = 256 })));
             }
             shapeImage.colorsTable = ImageUtil.GetBitmapColorsFast(shapeImage.Image).ToList();
 
@@ -548,6 +551,20 @@ namespace SSX_Library.EATextureLibrary
                     break;
             }
 
+            // The texel indices and written palette must use the encoder's same first-seen ordering.
+            if (Colours.Count > 0)
+            {
+                shapeImage.colorsTable = Colours;
+                if (shapeImage.MatrixType == MatrixType.EightBit)
+                {
+                    // Retail PS2 8-bit shapes carry a full 256-entry palette, even for small images.
+                    while (shapeImage.colorsTable.Count < 256)
+                    {
+                        shapeImage.colorsTable.Add(new Rgba32());
+                    }
+                }
+            }
+
             //Compress Image
             if (shapeImage.MatrixType == MatrixType.EightBitCompressed || shapeImage.MatrixType == MatrixType.BGRACompressed)
             {
@@ -556,7 +573,8 @@ namespace SSX_Library.EATextureLibrary
                 Matrix = TempBytes;
             }
 
-            WriteImageHeader(stream, shapeImage, Matrix.Length + 16);
+            // Include alignment padding in the chunk extent so the next palette header can be read.
+            WriteImageHeader(stream, shapeImage, StreamUtil.AlignbyMath(Matrix.Length + 16, 16));
 
             StreamUtil.WriteBytes(stream, Matrix);
 
@@ -596,6 +614,8 @@ namespace SSX_Library.EATextureLibrary
                 stream.WriteAsciiWithLength(shapeImage.Longname, 12);
             }
 
+            // Seeking for alignment alone does not extend a MemoryStream's final chunk.
+            stream.SetLength(stream.Position);
             stream.Position = 0;
             return StreamUtil.ReadBytes(stream, (int)stream.Length);
         }
@@ -638,7 +658,8 @@ namespace SSX_Library.EATextureLibrary
                 Matrix[i * 4 + 3] = Color.A;
                 if (image.AlphaFix)
                 {
-                    Matrix[i * 4 + 3] = (byte)(Color.A / 2);
+                    // Halve into GS range, keeping the opaque endpoint exact (255 -> 128) like DarkenImage.
+                    Matrix[i * 4 + 3] = (byte)((Color.A + 1) / 2);
                 }
             }
 
@@ -752,7 +773,10 @@ namespace SSX_Library.EATextureLibrary
             {
                 if(File.Exists(path))
                 {
-                    NewSSHImage.Image = Image.Load(path).CloneAs<Rgba32>();
+                    // Decode into the representation ShapeImage actually stores. An untyped load preserves
+                    // an opaque PNG as Image<Rgb24>, which cannot be cast to Image<Rgba32> even though the
+                    // pixels are losslessly convertible (and made repack reject ordinary RGB terrain art).
+                    NewSSHImage.Image = Image.Load<Rgba32>(path);
                 }
                 else
                 {
@@ -978,7 +1002,7 @@ namespace SSX_Library.EATextureLibrary
         public void LoadSingleImage(string path, int i)
         {
             var temp = ShapeImages[i];
-            temp.Image = Image.Load(path).CloneAs<Rgba32>();
+            temp.Image = Image.Load<Rgba32>(path);
             temp.colorsTable = ImageUtil.GetBitmapColorsFast(temp.Image).ToList();
             ShapeImages[i] = temp;
         }
@@ -995,16 +1019,46 @@ namespace SSX_Library.EATextureLibrary
             ShapeImages[i] = temp;
         }
 
-        //Neg 1 possibly not required
-        //test
-        public void BrightenImage(int i)
+        // Double the RGB to undo the PS2 GS half-bright colour store (stored 0x80 == 1.0). Returns true
+        // if the image was doubled.
+        //
+        // guard=false (the default) doubles every pixel. The level, skybox, crowd and board/ski banks use
+        // this: every image in them is half-bright. The crowd bank is premultiplied against its half-value
+        // alpha, and the same doubling restores its opaque colour to full range.
+        //
+        // guard=true doubles only when the image's opaque texels (A >= 0x80) are all <= 0x80; a single
+        // opaque channel over 0x80 marks the image full-range and leaves it unchanged. The opaque test
+        // reads the stored range from the interior and skips transparent/premultiplied edges, mirroring
+        // AlphaFix on the alpha channel. The shared PARTICLE sprite bank uses it for its per-image mix of
+        // half-bright glow art (the ex06-09 explosion frames) and full-range sprites (fog0, envr, the
+        // spray/needle sprites).
+        public bool BrightenImage(int i, bool guard = false)
         {
             var TempImage = ShapeImages[i].Image;
+
+            if (guard)
+            {
+                // Already stored full-range? (max opaque channel > 0x80) -> leave it untouched.
+                bool alreadyFullRange = false;
+                for (int y = 0; y < TempImage.Height && !alreadyFullRange; y++)
+                {
+                    for (int x = 0; x < TempImage.Width; x++)
+                    {
+                        Rgba32 c = TempImage[x, y];
+                        if (c.A < 0x80) continue;   // ignore transparent / premultiplied-down edges
+                        if (c.R > 0x80 || c.G > 0x80 || c.B > 0x80) { alreadyFullRange = true; break; }
+                    }
+                }
+                if (alreadyFullRange) return false;
+            }
+
             for (int y = 0; y < TempImage.Height; y++)
             {
                 for (int x = 0; x < TempImage.Width; x++)
                 {
                     Rgba32 color = TempImage[x, y];
+                    // Clamp ceiling is 255, not 256: (byte)256 wraps to 0, which would turn
+                    // any source channel >=129 black. Saturate to white instead.
                     color.R = (byte)(Math.Clamp(color.R * 2 - 1, 0, 255));
                     color.G = (byte)(Math.Clamp(color.G * 2 - 1, 0, 255));
                     color.B = (byte)(Math.Clamp(color.B * 2 - 1, 0, 255));
@@ -1015,6 +1069,7 @@ namespace SSX_Library.EATextureLibrary
             var tempimage = ShapeImages[i];
             tempimage.Image = TempImage;
             ShapeImages[i] = tempimage;
+            return true;
         }
 
         public void DarkenImage(int i)

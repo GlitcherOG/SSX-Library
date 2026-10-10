@@ -54,43 +54,12 @@ namespace SSX_Library.FileHandlers.LevelFiles.Tricky.PS2
                 if (Lines[a].StartsWith("f "))
                 {
                     Faces faces = new Faces();
-
-                    string[] SplitPoint = splitLine[1].Split('/');
-                    faces.V1Pos = int.Parse(SplitPoint[0]) - 1;
-                    if (SplitPoint.Length == 3)
-                    {
-                        //faces.UV1Pos = int.Parse(SplitPoint[1]) - 1;
-                        faces.Normal1Pos = int.Parse(SplitPoint[2]) - 1;
-                    }
-                    else
-                    {
-                        faces.Normal1Pos = int.Parse(SplitPoint[1]) - 1;
-                    }
-
-                    SplitPoint = splitLine[2].Split('/');
-                    faces.V2Pos = int.Parse(SplitPoint[0]) - 1;
-                    if (SplitPoint.Length == 3)
-                    {
-                        //faces.UV2Pos = int.Parse(SplitPoint[1]) - 1;
-                        faces.Normal2Pos = int.Parse(SplitPoint[2]) - 1;
-                    }
-                    else
-                    {
-                        faces.Normal2Pos = int.Parse(SplitPoint[1]) - 1;
-                    }
-
-                    SplitPoint = splitLine[3].Split('/');
-                    faces.V3Pos = int.Parse(SplitPoint[0]) - 1;
-                    if (SplitPoint.Length == 3)
-                    {
-                        //faces.UV3Pos = int.Parse(SplitPoint[1]) - 1;
-                        faces.Normal3Pos = int.Parse(SplitPoint[2]) - 1;
-                    }
-                    else
-                    {
-                        faces.Normal3Pos = int.Parse(SplitPoint[1]) - 1;
-                    }
-
+                    // an OBJ face vertex is "v", "v/vt", "v//vn" or "v/vt/vn" - the normal is the THIRD field when
+                    // present. A position-only face ("f 1 2 3") has no normal (Normal*Pos = -1); it's computed from
+                    // geometry below. (The old code assumed a normal was always present and indexed past the end.)
+                    faces.Normal1Pos = ParseFaceVert(splitLine[1], out faces.V1Pos);
+                    faces.Normal2Pos = ParseFaceVert(splitLine[2], out faces.V2Pos);
+                    faces.Normal3Pos = ParseFaceVert(splitLine[3], out faces.V3Pos);
                     Faces.Add(faces);
                 }
             }
@@ -99,7 +68,13 @@ namespace SSX_Library.FileHandlers.LevelFiles.Tricky.PS2
             {
                 var TempFace = Faces[i];
 
-                Model.FaceNormals.Add(Normals[TempFace.Normal1Pos]  /*CalculateFaceNormal(TempFace.V1, TempFace.V2, TempFace.V3)*/);
+                // Use the stored per-face normal when the OBJ supplied one and it's in range; otherwise compute it
+                // from the face's own vertices (a position-only collision face). Guards the old unconditional
+                // Normals[Normal1Pos] that threw on faces without an explicit normal.
+                Vector4 n = (TempFace.Normal1Pos >= 0 && TempFace.Normal1Pos < Normals.Count)
+                    ? Normals[TempFace.Normal1Pos]
+                    : CalculateFaceNormal(V3(Model.Vertices, TempFace.V1Pos), V3(Model.Vertices, TempFace.V2Pos), V3(Model.Vertices, TempFace.V3Pos));
+                Model.FaceNormals.Add(n);
 
                 Model.Index.Add(TempFace.V1Pos);
                 Model.Index.Add(TempFace.V2Pos);
@@ -109,6 +84,24 @@ namespace SSX_Library.FileHandlers.LevelFiles.Tricky.PS2
 
 
             return Model;
+        }
+
+        // Parse one OBJ face vertex ("v", "v/vt", "v//vn", "v/vt/vn"): out the 0-based vertex index, return the
+        // 0-based normal index (the third field) or -1 when the face carries no normal.
+        static int ParseFaceVert(string token, out int vpos)
+        {
+            string[] sp = token.Split('/');
+            vpos = int.Parse(sp[0]) - 1;
+            if (sp.Length >= 3 && sp[2].Length > 0) return int.Parse(sp[2]) - 1;
+            return -1;
+        }
+
+        // A Vector3 from the model's Vector4 vertex list (bounds-guarded), for the geometry-normal fallback.
+        static Vector3 V3(List<Vector4> verts, int i)
+        {
+            if (i < 0 || i >= verts.Count) return Vector3.Zero;
+            var v = verts[i];
+            return new Vector3(v.X, v.Y, v.Z);
         }
 
 

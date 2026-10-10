@@ -43,7 +43,7 @@ namespace SSXLibrary.JsonFiles.Tricky
             public float[] Rotation;
             public float[] Scale;
 
-            public int UnknownInt1;
+            public int ParticleModelIndex;
             public float[] LowestXYZ;
             public float[] HighestXYZ;
             public int UnknownInt8;

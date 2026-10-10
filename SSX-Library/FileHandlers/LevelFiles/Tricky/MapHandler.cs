@@ -23,51 +23,23 @@ namespace SSX_Library.FileHandlers.LevelFiles.Tricky
         public List<LinkerItem> Textures = new List<LinkerItem>();
         public List<LinkerItem> Lightmaps = new List<LinkerItem>();
 
-        int LinePos = 23;
-
         public void Load(string path)
         {
             string[] Lines = File.ReadAllLines(path);
 
-            LinePos = 23;
-
-            Models = ReadLinkerItems(Lines);
-
-            LinePos += 9;
-            particelModels = ReadLinkerItems(Lines);
-
-            LinePos += 9;
-            Patchs = ReadLinkerItems(Lines);
-
-            LinePos += 9;
-            InternalInstances = ReadLinkerItems(Lines);
-
-            LinePos += 9;
-            PlayerStarts = ReadLinkerItems(Lines);
-
-            LinePos += 9;
-            ParticleInstances = ReadLinkerItems(Lines);
-
-            LinePos += 9;
-            Splines = ReadLinkerItems(Lines);
-
-            LinePos += 9;
-            Lights = ReadLinkerItems(Lines);
-
-            LinePos += 9;
-            Materials = ReadLinkerItems(Lines);
-
-            LinePos += 9;
-            ContextBlocks = ReadLinkerItems(Lines);
-
-            LinePos += 9;
-            Cameras = ReadLinkerItems(Lines);
-
-            LinePos += 8;
-            Textures = ReadLinkerItems(Lines);
-
-            LinePos += 8;
-            Lightmaps = ReadLinkerItems(Lines);
+            Models = ReadBlock(Lines, "MODELS BEGIN");
+            particelModels = ReadBlock(Lines, "PARTICLE MODELS BEGIN");
+            Patchs = ReadBlock(Lines, "PATCHES BEGIN");
+            InternalInstances = ReadBlock(Lines, "INTERNAL INSTANCES BEGIN");
+            PlayerStarts = ReadBlock(Lines, "PLAYER STARTS BEGIN");
+            ParticleInstances = ReadBlock(Lines, "PARTICLE INSTANCES BEGIN");
+            Splines = ReadBlock(Lines, "SPLINES BEGIN");
+            Lights = ReadBlock(Lines, "LIGHTS BEGIN");
+            Materials = ReadBlock(Lines, "MATERIALS BEGIN");
+            ContextBlocks = ReadBlock(Lines, "CONTEXT BLOCKS BEGIN");
+            Cameras = ReadBlock(Lines, "CAMERAS BEGIN");
+            Textures = ReadBlock(Lines, "TEXTURES BEGIN");
+            Lightmaps = ReadBlock(Lines, "LIGHTMAPS BEGIN");
         }
 
         public void Save(string path)
@@ -75,7 +47,9 @@ namespace SSX_Library.FileHandlers.LevelFiles.Tricky
             //Header
             List<string> FileLines = new List<string>();
             FileLines.Add("");
-            //FileLines.Add("SSX Level Extractor V" + Program.Version + " By Archy/GlitcherOG");
+            // Retail maps carry a linker banner here; keep the header the same line count so fixed-offset
+            // readers of the retail format stay aligned.
+            FileLines.Add("SSX Level Extractor By Archy/GlitcherOG");
             FileLines.Add("N/A");
             FileLines.Add("N/A");
             FileLines.Add("N/A");
@@ -273,22 +247,29 @@ namespace SSX_Library.FileHandlers.LevelFiles.Tricky
             return new string(TempCharArray);
         }
 
-        List<LinkerItem> ReadLinkerItems(string[] Lines)
+        /// <summary>The linker items of one "### &lt;label&gt;" section: the marker, its ### fence and the
+        /// optional column-name row all start with '#', the data rows never do, and a blank line ends the
+        /// section. The banner above the first section varies in line count between writers of the format,
+        /// so the sections are found by their markers rather than by fixed line offsets.</summary>
+        List<LinkerItem> ReadBlock(string[] Lines, string label)
         {
             var TempList = new List<LinkerItem>();
-            while (true)
+            int pos = -1;
+            for (int i = 0; i < Lines.Length; i++)
             {
-                if (Lines[LinePos] == "")
-                {
-                    break;
-                }
+                if (Lines[i].StartsWith("#") && Lines[i].TrimStart('#').Trim() == label) { pos = i + 1; break; }
+            }
+            if (pos < 0) return TempList;
+            while (pos < Lines.Length && Lines[pos].StartsWith("#")) pos++;
+            while (pos < Lines.Length && Lines[pos] != "")
+            {
                 var LinkerItem = new LinkerItem();
-                LinkerItem.Name = Lines[LinePos].Substring(0, 82).TrimEnd(' ');
-                LinkerItem.UID = int.Parse(Lines[LinePos].Substring(82, 10).TrimEnd(' '));
-                LinkerItem.Ref = int.Parse(Lines[LinePos].Substring(92, 10).TrimEnd(' '));
-                LinkerItem.Hashvalue = Lines[LinePos].Substring(102, 10).TrimEnd(' ');
+                LinkerItem.Name = Lines[pos].Substring(0, 82).TrimEnd(' ');
+                LinkerItem.UID = int.Parse(Lines[pos].Substring(82, 10).TrimEnd(' '));
+                LinkerItem.Ref = int.Parse(Lines[pos].Substring(92, 10).TrimEnd(' '));
+                LinkerItem.Hashvalue = Lines[pos].Substring(102, 10).TrimEnd(' ');
                 TempList.Add(LinkerItem);
-                LinePos++;
+                pos++;
             }
             return TempList;
         }
