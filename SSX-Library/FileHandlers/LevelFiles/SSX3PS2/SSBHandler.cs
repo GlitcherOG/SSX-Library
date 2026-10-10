@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using SSX_Library.Internal;
 using SSX_Library.Internal.Utilities;
+using SSX_Library.Internal.Utilities.StreamExtensions;
 using SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData;
 using SSXLibrary.JsonFiles.SSX3;
 
@@ -34,68 +35,34 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2
         20 - AudioBank
         21 - Radar?
         22 - Avalanche Animation
+
+        Rebuild Order
+
+        Shape
+        Shape Lightmaps
+        Materials
+        Lights
+        Halo
+        Models
+        Instance
+        Particle Model
+        Particle Instance
+        Patches
+        Splines
+        Collision
+        Vis Curtains
+        Sound Triggers
+        World Painter
+        Camera Trigger
+        Audio Bank
+        AIP
+        Scripts
+        NIS Table
+        Missions
+        Radar
+        Avalanche Animation
          */
-        //public void LoadAndExtractSSB(string path, string extractPath)
-        //{
-        //    using (Stream stream = File.Open(path, FileMode.Open))
-        //    {
-        //        MemoryStream memoryStream = new MemoryStream();
-        //        List<int> ints = new List<int>();
-        //        int a = 0;
-        //        int CEND = 0;
-        //        int CBXS = 0;
-        //        while (true)
-        //        {
-        //            if (stream.Position >= stream.Length - 1)
-        //            {
-        //                break;
-        //            }
-        //            string MagicWords = StreamUtil.ReadString(stream, 4);
 
-        //            int Size = StreamUtil.ReadUInt32(stream);
-        //            byte[] Data = new byte[Size - 8];
-        //            byte[] DecompressedData = new byte[1];
-        //            Data = StreamUtil.ReadBytes(stream, Size - 8);
-
-        //            DecompressedData = RefpackHandler.Decompress(Data);
-        //            StreamUtil.WriteBytes(memoryStream, DecompressedData);
-
-        //            if (MagicWords.ToUpper() == "CBXS")
-        //            {
-        //                CBXS += 1;
-        //            }
-
-        //            if (MagicWords.ToUpper() == "CEND")
-        //            {
-        //                CEND += 1;
-        //                int FilePos = 0;
-        //                memoryStream.Position = 0;
-        //                Directory.CreateDirectory(extractPath + "//" + a);
-        //                while (memoryStream.Position < memoryStream.Length)
-        //                {
-        //                    int ID = StreamUtil.ReadUInt8(memoryStream);
-        //                    int ChunkSize = StreamUtil.ReadInt24(memoryStream);
-        //                    int TrackID = StreamUtil.ReadInt8(memoryStream);
-        //                    int RID = StreamUtil.ReadInt24(memoryStream);
-
-        //                    byte[] NewData = StreamUtil.ReadBytes(memoryStream, ChunkSize);
-
-        //                    if (ID == 2)
-        //                    {
-        //                        WorldMDR worldMDR = new WorldMDR();
-        //                        worldMDR.LoadData(NewData);
-        //                    }
-
-        //                    //var file = File.Create(extractPath + "//" + a + "//" + FilePos + "." + ID + "bin");
-        //                    FilePos++;
-        //                }
-        //                memoryStream.Dispose();
-        //                memoryStream = new MemoryStream();
-        //                a++;
-        //            }
-        //        }
-        //    }
-        //}
         public void LoadAndExtractSSBFromSBD(string path, string extractPath)
         {
             SDBHandler sdbHandler = new SDBHandler();
@@ -379,62 +346,119 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2
             ssx3Config.CreateJson(extractPath + "//ConfigSSX3.ssx");
         }
 
+        struct IDSSB
+        {
+            public int ChunkID;
+            public int ID;
+            public string Files;
+            public int TrackID;
+            public int RID;
+            public int Type;
+        }
+
         //public void PackSSB(string Folder, string BuildPath)
         //{
         //    MemoryStream memoryStream = new MemoryStream();
-        //    string[] AllFiles = Directory.GetFiles(Folder, "*.BSX");
+        //    string[] AllFiles = Directory.GetFiles(Folder, "*.*");
+
+        //    List<IDSSB> iDSSBs = new List<IDSSB>();
         //    for (int i = 0; i < AllFiles.Length; i++)
         //    {
-        //        using (Stream stream = File.Open(Folder +"//"+ i.ToString()+".BSX", FileMode.Open))
+        //        IDSSB TempiDSSB = new IDSSB();
+
+        //        string FileID = Path.GetFileName(AllFiles[i]);
+
+        //        TempiDSSB.ChunkID = int.Parse(FileID.Split("-")[0]);
+        //        TempiDSSB.ID = int.Parse(FileID.Split("-")[1]);
+        //        TempiDSSB.Files = AllFiles[i];
+
+        //        iDSSBs.Add(TempiDSSB);
+        //    }
+
+        //    iDSSBs.Sort((a, b) => a.ID.CompareTo(b.ID));
+
+        //    int ChunkID = 0;
+        //    int WritePoint = 0;
+        //    bool WriteChunk = false;
+        //    int ReadLenght = 40000;
+        //    //Final Output Regardless needs to be 32768 bytes long when compressed
+        //    byte[] output = new byte[ReadLenght];
+
+
+        //    for (int i = 0; i < iDSSBs.Count; i++)
+        //    {
+        //        //Start reading files into byte stream
+        //        //Once hitting lenght or passing it compress to correct chunk type
+        //        //If file is end of chunk
+        //        bool EndChunk = false;
+        //        bool ChunkFull = false;
+        //        using (Stream stream = File.Open(iDSSBs[i].Files, FileMode.Open))
         //        {
-        //            byte[] bytes = new byte[1];
-        //            while (true)
+        //            if (WritePoint + stream.Length < ReadLenght)
         //            {
-        //                byte[] output = new byte[32768];
-        //                bool End = false;
-        //                int ReadLength = 40000;
-        //                if (ReadLength+stream.Position>stream.Length)
-        //                {
-        //                    ReadLength = (int)(stream.Length - stream.Position);
-        //                    End = true;
-        //                }
-        //                long StartPos = stream.Position;
-        //                bool Start = true;
-        //                while(output.Length> 32768-8)
-        //                {
-        //                    if (!Start)
-        //                    {
-        //                        stream.Position = StartPos;
-        //                        ReadLength -= 32768 / 4;
-        //                        End = false;
-        //                    }
-        //                    bytes = StreamUtil.ReadBytes(stream, ReadLength);
-        //                    RefpackHandler.Compress(bytes, out output, CompressionLevel.Max);
-        //                    Start = false;
-        //                }
-                        
-                        
-        //                if(!End)
-        //                {
-        //                    StreamUtil.WriteString(memoryStream,"CBSX");
-        //                }
-        //                else
-        //                {
-        //                    StreamUtil.WriteString(memoryStream, "CEND");
-        //                }
-
-        //                StreamUtil.WriteInt32(memoryStream, 32768);
-
-        //                StreamUtil.WriteBytes(memoryStream, output);
-
-        //                StreamUtil.AlignBy(memoryStream, 32768);
-
-        //                if(End)
-        //                {
-        //                    break;
-        //                }
-
+        //                //Write chunk
+        //                byte[] Input = StreamUtil.ReadBytes(stream, (int)stream.Length);
+        //                Array.Copy(Input, 0, output, 0, Input.Length);
+        //                WritePoint += Input.Length;
         //            }
+        //            else
+        //            {
+        //                ChunkFull = true;
+        //                WriteChunk = true;
+        //                i--;
+        //                byte[] CompressedOutput = new byte[ReadLenght];
+        //                Array.Copy(output, 0, CompressedOutput, 0, WritePoint);
+        //                //Compress chunk and confirm safe
+        //                output = Refpack.Compress(output);
+        //                //If not error
+        //                if(output.Length > 32768)
+        //                {
+        //                    throw new Exception("Lenght Error");
+        //                }
+        //                //will need to swap out for better data
+        //            }
+        //        }
+
+        //        //Extra Conditions
+        //        if (!ChunkFull)
+        //        {
+        //            if (iDSSBs.Count < i + 1)
+        //            {
+        //                WriteChunk = true;
+        //                EndChunk = true;
+        //            }
+        //            else if (iDSSBs.Count < i)
+        //            {
+        //                if (ChunkID != iDSSBs[i + 1].ChunkID)
+        //                {
+        //                    WriteChunk = true;
+        //                    EndChunk = true;
+        //                }
+        //            }
+        //        }
+
+        //        if (WriteChunk)
+        //        {
+        //            if (EndChunk)
+        //            {
+        //                StreamUtil.WriteString(memoryStream, "CBSX");
+        //            }
+        //            else
+        //            {
+        //                StreamUtil.WriteString(memoryStream, "CEND");
+        //            }
+
+        //            StreamUtil.WriteInt32(memoryStream, 32768);
+
+        //            StreamUtil.WriteBytes(memoryStream, output);
+
+        //            StreamUtil.AlignBy(memoryStream, 32768);
+
+        //            output = new byte[ReadLenght];
+        //            ChunkFull = false;
+        //            EndChunk = false;
+        //            WriteChunk = false;
+        //            WritePoint = 0;
         //        }
         //    }
         //    if (File.Exists(BuildPath))
@@ -448,5 +472,79 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2
         //    file.Close();
         //    GC.Collect();
         //}
+
+        const int BlockSize = 32768;
+        const int HeaderSize = 8;                          // magic + int32
+        const int MaxCompressed = BlockSize - HeaderSize-16;  // compressed data must fit in one aligned block
+
+        public void PackSSB(string Folder, string BuildPath)
+        {
+            List<IDSSB> iDSSBs = new List<IDSSB>();
+            foreach (string path in Directory.GetFiles(Folder, "*.*"))
+            {
+                string[] parts = Path.GetFileName(path).Split("-");
+                iDSSBs.Add(new IDSSB
+                {
+                    ChunkID = int.Parse(parts[0]),
+                    ID = int.Parse(parts[1]),
+                    TrackID = int.Parse(parts[2]),
+                    RID = int.Parse(parts[3].Split(".")[0]),
+                    Type = int.Parse(parts[3].Split(".")[1]),
+                    Files = path
+                });
+            }
+            iDSSBs.Sort((a, b) => a.ID.CompareTo(b.ID));
+
+            using MemoryStream memoryStream = new MemoryStream();
+
+            // Group consecutive files by ChunkID, join each group, then split it into blocks
+            int start = 0;
+            while (start < iDSSBs.Count)
+            {
+                int end = start;
+                while (end < iDSSBs.Count && iDSSBs[end].ChunkID == iDSSBs[start].ChunkID)
+                    end++;
+
+                using MemoryStream chunkData = new MemoryStream();
+                for (int i = start; i < end; i++)
+                {
+                    byte[] fileBytes = File.ReadAllBytes(iDSSBs[i].Files);
+                    chunkData.WriteByte((byte)iDSSBs[i].Type);
+                    chunkData.WriteUInt24((uint)fileBytes.Length, SSX_Library.ByteOrder.LittleEndian);
+                    chunkData.WriteByte((byte)iDSSBs[i].TrackID);
+                    chunkData.WriteUInt24((uint)iDSSBs[i].RID, SSX_Library.ByteOrder.LittleEndian);
+                    chunkData.Write(fileBytes, 0, fileBytes.Length);
+                }
+
+                WriteChunk(memoryStream, chunkData.ToArray());
+                start = end;
+            }
+
+            File.WriteAllBytes(BuildPath, memoryStream.ToArray()); // overwrites, no need to delete first
+        }
+
+        void WriteChunk(Stream output, byte[] data)
+        {
+            using MemoryStream input = new MemoryStream(data);
+            using MemoryStream block = new MemoryStream();
+
+            while (input.Position < input.Length)
+            {
+                block.SetLength(0);
+                RefpackStreamResult result = RefpackStream.Compress(input, block, MaxCompressed);
+
+                if (result == RefpackStreamResult.Failed)
+                {
+                    throw new Exception($"Could not fit data at offset {input.Position} into a block");
+                }
+
+                bool lastBlock = result == RefpackStreamResult.Complete;
+
+                StreamUtil.WriteString(output, lastBlock ? "CEND" : "CBXS");
+                StreamUtil.WriteInt32(output, BlockSize);
+                StreamUtil.WriteBytes(output, block.ToArray());
+                StreamUtil.AlignBy(output, BlockSize);
+            }
+        }
     }
 }
