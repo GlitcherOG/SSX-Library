@@ -164,11 +164,6 @@ internal static class Refpack
         var compressedLength = 0;
         output = null;
 
-        if (input.Length < 16)
-        {
-            return input;
-        }
-
         var blockTrackingQueue = new Queue<KeyValuePair<int, int>>();
         var blockPretrackingQueue = new Queue<KeyValuePair<int, int>>();
 
@@ -348,9 +343,11 @@ internal static class Refpack
                  * FD-FF  111111pp
                  *   Read 0-3
                  */
+                // Previously this was a break, which silently cut the output short while the
+                // header still claimed the full size
                 if (FindRunLength(input, sequenceStart, compressedIndex + sequenceIndex) < sequenceLength)
                 {
-                    break;
+                    throw new InvalidOperationException($"Refpack match verification failed at offset {compressedIndex}. Please report.");
                 }
 
                 while (sequenceLength > 0)
@@ -416,7 +413,7 @@ internal static class Refpack
 
             if (input.Length > 0xFFFFFF)
             {
-                output = new byte[compressedLength + 5 + (endIsValid ? 0 : 1)];
+                output = new byte[compressedLength + 6 + (endIsValid ? 0 : 1)];
                 output[0] = 0x10 | 0x80; // 0x80 = length is 4 bytes
                 output[1] = 0xFB;
                 output[2] = (byte)(input.Length >> 24);
