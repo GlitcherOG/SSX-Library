@@ -104,11 +104,21 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
 
                 stream.Position = PosPallet + 0x80;
 
-                var Matrix = StreamUtil.ReadBytes(stream, sshTable.Total * 4);
+                // An 8-bit palette is stored in the GS's swizzled CLUT order, which swaps the second and third runs
+                // of eight in every block of 32, and is padded past Total. A colour whose swizzled slot lands in that
+                // padding (232-235 of a 236-colour table) is only there to be read, so read every stored slot, up to
+                // a full CLUT, before unswizzling; reading Total alone decoded those colours as transparent black.
+                int storedColours = sshTable.Total;
+                if (MatrixFormat == 2)
+                {
+                    storedColours = (int)Math.Clamp((stream.Length - stream.Position) / 4, sshTable.Total, 256);
+                }
+
+                var Matrix = StreamUtil.ReadBytes(stream, storedColours * 4);
 
                 if (MatrixFormat == 2)
                 {
-                    Matrix = ByteUtil.UnswizzlePalette(Matrix, sshTable.Total);
+                    Matrix = ByteUtil.UnswizzlePalette(Matrix, storedColours);
                 }
 
                 for (int i = 0; i < sshTable.Total; i++)

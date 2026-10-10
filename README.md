@@ -23,8 +23,9 @@ C#/.NET Library for Extracting, Creating, and Modifying files for SSX games.
 >   listing corrected to match the original grid rules, and `.ssh` reuse via
 >   seeded texture slots on repack.
 > - **Fixes:** AIP/SOP writer path vectors and bounding boxes, Bézier arc-length
->   sampling, SSX On Tour MPF parsing, and 8-bit palette limiting/ordering/alpha
->   in old SSH shapes, including compressed texture chunk alignment.
+>   sampling, SSX On Tour MPF parsing, 8-bit palette limiting/ordering/alpha
+>   in old SSH shapes, including compressed texture chunk alignment, and the
+>   padded swizzled palettes of SSX 3 world shapes.
 > - **Image processing dependencies:** ImageSharp.Drawing 3.1.2 brings in
 >   ImageSharp 4.1.2, including the codec and metadata security fixes. The library
 >   and its tests use the same dependency version.
