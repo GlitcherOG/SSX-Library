@@ -138,112 +138,114 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2
 
         public void Save(string path)
         {
-            //using (Stream stream = File.Open(path, FileMode.Open))
-            //{
-            //    UnknownBytes = StreamUtil.ReadBytes(stream, 4);
-            //    UnknownFloat = StreamUtil.ReadFloat(stream);
-            //    numLocations = StreamUtil.ReadUInt32(stream);
-            //    numChunks = StreamUtil.ReadUInt32(stream);
-            //    numUnknown2 = StreamUtil.ReadUInt32(stream);
-            //    UnknownBytes2 = StreamUtil.ReadBytes(stream, 60);
+            using MemoryStream stream = new MemoryStream();
 
-            //    locations = new List<Location>();
-            //    for (int i = 0; i < numLocations; i++)
-            //    {
-            //        var TempLocation = new Location();
-            //        TempLocation.Name = StreamUtil.ReadString(stream, 16);
-            //        TempLocation.numUnknown2 = StreamUtil.ReadUInt32(stream);
-            //        TempLocation.numChunks = StreamUtil.ReadUInt32(stream);
-            //        TempLocation.posChunks = StreamUtil.ReadUInt32(stream);
-            //        TempLocation.posUnknown2 = StreamUtil.ReadUInt32(stream);
+            StreamUtil.WriteBytes(stream, UnknownBytes);
+            StreamUtil.WriteFloat32(stream, UnknownFloat);
+            StreamUtil.WriteInt32(stream, locations.Count);
+            StreamUtil.WriteInt32(stream, chunksInfo.Count);
+            StreamUtil.WriteInt32(stream, streamingChunkInfos.Count);
+            StreamUtil.WriteBytes(stream, UnknownBytes2);
 
-            //        TempLocation.Unknown5 = StreamUtil.ReadInt16(stream);
-            //        TempLocation.Unknown6 = StreamUtil.ReadInt16(stream);
-            //        TempLocation.Unknown7 = StreamUtil.ReadInt16(stream);
-            //        TempLocation.Unknown8 = StreamUtil.ReadInt16(stream);
-            //        TempLocation.Unknown9 = StreamUtil.ReadInt16(stream);
-            //        TempLocation.Unknown10 = StreamUtil.ReadInt16(stream);
-            //        TempLocation.Unknown11 = StreamUtil.ReadInt16(stream);
-            //        TempLocation.Unknown12 = StreamUtil.ReadInt16(stream);
-            //        TempLocation.Unknown13 = StreamUtil.ReadInt16(stream);
-            //        TempLocation.Unknown14 = StreamUtil.ReadInt16(stream);
-            //        TempLocation.Unknown15 = StreamUtil.ReadInt16(stream);
-            //        TempLocation.Unknown16 = StreamUtil.ReadInt16(stream);
-            //        TempLocation.Unknown17 = StreamUtil.ReadInt16(stream);
-            //        TempLocation.Unknown18 = StreamUtil.ReadInt16(stream);
-            //        TempLocation.Unknown19 = StreamUtil.ReadInt16(stream);
-            //        TempLocation.Unknown20 = StreamUtil.ReadInt16(stream);
-            //        TempLocation.Unknown21 = StreamUtil.ReadInt16(stream);
-            //        TempLocation.Unknown22 = StreamUtil.ReadInt16(stream);
-            //        TempLocation.Unknown23 = StreamUtil.ReadInt16(stream);
-            //        TempLocation.Unknown24 = StreamUtil.ReadInt16(stream);
-            //        TempLocation.Unknown25 = StreamUtil.ReadInt16(stream);
-            //        TempLocation.Unknown26 = StreamUtil.ReadInt16(stream);
-            //        TempLocation.Unknown27 = StreamUtil.ReadInt16(stream);
-            //        TempLocation.Unknown28 = StreamUtil.ReadInt16(stream);
-            //        TempLocation.Unknown29 = StreamUtil.ReadInt16(stream);
-            //        TempLocation.Unknown30 = StreamUtil.ReadInt16(stream);
-            //        TempLocation.Unknown31 = StreamUtil.ReadInt16(stream);
-            //        TempLocation.Unknown32 = StreamUtil.ReadInt16(stream);
+            for (int i = 0; i < locations.Count; i++)
+            {
+                var location = locations[i];
+                StreamUtil.WriteString(stream, location.Name, 16);
+                StreamUtil.WriteInt32(stream, location.numChunks);
+                StreamUtil.WriteInt32(stream, location.numStreamingChunks);
+                StreamUtil.WriteInt32(stream, location.posEndStreamingChunk);
+                StreamUtil.WriteInt32(stream, location.posChunks);
 
-            //        locations.Add(TempLocation);
-            //    }
-            //    StreamUtil.AlignBy16(stream);
-            //    chunksInfo = new List<ChunkInfo>();
-            //    for (int i = 0; i < numChunks; i++)
-            //    {
-            //        var TempUnknown1 = new ChunkInfo();
-            //        TempUnknown1.BboxLow = StreamUtil.ReadVector4(stream);
-            //        TempUnknown1.BboxHigh = StreamUtil.ReadVector4(stream);
-            //        TempUnknown1.UnknownFloat9 = StreamUtil.ReadFloat(stream);
-            //        TempUnknown1.UnknownFloat10 = StreamUtil.ReadFloat(stream);
-            //        TempUnknown1.UnknownFloat11 = StreamUtil.ReadFloat(stream);
-            //        TempUnknown1.UnknownFloat12 = StreamUtil.ReadFloat(stream);
-            //        TempUnknown1.UnknownFloat13 = StreamUtil.ReadFloat(stream);
-            //        TempUnknown1.UnknownFloat14 = StreamUtil.ReadFloat(stream);
-            //        TempUnknown1.UnknownFloat15 = StreamUtil.ReadFloat(stream);
-            //        TempUnknown1.UnknownFloat16 = StreamUtil.ReadFloat(stream);
-            //        TempUnknown1.UnknownFloat17 = StreamUtil.ReadFloat(stream);
-            //        TempUnknown1.UnknownFloat18 = StreamUtil.ReadFloat(stream);
-            //        TempUnknown1.UnknownFloat19 = StreamUtil.ReadFloat(stream);
-            //        TempUnknown1.UnknownFloat20 = StreamUtil.ReadFloat(stream);
+                StreamUtil.WriteInt16(stream, location.numMaterials);
+                StreamUtil.WriteInt16(stream, location.numPatches);
+                StreamUtil.WriteInt16(stream, location.numWorldMDR);
+                StreamUtil.WriteInt16(stream, location.numInstance);
+                StreamUtil.WriteInt16(stream, location.numParticleModel);
+                StreamUtil.WriteInt16(stream, location.numParticleInstance);
+                StreamUtil.WriteInt16(stream, location.numLights);
+                StreamUtil.WriteInt16(stream, location.numHalo);
+                StreamUtil.WriteInt16(stream, location.numSplines);
+                StreamUtil.WriteInt16(stream, location.numShape);
+                StreamUtil.WriteInt16(stream, location.numShapelightmap);
+                StreamUtil.WriteInt16(stream, location.numVisCurtains);
+                StreamUtil.WriteInt16(stream, location.numCollision);
+                StreamUtil.WriteInt16(stream, location.numSoundTrigger);
+                StreamUtil.WriteInt16(stream, location.numAIP);
+                StreamUtil.WriteInt16(stream, location.numWorldPainter);
+                StreamUtil.WriteInt16(stream, location.numScripts);
+                StreamUtil.WriteInt16(stream, location.numCameraTrigger);
+                StreamUtil.WriteInt16(stream, location.numNISTable);
+                StreamUtil.WriteInt16(stream, location.numMissions);
+                StreamUtil.WriteInt16(stream, location.numAudioBanks);
+                StreamUtil.WriteInt16(stream, location.numRadar);
+                StreamUtil.WriteInt16(stream, location.numAvalancheAnimation);
 
-            //        TempUnknown1.UnknownInt1 = StreamUtil.ReadUInt32(stream);
-            //        TempUnknown1.UnknownInt2 = StreamUtil.ReadUInt32(stream);
-            //        TempUnknown1.UnknownInt3 = StreamUtil.ReadUInt32(stream);
-            //        TempUnknown1.UnknownInt4 = StreamUtil.ReadUInt32(stream);
+                StreamUtil.WriteInt16(stream, location.U1);
+                StreamUtil.WriteInt16(stream, location.U2);
+                StreamUtil.WriteInt16(stream, location.U3);
+                StreamUtil.WriteInt16(stream, location.U4);
+                StreamUtil.WriteInt16(stream, location.U5);
+            }
 
-            //        chunksInfo.Add(TempUnknown1);
-            //    }
+            // Pad with zeros to 16 bytes
+            StreamUtil.WriteBytes(stream, new byte[(16 - (int)(stream.Position % 16)) % 16]);
 
-            //    unknown2s = new List<Unknown2>();
+            for (int i = 0; i < chunksInfo.Count; i++)
+            {
+                var chunk = chunksInfo[i];
+                StreamUtil.WriteVector4(stream, chunk.BboxLow);
+                StreamUtil.WriteVector4(stream, chunk.BboxHigh);
+                StreamUtil.WriteFloat32(stream, chunk.UnknownFloat9);
+                StreamUtil.WriteFloat32(stream, chunk.UnknownFloat10);
+                StreamUtil.WriteFloat32(stream, chunk.UnknownFloat11);
+                StreamUtil.WriteFloat32(stream, chunk.UnknownFloat12);
+                StreamUtil.WriteFloat32(stream, chunk.UnknownFloat13);
+                StreamUtil.WriteFloat32(stream, chunk.UnknownFloat14);
+                StreamUtil.WriteFloat32(stream, chunk.UnknownFloat15);
+                StreamUtil.WriteFloat32(stream, chunk.UnknownFloat16);
+                StreamUtil.WriteFloat32(stream, chunk.UnknownFloat17);
+                StreamUtil.WriteFloat32(stream, chunk.UnknownFloat18);
+                StreamUtil.WriteFloat32(stream, chunk.UnknownFloat19);
+                StreamUtil.WriteFloat32(stream, chunk.UnknownFloat20);
+                StreamUtil.WriteInt32(stream, chunk.UnknownInt1);
+                StreamUtil.WriteInt32(stream, chunk.UnknownInt2);
+                StreamUtil.WriteInt32(stream, chunk.UnknownInt3);
+                StreamUtil.WriteInt32(stream, chunk.UnknownInt4);
+            }
 
-            //    for (int i = 0; i < numUnknown2; i++)
-            //    {
-            //        var TempUnknown2 = new Unknown2();
-            //        TempUnknown2.UnknownInt1 = StreamUtil.ReadUInt32(stream); //Items in SubChunk
-            //        TempUnknown2.UnknownInt2 = StreamUtil.ReadUInt32(stream);
-            //        TempUnknown2.UnknownInt3 = StreamUtil.ReadUInt32(stream);
-            //        TempUnknown2.UnknownInt4 = StreamUtil.ReadUInt32(stream);
-            //        TempUnknown2.UnknownInt5 = StreamUtil.ReadUInt32(stream);
-            //        TempUnknown2.UnknownInt6 = StreamUtil.ReadUInt32(stream);
-            //        TempUnknown2.UnknownInt7 = StreamUtil.ReadUInt32(stream);
-            //        TempUnknown2.UnknownInt8 = StreamUtil.ReadUInt32(stream);
-            //        TempUnknown2.UnknownInt9 = StreamUtil.ReadUInt32(stream);
-            //        TempUnknown2.UnknownInt10 = StreamUtil.ReadUInt32(stream);
+            for (int i = 0; i < streamingChunkInfos.Count; i++)
+            {
+                var streamingChunk = streamingChunkInfos[i];
+                StreamUtil.WriteInt16(stream, streamingChunk.numResources);
+                StreamUtil.WriteInt24(stream, streamingChunk.subChunkID);
+                StreamUtil.WriteInt24(stream, streamingChunk.chunkOffset);
+                StreamUtil.WriteInt32(stream, streamingChunk.unpackedSize);
 
+                StreamUtil.WriteInt16(stream, streamingChunk.numMaterials); //0
+                StreamUtil.WriteInt16(stream, streamingChunk.numPatches); //1
+                StreamUtil.WriteInt16(stream, streamingChunk.numWorldMDR); //2
+                StreamUtil.WriteInt16(stream, streamingChunk.numInstance); //3
+                StreamUtil.WriteInt16(stream, streamingChunk.numParticleModel); //4
+                StreamUtil.WriteInt16(stream, streamingChunk.numParticleInstance); //5
+                StreamUtil.WriteInt16(stream, streamingChunk.numLights); //6
+                StreamUtil.WriteInt16(stream, streamingChunk.numHalo); //7
+                StreamUtil.WriteInt16(stream, streamingChunk.numSplines); //8
+                StreamUtil.WriteInt16(stream, streamingChunk.numShapes); //9
+                StreamUtil.WriteInt16(stream, streamingChunk.numShapeLightmap); //10
+                StreamUtil.WriteInt16(stream, streamingChunk.numVisCurtains); //11
+                StreamUtil.WriteInt16(stream, streamingChunk.numCollision); //12
 
+                StreamUtil.WriteInt16(stream, streamingChunk.U1);
+                StreamUtil.WriteInt32(stream, streamingChunk.U2);
+                StreamUtil.WriteInt32(stream, streamingChunk.U3);
+                StreamUtil.WriteInt32(stream, streamingChunk.U4);
+                StreamUtil.WriteInt32(stream, streamingChunk.U5);
+                StreamUtil.WriteInt32(stream, streamingChunk.U6);
+                StreamUtil.WriteInt32(stream, streamingChunk.U7);
+                StreamUtil.WriteInt32(stream, streamingChunk.U8);
+            }
 
-            //        TempUnknown2.UnknownInt11 = StreamUtil.ReadUInt32(stream);
-            //        TempUnknown2.UnknownInt12 = StreamUtil.ReadUInt32(stream);
-            //        TempUnknown2.UnknownInt13 = StreamUtil.ReadUInt32(stream);
-            //        TempUnknown2.UnknownInt14 = StreamUtil.ReadUInt32(stream);
-            //        TempUnknown2.UnknownInt15 = StreamUtil.ReadUInt32(stream);
-            //        TempUnknown2.UnknownInt16 = StreamUtil.ReadUInt32(stream);
-            //        TempUnknown2.UnknownInt17 = StreamUtil.ReadUInt32(stream);
-            //        unknown2s.Add(TempUnknown2);
-            //    }
-            //}
+            File.WriteAllBytes(path, stream.ToArray());
         }
 
         //88 Bytes
