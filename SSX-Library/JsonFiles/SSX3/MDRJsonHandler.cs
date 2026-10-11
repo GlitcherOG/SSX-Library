@@ -65,6 +65,7 @@ namespace SSXLibrary.JsonFiles.SSX3
             public float[] Position;
             public float[] Rotation;
             public float[] Scale;
+            public bool IncludeMatrix;
 
             public UnknownS2 unknownS2;
             public UnknownS3 unknownS3;

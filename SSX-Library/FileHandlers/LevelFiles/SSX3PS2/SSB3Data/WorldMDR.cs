@@ -595,7 +595,11 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
                 Quaternion Rotation;
                 Vector3 Location;
 
-                Matrix4x4.Decompose(modelObject.matrix4X4, out Scale, out Rotation, out Location);
+                //Objects without a matrix (MatrixOffset -1) keep an all-zero matrix4X4, so export them as an identity transform
+                NewObject.IncludeMatrix = modelObject.MatrixOffset > 0;
+                Matrix4x4 matrix = NewObject.IncludeMatrix ? modelObject.matrix4X4 : Matrix4x4.Identity;
+
+                Matrix4x4.Decompose(matrix, out Scale, out Rotation, out Location);
                 NewObject.Position = ArrayConv.Vector3ToArray(Location);
                 NewObject.Rotation = ArrayConv.QuaternionToArray(Rotation);
                 NewObject.Scale = ArrayConv.Vector3ToArray(Scale);
