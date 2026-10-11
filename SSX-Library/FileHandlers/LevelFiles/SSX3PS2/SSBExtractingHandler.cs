@@ -37,32 +37,6 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2
         20 - AudioBank
         21 - Radar?
         22 - Avalanche Animation
-
-        Rebuild Order
-
-        Shape
-        Shape Lightmaps
-        Materials
-        Lights
-        Halo
-        Models
-        Instance
-        Particle Model
-        Particle Instance
-        Patches
-        Splines
-        Collision
-        Vis Curtains
-        Sound Triggers
-        World Painter
-        Camera Trigger
-        Audio Bank
-        AIP
-        Scripts
-        NIS Table
-        Missions
-        Radar
-        Avalanche Animation
          */
 
         public void LoadAndExtractSSBFromSBD(string path, string extractPath)
@@ -217,7 +191,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2
 
                                     worldOldSSH.Load(memoryStream1);
 
-                                    worldOldSSH.SaveImage(extractPath + "//Textures//" + RID + ".png");
+                                    worldOldSSH.ExportImage(extractPath + "//Textures//" + RID + ".png");
                                 }
 
                             }
@@ -230,7 +204,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2
 
                                     worldOldSSH.Load(memoryStream1);
                                     //worldOldSSH.SaveImage(ExtractPath + "//Lightmaps//" + Path + ".png");
-                                    worldOldSSH.SaveImage(extractPath + "//Lightmaps//" + RID.ToString().PadLeft(4, '0') + ".png");
+                                    worldOldSSH.ExportImage(extractPath + "//Lightmaps//" + RID.ToString().PadLeft(4, '0') + ".png");
                                 }
                             }
                             else if (ID == 11)

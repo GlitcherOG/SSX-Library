@@ -194,10 +194,29 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
             }
 
         }
-        public void SaveImage(string path)
+        public void ExportImage(string path)
         {
             bitmap.SaveAsPng(path);
         }
+
+        public void ImportImage(string path)
+        {
+            bitmap = Image.Load<Rgba32>(path);
+        }
+
+        public byte[] Save()
+        {
+            MemoryStream stream = new MemoryStream();
+
+            //WriteHeader
+
+            //WriteTexture
+
+
+            return stream.ToArray();
+        }
+
+
         public struct SSHColourTable
         {
             public int Size;
