@@ -62,8 +62,6 @@ namespace SSXLibrary.JsonFiles.SSX3
 
             public int ModelTrackID;
             public int ModelRID;
-
-            public float U5;
             public int U6;
             public int U7;
 

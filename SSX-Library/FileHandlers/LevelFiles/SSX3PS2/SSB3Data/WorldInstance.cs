@@ -33,7 +33,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
 
         public ObjectID ModelID;
 
-        public float U5;
+        public float Scale;
         public int U6;
         public int U7;
 
@@ -66,7 +66,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
 
             ModelID = WorldCommon.ObjectIDLoad(stream);
 
-            U5 = StreamUtil.ReadFloat(stream);
+            Scale = StreamUtil.ReadFloat(stream);
             U6 = StreamUtil.ReadInt32(stream);
             U7 = StreamUtil.ReadInt32(stream);
 
@@ -125,14 +125,14 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
             bin3File.U2 = U2;
             bin3File.U3 = U3;
 
-            Vector3 Scale;
+            Vector3 MatrixScale;
             Quaternion Rotation;
             Vector3 Location;
 
-            Matrix4x4.Decompose(matrix4X4, out Scale, out Rotation, out Location);
+            Matrix4x4.Decompose(matrix4X4, out MatrixScale, out Rotation, out Location);
             bin3File.Position = ArrayConv.Vector3ToArray(Location);
             bin3File.Rotation = ArrayConv.QuaternionToArray(Rotation);
-            bin3File.Scale = ArrayConv.Vector3ToArray(Scale);
+            bin3File.Scale = ArrayConv.Vector3ToArray(MatrixScale * Scale);
 
             bin3File.V0 = ArrayConv.Vector4ToArray(V0);
             bin3File.V1 = ArrayConv.Vector3ToArray(V1);
@@ -144,7 +144,6 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
 
             bin3File.ModelTrackID = ModelID.TrackID;
             bin3File.ModelRID = ModelID.RID;
-            bin3File.U5 = U5;
             bin3File.U6 = U6;
             bin3File.U7 = U7;
 

@@ -247,8 +247,8 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
                 NewU1struct.U1 = u1Structs[i].U1;
                 NewU1struct.U2 = ArrayConv.Vector3ToArray(u1Structs[i].U2);
                 NewU1struct.U3 = ArrayConv.Vector3ToArray(u1Structs[i].U3);
-                NewU1struct.U0 = u1Structs[i].U4;
-                NewU1struct.U1 = u1Structs[i].U5;
+                NewU1struct.U4 = u1Structs[i].U4;
+                NewU1struct.U5 = u1Structs[i].U5;
 
                 aipJsonHandler.u1Structs.Add(NewU1struct);
             }
