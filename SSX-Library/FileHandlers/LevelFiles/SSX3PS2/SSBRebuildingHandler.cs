@@ -92,7 +92,7 @@ namespace SSX_Library.FileHandlers.LevelFiles.SSX3PS2
 
         public void LoadLevelData(string LevelPath)
         {
-            Bin0JsonHandler bin0JsonHandler = Bin0JsonHandler.Load(LevelPath + "Bin0.json");
+            MaterialJsonHandler bin0JsonHandler = MaterialJsonHandler.Load(LevelPath + "Bin0.json");
             PatchesJsonHandler patchesJsonHandler = PatchesJsonHandler.Load(LevelPath + "Patches.json");
             MDRJsonHandler mDRJsonHandler = MDRJsonHandler.Load(LevelPath + "Prefabs.json");
             InstanceJsonHandler instanceJsonHandler = InstanceJsonHandler.Load(LevelPath + "Instances.json");

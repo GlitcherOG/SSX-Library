@@ -10,7 +10,7 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
 {
-    public class WorldBin0
+    public class WorldMaterial
     {
         public ObjectID objectID;
 
@@ -45,9 +45,9 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
             U10 = StreamUtil.ReadInt16(stream);
         }
 
-        public Bin0JsonHandler.Bin0File ToJSON()
+        public MaterialJsonHandler.Material ToJSON()
         {
-            Bin0JsonHandler.Bin0File bin0File = new Bin0JsonHandler.Bin0File();
+            MaterialJsonHandler.Material bin0File = new MaterialJsonHandler.Material();
 
             bin0File.TrackID = objectID.TrackID;
             bin0File.RID = objectID.RID;

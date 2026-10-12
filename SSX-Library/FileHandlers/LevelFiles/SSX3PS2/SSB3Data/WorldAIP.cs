@@ -25,12 +25,8 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
         public List<U1Struct> u1Structs = new List<U1Struct>();
 
 
-        public void LoadData(byte[] bytes)
+        public void LoadData(Stream stream)
         {
-            MemoryStream stream = new MemoryStream();
-            StreamUtil.WriteBytes(stream, bytes);
-            stream.Position = 0;
-
             MagicWords = StreamUtil.ReadInt32(stream);
             NumAIPaths = StreamUtil.ReadInt32(stream);
 

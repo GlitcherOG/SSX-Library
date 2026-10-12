@@ -8,9 +8,9 @@ using System.IO;
 
 namespace SSXLibrary.JsonFiles.SSX3
 {
-    public class Bin0JsonHandler
+    public class MaterialJsonHandler
     {
-        public List<Bin0File> bin0Files = new List<Bin0File>();
+        public List<Material> Materials = new List<Material>();
 
         public void CreateJson(string path, bool Inline = false)
         {
@@ -24,22 +24,22 @@ namespace SSXLibrary.JsonFiles.SSX3
             File.WriteAllText(path, serializer);
         }
 
-        public static Bin0JsonHandler Load(string path)
+        public static MaterialJsonHandler Load(string path)
         {
             string paths = path;
             if (File.Exists(paths))
             {
                 var stream = File.ReadAllText(paths);
-                var container = JsonConvert.DeserializeObject<Bin0JsonHandler>(stream);
+                var container = JsonConvert.DeserializeObject<MaterialJsonHandler>(stream);
                 return container;
             }
             else
             {
-                return new Bin0JsonHandler();
+                return new MaterialJsonHandler();
             }
         }
 
-        public struct Bin0File
+        public struct Material
         {
             public int TrackID;
             public int RID;
