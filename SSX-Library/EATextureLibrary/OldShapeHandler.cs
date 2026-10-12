@@ -95,7 +95,14 @@ namespace SSX_Library.EATextureLibrary
 
                     stream.Position = SavePos;
 
-                    EndingString = StreamUtil.ReadString(stream, 8);
+                    if (stream.Position != ShapeImages[0].Offset)
+                    {
+                        EndingString = StreamUtil.ReadString(stream, 8, true);
+                    }
+                    else
+                    {
+                        EndingString = "Buy ERTS";
+                    }
 
                     LoadImages(stream);
                 }
@@ -127,6 +134,7 @@ namespace SSX_Library.EATextureLibrary
 
         private void LoadImages(Stream stream)
         {
+            long StartPos = stream.Position;
             for (int i = 0; i < ShapeImages.Count; i++)
             {
                 ShapeImage tempImage = ShapeImages[i];
@@ -140,10 +148,11 @@ namespace SSX_Library.EATextureLibrary
 
                     string TestEnd = StreamUtil.ReadString(stream, 8);
                     stream.Position -= 8;
-                    if(TestEnd == EndingString)
+                    if (TestEnd == EndingString)
                     {
                         break;
                     }
+
 
                     shape.MatrixFormat = (MatrixType)StreamUtil.ReadUInt8(stream);
 
@@ -195,7 +204,7 @@ namespace SSX_Library.EATextureLibrary
 
                         shape.Width = StreamUtil.ReadInt32(stream, GCFile);
 
-                        shape.Matrix = StreamUtil.ReadBytes(stream, shape.Width*8);
+                        shape.Matrix = StreamUtil.ReadBytes(stream, shape.Width * 8);
 
                         StreamUtil.AlignBy16(stream);
                     }
@@ -329,7 +338,7 @@ namespace SSX_Library.EATextureLibrary
                 }
 
                 //Metal Alpha
-                if (MetalCheck!=null)
+                if (MetalCheck != null)
                 {
                     var TempTexture = tempImage.Image;
                     var NewImage = new Image<A8>(TempTexture.Width, TempTexture.Height);
