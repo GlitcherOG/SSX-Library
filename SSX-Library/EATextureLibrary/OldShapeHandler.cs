@@ -23,10 +23,12 @@ namespace SSX_Library.EATextureLibrary
         public List<ShapeImage> ShapeImages = new List<ShapeImage>();
 
         public bool GCFile = false;
+        public bool NoAlphaFix = false;
 
-
-        public void LoadShape(string path)
+        public void LoadShape(string path, bool _NoAlphaFix = false)
         {
+            NoAlphaFix = _NoAlphaFix;
+
             ShapeImages = new List<ShapeImage>();
             using (Stream stream = File.Open(path, FileMode.Open))
             {
@@ -940,30 +942,33 @@ namespace SSX_Library.EATextureLibrary
 
         private ShapeImage AlphaFix(ShapeImage newSSHImage)
         {
-            bool TestAlpha = true;
-
-            for (int i = 0; i < newSSHImage.colorsTable.Count; i++)
+            if (!NoAlphaFix)
             {
-                if (newSSHImage.colorsTable[i].A > 0x80)
-                {
-                    TestAlpha = false;
-                    break;
-                }
-            }
+                bool TestAlpha = true;
 
-            if (TestAlpha)
-            {
-                newSSHImage.AlphaFix = true;
                 for (int i = 0; i < newSSHImage.colorsTable.Count; i++)
                 {
-                    var TempColour = newSSHImage.colorsTable[i];
-                    int A = TempColour.A * 2;
-                    if (A > 255)
+                    if (newSSHImage.colorsTable[i].A > 0x80)
                     {
-                        A = 255;
+                        TestAlpha = false;
+                        break;
                     }
-                    TempColour.A = (byte)A;
-                    newSSHImage.colorsTable[i] = TempColour;
+                }
+
+                if (TestAlpha)
+                {
+                    newSSHImage.AlphaFix = true;
+                    for (int i = 0; i < newSSHImage.colorsTable.Count; i++)
+                    {
+                        var TempColour = newSSHImage.colorsTable[i];
+                        int A = TempColour.A * 2;
+                        if (A > 255)
+                        {
+                            A = 255;
+                        }
+                        TempColour.A = (byte)A;
+                        newSSHImage.colorsTable[i] = TempColour;
+                    }
                 }
             }
             return newSSHImage;

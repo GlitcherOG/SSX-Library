@@ -28,7 +28,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
         public SSHColourTable sshTable;
         public Image<Rgba32> bitmap;
 
-        public void Load(Stream stream)
+        public void Load(Stream stream, bool NoAlphaFix = false)
         {
             stream.Position = 0;
 
@@ -132,31 +132,34 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
 
                 int Max = 0;
                 //Alpha Fix
-                for (int a = 0; a < sshTable.colorTable.Count; a++)
+                if (!NoAlphaFix)
                 {
-                    if (Max < sshTable.colorTable[a].A)
-                    {
-                        Max = sshTable.colorTable[a].A;
-                    }
-                }
-                if (Max <= 128)
-                {
-                    AlphaFix = true;
-
                     for (int a = 0; a < sshTable.colorTable.Count; a++)
                     {
-                        var TempColour = sshTable.colorTable[a];
-                        int A = TempColour.A * 2;
-                        if (A > 255)
+                        if (Max < sshTable.colorTable[a].A)
                         {
-                            A = 255;
+                            Max = sshTable.colorTable[a].A;
                         }
-                        else if (A < 0)
+                    }
+                    if (Max <= 128)
+                    {
+                        AlphaFix = true;
+
+                        for (int a = 0; a < sshTable.colorTable.Count; a++)
                         {
-                            A = 0;
+                            var TempColour = sshTable.colorTable[a];
+                            int A = TempColour.A * 2;
+                            if (A > 255)
+                            {
+                                A = 255;
+                            }
+                            else if (A < 0)
+                            {
+                                A = 0;
+                            }
+                            TempColour = new Rgba32(TempColour.R, TempColour.G, TempColour.B, (byte)A);
+                            sshTable.colorTable[a] = TempColour;
                         }
-                        TempColour = new Rgba32(TempColour.R, TempColour.G, TempColour.B, (byte)A);
-                        sshTable.colorTable[a] = TempColour;
                     }
                 }
             }

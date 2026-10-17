@@ -203,7 +203,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2
                                     Console.WriteLine(extractPath + "//Lightmaps//" + Path + ".png");
                                     WorldSSH worldOldSSH = new WorldSSH();
 
-                                    worldOldSSH.Load(EntryStream);
+                                    worldOldSSH.Load(EntryStream, true);
                                     //worldOldSSH.SaveImage(ExtractPath + "//Lightmaps//" + Path + ".png");
                                     worldOldSSH.ExportImage(extractPath + "//Lightmaps//" + RID.ToString().PadLeft(4, '0') + ".png");
                                 }

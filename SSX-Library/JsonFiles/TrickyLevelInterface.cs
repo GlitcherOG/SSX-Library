@@ -1256,22 +1256,22 @@ namespace SSXLibrary
 
             if (File.Exists(LoadPath + "_L.ssh"))
             {
-                LightmapHandler.LoadShape(LoadPath + "_L.ssh");
+                LightmapHandler.LoadShape(LoadPath + "_L.ssh", true);
 
                 for (int i = 0; i < LightmapHandler.ShapeImages.Count; i++)
                 {
                     Console.WriteLine("Lightmap Textures: " + (i + 1) + "/" + LightmapHandler.ShapeImages.Count);
-                    LightmapHandler.BrightenImage(i);
+                    //LightmapHandler.BrightenImage(i);
                     LightmapHandler.ExtractSingleImage(ExportPath + "\\Lightmaps\\" + LightmapHandler.ShapeImages[i].Shortname + ".png", i);
                 }
             }
             else
             {
-                LightmapHandler.LoadShape(LoadPath.Substring(0, LoadPath.Length - 1) + "_L.ssh");
+                LightmapHandler.LoadShape(LoadPath.Substring(0, LoadPath.Length - 1) + "_L.ssh", true);
                 for (int i = 0; i < LightmapHandler.ShapeImages.Count; i++)
                 {
                     Console.WriteLine("Lightmap Textures: " + (i + 1) + "/" + LightmapHandler.ShapeImages.Count);
-                    LightmapHandler.BrightenImage(i);
+                    //LightmapHandler.BrightenImage(i);
                     LightmapHandler.ExtractSingleImage(ExportPath + "\\Lightmaps\\" + LightmapHandler.ShapeImages[i].Shortname + ".png", i);
                 }
             }
