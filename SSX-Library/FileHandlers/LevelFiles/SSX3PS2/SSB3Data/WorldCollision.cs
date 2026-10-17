@@ -6,8 +6,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSB3Data
 {
     public class WorldCollision
     {
-        public int TrackID;
-        public int RID;
+        public ObjectID objectID;
 
         public int U0;
         public int U0Count;
@@ -19,10 +18,10 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSB3Data
         public List<U0Struct> Models = new List<U0Struct>();
 
 
-        public void LoadData(Stream stream, int trackID, int rID)
+        public void LoadData(Stream stream, int TrackID, int RID)
         {
-            TrackID = trackID;
-            RID = rID;
+            objectID.TrackID = TrackID;
+            objectID.RID = RID;
 
             U0 = StreamUtil.ReadInt16(stream);
             U0Count = StreamUtil.ReadInt16(stream);
@@ -157,7 +156,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSB3Data
                 output += "f " + (indices[i].Index1+1).ToString() + "//" + (i + 1).ToString() + " " + (indices[i].Index2 + 1).ToString() + "//" + (i + 1).ToString() + " " + (indices[i].Index3 + 1).ToString() + "//" + (i + 1).ToString() + "\n";
             }
 
-            File.WriteAllText(Path + "/" + RID.ToString() + "-" + Name + ".obj", output);
+            File.WriteAllText(Path + "/" + objectID.RID.ToString() + "-" + Name + ".obj", output);
         }
 
         public struct U0Struct

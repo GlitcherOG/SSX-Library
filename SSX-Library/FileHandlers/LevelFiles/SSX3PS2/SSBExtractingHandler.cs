@@ -154,7 +154,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2
 
                                 worldMDR.Name = phmHandler.GetName(TrackID, RID, 2, psmHandler);
 
-                                Console.WriteLine(LevelExtractPath + "//Models//" + RID + ".obj");
+                                Console.WriteLine(LevelExtractPath + "//Models//" + worldMDR.Name + ".obj");
                                 mdrJsonHandler.mainModelHeaders.Add(worldMDR.SaveModel(LevelExtractPath + "//Models//"));
                                 //worldMDR.SaveModelGLB(ExtractPath + "//Models//" + RID + ".glb");
                             }
@@ -234,7 +234,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2
                                 WorldCollision worldBin12 = new WorldCollision();
                                 worldBin12.LoadData(EntryStream, TrackID, RID);
 
-                                Console.WriteLine(extractPath + "//Collision//" + RID + ".obj");
+                                Console.WriteLine(LevelExtractPath + "//Collision//" + phmHandler.GetName(TrackID, RID, 4, psmHandler) + ".obj");
                                 worldBin12.CollisionObjectSave(LevelExtractPath + "//Collision//", phmHandler.GetName(TrackID, RID, 4, psmHandler));
                             }
                             else if (ID == 14)
@@ -308,7 +308,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2
                     bin6JsonHandler.CreateJson(LevelExtractPath + "//Bin6.json");
 
                     Console.WriteLine(LevelExtractPath + "//Bin7.json");
-                    bin6JsonHandler.CreateJson(LevelExtractPath + "//Bin7.json");
+                    bin7JsonHandler.CreateJson(LevelExtractPath + "//Bin7.json");
 
                     Console.WriteLine(LevelExtractPath + "//VisCurtain.json");
                     visCurtainJsonHandler.CreateJson(LevelExtractPath + "//VisCurtain.json");
