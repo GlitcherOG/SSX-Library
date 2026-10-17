@@ -9,7 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 
-namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
+namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSB3Data
 {
     internal class WorldAIP
     {

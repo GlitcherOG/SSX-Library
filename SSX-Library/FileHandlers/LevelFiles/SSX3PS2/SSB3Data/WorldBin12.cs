@@ -8,7 +8,7 @@ using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
+namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSB3Data
 {
     public class WorldBin12
     {
@@ -67,12 +67,6 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
                 }
 
                 //MathBbox Info
-
-
-
-
-
-
                 stream.Position = Pos + TempU0Struct.U2Offset;
                 TempU0Struct.vectors2 = new List<Vector4>();
 

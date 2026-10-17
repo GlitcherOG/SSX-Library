@@ -8,7 +8,7 @@ using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
+namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSB3Data
 {
     // Chunk ID-11: visibility curtain. 208 bytes, fixed (the size histogram on
     // bam.ssb is a single bucket, {208: 167}).

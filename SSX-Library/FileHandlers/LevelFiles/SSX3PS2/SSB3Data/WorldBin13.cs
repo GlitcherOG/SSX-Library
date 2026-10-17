@@ -1,7 +1,7 @@
 ﻿using SSX_Library.Internal.Utilities;
 using System.IO;
 
-namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
+namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSB3Data
 {
     public class WorldBin13
     {

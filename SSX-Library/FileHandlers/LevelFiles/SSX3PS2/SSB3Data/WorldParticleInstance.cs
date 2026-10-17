@@ -2,7 +2,7 @@ using SSX_Library.Internal.Utilities;
 using SSXLibrary.JsonFiles.SSX3;
 using System.Numerics;
 
-namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
+namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSB3Data
 {
     // Chunk ID-5: particle-FX placement instance. 144 bytes, fixed (the size
     // histogram on bam.ssb is a single bucket, {144: 141}).

@@ -2,7 +2,7 @@
 using SSXLibrary.JsonFiles.SSX3;
 using System.Numerics;
 
-namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
+namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSB3Data
 {
     public class WorldSpline
     {

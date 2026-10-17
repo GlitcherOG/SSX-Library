@@ -4,7 +4,7 @@ using SSX_Library.EATextureLibrary;
 using SSX_Library.Internal;
 using SSX_Library.Internal.Utilities;
 
-namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
+namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSB3Data
 {
     public class WorldSSH
     {

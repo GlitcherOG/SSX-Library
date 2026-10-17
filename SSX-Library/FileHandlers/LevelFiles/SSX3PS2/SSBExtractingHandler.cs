@@ -2,7 +2,7 @@
 using SSX_Library.Internal;
 using SSX_Library.Internal.Utilities;
 using SSX_Library.Internal.Utilities.StreamExtensions;
-using SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData;
+using SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSB3Data;
 using SSXLibrary.JsonFiles.SSX3;
 using System.IO;
 using System.IO.Pipelines;
@@ -57,6 +57,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2
                 InstanceJsonHandler bin3JsonHandler = new InstanceJsonHandler();
                 ParticleInstanceJsonHandler particleInstanceJsonHandler = new ParticleInstanceJsonHandler();
                 Bin6JsonHandler bin6JsonHandler = new Bin6JsonHandler();
+                Bin7JsonHandler bin7JsonHandler = new Bin7JsonHandler();
                 SplineJsonHandler splineJsonHandler = new SplineJsonHandler();
                 VisCurtainJsonHandler visCurtainJsonHandler = new VisCurtainJsonHandler();
                 MDRJsonHandler mdrJsonHandler = new MDRJsonHandler();
@@ -173,6 +174,13 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2
                                 worldBin6.LoadData(EntryStream);
 
                                 bin6JsonHandler.bin6Files.Add(worldBin6.ToJSON());
+                            }
+                            else if (ID == 7)
+                            {
+                                WorldBin7 worldBin7 = new WorldBin7();
+                                worldBin7.LoadData(EntryStream, TrackID, RID);
+
+                                bin7JsonHandler.bin7Files.Add(worldBin7.ToJSON());
                             }
                             else if (ID == 8)
                             {
@@ -293,7 +301,10 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2
                     Console.WriteLine(LevelExtractPath + "//Bin6.json");
                     bin6JsonHandler.CreateJson(LevelExtractPath + "//Bin6.json");
 
-                    Console.WriteLine(LevelExtractPath + "//Bin11.json");
+                    Console.WriteLine(LevelExtractPath + "//Bin7.json");
+                    bin6JsonHandler.CreateJson(LevelExtractPath + "//Bin7.json");
+
+                    Console.WriteLine(LevelExtractPath + "//VisCurtain.json");
                     visCurtainJsonHandler.CreateJson(LevelExtractPath + "//VisCurtain.json");
 
                     Console.WriteLine(LevelExtractPath + "//Splines.json");
