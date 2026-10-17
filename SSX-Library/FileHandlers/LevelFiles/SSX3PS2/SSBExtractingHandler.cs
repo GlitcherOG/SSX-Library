@@ -39,15 +39,19 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2
         22 - Avalanche Animation
          */
 
+        SDBHandler sdbHandler = new SDBHandler();
+        PSMHandler psmHandler = new PSMHandler();
+        PHMHandler phmHandler = new PHMHandler();
+
         public void LoadAndExtractSSBFromSBD(string path, string extractPath)
         {
-            SDBHandler sdbHandler = new SDBHandler();
+            sdbHandler = new SDBHandler();
             sdbHandler.LoadSBD(path.Replace(".ssb", ".sdb"));
 
-            PHMHandler phmHandler = new PHMHandler();
+            phmHandler = new PHMHandler();
             phmHandler.LoadPHM(path.Replace(".ssb", ".phm"));
-
-            PSMHandler psmHandler = new PSMHandler();
+            
+            psmHandler = new PSMHandler();
             psmHandler.LoadPSM(path.Replace(".ssb", ".psm"));
 
             using (Stream stream = File.Open(path, FileMode.Open))
@@ -102,6 +106,8 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2
                                 break;
                             }
                         }
+
+                        //Multithread
 
                         //CheckSize
                         if(memoryStream.Length!= StreamingChunk.unpackedSize)
@@ -340,6 +346,11 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2
 
             SSX3Config ssx3Config = new SSX3Config();
             ssx3Config.CreateJson(extractPath + "//ConfigSSX3.ssx");
+        }
+
+        static async Task ExtractPrcoess(string LevelExtractPath)
+        {
+
         }
     }
 }
