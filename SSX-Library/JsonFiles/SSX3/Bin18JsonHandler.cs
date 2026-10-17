@@ -6,7 +6,7 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
-using SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData;
+using SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSB3Data;
 
 namespace SSXLibrary.JsonFiles.SSX3
 {

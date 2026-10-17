@@ -1,5 +1,5 @@
 ﻿using Newtonsoft.Json;
-using SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData;
+using SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSB3Data;
 using System;
 using System.Collections.Generic;
 using System.IO;
