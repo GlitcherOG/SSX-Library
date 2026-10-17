@@ -8,9 +8,9 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSB3Data
 {
     public class WorldMDR
     {
-        public string Name;
-
         public ObjectID objectID;
+
+        public string Name;
 
         public int U1Count;
         public int U1Offset;

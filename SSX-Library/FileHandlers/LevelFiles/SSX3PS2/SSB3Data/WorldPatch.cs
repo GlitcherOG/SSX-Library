@@ -13,6 +13,8 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSB3Data
 {
     public class WorldPatch
     {
+        public ObjectID objectID;
+
         public string Name = "Null";
 
         public int U0;
@@ -23,30 +25,12 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSB3Data
         public int U5;
 
         public Vector4 Lightmap;
-        public Vector2 UV1;
-        public Vector2 UV2;
-        public Vector2 UV3;
-        public Vector2 UV4;
+        public Vector2[] UV = new Vector2[4];
 
-        public Vector4 R4C4;
-        public Vector4 R4C3;
-        public Vector4 R4C2;
-        public Vector4 R4C1;
-        public Vector4 R3C4;
-        public Vector4 R3C3;
-        public Vector4 R3C2;
-        public Vector4 R3C1;
-        public Vector4 R2C4;
-        public Vector4 R2C3;
-        public Vector4 R2C2;
-        public Vector4 R2C1;
-        public Vector4 R1C4;
-        public Vector4 R1C3;
-        public Vector4 R1C2;
-        public Vector4 R1C1;
+        public Vector4[] controlPoints = new Vector4[16];
 
         public Vector4 U7;
-        public ObjectID objectID;
+
         public int U10;
         public int StreamingChunkID;
 
@@ -77,27 +61,18 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSB3Data
             U5 = StreamUtil.ReadInt16(stream);
 
             Lightmap = StreamUtil.ReadVector4(stream);
-            UV1 = StreamUtil.ReadVector2(stream);
-            UV2 = StreamUtil.ReadVector2(stream);
-            UV3 = StreamUtil.ReadVector2(stream);
-            UV4 = StreamUtil.ReadVector2(stream);
 
-            R4C4 = StreamUtil.ReadVector4(stream);
-            R4C3 = StreamUtil.ReadVector4(stream);
-            R4C2 = StreamUtil.ReadVector4(stream);
-            R4C1 = StreamUtil.ReadVector4(stream);
-            R3C4 = StreamUtil.ReadVector4(stream);
-            R3C3 = StreamUtil.ReadVector4(stream);
-            R3C2 = StreamUtil.ReadVector4(stream);
-            R3C1 = StreamUtil.ReadVector4(stream);
-            R2C4 = StreamUtil.ReadVector4(stream);
-            R2C3 = StreamUtil.ReadVector4(stream);
-            R2C2 = StreamUtil.ReadVector4(stream);
-            R2C1 = StreamUtil.ReadVector4(stream);
-            R1C4 = StreamUtil.ReadVector4(stream);
-            R1C3 = StreamUtil.ReadVector4(stream);
-            R1C2 = StreamUtil.ReadVector4(stream);
-            R1C1 = StreamUtil.ReadVector4(stream);
+            UV = new Vector2[4];
+            for (int i = 0; i < 4; i++)
+            {
+                UV[i] = StreamUtil.ReadVector2(stream);
+            }
+
+            controlPoints = new Vector4[16];
+            for (int i = 0; i < 16; i++)
+            {
+                controlPoints[i] = StreamUtil.ReadVector4(stream);
+            }
 
             U7 = StreamUtil.ReadVector4(stream);
             objectID = WorldCommon.ObjectIDLoad(stream);
@@ -139,35 +114,17 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSB3Data
             patchJson.LightMapPoint = ArrayConv.Vector4ToArray(Lightmap);
             patchJson.UVPoints = new float[4, 2];
 
-            patchJson.UVPoints[0, 0] = UV1.X;
-            patchJson.UVPoints[0, 1] = UV1.Y;
-
-            patchJson.UVPoints[1, 0] = UV2.X;
-            patchJson.UVPoints[1, 1] = UV2.Y;
-
-            patchJson.UVPoints[2, 0] = UV3.X;
-            patchJson.UVPoints[2, 1] = UV3.Y;
-
-            patchJson.UVPoints[3, 0] = UV4.X;
-            patchJson.UVPoints[3, 1] = UV4.Y;
+            for (int i = 0; i < 4; i++)
+            {
+                patchJson.UVPoints[i, 0] = UV[i].X;
+                patchJson.UVPoints[i, 1] = UV[i].Y;
+            }
 
             BezierUtil bezierUtil = new BezierUtil();
-            bezierUtil.ProcessedPoints[0] = VectorConv.Vector4ToVector3(R1C1);
-            bezierUtil.ProcessedPoints[1] = VectorConv.Vector4ToVector3(R1C2);
-            bezierUtil.ProcessedPoints[2] = VectorConv.Vector4ToVector3(R1C3);
-            bezierUtil.ProcessedPoints[3] = VectorConv.Vector4ToVector3(R1C4);
-            bezierUtil.ProcessedPoints[4] = VectorConv.Vector4ToVector3(R2C1);
-            bezierUtil.ProcessedPoints[5] = VectorConv.Vector4ToVector3(R2C2);
-            bezierUtil.ProcessedPoints[6] = VectorConv.Vector4ToVector3(R2C3);
-            bezierUtil.ProcessedPoints[7] = VectorConv.Vector4ToVector3(R2C4);
-            bezierUtil.ProcessedPoints[8] = VectorConv.Vector4ToVector3(R3C1);
-            bezierUtil.ProcessedPoints[9] = VectorConv.Vector4ToVector3(R3C2);
-            bezierUtil.ProcessedPoints[10] = VectorConv.Vector4ToVector3(R3C3);
-            bezierUtil.ProcessedPoints[11] = VectorConv.Vector4ToVector3(R3C4);
-            bezierUtil.ProcessedPoints[12] = VectorConv.Vector4ToVector3(R4C1);
-            bezierUtil.ProcessedPoints[13] = VectorConv.Vector4ToVector3(R4C2);
-            bezierUtil.ProcessedPoints[14] = VectorConv.Vector4ToVector3(R4C3);
-            bezierUtil.ProcessedPoints[15] = VectorConv.Vector4ToVector3(R4C4);
+            for (int i = 0; i < 16; i++)
+            {
+                bezierUtil.ProcessedPoints[i] = VectorConv.Vector4ToVector3(controlPoints[i]);
+            }
 
             bezierUtil.GenerateRawPoints();
 

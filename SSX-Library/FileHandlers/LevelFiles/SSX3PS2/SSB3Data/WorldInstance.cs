@@ -7,14 +7,9 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSB3Data
 {
     public class WorldInstance
     {
-        // The instance tail carries a per-model-vertex baked-lighting array
-        // (one 16-bit ABGR1555 colour per vertex, potentially thousands). Gate
-        // its JSON emission behind this flag so normal exports stay small.
-        public static bool EmitVertexColors = false;
+        public ObjectID objectID;
 
         public string Name;
-
-        public ObjectID objectID;
 
         public int U0;
         public int U1;
@@ -149,11 +144,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSB3Data
             bin3File.U11 = U11;
             bin3File.U12 = U12;
 
-            // Large per-vertex bake array — only emit when explicitly requested.
-            if (EmitVertexColors)
-            {
-                bin3File.VertexColors = VertexColors;
-            }
+            bin3File.VertexColors = VertexColors;
 
             return bin3File;
         }
