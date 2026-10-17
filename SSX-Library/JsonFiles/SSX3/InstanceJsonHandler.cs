@@ -52,10 +52,6 @@ namespace SSXLibrary.JsonFiles.SSX3
             public float[] Rotation;
             public float[] Scale;
 
-
-            public float[] V0;
-            public float[] V1;
-            public float[] V2;
             public float U31;
 
             public int U4;

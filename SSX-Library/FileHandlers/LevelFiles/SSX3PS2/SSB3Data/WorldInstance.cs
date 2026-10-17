@@ -22,9 +22,9 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
         public int U3;
 
         public Matrix4x4 matrix4X4 = new Matrix4x4();
-        public Vector4 V0;
-        public Vector3 V1;
-        public Vector3 V2;
+        public Vector4 BBoxCentre;
+        public Vector3 BBoxLow;
+        public Vector3 BBoxHigh;
 
         public int U4; //Unknown int16 (offset 0x7C), common values 2048, 4096, 6144, 7680, 11520
         //Global SDB streaming chunk ID of the leaf chunk that holds this instance's model textures, or the location chunk
@@ -56,9 +56,9 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
             U3 = StreamUtil.ReadInt32(stream);
 
             matrix4X4 = StreamUtil.ReadMatrix4x4(stream);
-            V0 = StreamUtil.ReadVector4(stream);
-            V1 = StreamUtil.ReadVector3(stream);
-            V2 = StreamUtil.ReadVector3(stream);
+            BBoxCentre = StreamUtil.ReadVector4(stream);
+            BBoxLow = StreamUtil.ReadVector3(stream);
+            BBoxHigh = StreamUtil.ReadVector3(stream);
 
             objectID = WorldCommon.ObjectIDLoad(stream); 
             U4 = StreamUtil.ReadUInt16(stream);
@@ -133,10 +133,6 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
             bin3File.Position = ArrayConv.Vector3ToArray(Location);
             bin3File.Rotation = ArrayConv.QuaternionToArray(Rotation);
             bin3File.Scale = ArrayConv.Vector3ToArray(MatrixScale * Scale);
-
-            bin3File.V0 = ArrayConv.Vector4ToArray(V0);
-            bin3File.V1 = ArrayConv.Vector3ToArray(V1);
-            bin3File.V2 = ArrayConv.Vector3ToArray(V2);
 
             bin3File.TrackID = objectID.TrackID;
             bin3File.RID = objectID.RID;
