@@ -53,8 +53,6 @@ namespace SSXLibrary.JsonFiles.SSX3
 
             public float U6;
 
-            public List<ObjectID> MaterialList;
-
             public List<ModelObject> ModelObjects;
         }
 
@@ -94,7 +92,7 @@ namespace SSXLibrary.JsonFiles.SSX3
         {
             public string ModelPath;
 
-            public int MaterialID;
+            public ObjectID MaterialID;
             public int U1;
             public int U4;
 

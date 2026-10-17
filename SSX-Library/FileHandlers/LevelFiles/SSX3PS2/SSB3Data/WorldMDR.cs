@@ -580,8 +580,6 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
 
             JsonModelObject.U6 = U6;
 
-            JsonModelObject.MaterialList = MaterialList;
-
             JsonModelObject.ModelObjects = new List<MDRJsonHandler.ModelObject>();
 
             for (int i = 0; i < ModelObjects.Count; i++)
@@ -618,7 +616,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSBData
 
                         TempModelOffset.ModelPath = modelObject.unknownS2.ModelHeaderOffset[j].ModelPath;
 
-                        TempModelOffset.MaterialID = modelObject.unknownS2.ModelHeaderOffset[j].MaterialID;
+                        TempModelOffset.MaterialID = MaterialList[modelObject.unknownS2.ModelHeaderOffset[j].MaterialID];
                         TempModelOffset.U1 = modelObject.unknownS2.ModelHeaderOffset[j].U1;
                         TempModelOffset.U4 = modelObject.unknownS2.ModelHeaderOffset[j].U4;
 
