@@ -167,6 +167,13 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2
 
                                 bin3JsonHandler.Instances.Add(worldBin3.ToJSON());
                             }
+                            else if (ID == 4)
+                            {
+                                WorldBin4 worldBin4 = new WorldBin4();
+                                worldBin4.LoadData(EntryStream);
+
+                                //Do something with data
+                            }
                             else if (ID == 5)
                             {
                                 WorldParticleInstance worldParticleInstance = new WorldParticleInstance();
