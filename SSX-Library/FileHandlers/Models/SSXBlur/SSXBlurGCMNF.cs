@@ -1,7 +1,7 @@
-﻿using SSX_Library.Internal.Utilities;
+﻿using SSXLibrary.Internal.Utilities;
 using System.IO;
 using System.Numerics;
-using SSX_Library.Internal;
+using SSXLibrary.Internal;
 
 namespace SSXLibrary.FileHandlers.Models.SSXBlur
 {

@@ -1,5 +1,5 @@
 ﻿using System.Numerics;
-using SSX_Library.Internal.Utilities;
+using SSXLibrary.Internal.Utilities;
 
 namespace SSXLibrary.FileHandlers.Models.Tricky
 {

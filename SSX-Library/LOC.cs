@@ -1,8 +1,8 @@
 using System.Collections.Immutable;
 using System.Text;
-using SSX_Library.Internal.Utilities.StreamExtensions;
+using SSXLibrary.Internal.Utilities.StreamExtensions;
 
-namespace SSX_Library;
+namespace SSXLibrary;
 
 /*
     Saving Behavior:

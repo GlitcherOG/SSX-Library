@@ -5,7 +5,7 @@ using System.Diagnostics;
 using System.Text;
 using static System.Net.Mime.MediaTypeNames;
 
-namespace SSX_Library.FileHandlers
+namespace SSXLibrary.FileHandlers
 {
     internal class BNKAudioCode
     {

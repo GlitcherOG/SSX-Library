@@ -1,9 +1,9 @@
-using SSX_Library.Internal.Utilities.StreamExtensions;
+using SSXLibrary.Internal.Utilities.StreamExtensions;
 using System.Collections.Immutable;
 using System.Text;
 using System.IO.Compression;
 
-namespace SSX_Library.Internal.BIG;
+namespace SSXLibrary.Internal.BIG;
 
 /// <summary>
 /// Helper class for dealing with ChunkZip compression

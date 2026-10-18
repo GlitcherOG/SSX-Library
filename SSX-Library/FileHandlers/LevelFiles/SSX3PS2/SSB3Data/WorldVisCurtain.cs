@@ -1,4 +1,4 @@
-using SSX_Library.Internal.Utilities;
+using SSXLibrary.Internal.Utilities;
 using SSXLibrary.JsonFiles.SSX3;
 using System;
 using System.Collections.Generic;

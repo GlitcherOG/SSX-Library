@@ -1,6 +1,6 @@
 
 
-namespace SSX_Library.Internal.Textures;
+namespace SSXLibrary.Internal.Textures;
 
 public sealed class NewShape
 {

@@ -1,4 +1,4 @@
-namespace SSX_Library;
+namespace SSXLibrary;
 
 /*
     Global User-level Structs

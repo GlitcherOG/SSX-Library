@@ -1,6 +1,6 @@
-using SSX_Library.Internal.Utilities.StreamExtensions;
+using SSXLibrary.Internal.Utilities.StreamExtensions;
 
-namespace SSX_Library.Internal;
+namespace SSXLibrary.Internal;
 
 /*
     More Info on the bitstream structure: http://wiki.niotso.org/RefPack

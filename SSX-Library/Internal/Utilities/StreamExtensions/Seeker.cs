@@ -1,4 +1,4 @@
-namespace SSX_Library.Internal.Utilities.StreamExtensions;
+namespace SSXLibrary.Internal.Utilities.StreamExtensions;
 
 /// <summary>
 /// Stream extensions for moving a stream's position without reading or writing.

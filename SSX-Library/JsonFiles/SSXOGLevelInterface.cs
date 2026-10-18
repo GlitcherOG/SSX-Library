@@ -1,10 +1,10 @@
 ﻿using SSXLibrary.FileHandlers.LevelFiles.OGPS2;
 using SSXLibrary.JsonFiles.SSXOG;
-using SSX_Library.Internal.Utilities;
+using SSXLibrary.Internal.Utilities;
 using System.Numerics;
 using System.Collections;
-using SSX_Library.EATextureLibrary;
-using SSX_Library.Internal.Utilities;
+using SSXLibrary.EATextureLibrary;
+using SSXLibrary.Internal.Utilities;
 
 
 namespace SSXLibrary.JsonFiles

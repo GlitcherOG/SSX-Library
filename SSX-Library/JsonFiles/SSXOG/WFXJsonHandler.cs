@@ -1,6 +1,6 @@
 ﻿//using SSXLibrary.FileHandlers.LevelFiles.OGPS2;
 //using SSXLibrary.JsonFiles.Tricky;
-//using SSX_Library.Internal.Utilities;
+//using SSXLibrary.Internal.Utilities;
 //using System;
 //using System.Collections.Generic;
 //using System.Linq;

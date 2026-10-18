@@ -1,5 +1,5 @@
 ﻿using SSXLibrary.JsonFiles.SSX3;
-using SSX_Library.Internal.Utilities;
+using SSXLibrary.Internal.Utilities;
 
 namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSB3Data
 {

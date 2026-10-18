@@ -1,5 +1,5 @@
-﻿using SSX_Library;
-using SSX_Library.Internal.Utilities;
+﻿using SSXLibrary;
+using SSXLibrary.Internal.Utilities;
 using SSXLibrary.FileHandlers;
 using System.Diagnostics;
 using System.IO.Hashing;

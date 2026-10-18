@@ -1,5 +1,5 @@
-﻿using SSX_Library.Internal.Utilities;
-using SSX_Library.Internal;
+﻿using SSXLibrary.Internal.Utilities;
+using SSXLibrary.Internal;
 using System;
 using System.Collections.Generic;
 using System.IO;

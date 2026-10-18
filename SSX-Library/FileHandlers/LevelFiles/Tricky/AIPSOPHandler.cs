@@ -1,7 +1,7 @@
-﻿using SSX_Library.Internal.Utilities;
+﻿using SSXLibrary.Internal.Utilities;
 using System.Numerics;
 
-namespace SSX_Library.FileHandlers.LevelFiles.Tricky
+namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
 {
     public class AIPSOPHandler
     {

@@ -2,14 +2,14 @@
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 using SixLabors.ImageSharp.Processing.Processors.Quantization;
-using SSX_Library.Internal;
-using SSX_Library.Internal.Utilities;
-using SSX_Library.Internal.Utilities.StreamExtensions;
+using SSXLibrary.Internal;
+using SSXLibrary.Internal.Utilities;
+using SSXLibrary.Internal.Utilities.StreamExtensions;
 using System.Drawing;
 using System.Text;
 
 
-namespace SSX_Library.EATextureLibrary
+namespace SSXLibrary.EATextureLibrary
 {
     public class OldShapeHandler
     {

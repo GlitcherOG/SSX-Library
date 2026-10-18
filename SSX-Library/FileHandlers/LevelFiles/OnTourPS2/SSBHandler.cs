@@ -1,5 +1,5 @@
-using SSX_Library.Internal;
-using SSX_Library.Internal.Utilities;
+using SSXLibrary.Internal;
+using SSXLibrary.Internal.Utilities;
 using SSXLibrary.FileHandlers.LevelFiles.SSXOnTourPS2.SSBOnTourData;
 using System.Diagnostics;
 using System.IO;

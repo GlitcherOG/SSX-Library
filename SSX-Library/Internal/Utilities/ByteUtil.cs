@@ -1,7 +1,7 @@
 ﻿using SixLabors.ImageSharp.PixelFormats;
 using System.Collections;
 
-namespace SSX_Library.Internal.Utilities;
+namespace SSXLibrary.Internal.Utilities;
 
 // Todo: Replace with ByteConv.cs
 internal class ByteUtil

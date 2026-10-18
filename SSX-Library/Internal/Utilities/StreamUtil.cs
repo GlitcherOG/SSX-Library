@@ -2,7 +2,7 @@
 using System.Numerics;
 using System.Drawing;
 
-namespace SSX_Library.Internal.Utilities
+namespace SSXLibrary.Internal.Utilities
 {
     internal class StreamUtil
     {

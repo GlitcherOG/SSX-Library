@@ -1,5 +1,5 @@
 ﻿using ICSharpCode.SharpZipLib.Core;
-using SSX_Library.Internal.Utilities.StreamExtensions;
+using SSXLibrary.Internal.Utilities.StreamExtensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +7,7 @@ using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SSX_Library.FileHandlers.LevelFiles.Tricky.Xbox
+namespace SSXLibrary.FileHandlers.LevelFiles.Tricky.Xbox
 {
     public class XBDHandler
     {

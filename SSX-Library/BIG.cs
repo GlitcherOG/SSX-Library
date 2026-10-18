@@ -1,6 +1,6 @@
-using SSX_Library.Internal.BIG;
+using SSXLibrary.Internal.BIG;
 
-namespace SSX_Library;
+namespace SSXLibrary;
 
 /*
     More Info: https://ssx.computernewb.com/wiki/Formats/Common:BIG

@@ -1,6 +1,6 @@
-using SSX_Library.Internal.Textures;
+using SSXLibrary.Internal.Textures;
 
-namespace SSX_Library;
+namespace SSXLibrary;
 
 /// <summary>
 /// Mipmap texture files for the SSX3 Gizmondo version.

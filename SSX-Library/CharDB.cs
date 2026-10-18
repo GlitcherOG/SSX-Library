@@ -1,6 +1,6 @@
-using SSX_Library.Internal.Utilities.StreamExtensions;
+using SSXLibrary.Internal.Utilities.StreamExtensions;
 
-namespace SSX_Library;
+namespace SSXLibrary;
 
 /// <summary>
 /// Handler for the SSX3 CharDB.dbl file for storing character information.

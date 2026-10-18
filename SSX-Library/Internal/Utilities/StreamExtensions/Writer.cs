@@ -1,7 +1,7 @@
 using System.Buffers.Binary;
 using System.Text;
 
-namespace SSX_Library.Internal.Utilities.StreamExtensions;
+namespace SSXLibrary.Internal.Utilities.StreamExtensions;
 
 /// <summary>
 /// Stream extensions for writing primitive types.

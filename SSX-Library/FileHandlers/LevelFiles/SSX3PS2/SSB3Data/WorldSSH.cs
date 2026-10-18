@@ -1,8 +1,8 @@
 ﻿using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
-using SSX_Library.EATextureLibrary;
-using SSX_Library.Internal;
-using SSX_Library.Internal.Utilities;
+using SSXLibrary.EATextureLibrary;
+using SSXLibrary.Internal;
+using SSXLibrary.Internal.Utilities;
 
 namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSB3Data
 {

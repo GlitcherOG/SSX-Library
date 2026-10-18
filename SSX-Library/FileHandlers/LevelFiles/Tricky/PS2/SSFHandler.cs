@@ -1,9 +1,9 @@
-﻿using SSX_Library.Internal.Utilities;
-using SSX_Library.Internal.Utilities.StreamExtensions;
+﻿using SSXLibrary.Internal.Utilities;
+using SSXLibrary.Internal.Utilities.StreamExtensions;
 using System.Globalization;
 using System.Numerics;
 
-namespace SSX_Library.FileHandlers.LevelFiles.Tricky.PS2
+namespace SSXLibrary.FileHandlers.LevelFiles.Tricky.PS2
 {
     public class SSFHandler
     {

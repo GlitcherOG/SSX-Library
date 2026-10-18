@@ -1,11 +1,11 @@
 ﻿using System.Numerics;
-using SSX_Library.Internal.Utilities;
+using SSXLibrary.Internal.Utilities;
 using System.Globalization;
 using SharpGLTF.Geometry.VertexTypes;
 using SharpGLTF.Geometry;
 using SharpGLTF.Materials;
 
-namespace SSX_Library.FileHandlers.LevelFiles.Tricky.PS2
+namespace SSXLibrary.FileHandlers.LevelFiles.Tricky.PS2
 {
     public class PBDHandler
     {

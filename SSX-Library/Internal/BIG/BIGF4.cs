@@ -1,8 +1,8 @@
 using System.Collections.Immutable;
 using System.ComponentModel;
-using SSX_Library.Internal.Utilities.StreamExtensions;
+using SSXLibrary.Internal.Utilities.StreamExtensions;
 
-namespace SSX_Library.Internal.BIG;
+namespace SSXLibrary.Internal.BIG;
 
 /// <summary>
 /// Handles BIGF and BIG4 type big files.

@@ -1,9 +1,9 @@
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp;
-using SSX_Library.Internal.Utilities.StreamExtensions;
+using SSXLibrary.Internal.Utilities.StreamExtensions;
 using CommunityToolkit.HighPerformance;
 
-namespace SSX_Library.Internal.Textures;
+namespace SSXLibrary.Internal.Textures;
 
 internal static class Gizmondo
 {

@@ -1,4 +1,4 @@
-namespace SSX_Library.Internal;
+namespace SSXLibrary.Internal;
 
 /*
     More Info on the bitstream structure: http://wiki.niotso.org/RefPack

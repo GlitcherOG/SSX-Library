@@ -1,5 +1,5 @@
-﻿using SSX_Library.Internal.Utilities;
-using SSX_Library.Internal.Utilities.StreamExtensions;
+﻿using SSXLibrary.Internal.Utilities;
+using SSXLibrary.Internal.Utilities.StreamExtensions;
 using System.IO;
 
 namespace SSXLibrary.FileHandlers.LevelFiles.OnTourPS2

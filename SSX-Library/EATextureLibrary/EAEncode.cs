@@ -2,12 +2,12 @@
 using BCnEncoder.Encoder;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
-using SSX_Library.Internal.Utilities;
+using SSXLibrary.Internal.Utilities;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Text;
 
-namespace SSX_Library.EATextureLibrary
+namespace SSXLibrary.EATextureLibrary
 {
     internal class EAEncode
     {

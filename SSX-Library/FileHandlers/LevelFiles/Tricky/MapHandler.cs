@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SSX_Library.FileHandlers.LevelFiles.Tricky
+namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
 {
     public class MapHandler
     {
