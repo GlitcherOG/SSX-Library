@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Text;
+using SSXLibrary.JsonFiles.SSX3;
 
 namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSB3Data
 {
@@ -83,6 +84,29 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSB3Data
 
                 PointDataList.Add(pointData);
             }
+        }
+
+        public Bin4JsonHandler.Bin4 ToJSON()
+        {
+            Bin4JsonHandler.Bin4 bin4 = new Bin4JsonHandler.Bin4();
+            bin4.Name = objectID.RID.ToString();
+
+            bin4.objectID = objectID;
+
+            bin4.PointDatas = new List<Bin4JsonHandler.PointData>();
+            for (int i = 0; i < PointDataList.Count; i++)
+            {
+                var TempPointData = new Bin4JsonHandler.PointData();
+
+                TempPointData.UVector1 = ArrayConv.Vector3ToArray(PointDataList[i].UVector1);
+                TempPointData.UVector2 = ArrayConv.Vector3ToArray(PointDataList[i].UVector2);
+
+                TempPointData.U0 = PointDataList[i].U0;
+
+                bin4.PointDatas.Add(TempPointData);
+            }
+
+            return bin4;
         }
 
 

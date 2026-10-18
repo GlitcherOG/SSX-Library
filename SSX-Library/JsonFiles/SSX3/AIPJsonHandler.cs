@@ -27,18 +27,18 @@ namespace SSXLibrary.JsonFiles.SSX3
             File.WriteAllText(path, serializer);
         }
 
-        public static MaterialJsonHandler Load(string path)
+        public static AIPJsonHandler Load(string path)
         {
             string paths = path;
             if (File.Exists(paths))
             {
                 var stream = File.ReadAllText(paths);
-                var container = JsonConvert.DeserializeObject<MaterialJsonHandler>(stream);
+                var container = JsonConvert.DeserializeObject<AIPJsonHandler>(stream);
                 return container;
             }
             else
             {
-                return new MaterialJsonHandler();
+                return new AIPJsonHandler();
             }
         }
 

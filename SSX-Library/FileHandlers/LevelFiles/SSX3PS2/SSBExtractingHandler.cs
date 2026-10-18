@@ -59,6 +59,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2
                 PatchesJsonHandler patchesJsonHandler = new PatchesJsonHandler();
                 MaterialJsonHandler bin0JsonHandler = new MaterialJsonHandler();
                 InstanceJsonHandler bin3JsonHandler = new InstanceJsonHandler();
+                Bin4JsonHandler bin4JsonHandler = new Bin4JsonHandler();
                 ParticleInstanceJsonHandler particleInstanceJsonHandler = new ParticleInstanceJsonHandler();
                 Bin6JsonHandler bin6JsonHandler = new Bin6JsonHandler();
                 Bin7JsonHandler bin7JsonHandler = new Bin7JsonHandler();
@@ -172,7 +173,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2
                                 WorldBin4 worldBin4 = new WorldBin4();
                                 worldBin4.LoadData(EntryStream);
 
-                                //Do something with data
+                                bin4JsonHandler.bin4s.Add(worldBin4.ToJSON());
                             }
                             else if (ID == 5)
                             {
@@ -307,6 +308,9 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2
 
                     Console.WriteLine(LevelExtractPath + "//Instances.json");
                     bin3JsonHandler.CreateJson(LevelExtractPath + "//Instances.json");
+
+                    Console.WriteLine(LevelExtractPath + "//bin4.json");
+                    bin4JsonHandler.CreateJson(LevelExtractPath + "//bin4.json");
 
                     Console.WriteLine(LevelExtractPath + "//ParticleInstances.json");
                     particleInstanceJsonHandler.CreateJson(LevelExtractPath + "//ParticleInstances.json");
