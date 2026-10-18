@@ -22,8 +22,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSB3Data
         public Vector3 BBoxHigh;
 
         public int U4; //Unknown int16 (offset 0x7C), common values 2048, 4096, 6144, 7680, 11520
-        //Global SDB streaming chunk ID of the leaf chunk that holds this instance's model textures, or the location chunk
-        //for skies/TRANSP (offset 0x7E). Has to be updated if the streaming chunks are regenerated (see SSBStreamingRebuild.SetStreamingChunkID)
+
         public int StreamingChunkID;
 
         public ObjectID ModelID;
@@ -129,12 +128,10 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSB3Data
             bin3File.Rotation = ArrayConv.QuaternionToArray(Rotation);
             bin3File.Scale = ArrayConv.Vector3ToArray(MatrixScale * Scale);
 
-            bin3File.TrackID = objectID.TrackID;
-            bin3File.RID = objectID.RID;
+            bin3File.objectID = objectID;
             bin3File.U4 = U4;
 
-            bin3File.ModelTrackID = ModelID.TrackID;
-            bin3File.ModelRID = ModelID.RID;
+            bin3File.Model = ModelID;
             bin3File.U6 = U6;
             bin3File.U7 = U7;
 

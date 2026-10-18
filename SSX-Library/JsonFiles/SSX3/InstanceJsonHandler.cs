@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSB3Data;
 using System.IO;
 
 
@@ -40,8 +41,7 @@ namespace SSXLibrary.JsonFiles.SSX3
         {
             public string Name;
 
-            public int TrackID;
-            public int RID;
+            public ObjectID objectID;
 
             public int U0;
             public int U1;
@@ -56,8 +56,7 @@ namespace SSXLibrary.JsonFiles.SSX3
 
             public int U4;
 
-            public int ModelTrackID;
-            public int ModelRID;
+            public ObjectID Model;
             public int U6;
             public int U7;
 
