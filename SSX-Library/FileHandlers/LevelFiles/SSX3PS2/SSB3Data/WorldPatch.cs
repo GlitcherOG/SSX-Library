@@ -123,7 +123,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSB3Data
             BezierUtil bezierUtil = new BezierUtil();
             for (int i = 0; i < 16; i++)
             {
-                bezierUtil.ProcessedPoints[i] = VectorConv.Vector4ToVector3(controlPoints[i]);
+                bezierUtil.ProcessedPoints[i] = VectorConv.Vector4ToVector3(controlPoints[15-i]);
             }
 
             bezierUtil.GenerateRawPoints();
