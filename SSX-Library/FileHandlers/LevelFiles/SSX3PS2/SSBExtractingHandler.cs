@@ -14,27 +14,27 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2
         /*
             
         All IDS
-        0 - Materials
-        1 - Patches
-        2 - WorldMDR
-        3 - Instance
-        4 - Particle Model
-        5 - Particles Instance
-        6 - Lights
-        7 - Halo
-        8 - Splines
-        9 - Shape
-        10 - Old Shape Lightmaps
-        11 - Vis Curtains
-        12 - Collision?
-        13 - Sound Triggers?
-        14 - AIP
+        0 - Materials - Extracting
+        1 - Patches - Extracting
+        2 - WorldMDR - Partically
+        3 - Instance - Extracting (Issues with Vertex Lighting and no idea if collisions are linked)
+        4 - Particle Model - Extracting
+        5 - Particles Instance - Extracting (Needs a Review)
+        6 - Lights - Extracting
+        7 - Halo - Extracting
+        8 - Splines - Extacting
+        9 - Shape - Extracting
+        10 - Old Shape Lightmaps - Extracting
+        11 - Vis Curtains - Extracting
+        12 - Collision? - Extracting Mostly but unknown how its linked
+        13 - Sound Triggers? - Loading
+        14 - AIP - Extracting
         15 - World Painter?
         16 - Scripts?
         17 - CameraTriggers?
-        18 - NIS Table
+        18 - NIS Table - Extracting
         19 - Missions?
-        20 - AudioBank
+        20 - AudioBank - Extracting
         21 - Radar?
         22 - Avalanche Animation
          */
@@ -244,6 +244,13 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2
 
                                 Console.WriteLine(LevelExtractPath + "//Collision//" + phmHandler.GetName(TrackID, RID, 4, psmHandler) + ".obj");
                                 worldBin12.CollisionObjectSave(LevelExtractPath + "//Collision//", phmHandler.GetName(TrackID, RID, 4, psmHandler));
+                            }
+                            else if (ID == 13)
+                            {
+                                WorldBin13 worldBin13 = new WorldBin13();
+                                worldBin13.LoadData(EntryStream);
+
+                                //Something
                             }
                             else if (ID == 14)
                             {
