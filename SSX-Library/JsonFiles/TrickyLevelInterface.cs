@@ -281,42 +281,42 @@ namespace SSXLibrary
                 //The .ssf can come up short on a custom course the same way the .map does.
                 //Only the gameplay properties are missing - the instance itself is already
                 //built from the pbd - so leave them at their defaults and carry on.
-                int StatePos = i < ssfHandler.InstanceState.Count ? ssfHandler.InstanceState[i] : -1;
-                if (StatePos >= 0 && StatePos < ssfHandler.ObjectProperties.Count)
+                if (consoleVersion == ConsoleVersion.PS2)
                 {
-                    instanceJson.U0 = ssfHandler.ObjectProperties[StatePos].U0;
-                    instanceJson.PlayerBounceAmmount = ssfHandler.ObjectProperties[StatePos].PlayerBounce;
-                    instanceJson.U2 = ssfHandler.ObjectProperties[StatePos].U2;
-
-                    //GenerateBitArray
-
-                    byte[] TempBytes = BitConverter.GetBytes(ssfHandler.ObjectProperties[StatePos].BitFlags);
-
-                    BitArray bitArray = new BitArray(TempBytes);
-
-
-
-                    instanceJson.Visable = bitArray[0];
-                    instanceJson.PlayerCollision = bitArray[5];
-                    instanceJson.PlayerBounce = bitArray[7];
-                    instanceJson.Unknown241 = bitArray[12];
-                    instanceJson.UVScroll = bitArray[13];
-
-
-                    instanceJson.SurfaceType = ssfHandler.ObjectProperties[StatePos].SurfaceType;
-                    instanceJson.CollsionMode = ssfHandler.ObjectProperties[StatePos].CollsionMode;
-                    instanceJson.EffectSlotIndex = ssfHandler.ObjectProperties[StatePos].EffectSlotIndex;
-                    instanceJson.PhysicsIndex = ssfHandler.ObjectProperties[StatePos].PhysicsIndex;
-                    instanceJson.U8 = ssfHandler.ObjectProperties[StatePos].U8;
-
-                    int CollsionPos = ssfHandler.ObjectProperties[StatePos].CollisonModelIndex;
-                    if (CollsionPos != -1 && CollsionPos < ssfHandler.CollisonModelPointers.Count && instanceJson.CollsionMode != 3)
+                    int StatePos = i < ssfHandler.InstanceState.Count ? ssfHandler.InstanceState[i] : -1;
+                    if (StatePos >= 0 && StatePos < ssfHandler.ObjectProperties.Count)
                     {
-                        instanceJson.CollsionModelPaths = new string[ssfHandler.CollisonModelPointers[CollsionPos].Models.Count];
+                        instanceJson.U0 = ssfHandler.ObjectProperties[StatePos].U0;
+                        instanceJson.PlayerBounceAmmount = ssfHandler.ObjectProperties[StatePos].PlayerBounce;
+                        instanceJson.U2 = ssfHandler.ObjectProperties[StatePos].U2;
 
-                        for (int a = 0; a < instanceJson.CollsionModelPaths.Length; a++)
+                        //GenerateBitArray
+
+                        byte[] TempBytes = BitConverter.GetBytes(ssfHandler.ObjectProperties[StatePos].BitFlags);
+
+                        BitArray bitArray = new BitArray(TempBytes);
+
+                        instanceJson.Visable = bitArray[0];
+                        instanceJson.PlayerCollision = bitArray[5];
+                        instanceJson.PlayerBounce = bitArray[7];
+                        instanceJson.Unknown241 = bitArray[12];
+                        instanceJson.UVScroll = bitArray[13];
+
+                        instanceJson.SurfaceType = ssfHandler.ObjectProperties[StatePos].SurfaceType;
+                        instanceJson.CollsionMode = ssfHandler.ObjectProperties[StatePos].CollsionMode;
+                        instanceJson.EffectSlotIndex = ssfHandler.ObjectProperties[StatePos].EffectSlotIndex;
+                        instanceJson.PhysicsIndex = ssfHandler.ObjectProperties[StatePos].PhysicsIndex;
+                        instanceJson.U8 = ssfHandler.ObjectProperties[StatePos].U8;
+
+                        int CollsionPos = ssfHandler.ObjectProperties[StatePos].CollisonModelIndex;
+                        if (CollsionPos != -1 && CollsionPos < ssfHandler.CollisonModelPointers.Count && instanceJson.CollsionMode != 3)
                         {
-                            instanceJson.CollsionModelPaths[a] = ssfHandler.CollisonModelPointers[CollsionPos].Models[a].MeshPath;
+                            instanceJson.CollsionModelPaths = new string[ssfHandler.CollisonModelPointers[CollsionPos].Models.Count];
+
+                            for (int a = 0; a < instanceJson.CollsionModelPaths.Length; a++)
+                            {
+                                instanceJson.CollsionModelPaths[a] = ssfHandler.CollisonModelPointers[CollsionPos].Models[a].MeshPath;
+                            }
                         }
                     }
                 }
@@ -484,11 +484,14 @@ namespace SSXLibrary
                 SplineJsonHandler.SplineJson TempSpline = new SplineJsonHandler.SplineJson();
                 TempSpline.SplineName = splineName;
 
-                if (i < ssfHandler.Splines.Count)
+                if (consoleVersion == ConsoleVersion.PS2)
                 {
-                    TempSpline.U0 = ssfHandler.Splines[i].U1;
-                    TempSpline.U1 = ssfHandler.Splines[i].U2;
-                    TempSpline.SplineStyle = ssfHandler.Splines[i].SplineStyle;
+                    if (i < ssfHandler.Splines.Count)
+                    {
+                        TempSpline.U0 = ssfHandler.Splines[i].U1;
+                        TempSpline.U1 = ssfHandler.Splines[i].U2;
+                        TempSpline.SplineStyle = ssfHandler.Splines[i].SplineStyle;
+                    }
                 }
 
                 TempSpline.Segments = new List<SplineJsonHandler.SegmentJson>();
@@ -553,7 +556,7 @@ namespace SSXLibrary
                             var TempMeshHeader = new ModelJsonHandler.MeshHeader();
 
                             TempMeshHeader.MeshPath = pbdHandler.modelData[i].ModelObjects[a].objectData.MeshOffsets[b].MeshID + ".obj";
-                            TempMeshHeader.MaterialID = pbdHandler.materialBlocks[pbdHandler.modelData[i].MaterialBlockID].ints[pbdHandler.modelData[i].ModelObjects[a].objectData.MeshOffsets[b].MaterialBlockPos];
+                            //TempMeshHeader.MaterialID = pbdHandler.materialBlocks[pbdHandler.modelData[i].MaterialBlockID].ints[pbdHandler.modelData[i].ModelObjects[a].objectData.MeshOffsets[b].MaterialBlockPos];
 
                             TempPrefabObject.MeshData.Add(TempMeshHeader);
                         }
@@ -1237,7 +1240,7 @@ namespace SSXLibrary
                                 var TempMeshHeader = new ModelJsonHandler.MeshHeader();
 
                                 TempMeshHeader.MeshPath = skypbdHandler.modelData[i].ModelObjects[a].objectData.MeshOffsets[b].MeshID + ".obj";
-                                TempMeshHeader.MaterialID = skypbdHandler.materialBlocks[skypbdHandler.modelData[i].MaterialBlockID].ints[skypbdHandler.modelData[i].ModelObjects[a].objectData.MeshOffsets[b].MaterialBlockPos];
+                                //TempMeshHeader.MaterialID = skypbdHandler.materialBlocks[skypbdHandler.modelData[i].MaterialBlockID].ints[skypbdHandler.modelData[i].ModelObjects[a].objectData.MeshOffsets[b].MaterialBlockPos];
 
                                 TempPrefabObject.MeshData.Add(TempMeshHeader);
                             }
