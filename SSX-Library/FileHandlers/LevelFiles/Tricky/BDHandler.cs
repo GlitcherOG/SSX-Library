@@ -1086,6 +1086,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
                 TempHeader.MaterialBlockID = StreamUtil.ReadUInt32(stream);
                 TempHeader.Unknown3 = StreamUtil.ReadUInt32(stream); //Does change sometimes
                 TempHeader.AnimTime = StreamUtil.ReadFloat(stream);
+                stream.Position += 4;
                 TempHeader.Scale = StreamUtil.ReadVector3(stream);
                 //Xbox Differes from here
                 TempHeader.TotalMeshCount = StreamUtil.ReadUInt32(stream);
