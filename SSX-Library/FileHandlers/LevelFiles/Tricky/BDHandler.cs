@@ -796,8 +796,13 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
             NumSplineSegments = StreamUtil.ReadUInt32(stream); //Done
             NumTextureFlipbooks = StreamUtil.ReadUInt32(stream);
             NumModels = StreamUtil.ReadUInt32(stream);
-            stream.Position += 6 * 4;
+            NumParticleModel = StreamUtil.ReadUInt32(stream);
+            NumTextures = StreamUtil.ReadUInt32(stream); //Done
+            NumCameras = StreamUtil.ReadUInt32(stream); //Used in SSXFE MAP
+            stream.Position += 4;
+            LightMapSize = StreamUtil.ReadUInt32(stream); //Always blank?
 
+            PlayerStartOffset = StreamUtil.ReadUInt32(stream); //NA
             PatchOffset = StreamUtil.ReadUInt32(stream);
             PatchOffsetPoints = StreamUtil.ReadUInt32(stream);
             stream.Position += 4;
@@ -811,9 +816,14 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
             TextureFlipbookOffset = StreamUtil.ReadUInt32(stream);
             ModelPointerOffset = StreamUtil.ReadUInt32(stream); //Done
             ModelsOffset = StreamUtil.ReadUInt32(stream); //Done
+            ParticleModelPointerOffset = StreamUtil.ReadUInt32(stream); //Done
+            ParticleModelsOffset = StreamUtil.ReadUInt32(stream);
+            CameraPointerOffset = StreamUtil.ReadUInt32(stream); //Done
+            CamerasOffset = StreamUtil.ReadUInt32(stream); //sort of loading
+            HashOffset = StreamUtil.ReadUInt32(stream); //sort of loading
+            MeshDataOffset = StreamUtil.ReadUInt32(stream); //Loading
 
-            //stream.Position += 17 * 4;
-
+            //New Data
             stream.Position = PatchOffset;
             Patches = new List<Patch>();
             for (int i = 0; i < NumPatches; i++)
@@ -1021,7 +1031,6 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
                 splines.Add(spline);
             }
 
-            //Spline Segments
             stream.Position = SplineSegmentOffset;
             splinesSegments = new List<SplinesSegments>();
             for (int i = 0; i < NumSplineSegments; i++)
@@ -1051,7 +1060,6 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
                 splinesSegments.Add(splinesSegment);
             }
 
-            //Texture Flips
             textureFlipbooks = new List<TextureFlipbook>();
             stream.Position = TextureFlipbookOffset;
             for (int i = 0; i < NumTextureFlipbooks; i++)
@@ -1066,7 +1074,6 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
                 textureFlipbooks.Add(TempTextureFlip);
             }
 
-            //ModelPointers
             stream.Position = ModelPointerOffset;
             ModelPointers = new List<int>();
             for (int i = 0; i < NumModels; i++)
@@ -1074,6 +1081,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
                 ModelPointers.Add(StreamUtil.ReadUInt32(stream));
             }
 
+            //Not Reading Correctly
             stream.Position = ModelsOffset;
             modelData = new List<Models>();
             for (int i = 0; i < ModelPointers.Count; i++)
@@ -1220,6 +1228,122 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
                     TempHeader.ModelObjects.Add(TempPrefab);
                 }
                 modelData.Add(TempHeader);
+            }
+
+            //Particle Model Pointers
+            stream.Position = ParticleModelPointerOffset;
+            ParticleModelPointers = new List<int>();
+            for (int i = 0; i < NumParticleModel; i++)
+            {
+                ParticleModelPointers.Add(StreamUtil.ReadUInt32(stream));
+            }
+
+            //Particle Models
+            particleModels = new List<ParticleModel>();
+            for (int i = 0; i < NumParticleModel; i++)
+            {
+                stream.Position = ParticleModelsOffset + ParticleModelPointers[i];
+                ParticleModel TempParticleModel = new ParticleModel();
+                TempParticleModel.ByteSize = StreamUtil.ReadUInt32(stream);
+                TempParticleModel.ParticleHeaderCount = StreamUtil.ReadUInt32(stream);
+                TempParticleModel.ParticleHeadersOffset = StreamUtil.ReadUInt32(stream);
+
+                TempParticleModel.U1 = StreamUtil.ReadUInt32(stream);
+                TempParticleModel.U2 = StreamUtil.ReadUInt32(stream);
+                TempParticleModel.U3 = StreamUtil.ReadUInt32(stream);
+                TempParticleModel.U4 = StreamUtil.ReadUInt32(stream);
+                TempParticleModel.U5 = StreamUtil.ReadUInt32(stream);
+
+                TempParticleModel.ParticleObjectHeaders = new List<ParticleObjectHeader>();
+                stream.Position = ParticleModelsOffset + ParticleModelPointers[i] + TempParticleModel.ParticleHeadersOffset;
+                for (int a = 0; a < TempParticleModel.ParticleHeaderCount; a++)
+                {
+                    ParticleObjectHeader NewHeader = new ParticleObjectHeader();
+
+                    NewHeader.U1 = StreamUtil.ReadUInt32(stream);
+                    NewHeader.ObjectOffset = StreamUtil.ReadUInt32(stream);
+                    NewHeader.U3 = StreamUtil.ReadUInt32(stream);
+                    NewHeader.U4 = StreamUtil.ReadUInt32(stream);
+
+                    NewHeader.ParticleObject = new ParticleObject();
+                    int TempPos = (int)stream.Position;
+                    stream.Position = ParticleModelsOffset + ParticleModelPointers[i] + TempParticleModel.ParticleHeadersOffset + NewHeader.ObjectOffset;
+
+                    NewHeader.ParticleObject.ByteSize = StreamUtil.ReadUInt32(stream);
+                    NewHeader.ParticleObject.LowestXYZ = StreamUtil.ReadVector3(stream);
+                    NewHeader.ParticleObject.HighestXYZ = StreamUtil.ReadVector3(stream);
+                    NewHeader.ParticleObject.U1 = StreamUtil.ReadUInt32(stream);
+
+                    NewHeader.ParticleObject.AnimationCount = StreamUtil.ReadUInt32(stream);
+                    NewHeader.ParticleObject.AnimationOffset = StreamUtil.ReadUInt32(stream);
+                    NewHeader.ParticleObject.animationFrames = new List<AnimationFrames>();
+                    stream.Position = ParticleModelsOffset + ParticleModelPointers[i] + TempParticleModel.ParticleHeadersOffset + NewHeader.ObjectOffset + NewHeader.ParticleObject.AnimationOffset;
+                    for (int b = 0; b < NewHeader.ParticleObject.AnimationCount; b++)
+                    {
+                        var NewAnimationFrame = new AnimationFrames();
+                        NewAnimationFrame.Position = StreamUtil.ReadVector3(stream);
+                        NewAnimationFrame.Rotation = StreamUtil.ReadVector3(stream);
+                        NewAnimationFrame.Unknown = StreamUtil.ReadFloat(stream);
+
+                        NewHeader.ParticleObject.animationFrames.Add(NewAnimationFrame);
+                    }
+
+                    stream.Position = TempPos;
+                    TempParticleModel.ParticleObjectHeaders.Add(NewHeader);
+                }
+
+
+                particleModels.Add(TempParticleModel);
+            }
+
+            if (HashOffset != 0)
+            {
+                stream.Position = HashOffset;
+                hashData = new HashData();
+                hashData.TotalLength = StreamUtil.ReadUInt32(stream);
+                hashData.CountU1 = StreamUtil.ReadUInt32(stream);
+                hashData.OffsetU1 = StreamUtil.ReadUInt32(stream);
+                hashData.CountInstances = StreamUtil.ReadUInt32(stream);
+                hashData.OffsetInstances = StreamUtil.ReadUInt32(stream);
+                hashData.CountU2 = StreamUtil.ReadUInt32(stream);
+                hashData.OffsetU2 = StreamUtil.ReadUInt32(stream);
+                hashData.CountLights = StreamUtil.ReadUInt32(stream);
+                hashData.OffsetLights = StreamUtil.ReadUInt32(stream);
+                hashData.CountU4 = StreamUtil.ReadUInt32(stream);
+                hashData.OffsetU4 = StreamUtil.ReadUInt32(stream);
+                hashData.CountCamera = StreamUtil.ReadUInt32(stream);
+                hashData.OffsetCamera = StreamUtil.ReadUInt32(stream);
+
+                hashData.InstanceHash = new List<HashDataUnknown>();
+                hashData.LightsHash = new List<HashDataUnknown>();
+                hashData.CameraHash = new List<HashDataUnknown>();
+
+                stream.Position = hashData.OffsetInstances + HashOffset;
+                for (int i = 0; i < hashData.CountInstances; i++)
+                {
+                    HashDataUnknown NewHash = new HashDataUnknown();
+                    NewHash.Hash = StreamUtil.ReadUInt32(stream);
+                    NewHash.ObjectUID = StreamUtil.ReadUInt32(stream);
+                    hashData.InstanceHash.Add(NewHash);
+                }
+
+                stream.Position = hashData.OffsetLights + HashOffset;
+                for (int i = 0; i < hashData.CountLights; i++)
+                {
+                    HashDataUnknown NewHash = new HashDataUnknown();
+                    NewHash.Hash = StreamUtil.ReadUInt32(stream);
+                    NewHash.ObjectUID = StreamUtil.ReadUInt32(stream);
+                    hashData.LightsHash.Add(NewHash);
+                }
+
+                stream.Position = hashData.OffsetCamera + HashOffset;
+                for (int i = 0; i < hashData.CountCamera; i++)
+                {
+                    HashDataUnknown NewHash = new HashDataUnknown();
+                    NewHash.Hash = StreamUtil.ReadUInt32(stream);
+                    NewHash.ObjectUID = StreamUtil.ReadUInt32(stream);
+                    hashData.CameraHash.Add(NewHash);
+                }
             }
         }
 
