@@ -50,6 +50,15 @@ namespace SSXLibrary
         public MaterialJsonHandler SkyMaterialJson = new MaterialJsonHandler();
         public ModelJsonHandler SkyPrefabJsonHandler = new ModelJsonHandler();
 
+        public ConsoleVersion consoleVersion = ConsoleVersion.PS2;
+
+        public enum ConsoleVersion
+        {
+            PS2,
+            Xbox,
+            GC
+        }
+
         public void ExtractTrickyLevelFiles(string LoadPath, string ExportPath)
         {
             Console.WriteLine("Loading *BD File");
@@ -57,10 +66,12 @@ namespace SSXLibrary
             BDHandler pbdHandler = new BDHandler();
             if (File.Exists(LoadPath + ".pbd"))
             {
+                consoleVersion = ConsoleVersion.PS2;
                 pbdHandler.LoadPBD(LoadPath + ".pbd");
             }
             else if (File.Exists(LoadPath + ".xbd"))
             {
+                consoleVersion = ConsoleVersion.Xbox;
                 pbdHandler.LoadPBD(LoadPath + ".xbd");
             }
 
@@ -73,8 +84,10 @@ namespace SSXLibrary
 
             Console.WriteLine("Loading SSF File");
             SSFHandler ssfHandler = new SSFHandler();
-            ssfHandler.Load(LoadPath + ".ssf");
-            //ssfHandler.Save(LoadPath + ".ssf1");
+            if (consoleVersion == ConsoleVersion.PS2)
+            {
+                ssfHandler.Load(LoadPath + ".ssf");
+            }
 
             //Load Map
             Console.WriteLine("Loading MAP File");
@@ -83,7 +96,16 @@ namespace SSXLibrary
 
             Console.WriteLine("Loading SSH File");
             OldShapeHandler TextureHandler = new OldShapeHandler();
-            TextureHandler.LoadShape(LoadPath + ".ssh");
+            OldShapeHandler BumpHandler = new OldShapeHandler();
+            if (consoleVersion == ConsoleVersion.PS2)
+            {
+                TextureHandler.LoadShape(LoadPath + ".ssh");
+            }
+            else if (consoleVersion == ConsoleVersion.Xbox)
+            {
+                TextureHandler.LoadShape(LoadPath + ".xsh");
+                BumpHandler.LoadShape(LoadPath + "_B.xsh");
+            }
 
             Console.WriteLine("Loading LTG File");
             LTGHandler ltgHandler = new LTGHandler();
@@ -1089,6 +1111,7 @@ namespace SSXLibrary
             Console.WriteLine("Creating Folders for Textures and Models...");
             Directory.CreateDirectory(ExportPath + "/Meshes");
             Directory.CreateDirectory(ExportPath + "/Textures");
+            Directory.CreateDirectory(ExportPath + "/Bump");
             Directory.CreateDirectory(ExportPath + "/Skybox");
             Directory.CreateDirectory(ExportPath + "/Skybox/Textures");
             Directory.CreateDirectory(ExportPath + "/Skybox/Meshes");
@@ -1097,28 +1120,54 @@ namespace SSXLibrary
             Console.WriteLine("Extracting Collision Models...");
             ssfHandler.SaveModels(ExportPath + "/Collision/");
             Console.WriteLine("Extracting Models...");
-            pbdHandler.ExportModels(ExportPath + "/Meshes/");
+            //pbdHandler.ExportModels(ExportPath + "/Meshes/");
 
             for (int i = 0; i < TextureHandler.ShapeImages.Count; i++)
             {
                 Console.WriteLine("Textures: " + (i + 1) + "/" + TextureHandler.ShapeImages.Count);
-                TextureHandler.BrightenImage(i);
-                TextureHandler.ExtractSingleImage(ExportPath + "\\Textures\\" + TextureHandler.ShapeImages[i].Shortname + ".png", i);
+                if (consoleVersion == ConsoleVersion.PS2)
+                {
+                    TextureHandler.BrightenImage(i);
+                }
+                TextureHandler.ExtractSingleImage(ExportPath + "\\Textures\\" + i.ToString().PadLeft(4, '0') + ".png", i);
+            }
+
+            if (consoleVersion == ConsoleVersion.Xbox)
+            {
+                for (int i = 0; i < BumpHandler.ShapeImages.Count; i++)
+                {
+                    Console.WriteLine("Bump: " + (i + 1) + "/" + BumpHandler.ShapeImages.Count);
+                    BumpHandler.ExtractSingleImage(ExportPath + "\\Bump\\" + i.ToString().PadLeft(4, '0') + ".png", i);
+                }
             }
 
 
             //NOTE CHANGE TO CHECK EACH PATH BEFORE RUNNING
 
-            if (File.Exists(LoadPath + "_sky.ssh"))
+            if (File.Exists(LoadPath + "_sky.ssh") || File.Exists(LoadPath + "_sky.xsh"))
             {
                 Console.WriteLine("Loading Skybox Textures");
                 OldShapeHandler SkyboxHandler = new OldShapeHandler();
-                SkyboxHandler.LoadShape(LoadPath + "_sky.ssh");
+                if (consoleVersion == ConsoleVersion.PS2)
+                {
+                    SkyboxHandler.LoadShape(LoadPath + "_sky.ssh");
+                }
+                else if (consoleVersion == ConsoleVersion.Xbox)
+                {
+                    SkyboxHandler.LoadShape(LoadPath + "_sky.xsh");
+                }
 
                 //Load PBD Sky
                 Console.WriteLine("Loading Skybox PBD File");
                 BDHandler skypbdHandler = new BDHandler();
-                skypbdHandler.LoadPBD(LoadPath + "_sky.pbd");
+                if (consoleVersion == ConsoleVersion.PS2)
+                {
+                    skypbdHandler.LoadPBD(LoadPath + "_sky.pbd");
+                }
+                else if (consoleVersion == ConsoleVersion.Xbox)
+                {
+                    skypbdHandler.LoadPBD(LoadPath + "_sky.xbd");
+                }
 
                 //Create Material Json
                 SkyMaterialJson = new MaterialJsonHandler();
@@ -1256,30 +1305,60 @@ namespace SSXLibrary
                 for (int i = 0; i < SkyboxHandler.ShapeImages.Count; i++)
                 {
                     Console.WriteLine("Skybox Textures: " + (i + 1) + "/" + SkyboxHandler.ShapeImages.Count);
-                    SkyboxHandler.BrightenImage(i);
-                    SkyboxHandler.ExtractSingleImage(ExportPath + "\\Skybox\\Textures\\" + SkyboxHandler.ShapeImages[i].Shortname + ".png", i);
+                    if (consoleVersion == ConsoleVersion.PS2)
+                    {
+                        SkyboxHandler.BrightenImage(i);
+                    }
+                    SkyboxHandler.ExtractSingleImage(ExportPath + "\\Skybox\\Textures\\" + i.ToString().PadLeft(4, '0') + ".png", i);
                 }
             }
 
-            if (File.Exists(LoadPath + "_L.ssh"))
+            if (consoleVersion == ConsoleVersion.PS2)
             {
-                LightmapHandler.LoadShape(LoadPath + "_L.ssh", true);
-
-                for (int i = 0; i < LightmapHandler.ShapeImages.Count; i++)
+                if (File.Exists(LoadPath + "_L.ssh"))
                 {
-                    Console.WriteLine("Lightmap Textures: " + (i + 1) + "/" + LightmapHandler.ShapeImages.Count);
-                    //LightmapHandler.BrightenImage(i);
-                    LightmapHandler.ExtractSingleImage(ExportPath + "\\Lightmaps\\" + LightmapHandler.ShapeImages[i].Shortname + ".png", i);
+                    LightmapHandler.LoadShape(LoadPath + "_L.ssh", true);
+
+                    for (int i = 0; i < LightmapHandler.ShapeImages.Count; i++)
+                    {
+                        Console.WriteLine("Lightmap Textures: " + (i + 1) + "/" + LightmapHandler.ShapeImages.Count);
+                        //LightmapHandler.BrightenImage(i);
+                        LightmapHandler.ExtractSingleImage(ExportPath + "\\Lightmaps\\" + i.ToString().PadLeft(4, '0') + ".png", i);
+                    }
+                }
+                else
+                {
+                    LightmapHandler.LoadShape(LoadPath.Substring(0, LoadPath.Length - 1) + "_L.ssh", true);
+                    for (int i = 0; i < LightmapHandler.ShapeImages.Count; i++)
+                    {
+                        Console.WriteLine("Lightmap Textures: " + (i + 1) + "/" + LightmapHandler.ShapeImages.Count);
+                        //LightmapHandler.BrightenImage(i);
+                        LightmapHandler.ExtractSingleImage(ExportPath + "\\Lightmaps\\" + i.ToString().PadLeft(4, '0') + ".png", i);
+                    }
                 }
             }
-            else
+            else if (consoleVersion == ConsoleVersion.Xbox)
             {
-                LightmapHandler.LoadShape(LoadPath.Substring(0, LoadPath.Length - 1) + "_L.ssh", true);
-                for (int i = 0; i < LightmapHandler.ShapeImages.Count; i++)
+                if (File.Exists(LoadPath + "_L.xsh"))
                 {
-                    Console.WriteLine("Lightmap Textures: " + (i + 1) + "/" + LightmapHandler.ShapeImages.Count);
-                    //LightmapHandler.BrightenImage(i);
-                    LightmapHandler.ExtractSingleImage(ExportPath + "\\Lightmaps\\" + LightmapHandler.ShapeImages[i].Shortname + ".png", i);
+                    LightmapHandler.LoadShape(LoadPath + "_L.xsh", true);
+
+                    for (int i = 0; i < LightmapHandler.ShapeImages.Count; i++)
+                    {
+                        Console.WriteLine("Lightmap Textures: " + (i + 1) + "/" + LightmapHandler.ShapeImages.Count);
+                        //LightmapHandler.BrightenImage(i);
+                        LightmapHandler.ExtractSingleImage(ExportPath + "\\Lightmaps\\" + i.ToString().PadLeft(4, '0') + ".png", i);
+                    }
+                }
+                else
+                {
+                    LightmapHandler.LoadShape(LoadPath.Substring(0, LoadPath.Length - 1) + "_L.xsh", true);
+                    for (int i = 0; i < LightmapHandler.ShapeImages.Count; i++)
+                    {
+                        Console.WriteLine("Lightmap Textures: " + (i + 1) + "/" + LightmapHandler.ShapeImages.Count);
+                        //LightmapHandler.BrightenImage(i);
+                        LightmapHandler.ExtractSingleImage(ExportPath + "\\Lightmaps\\" + i.ToString().PadLeft(4, '0') + ".png", i);
+                    }
                 }
             }
 
