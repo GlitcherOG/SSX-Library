@@ -52,6 +52,18 @@ namespace SSXLibrary
 
         public void ExtractTrickyLevelFiles(string LoadPath, string ExportPath)
         {
+            Console.WriteLine("Loading *BD File");
+            //Load PBD
+            BDHandler pbdHandler = new BDHandler();
+            if (File.Exists(LoadPath + ".pbd"))
+            {
+                pbdHandler.LoadPBD(LoadPath + ".pbd");
+            }
+            else if (File.Exists(LoadPath + ".xbd"))
+            {
+                pbdHandler.LoadPBD(LoadPath + ".xbd");
+            }
+
             Console.WriteLine("Loading ADL File");
             ADLHandler adlHandler = new ADLHandler();
             if (File.Exists(LoadPath + ".adl"))
@@ -68,11 +80,6 @@ namespace SSXLibrary
             Console.WriteLine("Loading MAP File");
             MapHandler mapHandler = new MapHandler();
             mapHandler.Load(LoadPath + ".map");
-
-            Console.WriteLine("Loading PBD File");
-            //Load PBD
-            BDHandler pbdHandler = new BDHandler();
-            pbdHandler.LoadPBD(LoadPath + ".pbd");
 
             Console.WriteLine("Loading SSH File");
             OldShapeHandler TextureHandler = new OldShapeHandler();

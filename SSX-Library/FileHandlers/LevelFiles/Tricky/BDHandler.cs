@@ -82,13 +82,13 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
             {
                 MagicBytes = StreamUtil.ReadBytes(stream, 4);
 
-                if (MagicBytes == new byte[4] { 0x00, 0x15, 0x1b, 0x01 })
-                {
-                    LoadXbox(stream);
-                }
-                else if (MagicBytes == new byte[4] { 0x00, 0x18, 0x1E, 0x02 })
+                if (MagicBytes.AsSpan().SequenceEqual(new byte[4] { 0x00, 0x15, 0x1b, 0x01 }))
                 {
                     LoadPS2(stream);
+                }
+                else if (MagicBytes.AsSpan().SequenceEqual(new byte[4] { 0x00, 0x18, 0x1E, 0x02 }))
+                {
+                    LoadXbox(stream);
                 }
             }
         }
@@ -793,21 +793,23 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
 
             PatchOffset = StreamUtil.ReadUInt32(stream);
             PatchOffsetPoints = StreamUtil.ReadUInt32(stream);
+            stream.Position += 4;
             InstanceOffset = StreamUtil.ReadUInt32(stream);
             ParticleInstancesOffset = StreamUtil.ReadUInt32(stream);
-            stream.Position += 17 * 4;
+            //stream.Position += 17 * 4;
 
+            stream.Position = PatchOffset;
             Patches = new List<Patch>();
             for (int i = 0; i < NumPatches; i++)
             {
                 Patch patch = new Patch();
 
+                patch.LightMapPoint = stream.ReadVector4();
+
                 patch.UVPoint1 = stream.ReadVector4();
                 patch.UVPoint2 = stream.ReadVector4();
                 patch.UVPoint3 = stream.ReadVector4();
                 patch.UVPoint4 = stream.ReadVector4();
-
-                patch.LightMapPoint = stream.ReadVector4();
 
                 patch.R4C4 = stream.ReadVector4();
                 patch.R4C3 = stream.ReadVector4();
@@ -856,11 +858,12 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
                     patch.U10[j] = stream.ReadUInt16();
                 }
 
-                patch.U11 = stream.ReadUInt16();
+                patch.U11 = stream.ReadUInt32();
 
                 Patches.Add(patch);
             }
 
+            stream.Position = PatchOffsetPoints;
             patchPointDatas = new List<PatchPointData>();
             for (int i = 0; i < NumPatches*16; i++)
             {
@@ -872,13 +875,12 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
                 patchPointDatas.Add(NewPatchData);
             }
 
+            stream.Position = InstanceOffset;
             Instances = new List<Instance>();
             for (int i = 0; i < NumInstances; i++)
             {
                 var TempInstance = new Instance();
                 TempInstance.matrix4X4 = StreamUtil.ReadMatrix4x4(stream);
-
-                var TempMatrix = StreamUtil.ReadMatrix4x4(stream);
 
                 TempInstance.ModelID = StreamUtil.ReadUInt32(stream);
                 TempInstance.PrevInstance = StreamUtil.ReadUInt32(stream);
@@ -903,6 +905,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
                 Instances.Add(TempInstance);
             }
 
+            stream.Position = ParticleInstancesOffset;
             particleInstances = new List<ParticleInstance>();
             for (int i = 0; i < NumParticleInstances; i++)
             {
@@ -2544,7 +2547,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
         public ushort U8;
         public ushort U9;
         public ushort[] U10; //130
-        public ushort U11;
+        public uint U11;
     }
 
     public struct PatchPointData
