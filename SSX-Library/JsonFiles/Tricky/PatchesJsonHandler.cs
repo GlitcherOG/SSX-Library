@@ -54,6 +54,7 @@ namespace SSXLibrary.JsonFiles.Tricky
             public int SurfaceType;
             public bool TrickOnlyPatch;
             public string TexturePath;
+            public string BumpPath;
             public int LightmapID;
         }
     }

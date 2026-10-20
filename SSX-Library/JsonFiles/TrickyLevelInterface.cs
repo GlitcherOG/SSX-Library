@@ -172,6 +172,10 @@ namespace SSXLibrary
                 }
                 string? patchTex = ShapeNameOrNull(TextureHandler, pbdHandler.Patches[i].TextureAssigment, $"patch {i}");
                 if (patchTex != null) patch.TexturePath = patchTex + ".png";
+
+                string? bumpTex = ShapeNameOrNull(BumpHandler, pbdHandler.Patches[i].BumpAssigment, $"patch {i}");
+                if (bumpTex != null) patch.BumpPath = bumpTex + ".png";
+
                 patch.LightmapID = pbdHandler.Patches[i].LightmapID;
                 patchPoints.Patches.Add(patch);
             }
