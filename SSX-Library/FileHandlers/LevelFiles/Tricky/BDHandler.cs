@@ -789,13 +789,18 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
             stream.Position += 4 * 2;
             NumInstances = StreamUtil.ReadUInt32(stream); //Done
             NumParticleInstances = StreamUtil.ReadUInt32(stream);
-            stream.Position += 13 * 4;
+            NumMaterials = StreamUtil.ReadUInt32(stream);
+            NumMaterialBlocks = StreamUtil.ReadUInt32(stream);
+            stream.Position += 11 * 4;
 
             PatchOffset = StreamUtil.ReadUInt32(stream);
             PatchOffsetPoints = StreamUtil.ReadUInt32(stream);
             stream.Position += 4;
             InstanceOffset = StreamUtil.ReadUInt32(stream);
             ParticleInstancesOffset = StreamUtil.ReadUInt32(stream);
+            MaterialOffset = StreamUtil.ReadUInt32(stream);
+            MaterialBlocksOffset = StreamUtil.ReadUInt32(stream);
+
             //stream.Position += 17 * 4;
 
             stream.Position = PatchOffset;
@@ -920,6 +925,54 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
                 TempParticle.UnknownInt11 = StreamUtil.ReadUInt32(stream);
                 TempParticle.UnknownInt12 = StreamUtil.ReadUInt32(stream);
                 particleInstances.Add(TempParticle);
+            }
+
+            stream.Position = MaterialOffset;
+            materials = new List<TrickyMaterial>();
+            for (int i = 0; i < NumMaterials; i++)
+            {
+                var TempMaterial = new TrickyMaterial();
+                TempMaterial.TextureID = StreamUtil.ReadInt16(stream);
+                TempMaterial.UnknownInt2 = StreamUtil.ReadInt16(stream);
+                TempMaterial.UnknownInt3 = StreamUtil.ReadUInt32(stream);
+
+                TempMaterial.UnknownFloat1 = StreamUtil.ReadFloat(stream);
+                TempMaterial.UnknownFloat2 = StreamUtil.ReadFloat(stream);
+                TempMaterial.UnknownFloat3 = StreamUtil.ReadFloat(stream);
+                TempMaterial.UnknownFloat4 = StreamUtil.ReadFloat(stream);
+
+                TempMaterial.UnknownInt8 = StreamUtil.ReadUInt32(stream);
+
+                TempMaterial.UnknownFloat5 = StreamUtil.ReadFloat(stream);
+                TempMaterial.UnknownFloat6 = StreamUtil.ReadFloat(stream);
+                TempMaterial.UnknownFloat7 = StreamUtil.ReadFloat(stream);
+                TempMaterial.UnknownFloat8 = StreamUtil.ReadFloat(stream);
+
+                TempMaterial.UnknownInt13 = StreamUtil.ReadUInt32(stream);
+                TempMaterial.UnknownInt14 = StreamUtil.ReadUInt32(stream);
+                TempMaterial.UnknownInt15 = StreamUtil.ReadUInt32(stream);
+                TempMaterial.UnknownInt16 = StreamUtil.ReadUInt32(stream);
+                TempMaterial.UnknownInt17 = StreamUtil.ReadUInt32(stream);
+                TempMaterial.UnknownInt18 = StreamUtil.ReadUInt32(stream);
+
+                TempMaterial.TextureFlipbookID = StreamUtil.ReadInt16(stream);
+                TempMaterial.UnknownInt20 = StreamUtil.ReadInt16(stream);
+
+                materials.Add(TempMaterial);
+            }
+
+            stream.Position = MaterialBlocksOffset;
+            materialBlocks = new List<MaterialBlock>();
+            for (int i = 0; i < NumMaterialBlocks; i++)
+            {
+                var TempMaterialBlock = new MaterialBlock();
+                TempMaterialBlock.BlockCount = StreamUtil.ReadUInt32(stream);
+                TempMaterialBlock.ints = new List<int>();
+                for (int a = 0; a < TempMaterialBlock.BlockCount; a++)
+                {
+                    TempMaterialBlock.ints.Add(StreamUtil.ReadUInt32(stream));
+                }
+                materialBlocks.Add(TempMaterialBlock);
             }
         }
 
