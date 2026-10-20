@@ -795,7 +795,8 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
             NumSplines = StreamUtil.ReadUInt32(stream); //Done
             NumSplineSegments = StreamUtil.ReadUInt32(stream); //Done
             NumTextureFlipbooks = StreamUtil.ReadUInt32(stream);
-            stream.Position += 7 * 4;
+            NumModels = StreamUtil.ReadUInt32(stream);
+            stream.Position += 6 * 4;
 
             PatchOffset = StreamUtil.ReadUInt32(stream);
             PatchOffsetPoints = StreamUtil.ReadUInt32(stream);
@@ -808,6 +809,8 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
             SplineOffset = StreamUtil.ReadUInt32(stream); //Done
             SplineSegmentOffset = StreamUtil.ReadUInt32(stream); //Done
             TextureFlipbookOffset = StreamUtil.ReadUInt32(stream);
+            ModelPointerOffset = StreamUtil.ReadUInt32(stream); //Done
+            ModelsOffset = StreamUtil.ReadUInt32(stream); //Done
 
             //stream.Position += 17 * 4;
 
@@ -1061,6 +1064,161 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
                     TempTextureFlip.ImagePositions.Add(StreamUtil.ReadUInt32(stream));
                 }
                 textureFlipbooks.Add(TempTextureFlip);
+            }
+
+            //ModelPointers
+            stream.Position = ModelPointerOffset;
+            ModelPointers = new List<int>();
+            for (int i = 0; i < NumModels; i++)
+            {
+                ModelPointers.Add(StreamUtil.ReadUInt32(stream));
+            }
+
+            stream.Position = ModelsOffset;
+            modelData = new List<Models>();
+            for (int i = 0; i < ModelPointers.Count; i++)
+            {
+                stream.Position = ModelsOffset + ModelPointers[i];
+                var TempHeader = new Models();
+                TempHeader.TotalLength = StreamUtil.ReadUInt32(stream);
+                TempHeader.ObjectCount = StreamUtil.ReadUInt32(stream);
+                TempHeader.ObjectOffset = StreamUtil.ReadUInt32(stream);
+                TempHeader.MaterialBlockID = StreamUtil.ReadUInt32(stream);
+                TempHeader.Unknown3 = StreamUtil.ReadUInt32(stream); //Does change sometimes
+                TempHeader.AnimTime = StreamUtil.ReadFloat(stream);
+                TempHeader.Scale = StreamUtil.ReadVector3(stream);
+                //Xbox Differes from here
+                TempHeader.TotalMeshCount = StreamUtil.ReadUInt32(stream);
+                TempHeader.VertexCount = StreamUtil.ReadUInt32(stream);
+                TempHeader.TriStripCount = StreamUtil.ReadUInt32(stream);
+                TempHeader.Unknown4 = StreamUtil.ReadUInt32(stream); //Who even knows
+
+                TempHeader.NonTriCount = StreamUtil.ReadUInt32(stream);
+
+                TempHeader.ModelObjects = new List<ObjectHeader>();
+                for (int a = 0; a < TempHeader.ObjectCount; a++)
+                {
+                    var TempPrefab = new ObjectHeader();
+                    long StartPos = stream.Position;
+                    TempPrefab.ParentID = StreamUtil.ReadUInt32(stream);
+                    TempPrefab.ObjectHighOffset = StreamUtil.ReadUInt32(stream);
+                    TempPrefab.ObjectMediumOffset = StreamUtil.ReadUInt32(stream);
+                    TempPrefab.ObjectLowOffset = StreamUtil.ReadUInt32(stream);
+                    TempPrefab.AnimOffset = StreamUtil.ReadUInt32(stream);
+                    TempPrefab.Matrix4x4Offset = StreamUtil.ReadUInt32(stream);
+
+                    long tempPos = stream.Position;
+                    if (TempPrefab.Matrix4x4Offset != -1)
+                    {
+                        stream.Position = StartPos + TempPrefab.Matrix4x4Offset;
+                        TempPrefab.IncludeMatrix = true;
+                        TempPrefab.matrix4X4 = StreamUtil.ReadMatrix4x4(stream);
+                    }
+
+                    if (TempPrefab.ObjectHighOffset != 0 && TempPrefab.ObjectHighOffset != -1)
+                    {
+                        stream.Position = StartPos + TempPrefab.ObjectHighOffset;
+
+                        ObjectData meshHeader = new ObjectData();
+                        meshHeader.TotalEntryLength = StreamUtil.ReadUInt32(stream);
+                        meshHeader.LowestXYZ = StreamUtil.ReadVector3(stream);
+                        meshHeader.HighestXYZ = StreamUtil.ReadVector3(stream);
+
+                        meshHeader.Flags = StreamUtil.ReadUInt32(stream);
+                        meshHeader.MeshCount = StreamUtil.ReadUInt32(stream);
+                        meshHeader.FaceCount = StreamUtil.ReadUInt32(stream);
+
+                        meshHeader.TotalOffsetsLength = StreamUtil.ReadUInt32(stream);
+
+                        meshHeader.MeshOffsetPositions = new List<int>();
+                        for (int c = 0; c < meshHeader.MeshCount; c++)
+                        {
+                            meshHeader.MeshOffsetPositions.Add(StreamUtil.ReadUInt32(stream));
+                        }
+
+                        meshHeader.MeshOffsets = new List<MeshOffsets>();
+                        for (int b = 0; b < meshHeader.MeshCount; b++)
+                        {
+                            var context = new MeshOffsets();
+                            context.EntryLength = StreamUtil.ReadUInt32(stream);
+                            context.MaterialBlockPos = StreamUtil.ReadUInt32(stream);
+                            context.MeshDataLength = StreamUtil.ReadUInt32(stream);
+                            context.StartPos = StreamUtil.ReadUInt32(stream);
+                            context.Length1 = StreamUtil.ReadUInt32(stream);
+                            context.Length2 = StreamUtil.ReadUInt32(stream);
+                            context.Length3 = StreamUtil.ReadUInt32(stream);
+                            meshHeader.MeshOffsets.Add(context);
+                        }
+                        TempPrefab.objectData = meshHeader;
+                    }
+
+                    if (TempPrefab.AnimOffset != 0)
+                    {
+                        stream.Position = StartPos + TempPrefab.AnimOffset;
+                        TempPrefab.IncludeAnimation = true;
+                        //Load Stuff
+                        var TempAnimation = new ObjectAnimation();
+
+                        //Possibly Starting Animation Postion/Rotation
+                        TempAnimation.U1 = StreamUtil.ReadFloat(stream);
+                        TempAnimation.U2 = StreamUtil.ReadFloat(stream);
+                        TempAnimation.U3 = StreamUtil.ReadFloat(stream);
+                        TempAnimation.U4 = StreamUtil.ReadFloat(stream);
+                        TempAnimation.U5 = StreamUtil.ReadFloat(stream);
+                        TempAnimation.U6 = StreamUtil.ReadFloat(stream);
+
+                        TempAnimation.AnimationAction = StreamUtil.ReadUInt32(stream);
+
+                        //Animation Type
+                        //1 - X Position
+                        //2 - Y Position
+                        //4 - Z Position
+                        //8 - X Rotate
+                        //16 - Y Rotate
+                        //32 - Z Rotate
+
+                        TempAnimation.OffsetCount = StreamUtil.ReadUInt32(stream);
+                        TempAnimation.OffsetStart = StreamUtil.ReadUInt32(stream);
+
+                        TempAnimation.Offsets = new List<int>();
+
+                        for (int b = 0; b < TempAnimation.OffsetCount; b++)
+                        {
+                            TempAnimation.Offsets.Add(StreamUtil.ReadUInt32(stream));
+                        }
+
+                        TempAnimation.animationEntries = new List<AnimationEntry>();
+                        for (int b = 0; b < TempAnimation.Offsets.Count; b++)
+                        {
+                            stream.Position = StartPos + TempPrefab.AnimOffset + TempAnimation.Offsets[b];
+                            var TempAnimationEntry = new AnimationEntry();
+
+                            TempAnimationEntry.MathCount = StreamUtil.ReadUInt32(stream);
+                            TempAnimationEntry.MathOffset = StreamUtil.ReadUInt32(stream);
+
+                            TempAnimationEntry.animationMaths = new List<AnimationMath>();
+
+                            for (int c = 0; c < TempAnimationEntry.MathCount; c++)
+                            {
+                                AnimationMath TempMath = new AnimationMath();
+                                TempMath.Value1 = StreamUtil.ReadFloat(stream);
+                                TempMath.Value2 = StreamUtil.ReadFloat(stream);
+                                TempMath.Value3 = StreamUtil.ReadFloat(stream);
+                                TempMath.Value4 = StreamUtil.ReadFloat(stream);
+                                TempMath.Value5 = StreamUtil.ReadFloat(stream);
+                                TempMath.Value6 = StreamUtil.ReadFloat(stream);
+                                TempAnimationEntry.animationMaths.Add(TempMath);
+                            }
+
+                            TempAnimation.animationEntries.Add(TempAnimationEntry);
+                        }
+
+                        TempPrefab.objectAnimation = TempAnimation;
+                    }
+                    stream.Position = tempPos;
+                    TempHeader.ModelObjects.Add(TempPrefab);
+                }
+                modelData.Add(TempHeader);
             }
         }
 
