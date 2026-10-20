@@ -791,7 +791,11 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
             NumParticleInstances = StreamUtil.ReadUInt32(stream);
             NumMaterials = StreamUtil.ReadUInt32(stream);
             NumMaterialBlocks = StreamUtil.ReadUInt32(stream);
-            stream.Position += 11 * 4;
+            NumLights = StreamUtil.ReadUInt32(stream);
+            NumSplines = StreamUtil.ReadUInt32(stream); //Done
+            NumSplineSegments = StreamUtil.ReadUInt32(stream); //Done
+            NumTextureFlipbooks = StreamUtil.ReadUInt32(stream);
+            stream.Position += 7 * 4;
 
             PatchOffset = StreamUtil.ReadUInt32(stream);
             PatchOffsetPoints = StreamUtil.ReadUInt32(stream);
@@ -800,6 +804,10 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
             ParticleInstancesOffset = StreamUtil.ReadUInt32(stream);
             MaterialOffset = StreamUtil.ReadUInt32(stream);
             MaterialBlocksOffset = StreamUtil.ReadUInt32(stream);
+            LightsOffset = StreamUtil.ReadUInt32(stream);
+            SplineOffset = StreamUtil.ReadUInt32(stream); //Done
+            SplineSegmentOffset = StreamUtil.ReadUInt32(stream); //Done
+            TextureFlipbookOffset = StreamUtil.ReadUInt32(stream);
 
             //stream.Position += 17 * 4;
 
@@ -973,6 +981,86 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
                     TempMaterialBlock.ints.Add(StreamUtil.ReadUInt32(stream));
                 }
                 materialBlocks.Add(TempMaterialBlock);
+            }
+
+            stream.Position = LightsOffset;
+            lights = new List<Light>();
+            for (int i = 0; i < NumLights; i++)
+            {
+                var TempLights = new Light();
+                TempLights.Type = StreamUtil.ReadUInt32(stream);
+                TempLights.spriteRes = StreamUtil.ReadUInt32(stream);
+                TempLights.UnknownFloat1 = StreamUtil.ReadFloat(stream);
+                TempLights.UnknownInt1 = StreamUtil.ReadUInt32(stream);
+                TempLights.Colour = StreamUtil.ReadVector3(stream);
+                TempLights.Direction = StreamUtil.ReadVector3(stream);
+                TempLights.Position = StreamUtil.ReadVector3(stream);
+                TempLights.LowestXYZ = StreamUtil.ReadVector3(stream);
+                TempLights.HighestXYZ = StreamUtil.ReadVector3(stream);
+                TempLights.UnknownFloat2 = StreamUtil.ReadFloat(stream);
+                TempLights.UnknownInt2 = StreamUtil.ReadUInt32(stream);
+                TempLights.UnknownFloat3 = StreamUtil.ReadFloat(stream);
+                TempLights.UnknownInt3 = StreamUtil.ReadUInt32(stream);
+                lights.Add(TempLights);
+            }
+
+            stream.Position = SplineOffset;
+            splines = new List<Spline>();
+            for (int i = 0; i < NumSplines; i++)
+            {
+                Spline spline = new Spline();
+                spline.LowestXYZ = StreamUtil.ReadVector3(stream);
+                spline.HighestXYZ = StreamUtil.ReadVector3(stream);
+                spline.Unknown1 = StreamUtil.ReadUInt32(stream);
+                spline.SplineSegmentCount = StreamUtil.ReadUInt32(stream);
+                spline.SplineSegmentPosition = StreamUtil.ReadUInt32(stream);
+                spline.Unknown2 = StreamUtil.ReadUInt32(stream);
+                splines.Add(spline);
+            }
+
+            //Spline Segments
+            stream.Position = SplineSegmentOffset;
+            splinesSegments = new List<SplinesSegments>();
+            for (int i = 0; i < NumSplineSegments; i++)
+            {
+                SplinesSegments splinesSegment = new SplinesSegments();
+
+                splinesSegment.Point4 = StreamUtil.ReadVector4(stream);
+                splinesSegment.Point3 = StreamUtil.ReadVector4(stream);
+                splinesSegment.Point2 = StreamUtil.ReadVector4(stream);
+                splinesSegment.ControlPoint = StreamUtil.ReadVector4(stream);
+
+                splinesSegment.Coefficient1 = StreamUtil.ReadFloat(stream);
+                splinesSegment.Coefficient2 = StreamUtil.ReadFloat(stream);
+                splinesSegment.Coefficient3 = StreamUtil.ReadFloat(stream);
+                splinesSegment.Coefficient4 = StreamUtil.ReadFloat(stream);
+
+                splinesSegment.PreviousSegment = StreamUtil.ReadUInt32(stream);
+                splinesSegment.NextSegment = StreamUtil.ReadUInt32(stream);
+                splinesSegment.SplineParent = StreamUtil.ReadUInt32(stream);
+
+                splinesSegment.LowestXYZ = StreamUtil.ReadVector3(stream);
+                splinesSegment.HighestXYZ = StreamUtil.ReadVector3(stream);
+
+                splinesSegment.SegmentDisatnce = StreamUtil.ReadFloat(stream);
+                splinesSegment.PreviousSegmentsDistance = StreamUtil.ReadFloat(stream);
+                splinesSegment.Unknown32 = StreamUtil.ReadUInt32(stream);
+                splinesSegments.Add(splinesSegment);
+            }
+
+            //Texture Flips
+            textureFlipbooks = new List<TextureFlipbook>();
+            stream.Position = TextureFlipbookOffset;
+            for (int i = 0; i < NumTextureFlipbooks; i++)
+            {
+                var TempTextureFlip = new TextureFlipbook();
+                TempTextureFlip.ImageCount = StreamUtil.ReadUInt32(stream);
+                TempTextureFlip.ImagePositions = new List<int>();
+                for (int a = 0; a < TempTextureFlip.ImageCount; a++)
+                {
+                    TempTextureFlip.ImagePositions.Add(StreamUtil.ReadUInt32(stream));
+                }
+                textureFlipbooks.Add(TempTextureFlip);
             }
         }
 
