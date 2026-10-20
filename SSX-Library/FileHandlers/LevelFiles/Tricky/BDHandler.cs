@@ -872,9 +872,9 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
                 patch.Point3 = stream.ReadVector4();
                 patch.Point4 = stream.ReadVector4();
 
-                patch.U6 = stream.ReadUInt16();
-                patch.U7 = stream.ReadUInt16();
-                patch.U8 = stream.ReadUInt16();
+                patch.TextureAssigment = stream.ReadUInt16();
+                patch.BumpAssigment = stream.ReadUInt16();
+                patch.LightmapID = stream.ReadUInt16();
                 patch.U9 = stream.ReadUInt16();
 
                 patch.U10 = new ushort[130];
@@ -2954,6 +2954,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
         public int ResourceKindTags; //i16: four packed 3-bit resource-kind tags
         public int PatchVisablity;
         public int TextureAssigment; // Texture Assigment 
+        public int BumpAssigment;
         public int LightmapID;
         public int UnusedResourceId2; //i16: unused resource slot, -1 in retail
         public int UnusedResourceId3; //i16: unused resource slot, -1 in retail
@@ -2966,9 +2967,6 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
         public uint U3;
         public uint U4;
         public uint U5;
-        public ushort U6;
-        public ushort U7;
-        public ushort U8;
         public ushort U9;
         public ushort[] U10; //130
         public uint U11;
