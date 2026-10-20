@@ -71,7 +71,7 @@ namespace SSXLibrary
 
             Console.WriteLine("Loading PBD File");
             //Load PBD
-            PBDHandler pbdHandler = new PBDHandler();
+            BDHandler pbdHandler = new BDHandler();
             pbdHandler.LoadPBD(LoadPath + ".pbd");
 
             Console.WriteLine("Loading SSH File");
@@ -1110,7 +1110,7 @@ namespace SSXLibrary
 
                 //Load PBD Sky
                 Console.WriteLine("Loading Skybox PBD File");
-                PBDHandler skypbdHandler = new PBDHandler();
+                BDHandler skypbdHandler = new BDHandler();
                 skypbdHandler.LoadPBD(LoadPath + "_sky.pbd");
 
                 //Create Material Json
@@ -1307,7 +1307,7 @@ namespace SSXLibrary
             MapHandler mapHandler = new MapHandler();
 
             //Load PBDHandler
-            PBDHandler pbdHandler = new PBDHandler();
+            BDHandler pbdHandler = new BDHandler();
 
             SSFHandler ssfHandler = new SSFHandler();
 
@@ -2640,7 +2640,7 @@ namespace SSXLibrary
 
 
             #region Skybox Rebuild
-            PBDHandler skyboxpbdHander = new PBDHandler();
+            BDHandler skyboxpbdHander = new BDHandler();
             if (File.Exists(LoadPath + "/Skybox/Models.json"))
             {
                 //Rebuild Materials

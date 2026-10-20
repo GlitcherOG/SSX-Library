@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 using SSXLibrary.Internal.Utilities;
 using System.Net.Http.Headers;
 using SSXLibrary.Internal.Utilities;
-using SSXLibrary.FileHandlers.LevelFiles.Tricky.PS2;
 
 namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
 {
@@ -165,7 +164,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
             }
         }
 
-        public void RegenerateCentreLTG(PBDHandler pbdHandler, float NewMainBoxSize = 10000f, int NewNodeWidth = 4)
+        public void RegenerateCentreLTG(BDHandler pbdHandler, float NewMainBoxSize = 10000f, int NewNodeWidth = 4)
         {
             WorldBounds1 = new Vector3(0, 0, 0);
             WorldBounds2 = new Vector3(0, 0, 0);
@@ -713,7 +712,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
             mainBboxEmptyCount = totalGridCount - UsedBoxesCount;
         }
 
-        public void RegenerateOriginLTG(PBDHandler pbdHandler, float NewMainBoxSize = 10000f, int NewNodeWidth = 4)
+        public void RegenerateOriginLTG(BDHandler pbdHandler, float NewMainBoxSize = 10000f, int NewNodeWidth = 4)
         {
             WorldBounds1 = new Vector3(0, 0, 0);
             WorldBounds2 = new Vector3(0, 0, 0);
