@@ -170,13 +170,13 @@ namespace SSXLibrary
                 {
                     patch.TrickOnlyPatch = true;
                 }
-                string? patchTex = ShapeNameOrNull(TextureHandler, pbdHandler.Patches[i].TextureAssigment, $"patch {i}");
-                if (patchTex != null) patch.TexturePath = patchTex + ".png";
 
-                string? bumpTex = ShapeNameOrNull(BumpHandler, pbdHandler.Patches[i].BumpAssigment, $"patch {i}");
-                if (bumpTex != null) patch.BumpPath = bumpTex + ".png";
+                patch.TexturePath =  pbdHandler.Patches[i].TextureAssigment.ToString().PadLeft(4, '0') + ".png";
+                
+                patch.BumpPath = pbdHandler.Patches[i].BumpAssigment.ToString().PadLeft(4, '0') + ".png";
 
                 patch.LightmapID = pbdHandler.Patches[i].LightmapID;
+
                 patchPoints.Patches.Add(patch);
             }
             patchPoints.CreateJson(ExportPath + "/Patches.json", InlineExporting);
@@ -1405,7 +1405,6 @@ namespace SSXLibrary
             ssfHandler.CollisonModelPointers = new List<SSFHandler.CollisonModelPointer>();
             ssfHandler.ObjectProperties = new List<SSFHandler.ObjectPropertiesStruct>();
 
-
             if (MAPGenerate || PBDGenerate || LTGGenerate || ADLGenerate || SSFGenerate)
             {
                 //Rebuild Patches
@@ -1501,6 +1500,7 @@ namespace SSXLibrary
                     // The load-time resource remapper walks all four slots, so keep the unused IDs null.
                     patch.UnusedResourceId2 = -1;
                     patch.UnusedResourceId3 = -1;
+
                     if (ImportPatch.TrickOnlyPatch)
                     {
                         patch.PatchVisablity = 32768;
@@ -1516,11 +1516,19 @@ namespace SSXLibrary
                         patch.TextureAssigment = ImageFiles.Count - 1;
                     }
 
-                    //if (lightingFixObjects.Count - 1 >= patch.TextureAssigment)
-                    //{
-                    //    lightingFixObjects[patch.TextureAssigment].Patch.Add(i);
-                    //}
                     patch.LightmapID = ImportPatch.LightmapID;
+
+                    //Xbox Data
+                    //Row Count or Something
+                    patch.U1 = 4;
+                    patch.U2 = 4;
+                    patch.U3 = 4;
+                    patch.U4 = 4;
+
+                    //U5?
+
+                    patch.U11 = 156;
+
 
                     pbdHandler.Patches.Add(patch);
 

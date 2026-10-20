@@ -865,7 +865,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
                 patch.U2 = stream.ReadUInt32();
                 patch.U3 = stream.ReadUInt32();
                 patch.U4 = stream.ReadUInt32();
-                patch.U5 = stream.ReadUInt32();
+                patch.LTGGroup = stream.ReadUInt32();
 
                 patch.Point1 = stream.ReadVector4();
                 patch.Point2 = stream.ReadVector4();
@@ -2966,7 +2966,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
         public uint U2;
         public uint U3;
         public uint U4;
-        public uint U5;
+        public uint LTGGroup;
         public ushort[] U10; //130
         public uint U11;
 
