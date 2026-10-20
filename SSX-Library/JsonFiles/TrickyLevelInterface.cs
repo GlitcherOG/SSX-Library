@@ -1302,7 +1302,7 @@ namespace SSXLibrary
             ExportPath = ExportPath.Substring(0, ExportPath.Length - 4);
 
             #region Rebuild PBD
-            SSXTrickyConfig trickyConfig = SSXTrickyConfig.Load(LoadPath + "/trickyconfig.ssx");
+            SSXTrickyConfig trickyConfig = SSXTrickyConfig.Load(LoadPath + "/ConfigTricky.ssx");
 
             MapHandler mapHandler = new MapHandler();
 
