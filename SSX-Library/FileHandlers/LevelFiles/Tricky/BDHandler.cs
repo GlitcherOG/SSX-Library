@@ -877,14 +877,18 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
                 patch.LightmapID = stream.ReadUInt16();
                 patch.UnusedResourceId2 = stream.ReadUInt16();
 
-                patch.U10 = new ushort[130];
+                patch.PatchPointIndex = new ushort[128];
 
-                for (int j = 0; j < 130; j++)
+                for (int j = 0; j < 128; j++)
                 {
-                    patch.U10[j] = stream.ReadUInt16();
+                    patch.PatchPointIndex[j] = stream.ReadUInt16();
                 }
 
-                patch.U11 = stream.ReadUInt32();
+                patch.U11 = stream.ReadUInt16();
+
+                patch.PatchVisablity = StreamUtil.ReadInt16(stream);
+
+                patch.U13 = stream.ReadUInt32();
 
                 Patches.Add(patch);
             }
@@ -2967,8 +2971,9 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
         public uint U3;
         public uint U4;
         public uint LTGGroup;
-        public ushort[] U10; //130
+        public ushort[] PatchPointIndex; //130
         public uint U11;
+        public uint U13;
 
         public Patch()
         {

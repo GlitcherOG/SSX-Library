@@ -1128,6 +1128,7 @@ namespace SSXLibrary
             ssfHandler.SaveModels(ExportPath + "/Collision/");
             Console.WriteLine("Extracting Models...");
             //pbdHandler.ExportModels(ExportPath + "/Meshes/");
+            pbdHandler.ExportModels(ExportPath + "/Meshes/");
 
             for (int i = 0; i < TextureHandler.ShapeImages.Count; i++)
             {
