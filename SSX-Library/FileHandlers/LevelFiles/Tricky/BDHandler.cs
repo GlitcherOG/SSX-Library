@@ -9,8 +9,15 @@ using System.Numerics;
 
 namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
 {
+    public enum ConsoleVersion
+    {
+        PS2,
+        Xbox,
+        GC
+    }
     public class BDHandler
     {
+        public ConsoleVersion consoleVersion = ConsoleVersion.PS2;
         public byte[] MagicBytes;
         public int NumPlayerStarts;
         public int NumPatches;
@@ -84,10 +91,12 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
 
                 if (MagicBytes.AsSpan().SequenceEqual(new byte[4] { 0x00, 0x15, 0x1b, 0x01 }))
                 {
+                    consoleVersion = ConsoleVersion.PS2;
                     LoadPS2(stream);
                 }
                 else if (MagicBytes.AsSpan().SequenceEqual(new byte[4] { 0x00, 0x18, 0x1E, 0x02 }))
                 {
+                    consoleVersion = ConsoleVersion.Xbox;
                     LoadXbox(stream);
                 }
             }
@@ -753,7 +762,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
                             stream.Position = TempObjects.objectData.MeshOffsets[b].StartPos + MeshDataOffset;
                             while (true)
                             {
-                                var temp = ReadMesh(stream, TempPrefabData.Scale);
+                                var temp = ReadMeshPS2(stream, TempPrefabData.Scale);
                                 TempMeshData.meshChunk.Add(temp);
                                 stream.Position += 31;
                                 if (StreamUtil.ReadUInt8(stream) == 0x6C)
@@ -1351,7 +1360,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
             }
         }
 
-        public MeshChunk ReadMesh(Stream stream, Vector3 Scale)
+        public MeshChunk ReadMeshPS2(Stream stream, Vector3 Scale)
         {
             var ModelData = new MeshChunk();
 
@@ -1430,7 +1439,15 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
             return ModelData;
         }
 
-        public void SaveNew(string path)
+        public void Save(string path)
+        {
+            if(consoleVersion == ConsoleVersion.PS2)
+            {
+                SavePS2(path);
+            }
+        }
+
+        public void SavePS2(string path)
         {
             MemoryStream stream = new MemoryStream();
             //Skip writing header info
@@ -2167,7 +2184,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
             file.Close();
         }
 
-        public void ExportModels(string path)
+        public void ExportModelsPS2(string path)
         {
             //glstHandler.SavePDBModelglTF(path, this);
             for (int a = 0; a < modelData.Count; a++)
@@ -2346,19 +2363,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
             }
         }
 
-        //public MeshBuilder<VertexPositionNormal, VertexTexture1> ParentMesh(MeshBuilder<VertexPositionNormal, VertexTexture1> Mesh, 
-        //    List<MeshBuilder<VertexPositionNormal, VertexTexture1>> meshBuilders, Prefabs prefabs, int ID)
-        //{
-        //    for (int i = 0; i < prefabs.Count; i++)
-        //    {
-        //        if(ID==)
-        //    }
-
-        //    return Mesh;
-        //}
-
-
-        public void ImportMeshes(string FolderPath)
+        public void ImportMeshesPS2(string FolderPath)
         {
             MemoryStream memoryStream = new MemoryStream();
 
@@ -2887,9 +2892,6 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
             }
         }
 
-        /// <summary>Encode one signed-normalized normal component without letting +1 wrap through Int16.
-        /// The old direct <c>(int)(v * 32768)</c> produced 32768 for +1, and WriteInt16's cast turned that
-        /// into -32768: every positive cardinal normal therefore became its negative in a rebuilt PBD.</summary>
         private static int PackNormalComponent(float value)
         {
             if (!float.IsFinite(value)) return 0;

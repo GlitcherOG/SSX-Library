@@ -1127,8 +1127,7 @@ namespace SSXLibrary
             Console.WriteLine("Extracting Collision Models...");
             ssfHandler.SaveModels(ExportPath + "/Collision/");
             Console.WriteLine("Extracting Models...");
-            //pbdHandler.ExportModels(ExportPath + "/Meshes/");
-            pbdHandler.ExportModels(ExportPath + "/Meshes/");
+            pbdHandler.ExportModelsPS2(ExportPath + "/Meshes/");
 
             for (int i = 0; i < TextureHandler.ShapeImages.Count; i++)
             {
@@ -1308,7 +1307,7 @@ namespace SSXLibrary
                 }
                 SkyPrefabJsonHandler.CreateJson(ExportPath + "/Skybox/Models.json", InlineExporting);
                 Console.WriteLine("Begining Skybox Model Extraction");
-                skypbdHandler.ExportModels(ExportPath + "/Skybox/Meshes/");
+                skypbdHandler.ExportModelsPS2(ExportPath + "/Skybox/Meshes/");
 
                 for (int i = 0; i < SkyboxHandler.ShapeImages.Count; i++)
                 {
@@ -1531,8 +1530,9 @@ namespace SSXLibrary
 
                     //U5?
 
-                    patch.U11 = 156;
 
+                    patch.U11 = 337;
+                    patch.U13 = 156;
 
                     pbdHandler.Patches.Add(patch);
 
@@ -2343,7 +2343,7 @@ namespace SSXLibrary
             {
                 //ErrorManager.ErrorMessage = "Error with Importing Meshes";
                 Console.WriteLine("Importing Meshes");
-                pbdHandler.ImportMeshes(LoadPath + "\\Meshes");
+                pbdHandler.ImportMeshesPS2(LoadPath + "\\Meshes");
                 //ErrorManager.ErrorMessage = "Error Generating PDB BBoxes";
                 Console.WriteLine("Generating PDB BBoxes");
                 pbdHandler.RegenerateLowestAndHighest();
@@ -2360,7 +2360,7 @@ namespace SSXLibrary
 
                 //ErrorManager.ErrorMessage = "Error Saving PDB File";
                 Console.WriteLine("Saving PDB File");
-                pbdHandler.SaveNew(ExportPath + ".pbd");
+                pbdHandler.Save(ExportPath + ".pbd");
             }
 
             if (LTGGenerate)
@@ -2935,9 +2935,9 @@ namespace SSXLibrary
                 if (SkyPBDGenerate)
                 {
                     Console.WriteLine("Importing Skybox Models");
-                    skyboxpbdHander.ImportMeshes(LoadPath + "/Skybox/Meshes");
+                    skyboxpbdHander.ImportMeshesPS2(LoadPath + "/Skybox/Meshes");
                     Console.WriteLine("Saving Skybox PDB");
-                    skyboxpbdHander.SaveNew(ExportPath + "_sky.pbd");
+                    skyboxpbdHander.Save(ExportPath + "_sky.pbd");
                 }
 
                 if (SkySSHGenerate)
