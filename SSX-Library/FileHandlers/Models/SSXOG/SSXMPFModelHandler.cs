@@ -111,7 +111,7 @@ namespace SSXLibrary.FileHandlers.Models.SSXOG
                 for (int b = 0; b < Model.ChunksCount; b++)
                 {
                     MaterialGroup materialGroup = new MaterialGroup();
-                    materialGroup.ID = StreamUtil.ReadUInt32(streamMatrix);
+                    materialGroup.ID = StreamUtil.ReadUInt32(streamMatrix); //Flags, 1 Static Mesh, 2 Flex Mesh, 16 Shadow (No UVs or Normals)
                     materialGroup.MaterialID = StreamUtil.ReadUInt32(streamMatrix);
                     materialGroup.Unknown = StreamUtil.ReadUInt32(streamMatrix);
                     materialGroup.MeshOffset = StreamUtil.ReadUInt32(streamMatrix);
@@ -160,7 +160,7 @@ namespace SSXLibrary.FileHandlers.Models.SSXOG
                             List<Vector3> Normals = new List<Vector3>();
 
                             //Read UV Texture Points
-                            if (TempMaterialGroup.ID != 19)
+                            if ((TempMaterialGroup.ID & 16) == 0)
                             {
                                 streamMatrix.Position += 48;
                                 for (int a = 0; a < ModelData.VertexCount; a++)
@@ -210,7 +210,7 @@ namespace SSXLibrary.FileHandlers.Models.SSXOG
 
                     TempMaterialGroup.flexableMesh = new List<FlexableMesh>();
                     //Load Flex Mesh
-                    if (TempMaterialGroup.MorphMeshOffset != -1 && TempMaterialGroup.ID == 19)
+                    if (TempMaterialGroup.MorphMeshOffset != -1)
                     {
                         streamMatrix.Position = Model.MaterialGroups[n].MorphMeshOffset;
                         while (true)
@@ -224,23 +224,34 @@ namespace SSXLibrary.FileHandlers.Models.SSXOG
 
                             modelSplitData.BoneAssigmentCount = StreamUtil.ReadUInt32(streamMatrix);
                             modelSplitData.StripCount = StreamUtil.ReadUInt32(streamMatrix);
-                            modelSplitData.StripLeftTotal = StreamUtil.ReadUInt32(streamMatrix);
-                            modelSplitData.StripRightTotal = StreamUtil.ReadUInt32(streamMatrix);
+                            modelSplitData.VertexCount = StreamUtil.ReadUInt32(streamMatrix);
+                            modelSplitData.NormalCount = StreamUtil.ReadUInt32(streamMatrix);
 
-                            //Not Tristrip possily weights
+                            //Bone Blocks
+                            //Each bone owns the next VertexCount positions followed by NormalCount normals in the vertex pool
                             var TempStrips = new List<NewSplit>();
                             for (int a = 0; a < modelSplitData.BoneAssigmentCount; a++)
                             {
                                 NewSplit newSplit = new NewSplit();
                                 newSplit.BoneAssignment = (StreamUtil.ReadUInt32(streamMatrix)-14)/4;
-                                newSplit.VerticeCount = StreamUtil.ReadUInt32(streamMatrix);
-                                newSplit.VerticeCount2 = StreamUtil.ReadUInt32(streamMatrix);
-                                newSplit.BoneAssignment2 = (StreamUtil.ReadUInt32(streamMatrix))/*-114)/4*/;
+                                newSplit.VertexCount = StreamUtil.ReadUInt32(streamMatrix);
+                                newSplit.NormalCount = StreamUtil.ReadUInt32(streamMatrix);
+                                newSplit.NormalMatrix = StreamUtil.ReadUInt32(streamMatrix);
                                 TempStrips.Add(newSplit);
                             }
                             modelSplitData.newSplits = TempStrips;
 
-                            //Load Vertices
+                            //Bone each pool entry is local to
+                            List<int> PoolBones = new List<int>();
+                            for (int a = 0; a < TempStrips.Count; a++)
+                            {
+                                for (int c = 0; c < TempStrips[a].VertexCount + TempStrips[a].NormalCount; c++)
+                                {
+                                    PoolBones.Add(TempStrips[a].BoneAssignment);
+                                }
+                            }
+
+                            //Load Vertex Pool
                             streamMatrix.Position += 46;
                             int TempCount = StreamUtil.ReadUInt8(streamMatrix);
                             streamMatrix.Position += 1;
@@ -253,31 +264,31 @@ namespace SSXLibrary.FileHandlers.Models.SSXOG
                             modelSplitData.vertices = vertices;
                             StreamUtil.AlignBy16(streamMatrix);
 
-                            //First 6 bytes are header infomation of some sort for the ammount and type of data
-                            //Unknown
-                            //Normal Count
-                            //Unknown
-
-
-                            //Unknown not normals
+                            //Load Weights
+                            //First row is the 3 weight, 2 weight and 1 weight counts
+                            //3 and 2 weight entries are a pool index row followed by a weight row, 1 weight entries are only a pool index row
                             streamMatrix.Position += 46;
                             TempCount = StreamUtil.ReadUInt8(streamMatrix);
                             streamMatrix.Position += 1;
 
-                            int U0 = StreamUtil.ReadInt16(streamMatrix);
-                            int U1 = StreamUtil.ReadInt16(streamMatrix);
-                            int U2Count = StreamUtil.ReadInt16(streamMatrix);
+                            modelSplitData.ThreeWeightCount = StreamUtil.ReadUInt16(streamMatrix);
+                            modelSplitData.TwoWeightCount = StreamUtil.ReadUInt16(streamMatrix);
+                            modelSplitData.OneWeightCount = StreamUtil.ReadUInt16(streamMatrix);
 
-                            List<Vector3> Unknown = new List<Vector3>();
-                            for (int a = 0; a < U2Count; a++)
+                            List<WeightedVertex> weightedVertices = new List<WeightedVertex>();
+                            for (int a = 0; a < modelSplitData.ThreeWeightCount; a++)
                             {
-                                Vector3 unknown = new Vector3();
-                                unknown.X = StreamUtil.ReadInt16(streamMatrix);
-                                unknown.Y = StreamUtil.ReadInt16(streamMatrix);
-                                unknown.Z = StreamUtil.ReadInt16(streamMatrix);
-                                Unknown.Add(unknown);
+                                weightedVertices.Add(ReadWeightedVertex(streamMatrix, 3, vertices, PoolBones));
                             }
-                            modelSplitData.Unknown = Unknown;
+                            for (int a = 0; a < modelSplitData.TwoWeightCount; a++)
+                            {
+                                weightedVertices.Add(ReadWeightedVertex(streamMatrix, 2, vertices, PoolBones));
+                            }
+                            for (int a = 0; a < modelSplitData.OneWeightCount; a++)
+                            {
+                                weightedVertices.Add(ReadWeightedVertex(streamMatrix, 1, vertices, PoolBones));
+                            }
+                            modelSplitData.weightedVertices = weightedVertices;
                             StreamUtil.AlignBy16(streamMatrix);
 
                             //Tristrip
@@ -292,16 +303,34 @@ namespace SSXLibrary.FileHandlers.Models.SSXOG
                             modelSplitData.Strips = ints;
                             StreamUtil.AlignBy16(streamMatrix);
 
-                            //VerticeIndex
+                            //Strip Vertices
+                            //Interlaced rows, each vertex is a weighted vertex index and pool normal index row followed by a UV row
+                            //Shadow models (ID flag 16) only have the first row
                             streamMatrix.Position += 46;
                             TempCount = StreamUtil.ReadUInt8(streamMatrix);
                             streamMatrix.Position += 1;
-                            List<int> TempVertexIndex = new List<int>();
+                            if ((TempMaterialGroup.ID & 16) == 0)
+                            {
+                                TempCount = TempCount / 2;
+                            }
+                            List<FlexableVertex> stripVertices = new List<FlexableVertex>();
                             for (int a = 0; a < TempCount; a++)
                             {
-                                TempVertexIndex.Add(StreamUtil.ReadInt32(streamMatrix));
+                                FlexableVertex stripVertex = new FlexableVertex();
+                                stripVertex.WeightIndex = StreamUtil.ReadUInt16(streamMatrix);
+                                stripVertex.NormalIndex = StreamUtil.ReadUInt16(streamMatrix);
+                                stripVertex.boneWeights = weightedVertices[stripVertex.WeightIndex].boneWeights;
+
+                                if ((TempMaterialGroup.ID & 16) == 0)
+                                {
+                                    stripVertex.UV.X = StreamUtil.ReadInt16(streamMatrix) / 4096f;
+                                    stripVertex.UV.Y = StreamUtil.ReadInt16(streamMatrix) / 4096f;
+                                    stripVertex.Normal = vertices[stripVertex.NormalIndex];
+                                    stripVertex.NormalBoneID = PoolBones[stripVertex.NormalIndex];
+                                }
+                                stripVertices.Add(stripVertex);
                             }
-                            modelSplitData.VertexIndex = TempVertexIndex;
+                            modelSplitData.stripVertices = stripVertices;
                             StreamUtil.AlignBy16(streamMatrix);
                             streamMatrix.Position += 16;
 
@@ -320,9 +349,38 @@ namespace SSXLibrary.FileHandlers.Models.SSXOG
             }
         }
 
-        public void SaveModel(string path, int ModelID)
+        public WeightedVertex ReadWeightedVertex(Stream stream, int WeightCount, List<Vector3> vertices, List<int> PoolBones)
         {
-            glftHandler.SaveOGglTF(path, ModelList[ModelID]);
+            WeightedVertex weightedVertex = new WeightedVertex();
+            weightedVertex.boneWeights = new List<BoneWeight>();
+
+            int[] PoolIndex = new int[3];
+            for (int i = 0; i < 3; i++)
+            {
+                PoolIndex[i] = StreamUtil.ReadUInt16(stream);
+            }
+
+            //Weights are out of 32768
+            float[] Weights = new float[3] { 1f, 0f, 0f };
+            if (WeightCount != 1)
+            {
+                for (int i = 0; i < 3; i++)
+                {
+                    Weights[i] = StreamUtil.ReadUInt16(stream) / 32768f;
+                }
+            }
+
+            for (int i = 0; i < WeightCount; i++)
+            {
+                BoneWeight boneWeight = new BoneWeight();
+                boneWeight.VertexIndex = PoolIndex[i];
+                boneWeight.Position = vertices[PoolIndex[i]];
+                boneWeight.BoneID = PoolBones[PoolIndex[i]];
+                boneWeight.Weight = Weights[i];
+                weightedVertex.boneWeights.Add(boneWeight);
+            }
+
+            return weightedVertex;
         }
 
         public StaticMesh GenerateFacesStatic(StaticMesh models)
@@ -449,7 +507,7 @@ namespace SSXLibrary.FileHandlers.Models.SSXOG
             ModelData.faces = new List<FlexableFace>();
             int localIndex = 0;
             int Rotation = 0;
-            for (int b = 0; b < ModelData.VertexIndex.Count; b++)
+            for (int b = 0; b < ModelData.stripVertices.Count; b++)
             {
                 if (InsideSplits(b, ModelData.Strips))
                 {
@@ -482,8 +540,6 @@ namespace SSXLibrary.FileHandlers.Models.SSXOG
             int Index2 = 0;
             int Index3 = 0;
 
-            face.BoneAssignment = ModelData.newSplits[0].BoneAssignment;
-
             //Fixes the Rotation For Exporting
             //Swap When Exporting to other formats
             //1-Clockwise
@@ -501,13 +557,13 @@ namespace SSXLibrary.FileHandlers.Models.SSXOG
                 Index3 = Index;
             }
 
-            face.V1Pos = (int)ModelData.VertexIndex[Index1];
-            face.V2Pos = (int)ModelData.VertexIndex[Index2];
-            face.V3Pos = (int)ModelData.VertexIndex[Index3];
+            face.V1Pos = Index1;
+            face.V2Pos = Index2;
+            face.V3Pos = Index3;
 
-            face.V1 = ModelData.vertices[face.V1Pos];
-            face.V2 = ModelData.vertices[face.V2Pos];
-            face.V3 = ModelData.vertices[face.V3Pos];
+            face.V1 = ModelData.stripVertices[Index1];
+            face.V2 = ModelData.stripVertices[Index2];
+            face.V3 = ModelData.stripVertices[Index3];
 
             return face;
         }
@@ -544,18 +600,21 @@ namespace SSXLibrary.FileHandlers.Models.SSXOG
         {
             public int BoneAssigmentCount;
             public int StripCount;
-            public int StripLeftTotal;
-            public int StripRightTotal;
+            public int VertexCount; //Total positions in the pool
+            public int NormalCount; //Total normals in the pool
 
             public List<NewSplit> newSplits;
-            //public List<Vector3> uvNormals;
-            //public List<Vector2> uv;
 
+            //Pool of bone local positions and normals, laid out in newSplits order
             public List<Vector3> vertices;
-            public List<Vector3> Unknown;
-            public List<int> Strips;
-            public List<int> VertexIndex;
 
+            public int ThreeWeightCount;
+            public int TwoWeightCount;
+            public int OneWeightCount;
+            public List<WeightedVertex> weightedVertices;
+
+            public List<int> Strips;
+            public List<FlexableVertex> stripVertices;
 
             public List<FlexableFace> faces;
 
@@ -564,9 +623,33 @@ namespace SSXLibrary.FileHandlers.Models.SSXOG
         public struct NewSplit
         {
             public int BoneAssignment;
-            public int VerticeCount;
-            public int VerticeCount2;
-            public int BoneAssignment2;
+            public int VertexCount;
+            public int NormalCount;
+            public int NormalMatrix; //VU address of the bones rotation matrix (105 + 3 * (BoneAssignment + 3))
+        }
+
+        public struct WeightedVertex
+        {
+            public List<BoneWeight> boneWeights;
+        }
+
+        public struct BoneWeight
+        {
+            public int BoneID;
+            public float Weight;
+            public int VertexIndex; //Pool index
+            public Vector3 Position; //Local to BoneID
+        }
+
+        public struct FlexableVertex
+        {
+            public int WeightIndex;
+            public int NormalIndex; //Pool index
+            public List<BoneWeight> boneWeights;
+
+            public Vector3 Normal; //Local to NormalBoneID
+            public int NormalBoneID;
+            public Vector2 UV;
         }
         public struct StaticMesh
         {
@@ -635,11 +718,9 @@ namespace SSXLibrary.FileHandlers.Models.SSXOG
 
         public struct FlexableFace
         {
-            public int BoneAssignment;
-
-            public Vector3 V1;
-            public Vector3 V2;
-            public Vector3 V3;
+            public FlexableVertex V1;
+            public FlexableVertex V2;
+            public FlexableVertex V3;
 
             public int V1Pos;
             public int V2Pos;
