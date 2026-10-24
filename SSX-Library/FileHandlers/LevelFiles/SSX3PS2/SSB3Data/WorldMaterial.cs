@@ -20,7 +20,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSB3Data
         public int U4;
         public int U5;
         public int U6;
-        public int U7;
+        public int U7; //Flags, 2 Alpha Test, 4 Alpha Blend, 32 (with U6 49) Glow that looks additive, 8 and 16 seen on sky materials
         public int U8;
         public int U9;
         public int U10;
