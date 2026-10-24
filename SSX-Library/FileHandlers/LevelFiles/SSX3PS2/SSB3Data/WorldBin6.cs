@@ -3,6 +3,14 @@ using SSXLibrary.Internal.Utilities;
 
 namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSB3Data
 {
+    //Lights
+    //What decodes cleanly from level C (11 lights), the ints from U12 to U25 are floats stored as raw bits:
+    // - U4 Type, 0 and 3 have no position (global, one of each in every level and its sky), 1 Spot, 2 Point
+    // - U7 Range, the bounding box is the position +/- U7
+    // - U6, U9, U10 look like the colour (Point lights come out blue 0.56 0.62 1, Spot lights warm 0.8 0.77 0.43, global 1 1 1)
+    // - U11, U12, U13 Spot direction (unit vector)
+    // - U14, U15, U16 Position, U17 to U19 and U20 to U22 the bounding box
+    // - U23, U24 Spot inner and outer cone as cosines (0.94 / 0.866 is 20 / 30 degrees)
     public class WorldBin6
     {
         public int U0;
@@ -10,32 +18,32 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSB3Data
         public int U2;
         public int U3;
 
-        public int U4;
+        public int U4; //Type
         public float U5;
         public float U6;
-        public float U7;
+        public float U7; //Range
 
         public float U8;
         public float U9;
         public float U10;
-        public float U11;
+        public float U11; //Spot Direction X
 
-        public int U12;
-        public int U13;
-        public int U14;
-        public int U15;
+        public int U12; //Spot Direction Y (float bits)
+        public int U13; //Spot Direction Z (float bits)
+        public int U14; //Position X (float bits)
+        public int U15; //Position Y (float bits)
 
-        public int U16;
-        public int U17;
+        public int U16; //Position Z (float bits)
+        public int U17; //Bounding box (float bits)
         public int U18;
         public int U19;
 
-        public int U20;
+        public int U20; //Bounding box (float bits)
         public int U21;
         public int U22;
-        public int U23;
+        public int U23; //Spot inner cone cosine (float bits)
 
-        public int U24;
+        public int U24; //Spot outer cone cosine (float bits)
         public int U25;
         public int U26;
         public int U27;
@@ -54,7 +62,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSB3Data
             U7 = StreamUtil.ReadFloat(stream);
 
             U8 = StreamUtil.ReadFloat(stream);
-            U8 = StreamUtil.ReadFloat(stream);
+            U9 = StreamUtil.ReadFloat(stream);
             U10 = StreamUtil.ReadFloat(stream);
             U11 = StreamUtil.ReadFloat(stream);
 

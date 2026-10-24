@@ -40,6 +40,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSB3Data
         // Per-model-vertex baked lighting, one raw 16-bit ABGR1555 colour per
         // model vertex in PS2 vertex-stream order (a=bit15, b=10-14, g=5-9,
         // r=0-4). Concatenated across the model's parts (multiple UNPACK blocks).
+        // Part order is the prefab's ModelObjects, then each ModelHeaderOffset, then its record pairs.
         public List<int> VertexColors = new List<int>();
 
         public void LoadData(Stream stream)
