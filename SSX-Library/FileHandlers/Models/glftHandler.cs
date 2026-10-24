@@ -16,146 +16,6 @@ namespace SSXLibrary.FileHandlers
 
     public class glftHandler
     {
-        public static void SaveOGglTF(string Output, SSXMPFModelHandler.MPFModelHeader modelHeader)
-        {
-            var mesh = new MeshBuilder<VertexPositionNormal, VertexTexture1, VertexJoints4>(modelHeader.FileName);
-            //Make Materials
-            List<MaterialBuilder> materialBuilders = new List<MaterialBuilder>();
-
-            for (int i = 0; i < modelHeader.materialDataList.Count; i++)
-            {
-                var TempVar = modelHeader.materialDataList[i];
-                var material1 = new MaterialBuilder(TempVar.Name)
-                .WithChannelParam(KnownChannel.BaseColor, KnownProperty.RGBA, new Vector4(0, 0, 0, 1));
-                materialBuilders.Add(material1);
-            }
-
-            var bindings = new List<SharpGLTF.Scenes.NodeBuilder>();
-            SharpGLTF.Scenes.NodeBuilder Binding = new SharpGLTF.Scenes.NodeBuilder();
-
-            for (int i = 0; i < modelHeader.bone.Count; i++)
-            {
-                if (modelHeader.bone[i].BoneParentID == -1)
-                {
-                    Binding = new SharpGLTF.Scenes.NodeBuilder();
-                }
-                else
-                {
-                    Binding = bindings[modelHeader.bone[i].BoneParentID];
-                }
-                Binding = Binding.CreateNode(modelHeader.bone[i].boneName);
-                float tempX = modelHeader.bone[i].Radians.X;
-                float tempY = modelHeader.bone[i].Radians.Y;
-                float tempZ = modelHeader.bone[i].Radians.Z;
-
-                Binding.WithLocalRotation(Euler.ToQuaternion(new Vector3(tempX, tempY, tempZ)));
-
-                Binding.WithLocalTranslation(modelHeader.bone[i].Position);
-
-                Binding.LocalMatrix = Binding.LocalMatrix;
-                bindings.Add(Binding);
-            }
-
-
-            for (int i = 0; i < modelHeader.MaterialGroups.Count; i++)
-            {
-                for (int a = 0; a < modelHeader.MaterialGroups[i].staticMesh.Count; a++)
-                {
-                    var Data = modelHeader.MaterialGroups[i].staticMesh[a];
-                    int MatId = modelHeader.MaterialGroups[i].MaterialID;
-
-                    for (int b = 0; b < Data.faces.Count; b++)
-                    {
-                        Matrix4x4 matrix4X4 = bindings[Data.faces[b].BoneAssigment].WorldMatrix;
-
-                        var Face = Data.faces[b];
-                        VertexPositionNormal TempPos1 = new VertexPositionNormal();
-                        TempPos1.Position = Vector3.Transform(Face.V1, matrix4X4);
-                        TempPos1.Normal = Face.Normal1;
-
-                        VertexPositionNormal TempPos2 = new VertexPositionNormal();
-                        TempPos2.Position = Vector3.Transform(Face.V2, matrix4X4);
-                        TempPos2.Normal = Face.Normal2;
-
-                        VertexPositionNormal TempPos3 = new VertexPositionNormal();
-                        TempPos3.Position = Vector3.Transform(Face.V3, matrix4X4);
-                        TempPos3.Normal = Face.Normal3;
-
-                        VertexTexture1 TempTexture1 = new VertexTexture1();
-                        TempTexture1.TexCoord = Face.UV1;
-
-                        VertexTexture1 TempTexture2 = new VertexTexture1();
-                        TempTexture2.TexCoord = Face.UV2;
-
-                        VertexTexture1 TempTexture3 = new VertexTexture1();
-                        TempTexture3.TexCoord = Face.UV3;
-
-                        (int Temp, float TempFloat)[] bindings1 = new (int Temp, float TempFloat)[1];
-                        VertexJoints4 TempBinding1 = new VertexJoints4();
-                        bindings1 = new (int Temp, float TempFloat)[1];
-                        for (int ia = 0; ia < 1; ia++)
-                        {
-                            bindings1[ia] = (Data.BoneAssigment, 1);
-                        }
-                        TempBinding1.SetBindings(bindings1);
-
-                        VertexJoints4 TempBinding2 = new VertexJoints4();
-                        bindings1 = new (int Temp, float TempFloat)[1];
-                        for (int ia = 0; ia < 1; ia++)
-                        {
-                            bindings1[ia] = (Data.BoneAssigment, 1);
-                        }
-                        TempBinding2.SetBindings(bindings1);
-
-                        VertexJoints4 TempBinding3 = new VertexJoints4();
-                        bindings1 = new (int Temp, float TempFloat)[1];
-                        for (int ia = 0; ia < 1; ia++)
-                        {
-                            bindings1[ia] = (Data.BoneAssigment, 1);
-                        }
-                        TempBinding3.SetBindings(bindings1);
-
-                        mesh.UsePrimitive(materialBuilders[MatId]).AddTriangle((TempPos1, TempTexture1, TempBinding1), (TempPos2, TempTexture2, TempBinding2), (TempPos3, TempTexture3, TempBinding3));
-                    }
-                }
-
-                for (int a = 0; a < modelHeader.MaterialGroups[i].flexableMesh.Count; a++)
-                {
-                    var Data = modelHeader.MaterialGroups[i].flexableMesh[a];
-                    int MatId = modelHeader.MaterialGroups[i].MaterialID;
-
-                    for (int b = 0; b < Data.faces.Count; b++)
-                    {
-                        var Face = Data.faces[b];
-
-                        mesh.UsePrimitive(materialBuilders[MatId]).AddTriangle(GenerateOGFlexVertex(Face.V1, bindings), GenerateOGFlexVertex(Face.V2, bindings), GenerateOGFlexVertex(Face.V3, bindings));
-                    }
-                }
-            }
-
-            var scene = new SharpGLTF.Scenes.SceneBuilder();
-
-
-
-
-            scene.AddSkinnedMesh(mesh, Matrix4x4.Identity, bindings.ToArray());
-
-            if (modelHeader.IKPoint != null)
-            {
-                for (int i = 0; i < modelHeader.IKPoint.Count; i++)
-                {
-                    var Temp = new SharpGLTF.Scenes.NodeBuilder("IKPoint " + i.ToString());
-                    Temp.WithLocalTranslation(modelHeader.IKPoint[i]);
-                    scene.AddNode(Temp);
-                }
-            }
-
-            // save the model in different formats
-
-            var model = scene.ToGltf2();
-            model.SaveGLB(Output);
-        }
-
         static (VertexPositionNormal, VertexTexture1, VertexJoints4) GenerateOGFlexVertex(SSXMPFModelHandler.FlexableVertex Vertex, List<SharpGLTF.Scenes.NodeBuilder> bindings)
         {
             //Each bone has its own local copy of the position, blend them together using the weights
@@ -215,10 +75,18 @@ namespace SSXLibrary.FileHandlers
                     Binding = bindings[Handler.bones[i].ParentBone];
                 }
                 Binding = Binding.CreateNode(Handler.bones[i].BoneName);
-                Binding.WithLocalRotation(Handler.bones[i].Rotation);
+                Binding.WithLocalRotation(Handler.bones[i].PoseRotation);
                 Binding.WithLocalTranslation(Handler.bones[i].Position);
 
                 bindings.Add(Binding);
+            }
+
+            //Mesh stays in the bind pose, the skinning moves it into the pose the bones are in
+            var Joints = new (SharpGLTF.Scenes.NodeBuilder, Matrix4x4)[bindings.Count];
+            for (int i = 0; i < bindings.Count; i++)
+            {
+                Matrix4x4.Invert(Handler.bones[i].WorldMatrix, out Matrix4x4 InverseBind);
+                Joints[i] = (bindings[i], InverseBind);
             }
 
             for (int a = 0; a < Handler.reassignedMesh.Count; a++)
@@ -252,7 +120,7 @@ namespace SSXLibrary.FileHandlers
 
                         mesh.UsePrimitive(materialBuilders[Face.MaterialID]).AddTriangle((TempPos1, TempTexture1, GenerateOGJoints(Face.Weight1)), (TempPos2, TempTexture2, GenerateOGJoints(Face.Weight2)), (TempPos3, TempTexture3, GenerateOGJoints(Face.Weight3)));
                     }
-                    scene.AddSkinnedMesh(mesh, Matrix4x4.Identity, bindings.ToArray());
+                    scene.AddSkinnedMesh(mesh, Joints);
                 }
                 else
                 {
@@ -271,7 +139,7 @@ namespace SSXLibrary.FileHandlers
 
                         mesh.UsePrimitive(materialBuilders[Face.MaterialID]).AddTriangle((TempPos1, GenerateOGJoints(Face.Weight1)), (TempPos2, GenerateOGJoints(Face.Weight2)), (TempPos3, GenerateOGJoints(Face.Weight3)));
                     }
-                    scene.AddSkinnedMesh(mesh, Matrix4x4.Identity, bindings.ToArray());
+                    scene.AddSkinnedMesh(mesh, Joints);
                 }
                 if (Handler.reassignedMesh[a].IKPoints != null)
                 {
@@ -286,6 +154,148 @@ namespace SSXLibrary.FileHandlers
 
             var model = scene.ToGltf2();
             model.SaveGLB(Output);
+        }
+
+        public static SSXOGModelCombiner LoadOGGlft(string Path)
+        {
+            SSXOGModelCombiner ogModelCombiner = new SSXOGModelCombiner();
+            ogModelCombiner.materials = new List<SSXMPFModelHandler.MaterialData>();
+            ogModelCombiner.bones = new List<SSXOGModelCombiner.BoneData>();
+            ogModelCombiner.reassignedMesh = new List<SSXOGModelCombiner.ReassignedMesh>();
+            var Scene = SharpGLTF.Scenes.SceneBuilder.LoadDefaultScene(Path);
+            var Instances = Scene.Instances.ToArray();
+
+            //Read All Instances Looking for IK Point
+            List<Vector3> IKPoints = new List<Vector3>();
+            int IkCount = Instances.Count(x => x.Name != null && x.Name.ToLower().Contains("ikpoint"));
+            for (int a = 0; a < IkCount; a++)
+            {
+                var Instance = Instances.FirstOrDefault(x => x.Name != null && x.Name.ToLower() == ("ikpoint " + a));
+                if (Instance != null)
+                {
+                    IKPoints.Add(Instance.Content.GetPoseWorldMatrix().Translation);
+                }
+            }
+
+            //Read Bones Building List
+            var Ampatures = Scene.FindArmatures();
+            for (int a = 0; a < Ampatures[0].VisualChildren.Count; a++)
+            {
+                string Name = Ampatures[0].VisualChildren[a].Name.ToLower();
+                if (Name == "hips" || Name == "board")
+                {
+                    ReturnBoneAndChildrenOG(Ampatures[0].VisualChildren[a], ogModelCombiner.bones, -1);
+                }
+            }
+
+            for (int i = 0; i < Instances.Length; i++)
+            {
+                if (Instances[i].Content.GetType().Name == "SkinnedTransformer")
+                {
+                    var GLFTMesh = Instances[i].Content.GetGeometryAsset();
+                    var SkinnedMesh = (SharpGLTF.Scenes.SkinnedTransformer)Instances[i].Content;
+                    SSXOGModelCombiner.ReassignedMesh reassignedMesh = new SSXOGModelCombiner.ReassignedMesh();
+                    reassignedMesh.IKPoints = IKPoints;
+                    reassignedMesh.MeshName = GLFTMesh.Name;
+                    reassignedMesh.ShadowModel = GLFTMesh.Name.ToLower().Contains("shdw");
+                    reassignedMesh.faces = new List<SSXOGModelCombiner.ReassignedFace>();
+
+                    var JointBindings = SkinnedMesh.GetJointBindings();
+
+                    //The nodes only hold the pose, the bind pose the mesh is in comes from the skin
+                    for (int a = 0; a < JointBindings.Length; a++)
+                    {
+                        int BoneID = ogModelCombiner.bones.FindIndex(x => x.BoneName == JointBindings[a].Joint.Name);
+                        if (BoneID != -1)
+                        {
+                            var TempBone = ogModelCombiner.bones[BoneID];
+                            Matrix4x4.Invert(JointBindings[a].InverseBindMatrix, out TempBone.WorldMatrix);
+                            ogModelCombiner.bones[BoneID] = TempBone;
+                        }
+                    }
+
+                    var MaterialArray = GLFTMesh.Primitives.ToArray();
+                    for (int a = 0; a < MaterialArray.Length; a++)
+                    {
+                        //Build New Material With Primitive Name
+                        int MatID = ogModelCombiner.materials.FindIndex(x => x.Name == MaterialArray[a].Material.Name);
+                        if (MatID == -1)
+                        {
+                            var NewMaterial = new SSXMPFModelHandler.MaterialData();
+                            NewMaterial.Name = MaterialArray[a].Material.Name;
+                            ogModelCombiner.materials.Add(NewMaterial);
+                            MatID = ogModelCombiner.materials.Count - 1;
+                        }
+
+                        //Build Vertex List
+                        var VertexList = new List<(Vector3 Position, Vector3 Normal, Vector2 UV, SSXMPFModelHandler.WeightedVertex Weight)>();
+                        var OldVertexList = MaterialArray[a].Vertices.ToArray();
+                        for (int b = 0; b < OldVertexList.Length; b++)
+                        {
+                            var TempGeo = OldVertexList[b].GetGeometry();
+                            var TempSkinning = OldVertexList[b].GetSkinning();
+                            var TempMaterial = OldVertexList[b].GetMaterial();
+
+                            //Shadow models have no normals or UVs
+                            TempGeo.TryGetNormal(out Vector3 Normal);
+                            Vector2 UV = TempMaterial.MaxTextCoords > 0 ? TempMaterial.GetTexCoord(0) : Vector2.Zero;
+
+                            var Weight = new SSXMPFModelHandler.WeightedVertex();
+                            Weight.boneWeights = new List<SSXMPFModelHandler.BoneWeight>();
+                            for (int d = 0; d < TempSkinning.MaxBindings; d++)
+                            {
+                                var BindingList = TempSkinning.GetBinding(d);
+                                if (BindingList.Weight != 0)
+                                {
+                                    var TempWeight = new SSXMPFModelHandler.BoneWeight();
+                                    TempWeight.BoneID = ogModelCombiner.bones.FindIndex(x => x.BoneName == JointBindings[BindingList.Index].Joint.Name);
+                                    TempWeight.Weight = BindingList.Weight;
+                                    Weight.boneWeights.Add(TempWeight);
+                                }
+                            }
+
+                            VertexList.Add((TempGeo.GetPosition(), Normal, UV, Weight));
+                        }
+
+                        //Build Faces
+                        var TriangleList = MaterialArray[a].Triangles;
+                        for (int b = 0; b < TriangleList.Count; b++)
+                        {
+                            var FaceTri = TriangleList[b];
+                            SSXOGModelCombiner.ReassignedFace TempFace = new SSXOGModelCombiner.ReassignedFace();
+
+                            (TempFace.V1, TempFace.Normal1, TempFace.UV1, TempFace.Weight1) = VertexList[FaceTri.A];
+                            (TempFace.V2, TempFace.Normal2, TempFace.UV2, TempFace.Weight2) = VertexList[FaceTri.B];
+                            (TempFace.V3, TempFace.Normal3, TempFace.UV3, TempFace.Weight3) = VertexList[FaceTri.C];
+                            TempFace.MaterialID = MatID;
+
+                            reassignedMesh.faces.Add(TempFace);
+                        }
+                    }
+
+                    ogModelCombiner.reassignedMesh.Add(reassignedMesh);
+                }
+            }
+
+            return ogModelCombiner;
+        }
+
+        static void ReturnBoneAndChildrenOG(SharpGLTF.Scenes.NodeBuilder nodeBuilder, List<SSXOGModelCombiner.BoneData> Bones, int ParentBone)
+        {
+            var TempBoneData = new SSXOGModelCombiner.BoneData();
+            TempBoneData.BoneName = nodeBuilder.Name;
+            TempBoneData.ParentBone = ParentBone;
+            TempBoneData.Position = nodeBuilder.LocalTransform.Translation;
+            TempBoneData.Rotation = nodeBuilder.LocalTransform.GetDecomposed().Rotation;
+            TempBoneData.PoseRotation = TempBoneData.Rotation;
+            TempBoneData.WorldMatrix = nodeBuilder.WorldMatrix;
+            Bones.Add(TempBoneData);
+
+            int BoneID = Bones.Count - 1;
+            for (int i = 0; i < nodeBuilder.VisualChildren.Count; i++)
+            {
+                ReturnBoneAndChildrenOG(nodeBuilder.VisualChildren[i], Bones, BoneID);
+            }
         }
 
         static VertexJoints4 GenerateOGJoints(SSXMPFModelHandler.WeightedVertex Weight)

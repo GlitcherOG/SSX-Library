@@ -45,7 +45,8 @@ namespace SSXLibrary.FileHandlers.Models.SSXOG
                     modelHeader.MaterialCount = StreamUtil.ReadUInt8(stream);
                     modelHeader.IKCount = StreamUtil.ReadUInt8(stream);
                     modelHeader.Unknown3 = StreamUtil.ReadUInt8(stream);
-                    stream.Position += 15;
+                    //Face models list the body bones their palette uses here (FileID, BoneID pairs)
+                    modelHeader.UnknownBytes = StreamUtil.ReadBytes(stream, 15);
                     ModelList.Add(modelHeader);
                 }
 
@@ -349,6 +350,459 @@ namespace SSXLibrary.FileHandlers.Models.SSXOG
             }
         }
 
+        //WARNING - Claude assisted code
+        //Save and the chunk writers below it were written with help from Claude.
+        //Loading then saving every original model in CHAR HI and CHAR (74 files) gives back the same bytes,
+        //apart from a few bytes of uninitialised padding after the chunk table which are written as 0.
+        //
+        //What it has to get right, none of which the reader needs to know about:
+        // - Each mesh chunk is a PS2 DMA chain (cnt tags with their quad word counts) of VIF codes that unpack the data into VU1 memory.
+        //   Static chunks interleave UV, normal and position with the cycle (3 rows a vertex), flex chunks unpack one block after another.
+        // - Every unpack is lined up with NOPs so its data starts on a quad word, the minimum NOPs differ per block.
+        // - Row 0 of each chunk header is a GIF tag, row 1 holds the matrix and normal matrix VU addresses (2 + 4 * Slot and 105 + 3 * Slot).
+        // - Every chunk ends with a ref tag pointing at the kick (FLUSHE, MSCAL) at the end of its region, after a ret tag ending the chain.
+        // - Shadow GIF tags and the unknown header bytes (the face models palette list) have to be written exactly as the game expects.
+        public void Save(string path)
+        {
+            MemoryStream stream = new MemoryStream();
+
+            FileStart = 12 + 64 * ModelList.Count;
+            FileStart += (16 - FileStart % 16) % 16;
+            stream.Position = FileStart;
+
+            for (int i = 0; i < ModelList.Count; i++)
+            {
+                var Model = ModelList[i];
+                MemoryStream ModelStream = new MemoryStream();
+
+                //Materials
+                for (int a = 0; a < Model.materialDataList.Count; a++)
+                {
+                    StreamUtil.WriteString(ModelStream, Model.materialDataList[a].Name, 4);
+                    StreamUtil.WriteFloat32(ModelStream, Model.materialDataList[a].X);
+                    StreamUtil.WriteFloat32(ModelStream, Model.materialDataList[a].Y);
+                    StreamUtil.WriteFloat32(ModelStream, Model.materialDataList[a].Z);
+                }
+                StreamUtil.AlignBy16(ModelStream);
+
+                //Bones
+                Model.BoneOffset = (int)ModelStream.Position;
+                for (int a = 0; a < Model.bone.Count; a++)
+                {
+                    StreamUtil.WriteString(ModelStream, Model.bone[a].boneName, 16);
+                    StreamUtil.WriteInt16(ModelStream, Model.bone[a].BoneParentFileID);
+                    StreamUtil.WriteInt16(ModelStream, Model.bone[a].BoneParentID);
+                    StreamUtil.WriteVector3(ModelStream, Model.bone[a].Position);
+                }
+
+                //IK Points
+                Model.IKPointOffset = (int)ModelStream.Position;
+                for (int a = 0; a < Model.IKPoint.Count; a++)
+                {
+                    StreamUtil.WriteVector3(ModelStream, Model.IKPoint[a]);
+                    StreamUtil.WriteInt32(ModelStream, 0);
+                }
+
+                //Chunk Offsets, written once the mesh data is
+                Model.ChunkOffsets = (int)ModelStream.Position;
+                ModelStream.Position += 28 * Model.MaterialGroups.Count;
+                StreamUtil.AlignBy16(ModelStream);
+
+                //Mesh Data
+                Model.DataStart = (int)ModelStream.Position;
+                for (int n = 0; n < Model.MaterialGroups.Count; n++)
+                {
+                    var TempMaterialGroup = Model.MaterialGroups[n];
+                    bool Shadow = (TempMaterialGroup.ID & 16) != 0;
+
+                    //Static Mesh
+                    TempMaterialGroup.MeshOffset = -1;
+                    TempMaterialGroup.MeshOffsetEnd = -1;
+                    if ((TempMaterialGroup.ID & 1) != 0)
+                    {
+                        TempMaterialGroup.MeshOffset = (int)ModelStream.Position;
+                        List<int> RefTags = new List<int>();
+                        for (int a = 0; a < TempMaterialGroup.staticMesh.Count; a++)
+                        {
+                            WriteStaticMesh(ModelStream, TempMaterialGroup.staticMesh[a], Shadow, RefTags);
+                        }
+                        TempMaterialGroup.MeshOffsetEnd = WriteMeshEnd(ModelStream, TempMaterialGroup.MeshOffset, RefTags);
+                    }
+
+                    //Flex Mesh
+                    TempMaterialGroup.MorphMeshOffset = -1;
+                    TempMaterialGroup.MorphMeshOffsetEnd = -1;
+                    if ((TempMaterialGroup.ID & 2) != 0)
+                    {
+                        TempMaterialGroup.MorphMeshOffset = (int)ModelStream.Position;
+                        List<int> RefTags = new List<int>();
+                        for (int a = 0; a < TempMaterialGroup.flexableMesh.Count; a++)
+                        {
+                            WriteFlexMesh(ModelStream, TempMaterialGroup.flexableMesh[a], Shadow, RefTags);
+                        }
+                        TempMaterialGroup.MorphMeshOffsetEnd = WriteMeshEnd(ModelStream, TempMaterialGroup.MorphMeshOffset, RefTags);
+                    }
+
+                    Model.MaterialGroups[n] = TempMaterialGroup;
+                }
+
+                //Chunk Offsets
+                long EndPos = ModelStream.Position;
+                ModelStream.Position = Model.ChunkOffsets;
+                for (int a = 0; a < Model.MaterialGroups.Count; a++)
+                {
+                    StreamUtil.WriteInt32(ModelStream, Model.MaterialGroups[a].ID);
+                    StreamUtil.WriteInt32(ModelStream, Model.MaterialGroups[a].MaterialID);
+                    StreamUtil.WriteInt32(ModelStream, Model.MaterialGroups[a].Unknown);
+                    StreamUtil.WriteInt32(ModelStream, Model.MaterialGroups[a].MeshOffset);
+                    StreamUtil.WriteInt32(ModelStream, Model.MaterialGroups[a].MeshOffsetEnd);
+                    StreamUtil.WriteInt32(ModelStream, Model.MaterialGroups[a].MorphMeshOffset);
+                    StreamUtil.WriteInt32(ModelStream, Model.MaterialGroups[a].MorphMeshOffsetEnd);
+                }
+                ModelStream.Position = EndPos;
+
+                Model.ChunksCount = Model.MaterialGroups.Count;
+                Model.BoneCount = Model.bone.Count;
+                Model.MaterialCount = Model.materialDataList.Count;
+                Model.IKCount = Model.IKPoint.Count;
+                Model.DataOffset = (int)stream.Position - FileStart;
+                Model.EntrySize = (int)ModelStream.Length;
+
+                ModelStream.Position = 0;
+                StreamUtil.WriteStreamIntoStream(stream, ModelStream);
+                ModelStream.Dispose();
+                ModelStream.Close();
+                ModelList[i] = Model;
+            }
+
+            //Header
+            stream.Position = 0;
+            StreamUtil.WriteInt32(stream, U1);
+            StreamUtil.WriteInt16(stream, ModelList.Count);
+            StreamUtil.WriteInt16(stream, HeaderSize);
+            StreamUtil.WriteInt32(stream, FileStart);
+
+            for (int i = 0; i < ModelList.Count; i++)
+            {
+                var TempModel = ModelList[i];
+                StreamUtil.WriteString(stream, TempModel.FileName, 16);
+                StreamUtil.WriteInt32(stream, TempModel.DataOffset);
+                StreamUtil.WriteInt32(stream, TempModel.EntrySize);
+                StreamUtil.WriteInt32(stream, TempModel.BoneOffset);
+                StreamUtil.WriteInt32(stream, TempModel.IKPointOffset);
+                StreamUtil.WriteInt32(stream, TempModel.ChunkOffsets);
+                StreamUtil.WriteInt32(stream, TempModel.DataStart);
+
+                StreamUtil.WriteInt16(stream, TempModel.ChunksCount);
+                StreamUtil.WriteInt16(stream, TempModel.BoneCount);
+                StreamUtil.WriteUInt8(stream, TempModel.Unknown1);
+                StreamUtil.WriteUInt8(stream, TempModel.Unknown2);
+                StreamUtil.WriteUInt8(stream, TempModel.MaterialCount);
+                StreamUtil.WriteUInt8(stream, TempModel.IKCount);
+                StreamUtil.WriteUInt8(stream, TempModel.Unknown3);
+                StreamUtil.WriteBytes(stream, TempModel.UnknownBytes ?? new byte[15]);
+            }
+
+            if (File.Exists(path))
+            {
+                File.Delete(path);
+            }
+            var file = File.Create(path);
+            stream.Position = 0;
+            stream.CopyTo(file);
+            stream.Dispose();
+            file.Close();
+        }
+
+        //Each chunk is a DMA chain of VIF codes that unpacks into VU1 memory, then a ref tag pointing at the kick at the end of the region
+        void WriteStaticMesh(Stream ModelStream, StaticMesh Data, bool Shadow, List<int> RefTags)
+        {
+            int RowCount = Data.StripCount + 2;
+            int Slot = Data.BoneAssigment + 3;
+
+            //Header
+            int TagPos = (int)ModelStream.Position;
+            WriteDMATag(ModelStream, 1, 0);
+            WriteUnpackStart(ModelStream, 1, 2);
+            WriteVIFCode(ModelStream, 0x01, 0, 0x0101);
+            WriteVIFCode(ModelStream, 0x00);
+            WriteVIFCode(ModelStream, 0x6C, RowCount, 0x8000);
+
+            WriteGIFTag(ModelStream, Data.VertexCount, Shadow);
+            StreamUtil.WriteInt32(ModelStream, Data.StripCount);
+            StreamUtil.WriteInt32(ModelStream, 2 + 4 * Slot);
+            StreamUtil.WriteInt32(ModelStream, Shadow ? 0 : 105 + 3 * Slot);
+            StreamUtil.WriteInt32(ModelStream, Data.VertexCount);
+            for (int i = 0; i < Data.StripCount; i++)
+            {
+                StreamUtil.WriteInt32(ModelStream, Data.Strips[i + 1] - Data.Strips[i]);
+                StreamUtil.WriteInt32(ModelStream, 0);
+                StreamUtil.WriteInt32(ModelStream, 0);
+                StreamUtil.WriteInt32(ModelStream, 0);
+            }
+            FinishDMATag(ModelStream, TagPos);
+
+            //Vertex Data
+            TagPos = (int)ModelStream.Position;
+            WriteDMATag(ModelStream, 1, 0);
+            if (!Shadow)
+            {
+                //UV, Normal and Position are interleaved by the cycle (3 rows a vertex)
+                WriteUnpackStart(ModelStream, 1, 10);
+                WriteSTROW(ModelStream, 0, 0, 4096, 4096);
+                WriteSTMASK(ModelStream, 0x50505050);
+                WriteVIFCode(ModelStream, 0x00);
+                WriteVIFCode(ModelStream, 0x01, 0, 0x0103);
+                WriteVIFCode(ModelStream, 0x00);
+                WriteVIFCode(ModelStream, 0x75, Data.VertexCount, 0x8000 | RowCount);
+                for (int i = 0; i < Data.VertexCount; i++)
+                {
+                    StreamUtil.WriteInt16(ModelStream, Quantize(Data.uv[i].X, 4096f));
+                    StreamUtil.WriteInt16(ModelStream, Quantize(Data.uv[i].Y, 4096f));
+                }
+
+                WriteUnpackStart(ModelStream, 1, 10);
+                WriteSTROW(ModelStream, 0, 0, 0, 0x8000);
+                WriteSTMASK(ModelStream, 0x40404040);
+                WriteVIFCode(ModelStream, 0x00);
+                WriteVIFCode(ModelStream, 0x01, 0, 0x0103);
+                WriteVIFCode(ModelStream, 0x00);
+                WriteVIFCode(ModelStream, 0x79, Data.VertexCount, 0x8000 | (RowCount + 1));
+                for (int i = 0; i < Data.VertexCount; i++)
+                {
+                    StreamUtil.WriteInt16(ModelStream, Quantize(Data.uvNormals[i].X, 32768f));
+                    StreamUtil.WriteInt16(ModelStream, Quantize(Data.uvNormals[i].Y, 32768f));
+                    StreamUtil.WriteInt16(ModelStream, Quantize(Data.uvNormals[i].Z, 32768f));
+                }
+                StreamUtil.AlignBy(ModelStream, 4);
+
+                WriteUnpackStart(ModelStream, 1, 10);
+                WriteSTROW(ModelStream, 0, 0, 0, 0x3F800000);
+                WriteSTMASK(ModelStream, 0x40404040);
+                WriteVIFCode(ModelStream, 0x00);
+                WriteVIFCode(ModelStream, 0x01, 0, 0x0103);
+                WriteVIFCode(ModelStream, 0x00);
+                WriteVIFCode(ModelStream, 0x78, Data.VertexCount, 0x8000 | (RowCount + 2));
+            }
+            else
+            {
+                WriteUnpackStart(ModelStream, 1, 10);
+                WriteSTROW(ModelStream, 0, 0, 0, 0x3F800000);
+                WriteSTMASK(ModelStream, 0x40404040);
+                WriteVIFCode(ModelStream, 0x00);
+                WriteVIFCode(ModelStream, 0x01, 0, 0x0101);
+                WriteVIFCode(ModelStream, 0x00);
+                WriteVIFCode(ModelStream, 0x78, Data.VertexCount, 0x8000 | RowCount);
+            }
+            for (int i = 0; i < Data.VertexCount; i++)
+            {
+                StreamUtil.WriteVector3(ModelStream, Data.vertices[i]);
+            }
+            StreamUtil.AlignBy16(ModelStream);
+            FinishDMATag(ModelStream, TagPos);
+
+            WriteRefTag(ModelStream, RefTags);
+        }
+
+        void WriteFlexMesh(Stream ModelStream, FlexableMesh Data, bool Shadow, List<int> RefTags)
+        {
+            int RowCount = Data.newSplits.Count + 2;
+            int WeightRows = 1 + 2 * Data.ThreeWeightCount + 2 * Data.TwoWeightCount + Data.OneWeightCount;
+            int StripRows = Shadow ? Data.stripVertices.Count : Data.stripVertices.Count * 2;
+
+            int TagPos = (int)ModelStream.Position;
+            WriteDMATag(ModelStream, 1, 0);
+
+            //Header
+            WriteUnpackStart(ModelStream, 1, 2);
+            WriteVIFCode(ModelStream, 0x01, 0, 0x0101);
+            WriteVIFCode(ModelStream, 0x00);
+            WriteVIFCode(ModelStream, 0x6C, RowCount, 0x8000);
+
+            WriteGIFTag(ModelStream, Data.stripVertices.Count, Shadow);
+            StreamUtil.WriteInt32(ModelStream, Data.newSplits.Count);
+            StreamUtil.WriteInt32(ModelStream, Data.StripCount);
+            StreamUtil.WriteInt32(ModelStream, Data.VertexCount);
+            StreamUtil.WriteInt32(ModelStream, Data.NormalCount);
+            for (int i = 0; i < Data.newSplits.Count; i++)
+            {
+                int Slot = Data.newSplits[i].BoneAssignment + 3;
+                StreamUtil.WriteInt32(ModelStream, 2 + 4 * Slot);
+                StreamUtil.WriteInt32(ModelStream, Data.newSplits[i].VertexCount);
+                StreamUtil.WriteInt32(ModelStream, Data.newSplits[i].NormalCount);
+                StreamUtil.WriteInt32(ModelStream, Shadow ? 0 : 105 + 3 * Slot);
+            }
+
+            //Vertex Pool
+            WriteUnpackStart(ModelStream, 1, 10);
+            WriteSTROW(ModelStream, 0, 0, 0, 0x3F800000);
+            WriteSTMASK(ModelStream, 0x40404040);
+            WriteVIFCode(ModelStream, 0x00);
+            WriteVIFCode(ModelStream, 0x00);
+            WriteVIFCode(ModelStream, 0x00);
+            WriteVIFCode(ModelStream, 0x78, Data.vertices.Count, 0x8000 | RowCount);
+            for (int i = 0; i < Data.vertices.Count; i++)
+            {
+                StreamUtil.WriteVector3(ModelStream, Data.vertices[i]);
+            }
+
+            //Weights
+            WriteUnpackStart(ModelStream, 1, 10);
+            WriteSTROW(ModelStream, 0, 0, 0, 0x8000);
+            WriteSTMASK(ModelStream, 0x40404040);
+            WriteVIFCode(ModelStream, 0x00);
+            WriteVIFCode(ModelStream, 0x00);
+            WriteVIFCode(ModelStream, 0x00);
+            WriteVIFCode(ModelStream, 0x79, WeightRows, 0xC000 | (RowCount + Data.vertices.Count));
+            StreamUtil.WriteInt16(ModelStream, Data.ThreeWeightCount);
+            StreamUtil.WriteInt16(ModelStream, Data.TwoWeightCount);
+            StreamUtil.WriteInt16(ModelStream, Data.OneWeightCount);
+            for (int i = 0; i < Data.weightedVertices.Count; i++)
+            {
+                var Weights = Data.weightedVertices[i].boneWeights;
+                for (int a = 0; a < 3; a++)
+                {
+                    StreamUtil.WriteInt16(ModelStream, a < Weights.Count ? Weights[a].VertexIndex : 0);
+                }
+                if (Weights.Count != 1)
+                {
+                    for (int a = 0; a < 3; a++)
+                    {
+                        StreamUtil.WriteInt16(ModelStream, a < Weights.Count ? (int)MathF.Round(Weights[a].Weight * 32768f) : 0);
+                    }
+                }
+            }
+            StreamUtil.AlignBy(ModelStream, 4);
+
+            //Tristrip
+            WriteUnpackStart(ModelStream, 3, 0);
+            WriteVIFCode(ModelStream, 0x66, Data.StripCount, 0xC000 | (RowCount + Data.vertices.Count + WeightRows));
+            for (int i = 0; i < Data.StripCount; i++)
+            {
+                StreamUtil.WriteUInt8(ModelStream, Data.Strips[i + 1] - Data.Strips[i]);
+                StreamUtil.WriteUInt8(ModelStream, 0);
+            }
+            StreamUtil.AlignBy(ModelStream, 4);
+
+            //Strip Vertices
+            WriteUnpackStart(ModelStream, 1, 10);
+            WriteSTROW(ModelStream, 0, 0, 4096, 4096);
+            WriteSTMASK(ModelStream, 0x50505050);
+            WriteVIFCode(ModelStream, 0x00);
+            WriteVIFCode(ModelStream, 0x00);
+            WriteVIFCode(ModelStream, 0x00);
+            WriteVIFCode(ModelStream, 0x75, StripRows, 0x8000 | (RowCount + Data.vertices.Count + WeightRows + Data.StripCount));
+            for (int i = 0; i < Data.stripVertices.Count; i++)
+            {
+                StreamUtil.WriteInt16(ModelStream, Data.stripVertices[i].WeightIndex);
+                StreamUtil.WriteInt16(ModelStream, Data.stripVertices[i].NormalIndex);
+                if (!Shadow)
+                {
+                    StreamUtil.WriteInt16(ModelStream, Quantize(Data.stripVertices[i].UV.X, 4096f));
+                    StreamUtil.WriteInt16(ModelStream, Quantize(Data.stripVertices[i].UV.Y, 4096f));
+                }
+            }
+            StreamUtil.AlignBy16(ModelStream);
+            FinishDMATag(ModelStream, TagPos);
+
+            WriteRefTag(ModelStream, RefTags);
+        }
+
+        //Ret tag ending the chain, then the kick (FLUSHE, MSCAL) every ref tag in the region points at
+        int WriteMeshEnd(Stream ModelStream, int RegionStart, List<int> RefTags)
+        {
+            WriteDMATag(ModelStream, 6, 1);
+            WriteVIFCode(ModelStream, 0x00);
+            WriteVIFCode(ModelStream, 0x00);
+            WriteVIFCode(ModelStream, 0x00);
+            WriteVIFCode(ModelStream, 0x00);
+            WriteVIFCode(ModelStream, 0x00);
+            WriteVIFCode(ModelStream, 0x01, 0, 0x0101);
+
+            int RegionEnd = (int)ModelStream.Position;
+            WriteVIFCode(ModelStream, 0x00);
+            WriteVIFCode(ModelStream, 0x10);
+            WriteVIFCode(ModelStream, 0x00);
+            WriteVIFCode(ModelStream, 0x14);
+
+            for (int i = 0; i < RefTags.Count; i++)
+            {
+                ModelStream.Position = RefTags[i] + 4;
+                StreamUtil.WriteInt32(ModelStream, RegionEnd - RegionStart);
+            }
+            ModelStream.Position = RegionEnd + 16;
+            return RegionEnd;
+        }
+
+        static void WriteRefTag(Stream ModelStream, List<int> RefTags)
+        {
+            RefTags.Add((int)ModelStream.Position);
+            WriteDMATag(ModelStream, 3, 1);
+            WriteVIFCode(ModelStream, 0x00);
+            WriteVIFCode(ModelStream, 0x00);
+        }
+
+        static void WriteDMATag(Stream ModelStream, int ID, int QWC, int Address = 0)
+        {
+            StreamUtil.WriteInt32(ModelStream, (ID << 28) | QWC);
+            StreamUtil.WriteInt32(ModelStream, Address);
+        }
+
+        //Quad word count of a cnt tag is everything after the tag up to the current position
+        static void FinishDMATag(Stream ModelStream, int TagPos)
+        {
+            int EndPos = (int)ModelStream.Position;
+            ModelStream.Position = TagPos;
+            StreamUtil.WriteInt32(ModelStream, (1 << 28) | ((EndPos - TagPos) / 16 - 1));
+            ModelStream.Position = EndPos;
+        }
+
+        static void WriteVIFCode(Stream ModelStream, int Command, int Num = 0, int Immediate = 0)
+        {
+            StreamUtil.WriteInt32(ModelStream, (Command << 24) | ((Num & 0xFF) << 16) | Immediate);
+        }
+
+        static void WriteSTROW(Stream ModelStream, int X, int Y, int Z, int W)
+        {
+            WriteVIFCode(ModelStream, 0x30);
+            StreamUtil.WriteInt32(ModelStream, X);
+            StreamUtil.WriteInt32(ModelStream, Y);
+            StreamUtil.WriteInt32(ModelStream, Z);
+            StreamUtil.WriteInt32(ModelStream, W);
+        }
+
+        static void WriteSTMASK(Stream ModelStream, int Mask)
+        {
+            WriteVIFCode(ModelStream, 0x20);
+            StreamUtil.WriteInt32(ModelStream, Mask);
+        }
+
+        //NOPs so the unpack lands on the last word of a quad word and its data starts aligned
+        static void WriteUnpackStart(Stream ModelStream, int MinNOPs, int CodeWords)
+        {
+            for (int i = 0; i < MinNOPs; i++)
+            {
+                WriteVIFCode(ModelStream, 0x00);
+            }
+            while ((ModelStream.Position / 4 + CodeWords) % 4 != 3)
+            {
+                WriteVIFCode(ModelStream, 0x00);
+            }
+        }
+
+        static void WriteGIFTag(Stream ModelStream, int VertexCount, bool Shadow)
+        {
+            StreamUtil.WriteInt32(ModelStream, 0x8000 | VertexCount);
+            StreamUtil.WriteInt32(ModelStream, Shadow ? 0x10224000 : 0x302E4000);
+            StreamUtil.WriteInt32(ModelStream, Shadow ? 0x4 : 0x412);
+            StreamUtil.WriteInt32(ModelStream, 0);
+        }
+
+        static int Quantize(float Value, float Scale)
+        {
+            return (int)Math.Clamp(MathF.Round(Value * Scale), short.MinValue, short.MaxValue);
+        }
+
         public WeightedVertex ReadWeightedVertex(Stream stream, int WeightCount, List<Vector3> vertices, List<int> PoolBones)
         {
             WeightedVertex weightedVertex = new WeightedVertex();
@@ -587,6 +1041,7 @@ namespace SSXLibrary.FileHandlers.Models.SSXOG
             public int MaterialCount;
             public int IKCount;
             public int Unknown3;
+            public byte[] UnknownBytes;
 
             public byte[] Matrix;
 
