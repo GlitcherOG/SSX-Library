@@ -414,7 +414,7 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
 
             //Regenerate Materials
             List<int> MaterialsID = new List<int>();
-            List<int> RedoneMaterial = new List<int>();
+            var OriginalMaterials = TempTrickyMesh.materialDatas;
             TempTrickyMesh.materialDatas = new List<TrickyGCMNF.MaterialData>();
             for (int a = 0; a < ReassignedMesh.faces.Count; a++)
             {
@@ -426,37 +426,7 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
 
             for (int a = 0; a < MaterialsID.Count; a++)
             {
-                TrickyGCMNF.MaterialData MaterialData = new TrickyGCMNF.MaterialData();
-                RedoneMaterial.Add(a);
-                MaterialData.MainTexture = trickyModelCombiner.materials[MaterialsID[a]].MainTexture.Substring(0, 4).ToLower();
-                MaterialData.Texture1 = "";
-                MaterialData.Texture2 = "";
-                MaterialData.Texture3 = "";
-                MaterialData.Texture4 = "";
-
-                MaterialData.FactorFloat = 0.00392156885936856f;
-                MaterialData.Unused1Float = 0.00392156885936856f;
-                MaterialData.Unused2Float = 0.00392156885936856f;
-
-                string[] Split = trickyModelCombiner.materials[MaterialsID[a]].MainTexture.Split(' ');
-
-                if (Split.Length > 1)
-                {
-                    if (Split[1].ToLower() == "gloss")
-                    {
-                        if (MaterialData.MainTexture == "bord")
-                        {
-                            MaterialData.Texture3 = "bd_g";
-                        }
-                    }
-                    else if (Split[1].ToLower() == "envr")
-                    {
-                        MaterialData.Texture4 = "envr";
-                    }
-
-                }
-
-                TempTrickyMesh.materialDatas.Add(MaterialData);
+                TempTrickyMesh.materialDatas.Add(RegenMaterial(trickyModelCombiner.materials[MaterialsID[a]].MainTexture, OriginalMaterials));
             }
 
 
@@ -697,6 +667,7 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
                 }
                 #endregion
 
+                TempFace.MaterialID = ReassignedMesh.faces[a].MaterialID;
                 indiceFaces.Add(TempFace);
             }
 
@@ -724,103 +695,12 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
             }
             TempTrickyMesh.morphHeader = NewMorphHeader;
 
-            indiceFaces = TristripGenerator.NeighbourPriority(indiceFaces);
-
-            //Send to Tristrip Generator
-            List<TristripGenerator.IndiceTristrip> indiceTristrips = TristripGenerator.GenerateTristripNivda(indiceFaces, 10000, true);
-            if (indiceTristrips == null)
+            //Split into mesh headers of 10 weights or less, stripping each material on its own
+            TempTrickyMesh.meshHeaders = GenerateMeshHeaders(indiceFaces, VectorPoint, Shadow);
+            if (TempTrickyMesh.meshHeaders == null)
             {
                 //MessageBox.Show("Tristrip Failed to Generate");
                 return;
-            }
-
-            //Generate Morph Header Data
-
-            //For each tristrip check material number
-            //if material number has data in the mesh header list go on to the next
-            //If none found generate a new header
-            TempTrickyMesh.meshHeaders = new List<TrickyGCMNF.MeshHeader>();
-
-            for (int i = 0; i < indiceTristrips.Count; i++)
-            {
-                int MaterialID = indiceTristrips[i].MaterialID;
-
-                int HeaderID = -1;
-
-                for (int a = 0; a < TempTrickyMesh.meshHeaders.Count; a++)
-                {
-                    bool Added = false;
-                    for (int b = 0; b < TempTrickyMesh.meshHeaders[a].indexGroupHeaders.Count; b++)
-                    {
-                        if (TempTrickyMesh.meshHeaders[a].indexGroupHeaders[b].MatIndex1 == MaterialID)
-                        {
-                            Added = true;
-                            break;
-                        }
-                    }
-                    if(!Added)
-                    {
-                        HeaderID = a;
-                        break;
-                    }
-                }
-
-                if (HeaderID == -1)
-                {
-                    HeaderID = TempTrickyMesh.meshHeaders.Count;
-                    TrickyGCMNF.MeshHeader NewHeader = new TrickyGCMNF.MeshHeader();
-                    NewHeader.indexGroupHeaders = new List<TrickyGCMNF.IndexGroupHeader>();
-                    NewHeader.WeightIndex = new List<int>();
-                    TempTrickyMesh.meshHeaders.Add(NewHeader);
-                }
-
-                var TempHeader = TempTrickyMesh.meshHeaders[HeaderID];
-                TrickyGCMNF.IndexGroupHeader indexGroupHeader = new TrickyGCMNF.IndexGroupHeader();
-                indexGroupHeader.MatIndex0 = MaterialID;
-                indexGroupHeader.MatIndex1 = MaterialID;
-                indexGroupHeader.MatIndex2 = MaterialID;
-                indexGroupHeader.MatIndex3 = MaterialID;
-                indexGroupHeader.MatIndex4 = MaterialID;
-                TrickyGCMNF.IndexGroup indexGroup = new TrickyGCMNF.IndexGroup();
-
-                indexGroup.indices = new List<TrickyGCMNF.Index>();
-                indexGroup.shadowIndices = new List<TrickyGCMNF.ShadowIndex>();
-                
-                //Generate New Index List with Weight List
-                //Add Index List
-                for (int a = 0; a < indiceTristrips[i].Indices.Count; a++)
-                {
-                    if (!Shadow)
-                    {
-                        TrickyGCMNF.Index TrickyIndex = new TrickyGCMNF.Index();
-                        if (!TempHeader.WeightIndex.Contains(VectorPoint[indiceTristrips[i].Indices[a]].WeightIndex))
-                        {
-                            TempHeader.WeightIndex.Add(VectorPoint[indiceTristrips[i].Indices[a]].WeightIndex);
-                        }
-                        TrickyIndex.WeightIndex = TempHeader.WeightIndex.IndexOf(VectorPoint[indiceTristrips[i].Indices[a]].WeightIndex);
-
-                        TrickyIndex.Index0 = indiceTristrips[i].Indices[a];
-                        TrickyIndex.Index1 = indiceTristrips[i].Indices[a];
-                        TrickyIndex.Index2 = indiceTristrips[i].Indices[a];
-                        indexGroup.indices.Add(TrickyIndex);
-                    }
-                    else
-                    {
-                        TrickyGCMNF.ShadowIndex TrickyIndex = new TrickyGCMNF.ShadowIndex();
-                        if (!TempHeader.WeightIndex.Contains(VectorPoint[indiceTristrips[i].Indices[a]].WeightIndex))
-                        {
-                            TempHeader.WeightIndex.Add(VectorPoint[indiceTristrips[i].Indices[a]].WeightIndex);
-                        }
-                        TrickyIndex.WeightIndex = TempHeader.WeightIndex.IndexOf(VectorPoint[indiceTristrips[i].Indices[a]].WeightIndex);
-
-                        TrickyIndex.Index = indiceTristrips[i].Indices[a];
-                        indexGroup.shadowIndices.Add(TrickyIndex);
-                    }
-                }
-                indexGroupHeader.indexGroup = indexGroup;
-
-                TempHeader.indexGroupHeaders.Add(indexGroupHeader);
-                TempTrickyMesh.meshHeaders[HeaderID] = TempHeader;
             }
 
 
@@ -995,8 +875,8 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
                 }
 
                 List<int> MaterialsID = new List<int>();
-                List<int> RedoneMaterial = new List<int>();
                 //Regenerate Materials
+                var OriginalMaterials = TempTrickyMesh.materialDatas;
                 TempTrickyMesh.materialDatas = new List<TrickyGCMNF.MaterialData>();
                 for (int a = 0; a < TempReMesh.faces.Count; a++)
                 {
@@ -1008,66 +888,19 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
 
                 for (int a = 0; a < MaterialsID.Count; a++)
                 {
-                    TrickyGCMNF.MaterialData MaterialData = new TrickyGCMNF.MaterialData();
-                    RedoneMaterial.Add(a);
-                    MaterialData.MainTexture = trickyModelCombiner.materials[MaterialsID[a]].MainTexture.Substring(0, 4).ToLower();
-                    MaterialData.Texture1 = "";
-                    MaterialData.Texture2 = "";
-                    MaterialData.Texture3 = "";
-                    MaterialData.Texture4 = "";
-
-                    MaterialData.FactorFloat = 0.00392156885936856f;
-                    MaterialData.Unused1Float = 0.00392156885936856f;
-                    MaterialData.Unused2Float = 0.00392156885936856f;
-
-                    string[] Split = trickyModelCombiner.materials[MaterialsID[a]].MainTexture.Split(' ');
-
-                    if (Split.Length > 1)
-                    {
-                        if (Split[1].ToLower() == "gloss")
-                        {
-                            if (MaterialData.MainTexture == "suit")
-                            {
-                                MaterialData.Texture3 = "st_g";
-                            }
-                            else if (MaterialData.MainTexture == "helm")
-                            {
-                                MaterialData.Texture3 = "hm_g";
-                            }
-                            else if (MaterialData.MainTexture == "boot")
-                            {
-                                MaterialData.Texture3 = "bt_g";
-                            }
-                            else if (MaterialData.MainTexture == "head")
-                            {
-                                MaterialData.Texture3 = "hd_g";
-                            }
-                        }
-                        else if (Split[1].ToLower() == "envr")
-                        {
-                            MaterialData.Texture4 = "envr";
-                        }
-
-                    }
-
-                    TempTrickyMesh.materialDatas.Add(MaterialData);
+                    TempTrickyMesh.materialDatas.Add(RegenMaterial(trickyModelCombiner.materials[MaterialsID[a]].MainTexture, OriginalMaterials));
                 }
 
-                TrickyGCMNF.MaterialData TempMaterialData = new TrickyGCMNF.MaterialData();
-                TempMaterialData.MainTexture = "head";
-                TempTrickyMesh.materialDatas.Add(TempMaterialData);
-
-                TempMaterialData = new TrickyGCMNF.MaterialData();
-                TempMaterialData.MainTexture = "helm";
-                TempTrickyMesh.materialDatas.Add(TempMaterialData);
-
-                TempMaterialData = new TrickyGCMNF.MaterialData();
-                TempMaterialData.MainTexture = "suit";
-                TempTrickyMesh.materialDatas.Add(TempMaterialData);
-
-                TempMaterialData = new TrickyGCMNF.MaterialData();
-                TempMaterialData.MainTexture = "boot";
-                TempTrickyMesh.materialDatas.Add(TempMaterialData);
+                //Every original character model lists all four materials
+                string[] BaseMaterials = { "head", "helm", "suit", "boot" };
+                for (int a = 0; a < BaseMaterials.Length; a++)
+                {
+                    if (!TempTrickyMesh.materialDatas.Any(x => x.MainTexture == BaseMaterials[a]))
+                    {
+                        int Original = OriginalMaterials.FindIndex(x => x.MainTexture == BaseMaterials[a]);
+                        TempTrickyMesh.materialDatas.Add(Original != -1 ? OriginalMaterials[Original] : RegenMaterial(BaseMaterials[a], null));
+                    }
+                }
 
                 for (int a = 0; a < TempReMesh.faces.Count; a++)
                 {
@@ -1314,6 +1147,7 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
                     }
                     #endregion
 
+                    TempFace.MaterialID = TempReMesh.faces[a].MaterialID;
                     indiceFaces.Add(TempFace);
                 }
 
@@ -1341,144 +1175,12 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
                 }
                 TempTrickyMesh.morphHeader = NewMorphHeader;
 
-                indiceFaces = TristripGenerator.NeighbourPriority(indiceFaces);
-
-                //Send to Tristrip Generator
-                List<TristripGenerator.IndiceTristrip> indiceTristrips = TristripGenerator.GenerateTristripNivda(indiceFaces, 10000, true);
-                if (indiceTristrips == null)
+                //Split into mesh headers of 10 weights or less, stripping each material on its own
+                TempTrickyMesh.meshHeaders = GenerateMeshHeaders(indiceFaces, VectorPoint, Shadow);
+                if (TempTrickyMesh.meshHeaders == null)
                 {
                     //MessageBox.Show("Tristrip Failed to Generate");
                     return;
-                }
-
-                //Generate Morph Header Data
-
-                //For each tristrip check material number
-                //if material number has data in the mesh header list go on to the next
-                //If none found generate a new header
-                TempTrickyMesh.meshHeaders = new List<TrickyGCMNF.MeshHeader>();
-
-                //TODO: 10 Weights Per meshHeader
-                //theres a max of 10 weights per meshHeader group
-                var newIndiceTristrips = new List<TristripGenerator.IndiceTristrip>();
-
-                int StartPoint = 0;
-                for (int z = 0; z < indiceTristrips.Count; z++)
-                {
-                    var newHeader = new TristripGenerator.IndiceTristrip();
-                    newHeader.Indices = new List<int>();
-                    newHeader.MaterialID = indiceTristrips[z].MaterialID;
-                    bool Done = false;
-
-                    List<int> WeightList = new List<int>();
-                    for (int a = StartPoint; a < indiceTristrips[z].Indices.Count; a++)
-                    {
-                        if (WeightList.Count == 10 && !WeightList.Contains(VectorPoint[indiceTristrips[z].Indices[a]].WeightIndex))
-                        {
-                            break;
-                        }
-
-                        newHeader.Indices.Add(indiceTristrips[z].Indices[a]);
-
-                        if (!WeightList.Contains(VectorPoint[indiceTristrips[z].Indices[a]].WeightIndex))
-                        {
-                            WeightList.Add(VectorPoint[indiceTristrips[z].Indices[a]].WeightIndex);
-                        }
-
-                        if (a == indiceTristrips[z].Indices.Count - 1)
-                        {
-                            Done = true;
-                        }
-                        StartPoint = a;
-                    }
-
-                    newIndiceTristrips.Add(newHeader);
-                    if (Done == false)
-                    {
-                        z--;
-                    }
-                }
-
-                for (int z = 0; z < indiceTristrips.Count; z++)
-                {
-                    int MaterialID = indiceTristrips[z].MaterialID;
-
-                    int HeaderID = -1;
-
-                    for (int a = 0; a < TempTrickyMesh.meshHeaders.Count; a++)
-                    {
-                        bool Added = false;
-                        for (int b = 0; b < TempTrickyMesh.meshHeaders[a].indexGroupHeaders.Count; b++)
-                        {
-                            if (TempTrickyMesh.meshHeaders[a].indexGroupHeaders[b].MatIndex1 == MaterialID)
-                            {
-                                Added = true;
-                                break;
-                            }
-                        }
-                        if (!Added)
-                        {
-                            HeaderID = a;
-                            break;
-                        }
-                    }
-
-                    if (HeaderID == -1)
-                    {
-                        HeaderID = TempTrickyMesh.meshHeaders.Count;
-                        TrickyGCMNF.MeshHeader NewHeader = new TrickyGCMNF.MeshHeader();
-                        NewHeader.indexGroupHeaders = new List<TrickyGCMNF.IndexGroupHeader>();
-                        NewHeader.WeightIndex = new List<int>();
-                        TempTrickyMesh.meshHeaders.Add(NewHeader);
-                    }
-
-                    var TempHeader = TempTrickyMesh.meshHeaders[HeaderID];
-                    TrickyGCMNF.IndexGroupHeader indexGroupHeader = new TrickyGCMNF.IndexGroupHeader();
-                    indexGroupHeader.MatIndex0 = MaterialID;
-                    indexGroupHeader.MatIndex1 = MaterialID;
-                    indexGroupHeader.MatIndex2 = MaterialID;
-                    indexGroupHeader.MatIndex3 = MaterialID;
-                    indexGroupHeader.MatIndex4 = MaterialID;
-                    TrickyGCMNF.IndexGroup indexGroup = new TrickyGCMNF.IndexGroup();
-
-                    indexGroup.indices = new List<TrickyGCMNF.Index>();
-                    indexGroup.shadowIndices = new List<TrickyGCMNF.ShadowIndex>();
-
-                    //Generate New Index List with Weight List
-                    //Add Index List
-                    for (int a = 0; a < indiceTristrips[z].Indices.Count; a++)
-                    {
-                        if (!Shadow)
-                        {
-                            TrickyGCMNF.Index TrickyIndex = new TrickyGCMNF.Index();
-                            if (!TempHeader.WeightIndex.Contains(VectorPoint[indiceTristrips[z].Indices[a]].WeightIndex))
-                            {
-                                TempHeader.WeightIndex.Add(VectorPoint[indiceTristrips[z].Indices[a]].WeightIndex);
-                            }
-                            TrickyIndex.WeightIndex = TempHeader.WeightIndex.IndexOf(VectorPoint[indiceTristrips[z].Indices[a]].WeightIndex);
-
-                            TrickyIndex.Index0 = indiceTristrips[z].Indices[a];
-                            TrickyIndex.Index1 = indiceTristrips[z].Indices[a];
-                            TrickyIndex.Index2 = indiceTristrips[z].Indices[a];
-                            indexGroup.indices.Add(TrickyIndex);
-                        }
-                        else
-                        {
-                            TrickyGCMNF.ShadowIndex TrickyIndex = new TrickyGCMNF.ShadowIndex();
-                            if (!TempHeader.WeightIndex.Contains(VectorPoint[indiceTristrips[z].Indices[a]].WeightIndex))
-                            {
-                                TempHeader.WeightIndex.Add(VectorPoint[indiceTristrips[z].Indices[a]].WeightIndex);
-                            }
-                            TrickyIndex.WeightIndex = TempHeader.WeightIndex.IndexOf(VectorPoint[indiceTristrips[z].Indices[a]].WeightIndex);
-
-                            TrickyIndex.Index = indiceTristrips[z].Indices[a];
-                            indexGroup.shadowIndices.Add(TrickyIndex);
-                        }
-                    }
-                    indexGroupHeader.indexGroup = indexGroup;
-
-                    TempHeader.indexGroupHeaders.Add(indexGroupHeader);
-                    TempTrickyMesh.meshHeaders[HeaderID] = TempHeader;
                 }
 
 
@@ -1499,6 +1201,211 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
             //MessageBox.Show("Import Sucessful");
         }
 
+
+        //GX only has 10 position matrices, so a mesh header can only use 10 weights
+        const int MaxMeshHeaderWeights = 10;
+        //Display list byte length is stored as a u16
+        const int MaxDisplayListBytes = ushort.MaxValue;
+
+        public static List<TrickyGCMNF.MeshHeader> GenerateMeshHeaders(List<TristripGenerator.IndiceFace> indiceFaces, List<TrickyGCMNF.VertexData> VectorPoint, bool Shadow)
+        {
+            //Pack faces into groups that use 10 weights or less, first group they fit in
+            var FaceGroups = new List<List<TristripGenerator.IndiceFace>>();
+            var GroupWeights = new List<List<int>>();
+            for (int i = 0; i < indiceFaces.Count; i++)
+            {
+                var Face = indiceFaces[i];
+                var FaceWeights = new List<int> { VectorPoint[Face.Id1].WeightIndex, VectorPoint[Face.Id2].WeightIndex, VectorPoint[Face.Id3].WeightIndex }.Distinct().ToList();
+
+                int Group = -1;
+                for (int a = 0; a < FaceGroups.Count; a++)
+                {
+                    if (GroupWeights[a].Union(FaceWeights).Count() <= MaxMeshHeaderWeights)
+                    {
+                        Group = a;
+                        break;
+                    }
+                }
+                if (Group == -1)
+                {
+                    Group = FaceGroups.Count;
+                    FaceGroups.Add(new List<TristripGenerator.IndiceFace>());
+                    GroupWeights.Add(new List<int>());
+                }
+
+                FaceGroups[Group].Add(Face);
+                for (int a = 0; a < FaceWeights.Count; a++)
+                {
+                    if (!GroupWeights[Group].Contains(FaceWeights[a]))
+                    {
+                        GroupWeights[Group].Add(FaceWeights[a]);
+                    }
+                }
+            }
+
+            var MeshHeaders = new List<TrickyGCMNF.MeshHeader>();
+            int VertexSize = Shadow ? 4 : 8;
+            for (int i = 0; i < FaceGroups.Count; i++)
+            {
+                TrickyGCMNF.MeshHeader NewHeader = new TrickyGCMNF.MeshHeader();
+                NewHeader.indexGroupHeaders = new List<TrickyGCMNF.IndexGroupHeader>();
+                NewHeader.WeightIndex = GroupWeights[i];
+                //Same on every mesh header in the original files
+                NewHeader.unk0 = 18;
+                NewHeader.unk1 = 242;
+                NewHeader.unk2 = 96;
+
+                //Strip each material on its own
+                var Materials = FaceGroups[i].Select(x => x.MaterialID).Distinct().ToList();
+                for (int a = 0; a < Materials.Count; a++)
+                {
+                    var MaterialFaces = TristripGenerator.NeighbourPriority(FaceGroups[i].Where(x => x.MaterialID == Materials[a]).ToList());
+
+                    List<TristripGenerator.IndiceTristrip> indiceTristrips = TristripGenerator.GenerateTristripNivda(MaterialFaces, 10000, true);
+                    if (indiceTristrips == null)
+                    {
+                        return null;
+                    }
+                    if (indiceTristrips.Any(x => 3 + VertexSize * x.Indices.Count > MaxDisplayListBytes))
+                    {
+                        indiceTristrips = TristripGenerator.GenerateTristripNivda(MaterialFaces, 10000, false);
+                        if (indiceTristrips == null)
+                        {
+                            return null;
+                        }
+                    }
+
+                    for (int b = 0; b < indiceTristrips.Count; b++)
+                    {
+                        TrickyGCMNF.IndexGroupHeader indexGroupHeader = new TrickyGCMNF.IndexGroupHeader();
+                        indexGroupHeader.MatIndex0 = Materials[a];
+                        indexGroupHeader.MatIndex1 = Materials[a];
+                        indexGroupHeader.MatIndex2 = Materials[a];
+                        indexGroupHeader.MatIndex3 = Materials[a];
+                        indexGroupHeader.MatIndex4 = Materials[a];
+
+                        TrickyGCMNF.IndexGroup indexGroup = new TrickyGCMNF.IndexGroup();
+                        indexGroup.indices = new List<TrickyGCMNF.Index>();
+                        indexGroup.shadowIndices = new List<TrickyGCMNF.ShadowIndex>();
+
+                        for (int c = 0; c < indiceTristrips[b].Indices.Count; c++)
+                        {
+                            int VertexIndex = indiceTristrips[b].Indices[c];
+                            int WeightIndex = NewHeader.WeightIndex.IndexOf(VectorPoint[VertexIndex].WeightIndex);
+                            if (!Shadow)
+                            {
+                                TrickyGCMNF.Index TrickyIndex = new TrickyGCMNF.Index();
+                                TrickyIndex.WeightIndex = WeightIndex;
+                                TrickyIndex.Index0 = VertexIndex;
+                                TrickyIndex.Index1 = VertexIndex;
+                                TrickyIndex.Index2 = VertexIndex;
+                                indexGroup.indices.Add(TrickyIndex);
+                            }
+                            else
+                            {
+                                TrickyGCMNF.ShadowIndex TrickyIndex = new TrickyGCMNF.ShadowIndex();
+                                TrickyIndex.WeightIndex = WeightIndex;
+                                TrickyIndex.Index = VertexIndex;
+                                indexGroup.shadowIndices.Add(TrickyIndex);
+                            }
+                        }
+
+                        indexGroupHeader.indexGroup = indexGroup;
+                        NewHeader.indexGroupHeaders.Add(indexGroupHeader);
+                    }
+                }
+
+                MeshHeaders.Add(NewHeader);
+            }
+
+            return MeshHeaders;
+        }
+
+        //Same check ReturnFixedFaces uses to name the exported materials
+        static int MaterialFocus(TrickyGCMNF.MaterialData Material)
+        {
+            if (Material.Texture3 != null && Material.Texture3.EndsWith("_g"))
+            {
+                return 1;
+            }
+            if (Material.Texture4 == "envr")
+            {
+                return 2;
+            }
+            return 0;
+        }
+
+        //Reuse the original material when there is one so its textures and factor are kept
+        public static TrickyGCMNF.MaterialData RegenMaterial(string Name, List<TrickyGCMNF.MaterialData> OriginalMaterials)
+        {
+            string MainTexture = Name.Substring(0, 4).ToLower();
+            string[] Split = Name.Split(' ');
+            int Focus = 0;
+            if (Split.Length > 1)
+            {
+                if (Split[1].ToLower() == "gloss")
+                {
+                    Focus = 1;
+                }
+                else if (Split[1].ToLower() == "envr")
+                {
+                    Focus = 2;
+                }
+            }
+
+            if (OriginalMaterials != null)
+            {
+                for (int i = 0; i < OriginalMaterials.Count; i++)
+                {
+                    if (OriginalMaterials[i].MainTexture == MainTexture && MaterialFocus(OriginalMaterials[i]) == Focus)
+                    {
+                        return OriginalMaterials[i];
+                    }
+                }
+            }
+
+            TrickyGCMNF.MaterialData MaterialData = new TrickyGCMNF.MaterialData();
+            MaterialData.MainTexture = MainTexture;
+            MaterialData.Texture1 = "";
+            MaterialData.Texture2 = "";
+            MaterialData.Texture3 = "";
+            MaterialData.Texture4 = "";
+
+            //Most common values in the original files
+            MaterialData.FactorFloat = 127f / 255f;
+            MaterialData.Unused1Float = 1f / 255f;
+            MaterialData.Unused2Float = 1f / 255f;
+
+            if (Focus == 1)
+            {
+                if (MainTexture == "suit")
+                {
+                    MaterialData.Texture3 = "st_g";
+                }
+                else if (MainTexture == "helm")
+                {
+                    MaterialData.Texture3 = "hm_g";
+                }
+                else if (MainTexture == "boot")
+                {
+                    MaterialData.Texture3 = "bt_g";
+                }
+                else if (MainTexture == "head")
+                {
+                    MaterialData.Texture3 = "hd_g";
+                }
+                else if (MainTexture == "bord")
+                {
+                    MaterialData.Texture3 = "bd_g";
+                }
+            }
+            else if (Focus == 2)
+            {
+                MaterialData.Texture4 = "envr";
+            }
+
+            return MaterialData;
+        }
 
         static TrickyGCMNF.BoneData FindBone(List<TrickyGCMNF.BoneData> boneData, string BoneName)
         {

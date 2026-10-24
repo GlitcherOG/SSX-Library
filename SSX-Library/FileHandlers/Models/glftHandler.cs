@@ -2096,7 +2096,7 @@ namespace SSXLibrary.FileHandlers
 
                             //Get Weights
                             NewVertex.weightHeader = new TrickyGCMNF.BoneWeightHeader();
-                            NewVertex.weightHeader.Unknown2 = 19;
+                            NewVertex.weightHeader.Unknown1 = 19;
                             NewVertex.weightHeader.boneWeights = new List<TrickyGCMNF.BoneWeight>();
 
                             for (int d = 0; d < TempSkinning.MaxBindings; d++)

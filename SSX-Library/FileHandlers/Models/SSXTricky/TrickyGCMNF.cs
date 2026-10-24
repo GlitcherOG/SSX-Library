@@ -264,9 +264,9 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
 
                             TempIndexGroup.indexGroup = new IndexGroup();
 
+                            //GX display list, draw command then vertex count
                             TempIndexGroup.indexGroup.IndexUnk0 = StreamUtil.ReadUInt8(streamMatrix);
                             TempIndexGroup.indexGroup.NumIndex = StreamUtil.ReadUInt16(streamMatrix, true);
-                            TempIndexGroup.indexGroup.IndexUnk1 = StreamUtil.ReadUInt8(streamMatrix);
 
                             TempIndexGroup.indexGroup.shadowIndices = new List<ShadowIndex>();
                             TempIndexGroup.indexGroup.indices = new List<Index>();
@@ -275,21 +275,24 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
                             {
                                 if (!Shadow)
                                 {
-                                    Index shadowIndex = new Index();
+                                    //Position Matrix (3 * Weight), Texture Matrix (30 + 3 * Weight), Position, Normal, UV
+                                    Index index = new Index();
 
-                                    shadowIndex.WeightIndex = (StreamUtil.ReadUInt8(streamMatrix) - 30) / 3;
-                                    shadowIndex.Index0 = StreamUtil.ReadUInt16(streamMatrix, true);
-                                    shadowIndex.Index1 = StreamUtil.ReadUInt16(streamMatrix, true);
-                                    shadowIndex.Index2 = StreamUtil.ReadUInt16(streamMatrix, true);
-                                    shadowIndex.Unk0 = StreamUtil.ReadUInt8(streamMatrix);
-                                    TempIndexGroup.indexGroup.indices.Add(shadowIndex);
+                                    index.WeightIndex = StreamUtil.ReadUInt8(streamMatrix) / 3;
+                                    streamMatrix.Position += 1;
+                                    index.Index0 = StreamUtil.ReadUInt16(streamMatrix, true);
+                                    index.Index1 = StreamUtil.ReadUInt16(streamMatrix, true);
+                                    index.Index2 = StreamUtil.ReadUInt16(streamMatrix, true);
+                                    TempIndexGroup.indexGroup.indices.Add(index);
                                 }
                                 else
                                 {
+                                    //Position Matrix (3 * Weight), Position, Padding
                                     ShadowIndex shadowIndex = new ShadowIndex();
 
+                                    shadowIndex.WeightIndex = StreamUtil.ReadUInt8(streamMatrix) / 3;
                                     shadowIndex.Index = StreamUtil.ReadUInt16(streamMatrix, true);
-                                    shadowIndex.WeightIndex = StreamUtil.ReadUInt16(streamMatrix, true)/3;
+                                    streamMatrix.Position += 1;
 
                                     TempIndexGroup.indexGroup.shadowIndices.Add(shadowIndex);
                                 }
@@ -493,7 +496,7 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
                 {
                     StreamUtil.WriteString(ModelStream, Model.materialDatas[a].MainTexture, 4);
 
-                    if (Model.materialDatas[a].Texture1 != "")
+                    if (!string.IsNullOrEmpty(Model.materialDatas[a].Texture1))
                     {
                         StreamUtil.WriteString(ModelStream, Model.materialDatas[a].Texture1, 4);
                     }
@@ -502,7 +505,7 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
                         StreamUtil.WriteBytes(ModelStream, new byte[] { 0x00, 0x20, 0x20, 0x20 });
                     }
 
-                    if (Model.materialDatas[a].Texture2 != "")
+                    if (!string.IsNullOrEmpty(Model.materialDatas[a].Texture2))
                     {
                         StreamUtil.WriteString(ModelStream, Model.materialDatas[a].Texture2, 4);
                     }
@@ -511,7 +514,7 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
                         StreamUtil.WriteBytes(ModelStream, new byte[] { 0x00, 0x20, 0x20, 0x20 });
                     }
 
-                    if (Model.materialDatas[a].Texture3 != "")
+                    if (!string.IsNullOrEmpty(Model.materialDatas[a].Texture3))
                     {
                         StreamUtil.WriteString(ModelStream, Model.materialDatas[a].Texture3, 4);
                     }
@@ -520,7 +523,7 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
                         StreamUtil.WriteBytes(ModelStream, new byte[] { 0x00, 0x20, 0x20, 0x20 });
                     }
 
-                    if (Model.materialDatas[a].Texture4 != "")
+                    if (!string.IsNullOrEmpty(Model.materialDatas[a].Texture4))
                     {
                         StreamUtil.WriteString(ModelStream, Model.materialDatas[a].Texture4, 4);
                     }
@@ -649,7 +652,8 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
                     Model.meshHeaders[a] = TempHeader;
                 }
 
-                StreamUtil.AlignBy(ModelStream,32,0,false);
+                //Always pads, a full 32 bytes if already aligned (same as the original files)
+                ModelStream.Position += 32 - (ModelStream.Position % 32);
                 //Write IndexGroups
                 for (int a = 0; a < Model.meshHeaders.Count; a++)
                 {
@@ -663,8 +667,8 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
                         var TempGroup = TempHeader.indexGroup;
 
                         TempHeader.Offset = (int)ModelStream.Position;
-                        StreamUtil.WriteUInt8(ModelStream, 153);
-                        //StreamUtil.WriteUInt8(ModelStream, TempGroup.IndexUnk0);
+                        //GX_DRAW_TRIANGLE_STRIP using vertex format 1
+                        StreamUtil.WriteUInt8(ModelStream, 0x99);
                         if (!Shadow)
                         {
                             StreamUtil.WriteInt16(ModelStream, TempGroup.indices.Count, true);
@@ -673,25 +677,26 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
                         {
                             StreamUtil.WriteInt16(ModelStream, TempGroup.shadowIndices.Count, true);
                         }
-                        StreamUtil.WriteUInt8(ModelStream, TempGroup.IndexUnk1);
 
+                        //Weight index picks one of the meshes 10 matrices, used for the position matrix and texture matrix
                         if (!Shadow)
                         {
                             for (int c = 0; c < TempGroup.indices.Count; c++)
                             {
+                                StreamUtil.WriteUInt8(ModelStream, TempGroup.indices[c].WeightIndex * 3);
                                 StreamUtil.WriteUInt8(ModelStream, TempGroup.indices[c].WeightIndex * 3 + 30);
                                 StreamUtil.WriteInt16(ModelStream, TempGroup.indices[c].Index0, true);
                                 StreamUtil.WriteInt16(ModelStream, TempGroup.indices[c].Index1, true);
                                 StreamUtil.WriteInt16(ModelStream, TempGroup.indices[c].Index2, true);
-                                StreamUtil.WriteUInt8(ModelStream, TempGroup.indices[c].Unk0);
                             }
                         }
                         else
                         {
                             for (int c = 0; c < TempGroup.shadowIndices.Count; c++)
                             {
+                                StreamUtil.WriteUInt8(ModelStream, TempGroup.shadowIndices[c].WeightIndex * 3);
                                 StreamUtil.WriteInt16(ModelStream, TempGroup.shadowIndices[c].Index, true);
-                                StreamUtil.WriteInt16(ModelStream, TempGroup.shadowIndices[c].WeightIndex*3, true);
+                                StreamUtil.WriteUInt8(ModelStream, 0);
                             }
                         }
                         StreamUtil.AlignBy(ModelStream, 32);
@@ -759,16 +764,17 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
 
                 for (int a = 0; a < Model.Vertex.Count; a++)
                 {
-                    StreamUtil.WriteInt16(ModelStream, (int)(Model.Vertex[a].Vertex.X * 127f), true);
-                    StreamUtil.WriteInt16(ModelStream, (int)(Model.Vertex[a].Vertex.Y * 127f), true);
-                    StreamUtil.WriteInt16(ModelStream, (int)(Model.Vertex[a].Vertex.Z * 127f), true);
+                    StreamUtil.WriteInt16(ModelStream, Quantize(Model.Vertex[a].Vertex.X, 127f, short.MinValue, short.MaxValue), true);
+                    StreamUtil.WriteInt16(ModelStream, Quantize(Model.Vertex[a].Vertex.Y, 127f, short.MinValue, short.MaxValue), true);
+                    StreamUtil.WriteInt16(ModelStream, Quantize(Model.Vertex[a].Vertex.Z, 127f, short.MinValue, short.MaxValue), true);
 
-                    StreamUtil.WriteInt16(ModelStream, (int)(Model.Vertex[a].VertexNormal.X * 16384f), true);
-                    StreamUtil.WriteInt16(ModelStream, (int)(Model.Vertex[a].VertexNormal.Y * 16384f), true);
-                    StreamUtil.WriteInt16(ModelStream, (int)(Model.Vertex[a].VertexNormal.Z * 16384f), true);
+                    StreamUtil.WriteInt16(ModelStream, Quantize(Model.Vertex[a].VertexNormal.X, 16384f, short.MinValue, short.MaxValue), true);
+                    StreamUtil.WriteInt16(ModelStream, Quantize(Model.Vertex[a].VertexNormal.Y, 16384f, short.MinValue, short.MaxValue), true);
+                    StreamUtil.WriteInt16(ModelStream, Quantize(Model.Vertex[a].VertexNormal.Z, 16384f, short.MinValue, short.MaxValue), true);
 
-                    StreamUtil.WriteInt16(ModelStream, (int)(Model.Vertex[a].UV.X * 65535f), true);
-                    StreamUtil.WriteInt16(ModelStream, (int)(Model.Vertex[a].UV.Y * 65535f), true);
+                    //Unsigned, UVs outside 0-1 cant be stored
+                    StreamUtil.WriteInt16(ModelStream, Quantize(Model.Vertex[a].UV.X, 65535f, 0, ushort.MaxValue), true);
+                    StreamUtil.WriteInt16(ModelStream, Quantize(Model.Vertex[a].UV.Y, 65535f, 0, ushort.MaxValue), true);
                 }
 
                 ModelStream.Position = 0;
@@ -833,6 +839,12 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
             stream.CopyTo(file);
             stream.Dispose();
             file.Close();
+        }
+
+        //Round rather than truncate so values read back in are written out unchanged
+        static int Quantize(float Value, float Scale, int Min, int Max)
+        {
+            return (int)Math.Clamp(MathF.Round(Value * Scale), Min, Max);
         }
 
         public struct ModelHeader
@@ -931,8 +943,8 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
         {
             public int WeightCount;
             public int WeightListOffset;
-            public int Unknown1; //0
-            public int Unknown2; //19
+            public int Unknown1; //Always 19 (Xbox reads it the other way round)
+            public int Unknown2; //Always 0
 
             public List<BoneWeight> boneWeights;
         }
@@ -952,11 +964,11 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
             public int NumIndexGroups;
             public int OffsetSkinIndexList;
             public int OffsetIndexGroupList;
-            public int unk0;
-            public int unk1;
-            public int unk2;
+            public int unk0; //Always 18
+            public int unk1; //Always 242
+            public int unk2; //Always 96
 
-            public List<int> WeightIndex;
+            public List<int> WeightIndex; //Max of 10, one per GX matrix
             public List<IndexGroupHeader> indexGroupHeaders;
         }
 
@@ -978,9 +990,8 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
         public struct IndexGroup
         {
             //public int OffsetStrip;
-            public int IndexUnk0;
+            public int IndexUnk0; //GX draw command, always 0x99 (Triangle Strip, Vertex Format 1)
             public int NumIndex;
-            public int IndexUnk1;
 
             public List<ShadowIndex> shadowIndices;
             public List<Index> indices;
@@ -989,10 +1000,9 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
         public struct Index
         {
             public int WeightIndex;
-            public int Index0;
-            public int Index1;
-            public int Index2;
-            public int Unk0;
+            public int Index0; //Position
+            public int Index1; //Normal
+            public int Index2; //UV
         }
 
         public struct ShadowIndex
