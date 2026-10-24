@@ -345,6 +345,24 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
             return NewFaceList;
         }
 
+        //WARNING - Claude assisted code
+        //The rebuilding (StartRegenMesh down to GenerateMeshHeaders/RegenMaterial) and the TrickyGCMNF writer were fixed with help from Claude.
+        //Checked against every original GC model and tested in game, but give it a bit more suspicion than the rest of the library.
+        //
+        //Why it was needed, rebuilt models crashed the game because they broke rules every original file follows:
+        // - GX only has 10 position matrices, so a mesh header can only use 10 weights. The old code worked out a
+        //   10 weight split but never used it, so a body could end up as one header with 100+ weights and the matrix
+        //   indices in the display lists overflowed. Faces are now packed into mesh headers of 10 weights or less.
+        // - The display lists were read one byte off. Each vertex starts with its position matrix (3 * Weight) then the
+        //   texture matrix (30 + 3 * Weight), the old reader saw that first byte as leftover bytes on the previous vertex,
+        //   so rebuilt vertices all got matrix 0. Shadow vertices are position matrix, position, padding.
+        // - Mesh headers were written with unk0-2 as 0 and skin headers with the unknowns swapped,
+        //   every original file has (18, 242, 96) and (19, 0).
+        // - Materials were rebuilt with blank names and lost their _b textures and factor, they now reuse the original entries.
+        // - Every face was stripped together as material 0, each material now gets its own strips.
+        // - The writer truncated vertex values (off by one every save) and missed a padding rule,
+        //   an unedited model now saves back byte for byte (apart from morph float rounding).
+
         public void StartRegenMesh(TrickyGCModelCombiner trickyModelCombiner, int Selected)
         {
             if (Board != null && !BodyBool)

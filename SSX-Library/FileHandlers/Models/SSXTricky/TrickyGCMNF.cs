@@ -468,6 +468,8 @@ namespace SSXLibrary.FileHandlers.Models.Tricky
             }
         }
 
+        //WARNING - Claude assisted code
+        //Display list layout, vertex rounding and padding fixed with help from Claude, see TrickyGCModelCombiner.StartRegenMesh for why
         public void Save(string path)
         {
             MemoryStream stream = new MemoryStream();
