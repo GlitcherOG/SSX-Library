@@ -22,7 +22,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSB3Data
         public Vector3 BBoxHigh;
 
         public int U4;
-        public int U5; //TrackID possibly for streaming Chunk
+        public int streamingChunkTrackID; //TrackID possibly for streaming Chunk
 
         public int streamingChunkID;
 
@@ -59,8 +59,8 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSB3Data
             objectID = WorldCommon.ObjectIDLoad(stream);
 
             U4 = StreamUtil.ReadUInt8(stream);
-            U5 = StreamUtil.ReadUInt8(stream);
 
+            streamingChunkTrackID = StreamUtil.ReadUInt8(stream);
             streamingChunkID = StreamUtil.ReadInt16(stream);
 
             ModelID = WorldCommon.ObjectIDLoad(stream);
@@ -135,7 +135,6 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2.SSB3Data
 
             bin3File.objectID = objectID;
             bin3File.U4 = U4;
-            bin3File.U5 = U5;
 
             bin3File.Model = ModelID;
             bin3File.U6 = U6;
