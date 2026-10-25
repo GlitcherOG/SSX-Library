@@ -52,9 +52,8 @@ namespace SSXLibrary.JsonFiles.SSX3
             public float[] Rotation;
             public float[] Scale;
 
-            public float U31;
-
             public int U4;
+            public int U5;
 
             public ObjectID Model;
             public int U6;

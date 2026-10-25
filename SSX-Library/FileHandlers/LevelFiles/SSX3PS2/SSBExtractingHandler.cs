@@ -43,7 +43,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2
         PSMHandler psmHandler = new PSMHandler();
         PHMHandler phmHandler = new PHMHandler();
 
-        public void LoadAndExtractSSBFromSBD(string path, string extractPath)
+        public void LoadAndExtractSSBFromSBD(string path, string extractPath, bool SkipModels = false)
         {
             sdbHandler = new SDBHandler();
             sdbHandler.LoadSBD(path.Replace(".ssb", ".sdb"));
@@ -156,7 +156,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2
                                 worldMDR.Name = phmHandler.GetName(TrackID, RID, 2, psmHandler);
 
                                 Console.WriteLine(LevelExtractPath + "//Models//" + worldMDR.Name + ".obj");
-                                mdrJsonHandler.mainModelHeaders.Add(worldMDR.SaveModel(LevelExtractPath + "//Models//"));
+                                mdrJsonHandler.mainModelHeaders.Add(worldMDR.SaveModel(LevelExtractPath + "//Models//", SkipModels));
                                 //worldMDR.SaveModelGLB(ExtractPath + "//Models//" + RID + ".glb");
                             }
                             else if (ID == 3)
@@ -243,7 +243,10 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2
                                 worldBin12.LoadData(EntryStream, TrackID, RID);
 
                                 Console.WriteLine(LevelExtractPath + "//Collision//" + phmHandler.GetName(TrackID, RID, 4, psmHandler) + ".obj");
-                                worldBin12.CollisionObjectSave(LevelExtractPath + "//Collision//", phmHandler.GetName(TrackID, RID, 4, psmHandler));
+                                if (!SkipModels)
+                                {
+                                    worldBin12.CollisionObjectSave(LevelExtractPath + "//Collision//", phmHandler.GetName(TrackID, RID, 4, psmHandler));
+                                }
                             }
                             else if (ID == 13)
                             {
