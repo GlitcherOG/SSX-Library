@@ -26,9 +26,9 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2
         9 - Shape - Extracting
         10 - Old Shape Lightmaps - Extracting
         11 - Vis Curtains - Extracting
-        12 - Collision? - Extracting Mostly but unknown how its linked
-        13 - Sound Triggers? - Loading
-        14 - AIP - Extracting
+        12 - Collision - Extracting but missing Link to Instances and Sphere Colliders
+        13 - Sound Triggers? - Loading but not saving
+        14 - AIP - Extracting - 3 always present even if only 1 is used
         15 - World Painter?
         16 - Scripts?
         17 - CameraTriggers?
@@ -36,7 +36,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.SSX3PS2
         19 - Missions?
         20 - AudioBank - Extracting
         21 - Radar?
-        22 - Avalanche Animation
+        22 - Avalanche Animation - Always there even if blank
          */
 
         SDBHandler sdbHandler = new SDBHandler();
