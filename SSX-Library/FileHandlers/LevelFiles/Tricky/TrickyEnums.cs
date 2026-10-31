@@ -142,7 +142,7 @@
         Fixed = 3,
     }
 
-    //SSFHandler.Spline.SplineStyle
+    //SSFHandler.Spline.SplineStyle. The values are TrickySurfaceType surfaces (12 Wood, 13 metal)
     public enum SSFSplineStyle
     {
         MotionPath = -1,            //spline mover route (trains, gondolas), not grindable
@@ -202,6 +202,7 @@
         Sand = 16,
         NoCollision = 17,
         ShowOffRampMetal = 18,
+        ShowOffRampMetal2 = 19,     //metal sounds, the same audio group as 18
     }
 
     //Light.Type
