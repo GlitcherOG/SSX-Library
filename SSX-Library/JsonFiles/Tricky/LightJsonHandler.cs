@@ -45,16 +45,16 @@ namespace SSXLibrary.JsonFiles.Tricky
         {
             public string LightName;
 
-            public int Type;
+            public int Type; //TrickyLightType
             public int SpriteRes;
-            public float UnknownFloat1;
+            public float Brightness;
             public int UnknownInt1;
             public float[] Colour;
             public float[] Direction;
             public float[] Position;
             public float[] LowestXYZ;
             public float[] HighestXYZ;
-            public float UnknownFloat2;
+            public float OuterConeCosine;
             public int UnknownInt2;
             public float UnknownFloat3;
             public int UnknownInt3;
@@ -73,12 +73,10 @@ namespace SSXLibrary.JsonFiles.Tricky
         [Serializable]
         public struct ExternalSound
         {
-            public int U0;
+            public int EmitterType;
             public int SoundIndex;
-            public float U2;
-            public float U3;
-            public float U4;
-            public float U5; //Radius?
+            public float[] Offset;
+            public float Radius; //Radius?
             public float U6;
         }
     }

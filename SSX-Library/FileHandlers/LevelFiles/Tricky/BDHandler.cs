@@ -276,7 +276,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
                 TempMaterial.UnknownInt15 = StreamUtil.ReadUInt32(stream);
                 TempMaterial.UnknownInt16 = StreamUtil.ReadUInt32(stream);
                 TempMaterial.UnknownInt17 = StreamUtil.ReadUInt32(stream);
-                TempMaterial.UnknownInt18 = StreamUtil.ReadUInt32(stream);
+                TempMaterial.AppearanceFlags = StreamUtil.ReadUInt32(stream);
 
                 TempMaterial.TextureFlipbookID = StreamUtil.ReadInt16(stream);
                 TempMaterial.UnknownInt20 = StreamUtil.ReadInt16(stream);
@@ -307,14 +307,14 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
                 var TempLights = new Light();
                 TempLights.Type = StreamUtil.ReadUInt32(stream);
                 TempLights.spriteRes = StreamUtil.ReadUInt32(stream);
-                TempLights.UnknownFloat1 = StreamUtil.ReadFloat(stream);
+                TempLights.Brightness = StreamUtil.ReadFloat(stream);
                 TempLights.UnknownInt1 = StreamUtil.ReadUInt32(stream);
                 TempLights.Colour = StreamUtil.ReadVector3(stream);
                 TempLights.Direction = StreamUtil.ReadVector3(stream);
                 TempLights.Position = StreamUtil.ReadVector3(stream);
                 TempLights.LowestXYZ = StreamUtil.ReadVector3(stream);
                 TempLights.HighestXYZ = StreamUtil.ReadVector3(stream);
-                TempLights.UnknownFloat2 = StreamUtil.ReadFloat(stream);
+                TempLights.OuterConeCosine = StreamUtil.ReadFloat(stream);
                 TempLights.UnknownInt2 = StreamUtil.ReadUInt32(stream);
                 TempLights.UnknownFloat3 = StreamUtil.ReadFloat(stream);
                 TempLights.UnknownInt3 = StreamUtil.ReadUInt32(stream);
@@ -475,12 +475,8 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
                         var TempAnimation = new ObjectAnimation();
 
                         //Possibly Starting Animation Postion/Rotation
-                        TempAnimation.U1 = StreamUtil.ReadFloat(stream);
-                        TempAnimation.U2 = StreamUtil.ReadFloat(stream);
-                        TempAnimation.U3 = StreamUtil.ReadFloat(stream);
-                        TempAnimation.U4 = StreamUtil.ReadFloat(stream);
-                        TempAnimation.U5 = StreamUtil.ReadFloat(stream);
-                        TempAnimation.U6 = StreamUtil.ReadFloat(stream);
+                        TempAnimation.BasePosition = StreamUtil.ReadVector3(stream);
+                        TempAnimation.BaseRotation = StreamUtil.ReadVector3(stream);
 
                         TempAnimation.AnimationAction = StreamUtil.ReadUInt32(stream);
 
@@ -516,12 +512,12 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
                             for (int c = 0; c < TempAnimationEntry.MathCount; c++)
                             {
                                 AnimationMath TempMath = new AnimationMath();
-                                TempMath.Value1 = StreamUtil.ReadFloat(stream);
-                                TempMath.Value2 = StreamUtil.ReadFloat(stream);
-                                TempMath.Value3 = StreamUtil.ReadFloat(stream);
-                                TempMath.Value4 = StreamUtil.ReadFloat(stream);
-                                TempMath.Value5 = StreamUtil.ReadFloat(stream);
-                                TempMath.Value6 = StreamUtil.ReadFloat(stream);
+                                TempMath.Coefficient1 = StreamUtil.ReadFloat(stream);
+                                TempMath.Coefficient2 = StreamUtil.ReadFloat(stream);
+                                TempMath.Coefficient3 = StreamUtil.ReadFloat(stream);
+                                TempMath.Coefficient4 = StreamUtil.ReadFloat(stream);
+                                TempMath.StartTime = StreamUtil.ReadFloat(stream);
+                                TempMath.EndTime = StreamUtil.ReadFloat(stream);
                                 TempAnimationEntry.animationMaths.Add(TempMath);
                             }
 
@@ -589,7 +585,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
                         var NewAnimationFrame = new AnimationFrames();
                         NewAnimationFrame.Position = StreamUtil.ReadVector3(stream);
                         NewAnimationFrame.Rotation = StreamUtil.ReadVector3(stream);
-                        NewAnimationFrame.Unknown = StreamUtil.ReadFloat(stream);
+                        NewAnimationFrame.Radius = StreamUtil.ReadFloat(stream);
 
                         NewHeader.ParticleObject.animationFrames.Add(NewAnimationFrame);
                     }
@@ -987,7 +983,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
                 TempMaterial.UnknownInt15 = StreamUtil.ReadUInt32(stream);
                 TempMaterial.UnknownInt16 = StreamUtil.ReadUInt32(stream);
                 TempMaterial.UnknownInt17 = StreamUtil.ReadUInt32(stream);
-                TempMaterial.UnknownInt18 = StreamUtil.ReadUInt32(stream);
+                TempMaterial.AppearanceFlags = StreamUtil.ReadUInt32(stream);
 
                 TempMaterial.TextureFlipbookID = StreamUtil.ReadInt16(stream);
                 TempMaterial.UnknownInt20 = StreamUtil.ReadInt16(stream);
@@ -1016,14 +1012,14 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
                 var TempLights = new Light();
                 TempLights.Type = StreamUtil.ReadUInt32(stream);
                 TempLights.spriteRes = StreamUtil.ReadUInt32(stream);
-                TempLights.UnknownFloat1 = StreamUtil.ReadFloat(stream);
+                TempLights.Brightness = StreamUtil.ReadFloat(stream);
                 TempLights.UnknownInt1 = StreamUtil.ReadUInt32(stream);
                 TempLights.Colour = StreamUtil.ReadVector3(stream);
                 TempLights.Direction = StreamUtil.ReadVector3(stream);
                 TempLights.Position = StreamUtil.ReadVector3(stream);
                 TempLights.LowestXYZ = StreamUtil.ReadVector3(stream);
                 TempLights.HighestXYZ = StreamUtil.ReadVector3(stream);
-                TempLights.UnknownFloat2 = StreamUtil.ReadFloat(stream);
+                TempLights.OuterConeCosine = StreamUtil.ReadFloat(stream);
                 TempLights.UnknownInt2 = StreamUtil.ReadUInt32(stream);
                 TempLights.UnknownFloat3 = StreamUtil.ReadFloat(stream);
                 TempLights.UnknownInt3 = StreamUtil.ReadUInt32(stream);
@@ -1182,12 +1178,8 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
                         var TempAnimation = new ObjectAnimation();
 
                         //Possibly Starting Animation Postion/Rotation
-                        TempAnimation.U1 = StreamUtil.ReadFloat(stream);
-                        TempAnimation.U2 = StreamUtil.ReadFloat(stream);
-                        TempAnimation.U3 = StreamUtil.ReadFloat(stream);
-                        TempAnimation.U4 = StreamUtil.ReadFloat(stream);
-                        TempAnimation.U5 = StreamUtil.ReadFloat(stream);
-                        TempAnimation.U6 = StreamUtil.ReadFloat(stream);
+                        TempAnimation.BasePosition = StreamUtil.ReadVector3(stream);
+                        TempAnimation.BaseRotation = StreamUtil.ReadVector3(stream);
 
                         TempAnimation.AnimationAction = StreamUtil.ReadUInt32(stream);
 
@@ -1223,12 +1215,12 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
                             for (int c = 0; c < TempAnimationEntry.MathCount; c++)
                             {
                                 AnimationMath TempMath = new AnimationMath();
-                                TempMath.Value1 = StreamUtil.ReadFloat(stream);
-                                TempMath.Value2 = StreamUtil.ReadFloat(stream);
-                                TempMath.Value3 = StreamUtil.ReadFloat(stream);
-                                TempMath.Value4 = StreamUtil.ReadFloat(stream);
-                                TempMath.Value5 = StreamUtil.ReadFloat(stream);
-                                TempMath.Value6 = StreamUtil.ReadFloat(stream);
+                                TempMath.Coefficient1 = StreamUtil.ReadFloat(stream);
+                                TempMath.Coefficient2 = StreamUtil.ReadFloat(stream);
+                                TempMath.Coefficient3 = StreamUtil.ReadFloat(stream);
+                                TempMath.Coefficient4 = StreamUtil.ReadFloat(stream);
+                                TempMath.StartTime = StreamUtil.ReadFloat(stream);
+                                TempMath.EndTime = StreamUtil.ReadFloat(stream);
                                 TempAnimationEntry.animationMaths.Add(TempMath);
                             }
 
@@ -1296,7 +1288,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
                         var NewAnimationFrame = new AnimationFrames();
                         NewAnimationFrame.Position = StreamUtil.ReadVector3(stream);
                         NewAnimationFrame.Rotation = StreamUtil.ReadVector3(stream);
-                        NewAnimationFrame.Unknown = StreamUtil.ReadFloat(stream);
+                        NewAnimationFrame.Radius = StreamUtil.ReadFloat(stream);
 
                         NewHeader.ParticleObject.animationFrames.Add(NewAnimationFrame);
                     }
@@ -1597,7 +1589,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
                 StreamUtil.WriteInt32(stream, TempMaterial.UnknownInt15);
                 StreamUtil.WriteInt32(stream, TempMaterial.UnknownInt16);
                 StreamUtil.WriteInt32(stream, TempMaterial.UnknownInt17);
-                StreamUtil.WriteInt32(stream, TempMaterial.UnknownInt18);
+                StreamUtil.WriteInt32(stream, TempMaterial.AppearanceFlags);
 
                 StreamUtil.WriteInt16(stream, TempMaterial.TextureFlipbookID);
                 StreamUtil.WriteInt16(stream, TempMaterial.UnknownInt20);
@@ -1620,14 +1612,14 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
                 var TempLights = lights[i];
                 StreamUtil.WriteInt32(stream, TempLights.Type);
                 StreamUtil.WriteInt32(stream, TempLights.spriteRes);
-                StreamUtil.WriteFloat32(stream, TempLights.UnknownFloat1);
+                StreamUtil.WriteFloat32(stream, TempLights.Brightness);
                 StreamUtil.WriteInt32(stream, TempLights.UnknownInt1);
                 StreamUtil.WriteVector3(stream, TempLights.Colour);
                 StreamUtil.WriteVector3(stream, TempLights.Direction);
                 StreamUtil.WriteVector3(stream, TempLights.Position);
                 StreamUtil.WriteVector3(stream, TempLights.LowestXYZ);
                 StreamUtil.WriteVector3(stream, TempLights.HighestXYZ);
-                StreamUtil.WriteFloat32(stream, TempLights.UnknownFloat2);
+                StreamUtil.WriteFloat32(stream, TempLights.OuterConeCosine);
                 StreamUtil.WriteInt32(stream, TempLights.UnknownInt2);
                 StreamUtil.WriteFloat32(stream, TempLights.UnknownFloat3);
                 StreamUtil.WriteInt32(stream, TempLights.UnknownInt3);
@@ -1802,12 +1794,8 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
 
                         var TempAnim = TempObject.objectAnimation;
 
-                        StreamUtil.WriteFloat32(stream, TempAnim.U1);
-                        StreamUtil.WriteFloat32(stream, TempAnim.U2);
-                        StreamUtil.WriteFloat32(stream, TempAnim.U3);
-                        StreamUtil.WriteFloat32(stream, TempAnim.U4);
-                        StreamUtil.WriteFloat32(stream, TempAnim.U5);
-                        StreamUtil.WriteFloat32(stream, TempAnim.U6);
+                        StreamUtil.WriteVector3(stream, TempAnim.BasePosition);
+                        StreamUtil.WriteVector3(stream, TempAnim.BaseRotation);
 
                         StreamUtil.WriteInt32(stream, TempAnim.AnimationAction);
 
@@ -1828,12 +1816,12 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
 
                             for (int c = 0; c < TempAnim.animationEntries[b].animationMaths.Count; c++)
                             {
-                                StreamUtil.WriteFloat32(stream, TempAnim.animationEntries[b].animationMaths[c].Value1);
-                                StreamUtil.WriteFloat32(stream, TempAnim.animationEntries[b].animationMaths[c].Value2);
-                                StreamUtil.WriteFloat32(stream, TempAnim.animationEntries[b].animationMaths[c].Value3);
-                                StreamUtil.WriteFloat32(stream, TempAnim.animationEntries[b].animationMaths[c].Value4);
-                                StreamUtil.WriteFloat32(stream, TempAnim.animationEntries[b].animationMaths[c].Value5);
-                                StreamUtil.WriteFloat32(stream, TempAnim.animationEntries[b].animationMaths[c].Value6);
+                                StreamUtil.WriteFloat32(stream, TempAnim.animationEntries[b].animationMaths[c].Coefficient1);
+                                StreamUtil.WriteFloat32(stream, TempAnim.animationEntries[b].animationMaths[c].Coefficient2);
+                                StreamUtil.WriteFloat32(stream, TempAnim.animationEntries[b].animationMaths[c].Coefficient3);
+                                StreamUtil.WriteFloat32(stream, TempAnim.animationEntries[b].animationMaths[c].Coefficient4);
+                                StreamUtil.WriteFloat32(stream, TempAnim.animationEntries[b].animationMaths[c].StartTime);
+                                StreamUtil.WriteFloat32(stream, TempAnim.animationEntries[b].animationMaths[c].EndTime);
                             }
                         }
 
@@ -1956,7 +1944,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
                     {
                         StreamUtil.WriteVector3(stream, particleModels[i].ParticleObjectHeaders[a].ParticleObject.animationFrames[b].Position);
                         StreamUtil.WriteVector3(stream, particleModels[i].ParticleObjectHeaders[a].ParticleObject.animationFrames[b].Rotation);
-                        StreamUtil.WriteFloat32(stream, particleModels[i].ParticleObjectHeaders[a].ParticleObject.animationFrames[b].Unknown);
+                        StreamUtil.WriteFloat32(stream, particleModels[i].ParticleObjectHeaders[a].ParticleObject.animationFrames[b].Radius);
                     }
                     EndingPos = stream.Position;
 
@@ -2955,7 +2943,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
         //16 - Standard Sand
         //17 - No Collidion
         //18 - Show Off Ramp/Metal
-        public int SurfaceType; //Type
+        public int SurfaceType; //Type TrickySurfaceType
 
         public int ResourceKindTags; //i16: four packed 3-bit resource-kind tags
         public int PatchVisablity;
@@ -3023,7 +3011,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
         public int UnknownInt35;
         public int UnknownInt36;
 
-        public int LTGState;
+        public int LTGState; //TrickyLTGState
     }
 
     public struct ParticleInstance
@@ -3062,7 +3050,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
         public int UnknownInt15;
         public int UnknownInt16;
         public int UnknownInt17;
-        public int UnknownInt18;
+        public int AppearanceFlags; //TrickyMaterialAppearanceFlags
 
         public int TextureFlipbookID;
         public int UnknownInt20;
@@ -3076,16 +3064,16 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
 
     public struct Light
     {
-        public int Type;
-        public int spriteRes;
-        public float UnknownFloat1;
+        public int Type; //TrickyLightType
+        public int spriteRes; //& 0x70 is the glint size class (16, 32 or 64), 0 draws no glint
+        public float Brightness;
         public int UnknownInt1;
-        public Vector3 Colour;
+        public Vector3 Colour; //HDR, negative for subtractive shadow lights
         public Vector3 Direction;
         public Vector3 Position;
         public Vector3 LowestXYZ;
         public Vector3 HighestXYZ;
-        public float UnknownFloat2;
+        public float OuterConeCosine; //Spot lights, cosine of the cone half-angle
         public int UnknownInt2;
         public float UnknownFloat3;
         public int UnknownInt3;
@@ -3199,13 +3187,10 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
 
     public struct ObjectAnimation
     {
-        //Start AnimPos/Rot?
-        public float U1;
-        public float U2;
-        public float U3;
-        public float U4;
-        public float U5;
-        public float U6;
+        //The pose an animated object is built from. A channel replaces the matching component;
+        //the object's own matrix is not used. Rotation is Euler radians
+        public Vector3 BasePosition;
+        public Vector3 BaseRotation;
 
         public int AnimationAction; //Stored as Bit Flags
                                     //1 - X Position
@@ -3231,12 +3216,13 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
 
     public struct AnimationMath
     {
-        public float Value1;
-        public float Value2;
-        public float Value3;
-        public float Value4;
-        public float Value5;
-        public float Value6;
+        //One cubic segment of a channel curve, valid from StartTime to EndTime
+        public float Coefficient1;
+        public float Coefficient2;
+        public float Coefficient3;
+        public float Coefficient4;
+        public float StartTime;
+        public float EndTime;
     }
 
     public struct ParticleModel
@@ -3281,7 +3267,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
     {
         public Vector3 Position;
         public Vector3 Rotation;
-        public float Unknown;
+        public float Radius; //Puff radius
     }
 
 

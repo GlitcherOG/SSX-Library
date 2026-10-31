@@ -75,12 +75,8 @@ namespace SSXLibrary.JsonFiles.Tricky
         [Serializable]
         public struct ObjectAnimation
         {
-            public float U1;
-            public float U2;
-            public float U3;
-            public float U4;
-            public float U5;
-            public float U6;
+            public float[] BasePosition;
+            public float[] BaseRotation;
 
             public int AnimationAction;
             public List<AnimationEntry> AnimationEntries;
@@ -93,12 +89,12 @@ namespace SSXLibrary.JsonFiles.Tricky
         [Serializable]
         public struct AnimationMath
         {
-            public float Value1;
-            public float Value2;
-            public float Value3;
-            public float Value4;
-            public float Value5;
-            public float Value6;
+            public float Coefficient1;
+            public float Coefficient2;
+            public float Coefficient3;
+            public float Coefficient4;
+            public float StartTime;
+            public float EndTime;
         }
     }
 }

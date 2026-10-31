@@ -39,7 +39,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
                     NewPath.Type = StreamUtil.ReadUInt32(stream);
                     NewPath.U1 = StreamUtil.ReadUInt32(stream);
                     NewPath.U2 = StreamUtil.ReadUInt32(stream);
-                    NewPath.U3 = StreamUtil.ReadUInt32(stream);
+                    NewPath.Rating = StreamUtil.ReadUInt32(stream);
                     NewPath.U4 = StreamUtil.ReadUInt32(stream);
                     NewPath.U5 = StreamUtil.ReadUInt32(stream);
                     NewPath.Respawnable = StreamUtil.ReadUInt32(stream);
@@ -133,7 +133,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
                 StreamUtil.WriteInt32(stream, AIPath.PathAs[i].Type);
                 StreamUtil.WriteInt32(stream, AIPath.PathAs[i].U1);
                 StreamUtil.WriteInt32(stream, AIPath.PathAs[i].U2);
-                StreamUtil.WriteInt32(stream, AIPath.PathAs[i].U3);
+                StreamUtil.WriteInt32(stream, AIPath.PathAs[i].Rating);
                 StreamUtil.WriteInt32(stream, AIPath.PathAs[i].U4);
                 StreamUtil.WriteInt32(stream, AIPath.PathAs[i].U5);
                 StreamUtil.WriteInt32(stream, AIPath.PathAs[i].Respawnable);
@@ -351,7 +351,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
             public int Type;
             public int U1;
             public int U2;
-            public int U3;
+            public int Rating; //0-100, the AI scores candidate paths against it
             public int U4;
             public int U5;
             public int Respawnable;
@@ -369,7 +369,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
 
         public struct PathEvent
         {
-            public int EventType;
+            public int EventType; //PathEventType
             public int EventValue;
             public float EventStart;
             public float EventEnd;

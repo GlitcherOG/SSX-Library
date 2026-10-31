@@ -45,8 +45,8 @@ namespace SSXLibrary.JsonFiles.Tricky
             public string SplineName;
 
             public int U0;
-            public int U1;
-            public int SplineStyle;
+            public int RailFlags; //Bit 0 - can be grinded (rail candidacy)
+            public int SplineStyle; //SSFSplineStyle
 
             public List<SegmentJson> Segments;
 

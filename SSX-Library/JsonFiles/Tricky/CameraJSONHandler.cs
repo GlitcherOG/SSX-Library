@@ -89,12 +89,10 @@ namespace SSXLibrary.JsonFiles.Tricky
         [Serializable]
         public struct ExternalSound
         {
-            public int U0;
+            public int EmitterType;
             public int SoundIndex;
-            public float U2;
-            public float U3;
-            public float U4;
-            public float U5; //Radius?
+            public float[] Offset;
+            public float Radius; //Radius?
             public float U6;
         }
 

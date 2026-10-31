@@ -257,12 +257,10 @@ namespace SSXLibrary
                             for (int b = 0; b < adlHandler.HashSounds[a].Sound.ExternalSounds.Count; b++)
                             {
                                 var NewExternalSound = new InstanceJsonHandler.ExternalSound();
-                                NewExternalSound.U0 = adlHandler.HashSounds[a].Sound.ExternalSounds[b].U0;
+                                NewExternalSound.EmitterType = adlHandler.HashSounds[a].Sound.ExternalSounds[b].EmitterType;
                                 NewExternalSound.SoundIndex = adlHandler.HashSounds[a].Sound.ExternalSounds[b].SoundIndex;
-                                NewExternalSound.U2 = adlHandler.HashSounds[a].Sound.ExternalSounds[b].U2;
-                                NewExternalSound.U3 = adlHandler.HashSounds[a].Sound.ExternalSounds[b].U3;
-                                NewExternalSound.U4 = adlHandler.HashSounds[a].Sound.ExternalSounds[b].U4;
-                                NewExternalSound.U5 = adlHandler.HashSounds[a].Sound.ExternalSounds[b].U5;
+                                NewExternalSound.Offset = ArrayConv.Vector3ToArray(adlHandler.HashSounds[a].Sound.ExternalSounds[b].Offset);
+                                NewExternalSound.Radius = adlHandler.HashSounds[a].Sound.ExternalSounds[b].Radius;
                                 NewExternalSound.U6 = adlHandler.HashSounds[a].Sound.ExternalSounds[b].U6;
                                 NewExternalSound.U7 = adlHandler.HashSounds[a].Sound.ExternalSounds[b].U7;
                                 NewExternalSound.U8 = adlHandler.HashSounds[a].Sound.ExternalSounds[b].U8;
@@ -286,7 +284,7 @@ namespace SSXLibrary
                     int StatePos = i < ssfHandler.InstanceState.Count ? ssfHandler.InstanceState[i] : -1;
                     if (StatePos >= 0 && StatePos < ssfHandler.ObjectProperties.Count)
                     {
-                        instanceJson.U0 = ssfHandler.ObjectProperties[StatePos].U0;
+                        instanceJson.CollisionResponseMass = ssfHandler.ObjectProperties[StatePos].CollisionResponseMass;
                         instanceJson.PlayerBounceAmmount = ssfHandler.ObjectProperties[StatePos].PlayerBounce;
                         instanceJson.U2 = ssfHandler.ObjectProperties[StatePos].U2;
 
@@ -385,7 +383,7 @@ namespace SSXLibrary
                 TempMaterial.UnknownInt15 = pbdHandler.materials[i].UnknownInt15;
                 TempMaterial.UnknownInt16 = pbdHandler.materials[i].UnknownInt16;
                 TempMaterial.UnknownInt17 = pbdHandler.materials[i].UnknownInt17;
-                TempMaterial.UnknownInt18 = pbdHandler.materials[i].UnknownInt18;
+                TempMaterial.AppearanceFlags = pbdHandler.materials[i].AppearanceFlags;
 
                 TempMaterial.TextureFlipbook = new List<string>();
                 if (pbdHandler.materials[i].TextureFlipbookID != -1)
@@ -413,14 +411,14 @@ namespace SSXLibrary
 
                 TempLight.Type = pbdHandler.lights[i].Type;
                 TempLight.SpriteRes = pbdHandler.lights[i].spriteRes;
-                TempLight.UnknownFloat1 = pbdHandler.lights[i].UnknownFloat1;
+                TempLight.Brightness = pbdHandler.lights[i].Brightness;
                 TempLight.UnknownInt1 = pbdHandler.lights[i].UnknownInt1;
                 TempLight.Colour = ArrayConv.Vector3ToArray(pbdHandler.lights[i].Colour);
                 TempLight.Direction = ArrayConv.Vector3ToArray(pbdHandler.lights[i].Direction);
                 TempLight.Position = ArrayConv.Vector3ToArray(pbdHandler.lights[i].Position);
                 TempLight.LowestXYZ = ArrayConv.Vector3ToArray(pbdHandler.lights[i].LowestXYZ);
                 TempLight.HighestXYZ = ArrayConv.Vector3ToArray(pbdHandler.lights[i].HighestXYZ);
-                TempLight.UnknownFloat2 = pbdHandler.lights[i].UnknownFloat2;
+                TempLight.OuterConeCosine = pbdHandler.lights[i].OuterConeCosine;
                 TempLight.UnknownInt2 = pbdHandler.lights[i].UnknownInt2;
                 TempLight.UnknownFloat3 = pbdHandler.lights[i].UnknownFloat3;
                 TempLight.UnknownInt3 = pbdHandler.lights[i].UnknownInt3;
@@ -489,7 +487,7 @@ namespace SSXLibrary
                     if (i < ssfHandler.Splines.Count)
                     {
                         TempSpline.U0 = ssfHandler.Splines[i].U1;
-                        TempSpline.U1 = ssfHandler.Splines[i].U2;
+                        TempSpline.RailFlags = ssfHandler.Splines[i].RailFlags;
                         TempSpline.SplineStyle = ssfHandler.Splines[i].SplineStyle;
                     }
                 }
@@ -580,12 +578,8 @@ namespace SSXLibrary
                     {
                         var TempAnimation = new ModelJsonHandler.ObjectAnimation();
                         TempPrefabObject.IncludeAnimation = true;
-                        TempAnimation.U1 = pbdHandler.modelData[i].ModelObjects[a].objectAnimation.U1;
-                        TempAnimation.U2 = pbdHandler.modelData[i].ModelObjects[a].objectAnimation.U2;
-                        TempAnimation.U3 = pbdHandler.modelData[i].ModelObjects[a].objectAnimation.U3;
-                        TempAnimation.U4 = pbdHandler.modelData[i].ModelObjects[a].objectAnimation.U4;
-                        TempAnimation.U5 = pbdHandler.modelData[i].ModelObjects[a].objectAnimation.U5;
-                        TempAnimation.U6 = pbdHandler.modelData[i].ModelObjects[a].objectAnimation.U6;
+                        TempAnimation.BasePosition = ArrayConv.Vector3ToArray(pbdHandler.modelData[i].ModelObjects[a].objectAnimation.BasePosition);
+                        TempAnimation.BaseRotation = ArrayConv.Vector3ToArray(pbdHandler.modelData[i].ModelObjects[a].objectAnimation.BaseRotation);
 
                         TempAnimation.AnimationAction = pbdHandler.modelData[i].ModelObjects[a].objectAnimation.AnimationAction;
 
@@ -599,12 +593,12 @@ namespace SSXLibrary
                             {
                                 var TempMaths = new ModelJsonHandler.AnimationMath();
 
-                                TempMaths.Value1 = pbdHandler.modelData[i].ModelObjects[a].objectAnimation.animationEntries[b].animationMaths[c].Value1;
-                                TempMaths.Value2 = pbdHandler.modelData[i].ModelObjects[a].objectAnimation.animationEntries[b].animationMaths[c].Value2;
-                                TempMaths.Value3 = pbdHandler.modelData[i].ModelObjects[a].objectAnimation.animationEntries[b].animationMaths[c].Value3;
-                                TempMaths.Value4 = pbdHandler.modelData[i].ModelObjects[a].objectAnimation.animationEntries[b].animationMaths[c].Value4;
-                                TempMaths.Value5 = pbdHandler.modelData[i].ModelObjects[a].objectAnimation.animationEntries[b].animationMaths[c].Value5;
-                                TempMaths.Value6 = pbdHandler.modelData[i].ModelObjects[a].objectAnimation.animationEntries[b].animationMaths[c].Value6;
+                                TempMaths.Coefficient1 = pbdHandler.modelData[i].ModelObjects[a].objectAnimation.animationEntries[b].animationMaths[c].Coefficient1;
+                                TempMaths.Coefficient2 = pbdHandler.modelData[i].ModelObjects[a].objectAnimation.animationEntries[b].animationMaths[c].Coefficient2;
+                                TempMaths.Coefficient3 = pbdHandler.modelData[i].ModelObjects[a].objectAnimation.animationEntries[b].animationMaths[c].Coefficient3;
+                                TempMaths.Coefficient4 = pbdHandler.modelData[i].ModelObjects[a].objectAnimation.animationEntries[b].animationMaths[c].Coefficient4;
+                                TempMaths.StartTime = pbdHandler.modelData[i].ModelObjects[a].objectAnimation.animationEntries[b].animationMaths[c].StartTime;
+                                TempMaths.EndTime = pbdHandler.modelData[i].ModelObjects[a].objectAnimation.animationEntries[b].animationMaths[c].EndTime;
 
                                 TempEntry.AnimationMaths.Add(TempMaths);
                             }
@@ -652,7 +646,7 @@ namespace SSXLibrary
 
                         NewAnimationFrame.Position = ArrayConv.Vector3ToArray(pbdHandler.particleModels[i].ParticleObjectHeaders[a].ParticleObject.animationFrames[b].Position);
                         NewAnimationFrame.Rotation = ArrayConv.Vector3ToArray(pbdHandler.particleModels[i].ParticleObjectHeaders[a].ParticleObject.animationFrames[b].Rotation);
-                        NewAnimationFrame.Unknown = pbdHandler.particleModels[i].ParticleObjectHeaders[a].ParticleObject.animationFrames[b].Unknown;
+                        NewAnimationFrame.Radius = pbdHandler.particleModels[i].ParticleObjectHeaders[a].ParticleObject.animationFrames[b].Radius;
 
                         NewObjectHeader.ParticleObject.AnimationFrames.Add(NewAnimationFrame);
                     }
@@ -790,7 +784,7 @@ namespace SSXLibrary
                     //NewAIPath.Type = aip.AIPath.PathAs[i].Type;
                     //NewAIPath.U1 = aip.AIPath.PathAs[i].U1;
                     //NewAIPath.U2 = aip.AIPath.PathAs[i].U2;
-                    NewAIPath.U3 = aip.AIPath.PathAs[i].U3;
+                    NewAIPath.Rating = aip.AIPath.PathAs[i].Rating;
                     //NewAIPath.U4 = aip.AIPath.PathAs[i].U4;
                     //NewAIPath.U5 = aip.AIPath.PathAs[i].U5;
                     if (aip.AIPath.PathAs[i].Respawnable == 1)
@@ -902,7 +896,7 @@ namespace SSXLibrary
                     //NewAIPath.Type = sop.AIPath.PathAs[i].Type;
                     //NewAIPath.U1 = sop.AIPath.PathAs[i].U1;
                     //NewAIPath.U2 = sop.AIPath.PathAs[i].U2;
-                    NewAIPath.U3 = sop.AIPath.PathAs[i].U3;
+                    NewAIPath.Rating = sop.AIPath.PathAs[i].Rating;
                     //NewAIPath.U4 = sop.AIPath.PathAs[i].U4;
                     //NewAIPath.U5 = sop.AIPath.PathAs[i].U5;
                     if (sop.AIPath.PathAs[i].Respawnable == 1)
@@ -1000,11 +994,11 @@ namespace SSXLibrary
                 var TempEffectSlot = new SSFJsonHandler.EffectSlotJson();
 
                 TempEffectSlot.EffectSlotName = "EffectSlot " + i;
-                TempEffectSlot.PersistantEffectSlot = ssfHandler.EffectSlots[i].Slot1;
-                TempEffectSlot.CollisionEffectSlot = ssfHandler.EffectSlots[i].Slot2;
+                TempEffectSlot.PersistantEffectSlot = ssfHandler.EffectSlots[i].PersistantEffectSlot;
+                TempEffectSlot.CollisionEffectSlot = ssfHandler.EffectSlots[i].CollisionEffectSlot;
                 TempEffectSlot.Slot3 = ssfHandler.EffectSlots[i].Slot3;
                 TempEffectSlot.Slot4 = ssfHandler.EffectSlots[i].Slot4;
-                TempEffectSlot.EffectTriggerSlot = ssfHandler.EffectSlots[i].Slot5;
+                TempEffectSlot.EffectTriggerSlot = ssfHandler.EffectSlots[i].EffectTriggerSlot;
                 TempEffectSlot.Slot6 = ssfHandler.EffectSlots[i].Slot6;
                 TempEffectSlot.Slot7 = ssfHandler.EffectSlots[i].Slot7;
                 ssfJsonHandler.EffectSlots.Add(TempEffectSlot);
@@ -1062,45 +1056,43 @@ namespace SSXLibrary
                 {
                     var NewPhysicsData = new SSFJsonHandler.PhysicsData();
 
-                    NewPhysicsData.U2 = ssfHandler.PhysicsHeaders[i].PhysicsDatas[a].U2;
+                    NewPhysicsData.OccupancyMaskEncoding = ssfHandler.PhysicsHeaders[i].PhysicsDatas[a].OccupancyMaskEncoding;
 
-                    NewPhysicsData.UFloat0 = ssfHandler.PhysicsHeaders[i].PhysicsDatas[a].UFloat0;
-                    NewPhysicsData.UFloat1 = ssfHandler.PhysicsHeaders[i].PhysicsDatas[a].UFloat1;
-                    NewPhysicsData.UFloat2 = ssfHandler.PhysicsHeaders[i].PhysicsDatas[a].UFloat2;
+                    NewPhysicsData.Center = ArrayConv.Vector3ToArray(ssfHandler.PhysicsHeaders[i].PhysicsDatas[a].Center);
                     NewPhysicsData.UFloat3 = ssfHandler.PhysicsHeaders[i].PhysicsDatas[a].UFloat3;
                     NewPhysicsData.UFloat4 = ssfHandler.PhysicsHeaders[i].PhysicsDatas[a].UFloat4;
                     NewPhysicsData.UFloat5 = ssfHandler.PhysicsHeaders[i].PhysicsDatas[a].UFloat5;
-                    NewPhysicsData.UFloat6 = ssfHandler.PhysicsHeaders[i].PhysicsDatas[a].UFloat6;
-                    NewPhysicsData.UFloat7 = ssfHandler.PhysicsHeaders[i].PhysicsDatas[a].UFloat7;
-                    NewPhysicsData.UFloat8 = ssfHandler.PhysicsHeaders[i].PhysicsDatas[a].UFloat8;
-                    NewPhysicsData.UFloat9 = ssfHandler.PhysicsHeaders[i].PhysicsDatas[a].UFloat9;
-                    NewPhysicsData.UFloat10 = ssfHandler.PhysicsHeaders[i].PhysicsDatas[a].UFloat10;
-                    NewPhysicsData.UFloat11 = ssfHandler.PhysicsHeaders[i].PhysicsDatas[a].UFloat11;
-                    NewPhysicsData.UFloat12 = ssfHandler.PhysicsHeaders[i].PhysicsDatas[a].UFloat12;
-                    NewPhysicsData.UFloat13 = ssfHandler.PhysicsHeaders[i].PhysicsDatas[a].UFloat13;
-                    NewPhysicsData.UFloat14 = ssfHandler.PhysicsHeaders[i].PhysicsDatas[a].UFloat14;
-                    NewPhysicsData.UFloat15 = ssfHandler.PhysicsHeaders[i].PhysicsDatas[a].UFloat15;
-                    NewPhysicsData.UFloat16 = ssfHandler.PhysicsHeaders[i].PhysicsDatas[a].UFloat16;
-                    NewPhysicsData.UFloat17 = ssfHandler.PhysicsHeaders[i].PhysicsDatas[a].UFloat17;
-                    NewPhysicsData.UFloat18 = ssfHandler.PhysicsHeaders[i].PhysicsDatas[a].UFloat18;
-                    NewPhysicsData.UFloat19 = ssfHandler.PhysicsHeaders[i].PhysicsDatas[a].UFloat19;
-                    NewPhysicsData.UFloat20 = ssfHandler.PhysicsHeaders[i].PhysicsDatas[a].UFloat20;
-                    NewPhysicsData.UFloat21 = ssfHandler.PhysicsHeaders[i].PhysicsDatas[a].UFloat21;
-                    NewPhysicsData.UFloat22 = ssfHandler.PhysicsHeaders[i].PhysicsDatas[a].UFloat22;
-                    NewPhysicsData.UFloat23 = ssfHandler.PhysicsHeaders[i].PhysicsDatas[a].UFloat23;
+                    NewPhysicsData.InertiaM11 = ssfHandler.PhysicsHeaders[i].PhysicsDatas[a].InertiaM11;
+                    NewPhysicsData.InertiaM12 = ssfHandler.PhysicsHeaders[i].PhysicsDatas[a].InertiaM12;
+                    NewPhysicsData.InertiaM13 = ssfHandler.PhysicsHeaders[i].PhysicsDatas[a].InertiaM13;
+                    NewPhysicsData.InertiaM21 = ssfHandler.PhysicsHeaders[i].PhysicsDatas[a].InertiaM21;
+                    NewPhysicsData.InertiaM22 = ssfHandler.PhysicsHeaders[i].PhysicsDatas[a].InertiaM22;
+                    NewPhysicsData.InertiaM23 = ssfHandler.PhysicsHeaders[i].PhysicsDatas[a].InertiaM23;
+                    NewPhysicsData.InertiaM31 = ssfHandler.PhysicsHeaders[i].PhysicsDatas[a].InertiaM31;
+                    NewPhysicsData.InertiaM32 = ssfHandler.PhysicsHeaders[i].PhysicsDatas[a].InertiaM32;
+                    NewPhysicsData.InertiaM33 = ssfHandler.PhysicsHeaders[i].PhysicsDatas[a].InertiaM33;
+                    NewPhysicsData.InverseInertiaM11 = ssfHandler.PhysicsHeaders[i].PhysicsDatas[a].InverseInertiaM11;
+                    NewPhysicsData.InverseInertiaM12 = ssfHandler.PhysicsHeaders[i].PhysicsDatas[a].InverseInertiaM12;
+                    NewPhysicsData.InverseInertiaM13 = ssfHandler.PhysicsHeaders[i].PhysicsDatas[a].InverseInertiaM13;
+                    NewPhysicsData.InverseInertiaM21 = ssfHandler.PhysicsHeaders[i].PhysicsDatas[a].InverseInertiaM21;
+                    NewPhysicsData.InverseInertiaM22 = ssfHandler.PhysicsHeaders[i].PhysicsDatas[a].InverseInertiaM22;
+                    NewPhysicsData.InverseInertiaM23 = ssfHandler.PhysicsHeaders[i].PhysicsDatas[a].InverseInertiaM23;
+                    NewPhysicsData.InverseInertiaM31 = ssfHandler.PhysicsHeaders[i].PhysicsDatas[a].InverseInertiaM31;
+                    NewPhysicsData.InverseInertiaM32 = ssfHandler.PhysicsHeaders[i].PhysicsDatas[a].InverseInertiaM32;
+                    NewPhysicsData.InverseInertiaM33 = ssfHandler.PhysicsHeaders[i].PhysicsDatas[a].InverseInertiaM33;
 
-                    NewPhysicsData.uPhysicsStruct0 = new List<SSFJsonHandler.UPhysicsStruct>();
+                    NewPhysicsData.OccupancyLevels = new List<SSFJsonHandler.OccupancyLevel>();
 
-                    for (int b = 0; b < ssfHandler.PhysicsHeaders[i].PhysicsDatas[a].uPhysicsStruct0.Count; b++)
+                    for (int b = 0; b < ssfHandler.PhysicsHeaders[i].PhysicsDatas[a].OccupancyLevels.Count; b++)
                     {
-                        var NewPhysicsStruct = new SSFJsonHandler.UPhysicsStruct();
-                        NewPhysicsStruct.U0 = ssfHandler.PhysicsHeaders[i].PhysicsDatas[a].uPhysicsStruct0[b].U0;
-                        NewPhysicsStruct.U1 = ssfHandler.PhysicsHeaders[i].PhysicsDatas[a].uPhysicsStruct0[b].U1;
-                        NewPhysicsStruct.U2 = ssfHandler.PhysicsHeaders[i].PhysicsDatas[a].uPhysicsStruct0[b].U2;
-                        NewPhysicsData.uPhysicsStruct0.Add(NewPhysicsStruct);
+                        var NewPhysicsStruct = new SSFJsonHandler.OccupancyLevel();
+                        NewPhysicsStruct.SphereRadius = ssfHandler.PhysicsHeaders[i].PhysicsDatas[a].OccupancyLevels[b].SphereRadius;
+                        NewPhysicsStruct.ChildOffset = ssfHandler.PhysicsHeaders[i].PhysicsDatas[a].OccupancyLevels[b].ChildOffset;
+                        NewPhysicsStruct.MaskStride = ssfHandler.PhysicsHeaders[i].PhysicsDatas[a].OccupancyLevels[b].MaskStride;
+                        NewPhysicsData.OccupancyLevels.Add(NewPhysicsStruct);
                     }
 
-                    NewPhysicsData.UByteData = ssfHandler.PhysicsHeaders[i].PhysicsDatas[a].UByteData;
+                    NewPhysicsData.OccupancyMasks = ssfHandler.PhysicsHeaders[i].PhysicsDatas[a].OccupancyMasks;
                     NewPhysicsHeader.PhysicsDatas.Add(NewPhysicsData);
                 }
 
@@ -1203,7 +1195,7 @@ namespace SSXLibrary
                     TempMaterial.UnknownInt15 = skypbdHandler.materials[i].UnknownInt15;
                     TempMaterial.UnknownInt16 = skypbdHandler.materials[i].UnknownInt16;
                     TempMaterial.UnknownInt17 = skypbdHandler.materials[i].UnknownInt17;
-                    TempMaterial.UnknownInt18 = skypbdHandler.materials[i].UnknownInt18;
+                    TempMaterial.AppearanceFlags = skypbdHandler.materials[i].AppearanceFlags;
                     //TempMaterial.TextureFlipbookID = skypbdHandler.materials[i].TextureFlipbookID;
                     TempMaterial.UnknownInt20 = skypbdHandler.materials[i].UnknownInt20;
                     SkyMaterialJson.Materials.Add(TempMaterial);
@@ -1264,12 +1256,8 @@ namespace SSXLibrary
                         {
                             var TempAnimation = new ModelJsonHandler.ObjectAnimation();
                             TempPrefabObject.IncludeAnimation = true;
-                            TempAnimation.U1 = skypbdHandler.modelData[i].ModelObjects[a].objectAnimation.U1;
-                            TempAnimation.U2 = skypbdHandler.modelData[i].ModelObjects[a].objectAnimation.U2;
-                            TempAnimation.U3 = skypbdHandler.modelData[i].ModelObjects[a].objectAnimation.U3;
-                            TempAnimation.U4 = skypbdHandler.modelData[i].ModelObjects[a].objectAnimation.U4;
-                            TempAnimation.U5 = skypbdHandler.modelData[i].ModelObjects[a].objectAnimation.U5;
-                            TempAnimation.U6 = skypbdHandler.modelData[i].ModelObjects[a].objectAnimation.U6;
+                            TempAnimation.BasePosition = ArrayConv.Vector3ToArray(skypbdHandler.modelData[i].ModelObjects[a].objectAnimation.BasePosition);
+                            TempAnimation.BaseRotation = ArrayConv.Vector3ToArray(skypbdHandler.modelData[i].ModelObjects[a].objectAnimation.BaseRotation);
 
                             TempAnimation.AnimationAction = skypbdHandler.modelData[i].ModelObjects[a].objectAnimation.AnimationAction;
 
@@ -1283,12 +1271,12 @@ namespace SSXLibrary
                                 {
                                     var TempMaths = new ModelJsonHandler.AnimationMath();
 
-                                    TempMaths.Value1 = skypbdHandler.modelData[i].ModelObjects[a].objectAnimation.animationEntries[b].animationMaths[c].Value1;
-                                    TempMaths.Value2 = skypbdHandler.modelData[i].ModelObjects[a].objectAnimation.animationEntries[b].animationMaths[c].Value2;
-                                    TempMaths.Value3 = skypbdHandler.modelData[i].ModelObjects[a].objectAnimation.animationEntries[b].animationMaths[c].Value3;
-                                    TempMaths.Value4 = skypbdHandler.modelData[i].ModelObjects[a].objectAnimation.animationEntries[b].animationMaths[c].Value4;
-                                    TempMaths.Value5 = skypbdHandler.modelData[i].ModelObjects[a].objectAnimation.animationEntries[b].animationMaths[c].Value5;
-                                    TempMaths.Value6 = skypbdHandler.modelData[i].ModelObjects[a].objectAnimation.animationEntries[b].animationMaths[c].Value6;
+                                    TempMaths.Coefficient1 = skypbdHandler.modelData[i].ModelObjects[a].objectAnimation.animationEntries[b].animationMaths[c].Coefficient1;
+                                    TempMaths.Coefficient2 = skypbdHandler.modelData[i].ModelObjects[a].objectAnimation.animationEntries[b].animationMaths[c].Coefficient2;
+                                    TempMaths.Coefficient3 = skypbdHandler.modelData[i].ModelObjects[a].objectAnimation.animationEntries[b].animationMaths[c].Coefficient3;
+                                    TempMaths.Coefficient4 = skypbdHandler.modelData[i].ModelObjects[a].objectAnimation.animationEntries[b].animationMaths[c].Coefficient4;
+                                    TempMaths.StartTime = skypbdHandler.modelData[i].ModelObjects[a].objectAnimation.animationEntries[b].animationMaths[c].StartTime;
+                                    TempMaths.EndTime = skypbdHandler.modelData[i].ModelObjects[a].objectAnimation.animationEntries[b].animationMaths[c].EndTime;
 
                                     TempEntry.AnimationMaths.Add(TempMaths);
                                 }
@@ -1641,7 +1629,7 @@ namespace SSXLibrary
                         var NewSpline = new SSFHandler.Spline();
 
                         NewSpline.U1 = TempSpline.U0;
-                        NewSpline.U2 = TempSpline.U1;
+                        NewSpline.RailFlags = TempSpline.RailFlags;
                         NewSpline.SplineStyle = TempSpline.SplineStyle;
 
                         ssfHandler.Splines.Add(NewSpline);
@@ -1720,12 +1708,10 @@ namespace SSXLibrary
                         {
                             var NewExternalSound = new ADLHandler.ExternalSound();
 
-                            NewExternalSound.U0 = Oldinstance.Sounds.Value.ExternalSounds[a].U0;
+                            NewExternalSound.EmitterType = Oldinstance.Sounds.Value.ExternalSounds[a].EmitterType;
                             NewExternalSound.SoundIndex = Oldinstance.Sounds.Value.ExternalSounds[a].SoundIndex;
-                            NewExternalSound.U2 = Oldinstance.Sounds.Value.ExternalSounds[a].U2;
-                            NewExternalSound.U3 = Oldinstance.Sounds.Value.ExternalSounds[a].U3;
-                            NewExternalSound.U4 = Oldinstance.Sounds.Value.ExternalSounds[a].U4;
-                            NewExternalSound.U5 = Oldinstance.Sounds.Value.ExternalSounds[a].U5;
+                            NewExternalSound.Offset = ArrayConv.ArrayToVector3(Oldinstance.Sounds.Value.ExternalSounds[a].Offset);
+                            NewExternalSound.Radius = Oldinstance.Sounds.Value.ExternalSounds[a].Radius;
                             NewExternalSound.U6 = Oldinstance.Sounds.Value.ExternalSounds[a].U6;
                             NewExternalSound.U7 = Oldinstance.Sounds.Value.ExternalSounds[a].U7;
                             NewExternalSound.U8 = Oldinstance.Sounds.Value.ExternalSounds[a].U8;
@@ -1796,7 +1782,7 @@ namespace SSXLibrary
                         //Make Object Properties and Test if Exists
                         var NewObjectProperties = new SSFHandler.ObjectPropertiesStruct();
 
-                        NewObjectProperties.U0 = Oldinstance.U0;
+                        NewObjectProperties.CollisionResponseMass = Oldinstance.CollisionResponseMass;
                         NewObjectProperties.PlayerBounce = Oldinstance.PlayerBounceAmmount;
                         NewObjectProperties.U2 = Oldinstance.U2;
 
@@ -1841,7 +1827,7 @@ namespace SSXLibrary
                         {
                             var TempProperties = ssfHandler.ObjectProperties[a];
 
-                            if (NewObjectProperties.U0 == TempProperties.U0 &&
+                            if (NewObjectProperties.CollisionResponseMass == TempProperties.CollisionResponseMass &&
                                 NewObjectProperties.PlayerBounce == TempProperties.PlayerBounce &&
                                 NewObjectProperties.U2 == TempProperties.U2 &&
                                 NewObjectProperties.BitFlags == TempProperties.BitFlags &&
@@ -2014,12 +2000,8 @@ namespace SSXLibrary
                         {
                             NewObject.IncludeAnimation = true;
                             NewObject.objectAnimation = new ObjectAnimation();
-                            NewObject.objectAnimation.U1 = TempObject.Animation.Value.U1;
-                            NewObject.objectAnimation.U2 = TempObject.Animation.Value.U2;
-                            NewObject.objectAnimation.U3 = TempObject.Animation.Value.U3;
-                            NewObject.objectAnimation.U4 = TempObject.Animation.Value.U4;
-                            NewObject.objectAnimation.U5 = TempObject.Animation.Value.U5;
-                            NewObject.objectAnimation.U6 = TempObject.Animation.Value.U6;
+                            NewObject.objectAnimation.BasePosition = ArrayConv.ArrayToVector3(TempObject.Animation.Value.BasePosition);
+                            NewObject.objectAnimation.BaseRotation = ArrayConv.ArrayToVector3(TempObject.Animation.Value.BaseRotation);
 
                             NewObject.objectAnimation.AnimationAction = TempObject.Animation.Value.AnimationAction;
                             NewObject.objectAnimation.animationEntries = new List<AnimationEntry>();
@@ -2035,12 +2017,12 @@ namespace SSXLibrary
                                         var TempAnimationMaths = TempAnimationEntry.AnimationMaths[c];
                                         var NewAnimationMath = new AnimationMath();
 
-                                        NewAnimationMath.Value1 = TempAnimationMaths.Value1;
-                                        NewAnimationMath.Value2 = TempAnimationMaths.Value2;
-                                        NewAnimationMath.Value3 = TempAnimationMaths.Value3;
-                                        NewAnimationMath.Value4 = TempAnimationMaths.Value4;
-                                        NewAnimationMath.Value5 = TempAnimationMaths.Value5;
-                                        NewAnimationMath.Value6 = TempAnimationMaths.Value6;
+                                        NewAnimationMath.Coefficient1 = TempAnimationMaths.Coefficient1;
+                                        NewAnimationMath.Coefficient2 = TempAnimationMaths.Coefficient2;
+                                        NewAnimationMath.Coefficient3 = TempAnimationMaths.Coefficient3;
+                                        NewAnimationMath.Coefficient4 = TempAnimationMaths.Coefficient4;
+                                        NewAnimationMath.StartTime = TempAnimationMaths.StartTime;
+                                        NewAnimationMath.EndTime = TempAnimationMaths.EndTime;
 
 
                                         NewAnimationEntry.animationMaths.Add(NewAnimationMath);
@@ -2119,7 +2101,7 @@ namespace SSXLibrary
                     NewMaterial.UnknownInt15 = materialJson.Materials[i].UnknownInt15;
                     NewMaterial.UnknownInt16 = materialJson.Materials[i].UnknownInt16;
                     NewMaterial.UnknownInt17 = materialJson.Materials[i].UnknownInt17;
-                    NewMaterial.UnknownInt18 = materialJson.Materials[i].UnknownInt18;
+                    NewMaterial.AppearanceFlags = materialJson.Materials[i].AppearanceFlags;
 
                     if (materialJson.Materials[i].TextureFlipbook != null)
                     {
@@ -2181,14 +2163,14 @@ namespace SSXLibrary
                     Light TempLight = new Light();
                     TempLight.Type = lightJsonHandler.Lights[i].Type;
                     TempLight.spriteRes = lightJsonHandler.Lights[i].SpriteRes;
-                    TempLight.UnknownFloat1 = lightJsonHandler.Lights[i].UnknownFloat1;
+                    TempLight.Brightness = lightJsonHandler.Lights[i].Brightness;
                     TempLight.UnknownInt1 = lightJsonHandler.Lights[i].UnknownInt1;
                     TempLight.Colour = ArrayConv.ArrayToVector3(lightJsonHandler.Lights[i].Colour);
                     TempLight.Direction = ArrayConv.ArrayToVector3(lightJsonHandler.Lights[i].Direction);
                     TempLight.Position = ArrayConv.ArrayToVector3(lightJsonHandler.Lights[i].Position);
                     TempLight.LowestXYZ = ArrayConv.ArrayToVector3(lightJsonHandler.Lights[i].LowestXYZ);
                     TempLight.HighestXYZ = ArrayConv.ArrayToVector3(lightJsonHandler.Lights[i].HighestXYZ);
-                    TempLight.UnknownFloat2 = lightJsonHandler.Lights[i].UnknownFloat2;
+                    TempLight.OuterConeCosine = lightJsonHandler.Lights[i].OuterConeCosine;
                     TempLight.UnknownInt2 = lightJsonHandler.Lights[i].UnknownInt2;
                     TempLight.UnknownFloat3 = lightJsonHandler.Lights[i].UnknownFloat3;
                     TempLight.UnknownInt3 = lightJsonHandler.Lights[i].UnknownInt3;
@@ -2242,7 +2224,7 @@ namespace SSXLibrary
                             var NewAnimation = new AnimationFrames();
                             NewAnimation.Position = ArrayConv.ArrayToVector3(particleModelJsonHandler.ParticlePrefabs[i].ParticleObjectHeaders[a].ParticleObject.AnimationFrames[b].Position);
                             NewAnimation.Rotation = ArrayConv.ArrayToVector3(particleModelJsonHandler.ParticlePrefabs[i].ParticleObjectHeaders[a].ParticleObject.AnimationFrames[b].Rotation);
-                            NewAnimation.Unknown = particleModelJsonHandler.ParticlePrefabs[i].ParticleObjectHeaders[a].ParticleObject.AnimationFrames[b].Unknown;
+                            NewAnimation.Radius = particleModelJsonHandler.ParticlePrefabs[i].ParticleObjectHeaders[a].ParticleObject.AnimationFrames[b].Radius;
                             NewParticleHeader.ParticleObject.animationFrames.Add(NewAnimation);
                         }
 
@@ -2415,7 +2397,7 @@ namespace SSXLibrary
                     NewAIPATH.Type = 2;
                     NewAIPATH.U1 = 100;
                     NewAIPATH.U2 = 4;
-                    NewAIPATH.U3 = aip.AIPaths[i].U3;
+                    NewAIPATH.Rating = aip.AIPaths[i].Rating;
                     NewAIPATH.U4 = 101;
                     NewAIPATH.U5 = 4;
                     NewAIPATH.Respawnable = aip.AIPaths[i].Respawnable ? 1 : 0;
@@ -2511,7 +2493,7 @@ namespace SSXLibrary
                     NewAIPATH.Type = 2;
                     NewAIPATH.U1 = 100;
                     NewAIPATH.U2 = 4;
-                    NewAIPATH.U3 = sop.AIPaths[i].U3;
+                    NewAIPATH.Rating = sop.AIPaths[i].Rating;
                     NewAIPATH.U4 = 101;
                     NewAIPATH.U5 = 4;
                     NewAIPATH.Respawnable = sop.AIPaths[i].Respawnable ? 1 : 0;
@@ -2620,11 +2602,11 @@ namespace SSXLibrary
                     //ErrorManager.ErrorMessage = "Error with Effect Slot (" + i + ") " + ssfJsonHandler.EffectSlots[i].EffectSlotName;
                     Console.WriteLine("Effect Slots: " + (i + 1) + "/" + ssfJsonHandler.EffectSlots.Count + " " + ssfJsonHandler.EffectSlots[i].EffectSlotName);
                     var NewEffectSlot = new SSFHandler.EffectSlot();
-                    NewEffectSlot.Slot1 = ssfJsonHandler.EffectSlots[i].PersistantEffectSlot;
-                    NewEffectSlot.Slot2 = ssfJsonHandler.EffectSlots[i].CollisionEffectSlot;
+                    NewEffectSlot.PersistantEffectSlot = ssfJsonHandler.EffectSlots[i].PersistantEffectSlot;
+                    NewEffectSlot.CollisionEffectSlot = ssfJsonHandler.EffectSlots[i].CollisionEffectSlot;
                     NewEffectSlot.Slot3 = ssfJsonHandler.EffectSlots[i].Slot3;
                     NewEffectSlot.Slot4 = ssfJsonHandler.EffectSlots[i].Slot4;
-                    NewEffectSlot.Slot5 = ssfJsonHandler.EffectSlots[i].EffectTriggerSlot;
+                    NewEffectSlot.EffectTriggerSlot = ssfJsonHandler.EffectSlots[i].EffectTriggerSlot;
                     NewEffectSlot.Slot6 = ssfJsonHandler.EffectSlots[i].Slot6;
                     NewEffectSlot.Slot7 = ssfJsonHandler.EffectSlots[i].Slot7;
 
@@ -2644,47 +2626,45 @@ namespace SSXLibrary
                     {
                         var NewPhysicsData = new SSFHandler.PhysicsData();
 
-                        NewPhysicsData.U2 = ssfJsonHandler.PhysicsHeaders[i].PhysicsDatas[a].U2;
+                        NewPhysicsData.OccupancyMaskEncoding = ssfJsonHandler.PhysicsHeaders[i].PhysicsDatas[a].OccupancyMaskEncoding;
 
-                        NewPhysicsData.UFloat0 = ssfJsonHandler.PhysicsHeaders[i].PhysicsDatas[a].UFloat0;
-                        NewPhysicsData.UFloat1 = ssfJsonHandler.PhysicsHeaders[i].PhysicsDatas[a].UFloat1;
-                        NewPhysicsData.UFloat2 = ssfJsonHandler.PhysicsHeaders[i].PhysicsDatas[a].UFloat2;
+                        NewPhysicsData.Center = ArrayConv.ArrayToVector3(ssfJsonHandler.PhysicsHeaders[i].PhysicsDatas[a].Center);
                         NewPhysicsData.UFloat3 = ssfJsonHandler.PhysicsHeaders[i].PhysicsDatas[a].UFloat3;
                         NewPhysicsData.UFloat4 = ssfJsonHandler.PhysicsHeaders[i].PhysicsDatas[a].UFloat4;
                         NewPhysicsData.UFloat5 = ssfJsonHandler.PhysicsHeaders[i].PhysicsDatas[a].UFloat5;
-                        NewPhysicsData.UFloat6 = ssfJsonHandler.PhysicsHeaders[i].PhysicsDatas[a].UFloat6;
-                        NewPhysicsData.UFloat7 = ssfJsonHandler.PhysicsHeaders[i].PhysicsDatas[a].UFloat7;
-                        NewPhysicsData.UFloat8 = ssfJsonHandler.PhysicsHeaders[i].PhysicsDatas[a].UFloat8;
-                        NewPhysicsData.UFloat9 = ssfJsonHandler.PhysicsHeaders[i].PhysicsDatas[a].UFloat9;
-                        NewPhysicsData.UFloat10 = ssfJsonHandler.PhysicsHeaders[i].PhysicsDatas[a].UFloat10;
-                        NewPhysicsData.UFloat11 = ssfJsonHandler.PhysicsHeaders[i].PhysicsDatas[a].UFloat11;
-                        NewPhysicsData.UFloat12 = ssfJsonHandler.PhysicsHeaders[i].PhysicsDatas[a].UFloat12;
-                        NewPhysicsData.UFloat13 = ssfJsonHandler.PhysicsHeaders[i].PhysicsDatas[a].UFloat13;
-                        NewPhysicsData.UFloat14 = ssfJsonHandler.PhysicsHeaders[i].PhysicsDatas[a].UFloat14;
-                        NewPhysicsData.UFloat15 = ssfJsonHandler.PhysicsHeaders[i].PhysicsDatas[a].UFloat15;
-                        NewPhysicsData.UFloat16 = ssfJsonHandler.PhysicsHeaders[i].PhysicsDatas[a].UFloat16;
-                        NewPhysicsData.UFloat17 = ssfJsonHandler.PhysicsHeaders[i].PhysicsDatas[a].UFloat17;
-                        NewPhysicsData.UFloat18 = ssfJsonHandler.PhysicsHeaders[i].PhysicsDatas[a].UFloat18;
-                        NewPhysicsData.UFloat19 = ssfJsonHandler.PhysicsHeaders[i].PhysicsDatas[a].UFloat19;
-                        NewPhysicsData.UFloat20 = ssfJsonHandler.PhysicsHeaders[i].PhysicsDatas[a].UFloat20;
-                        NewPhysicsData.UFloat21 = ssfJsonHandler.PhysicsHeaders[i].PhysicsDatas[a].UFloat21;
-                        NewPhysicsData.UFloat22 = ssfJsonHandler.PhysicsHeaders[i].PhysicsDatas[a].UFloat22;
-                        NewPhysicsData.UFloat23 = ssfJsonHandler.PhysicsHeaders[i].PhysicsDatas[a].UFloat23;
+                        NewPhysicsData.InertiaM11 = ssfJsonHandler.PhysicsHeaders[i].PhysicsDatas[a].InertiaM11;
+                        NewPhysicsData.InertiaM12 = ssfJsonHandler.PhysicsHeaders[i].PhysicsDatas[a].InertiaM12;
+                        NewPhysicsData.InertiaM13 = ssfJsonHandler.PhysicsHeaders[i].PhysicsDatas[a].InertiaM13;
+                        NewPhysicsData.InertiaM21 = ssfJsonHandler.PhysicsHeaders[i].PhysicsDatas[a].InertiaM21;
+                        NewPhysicsData.InertiaM22 = ssfJsonHandler.PhysicsHeaders[i].PhysicsDatas[a].InertiaM22;
+                        NewPhysicsData.InertiaM23 = ssfJsonHandler.PhysicsHeaders[i].PhysicsDatas[a].InertiaM23;
+                        NewPhysicsData.InertiaM31 = ssfJsonHandler.PhysicsHeaders[i].PhysicsDatas[a].InertiaM31;
+                        NewPhysicsData.InertiaM32 = ssfJsonHandler.PhysicsHeaders[i].PhysicsDatas[a].InertiaM32;
+                        NewPhysicsData.InertiaM33 = ssfJsonHandler.PhysicsHeaders[i].PhysicsDatas[a].InertiaM33;
+                        NewPhysicsData.InverseInertiaM11 = ssfJsonHandler.PhysicsHeaders[i].PhysicsDatas[a].InverseInertiaM11;
+                        NewPhysicsData.InverseInertiaM12 = ssfJsonHandler.PhysicsHeaders[i].PhysicsDatas[a].InverseInertiaM12;
+                        NewPhysicsData.InverseInertiaM13 = ssfJsonHandler.PhysicsHeaders[i].PhysicsDatas[a].InverseInertiaM13;
+                        NewPhysicsData.InverseInertiaM21 = ssfJsonHandler.PhysicsHeaders[i].PhysicsDatas[a].InverseInertiaM21;
+                        NewPhysicsData.InverseInertiaM22 = ssfJsonHandler.PhysicsHeaders[i].PhysicsDatas[a].InverseInertiaM22;
+                        NewPhysicsData.InverseInertiaM23 = ssfJsonHandler.PhysicsHeaders[i].PhysicsDatas[a].InverseInertiaM23;
+                        NewPhysicsData.InverseInertiaM31 = ssfJsonHandler.PhysicsHeaders[i].PhysicsDatas[a].InverseInertiaM31;
+                        NewPhysicsData.InverseInertiaM32 = ssfJsonHandler.PhysicsHeaders[i].PhysicsDatas[a].InverseInertiaM32;
+                        NewPhysicsData.InverseInertiaM33 = ssfJsonHandler.PhysicsHeaders[i].PhysicsDatas[a].InverseInertiaM33;
 
-                        NewPhysicsData.uPhysicsStruct0 = new List<SSFHandler.UPhysicsStruct>();
+                        NewPhysicsData.OccupancyLevels = new List<SSFHandler.OccupancyLevel>();
 
-                        for (int b = 0; b < ssfJsonHandler.PhysicsHeaders[i].PhysicsDatas[a].uPhysicsStruct0.Count; b++)
+                        for (int b = 0; b < ssfJsonHandler.PhysicsHeaders[i].PhysicsDatas[a].OccupancyLevels.Count; b++)
                         {
-                            var NewPhysicsUStruct = new SSFHandler.UPhysicsStruct();
+                            var NewPhysicsUStruct = new SSFHandler.OccupancyLevel();
 
-                            NewPhysicsUStruct.U0 = ssfJsonHandler.PhysicsHeaders[i].PhysicsDatas[a].uPhysicsStruct0[b].U0;
-                            NewPhysicsUStruct.U1 = ssfJsonHandler.PhysicsHeaders[i].PhysicsDatas[a].uPhysicsStruct0[b].U1;
-                            NewPhysicsUStruct.U2 = ssfJsonHandler.PhysicsHeaders[i].PhysicsDatas[a].uPhysicsStruct0[b].U2;
+                            NewPhysicsUStruct.SphereRadius = ssfJsonHandler.PhysicsHeaders[i].PhysicsDatas[a].OccupancyLevels[b].SphereRadius;
+                            NewPhysicsUStruct.ChildOffset = ssfJsonHandler.PhysicsHeaders[i].PhysicsDatas[a].OccupancyLevels[b].ChildOffset;
+                            NewPhysicsUStruct.MaskStride = ssfJsonHandler.PhysicsHeaders[i].PhysicsDatas[a].OccupancyLevels[b].MaskStride;
 
-                            NewPhysicsData.uPhysicsStruct0.Add(NewPhysicsUStruct);
+                            NewPhysicsData.OccupancyLevels.Add(NewPhysicsUStruct);
                         }
 
-                        NewPhysicsData.UByteData = ssfJsonHandler.PhysicsHeaders[i].PhysicsDatas[a].UByteData;
+                        NewPhysicsData.OccupancyMasks = ssfJsonHandler.PhysicsHeaders[i].PhysicsDatas[a].OccupancyMasks;
 
                         NewPhysicsHeader.PhysicsDatas.Add(NewPhysicsData);
                     }
@@ -2787,7 +2767,7 @@ namespace SSXLibrary
                     NewMaterial.UnknownInt15 = SkyMaterialJson.Materials[i].UnknownInt15;
                     NewMaterial.UnknownInt16 = SkyMaterialJson.Materials[i].UnknownInt16;
                     NewMaterial.UnknownInt17 = SkyMaterialJson.Materials[i].UnknownInt17;
-                    NewMaterial.UnknownInt18 = SkyMaterialJson.Materials[i].UnknownInt18;
+                    NewMaterial.AppearanceFlags = SkyMaterialJson.Materials[i].AppearanceFlags;
                     //NewMaterial.TextureFlipbookID = SkyMaterialJson.Materials[i].TextureFlipbookID;
                     NewMaterial.UnknownInt20 = SkyMaterialJson.Materials[i].UnknownInt20;
 
@@ -2887,12 +2867,8 @@ namespace SSXLibrary
                         {
                             NewObject.IncludeAnimation = true;
                             NewObject.objectAnimation = new ObjectAnimation();
-                            NewObject.objectAnimation.U1 = TempObject.Animation.Value.U1;
-                            NewObject.objectAnimation.U2 = TempObject.Animation.Value.U2;
-                            NewObject.objectAnimation.U3 = TempObject.Animation.Value.U3;
-                            NewObject.objectAnimation.U4 = TempObject.Animation.Value.U4;
-                            NewObject.objectAnimation.U5 = TempObject.Animation.Value.U5;
-                            NewObject.objectAnimation.U6 = TempObject.Animation.Value.U6;
+                            NewObject.objectAnimation.BasePosition = ArrayConv.ArrayToVector3(TempObject.Animation.Value.BasePosition);
+                            NewObject.objectAnimation.BaseRotation = ArrayConv.ArrayToVector3(TempObject.Animation.Value.BaseRotation);
 
                             NewObject.objectAnimation.AnimationAction = TempObject.Animation.Value.AnimationAction;
                             NewObject.objectAnimation.animationEntries = new List<AnimationEntry>();
@@ -2908,12 +2884,12 @@ namespace SSXLibrary
                                         var TempAnimationMaths = TempAnimationEntry.AnimationMaths[c];
                                         var NewAnimationMath = new AnimationMath();
 
-                                        NewAnimationMath.Value1 = TempAnimationMaths.Value1;
-                                        NewAnimationMath.Value2 = TempAnimationMaths.Value2;
-                                        NewAnimationMath.Value3 = TempAnimationMaths.Value3;
-                                        NewAnimationMath.Value4 = TempAnimationMaths.Value4;
-                                        NewAnimationMath.Value5 = TempAnimationMaths.Value5;
-                                        NewAnimationMath.Value6 = TempAnimationMaths.Value6;
+                                        NewAnimationMath.Coefficient1 = TempAnimationMaths.Coefficient1;
+                                        NewAnimationMath.Coefficient2 = TempAnimationMaths.Coefficient2;
+                                        NewAnimationMath.Coefficient3 = TempAnimationMaths.Coefficient3;
+                                        NewAnimationMath.Coefficient4 = TempAnimationMaths.Coefficient4;
+                                        NewAnimationMath.StartTime = TempAnimationMaths.StartTime;
+                                        NewAnimationMath.EndTime = TempAnimationMaths.EndTime;
 
 
                                         NewAnimationEntry.animationMaths.Add(NewAnimationMath);

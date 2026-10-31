@@ -59,14 +59,12 @@ namespace SSXLibrary.JsonFiles.Tricky
                 NewSubType.SubType = TempEffect.type0.Value.SubType;
                 if (NewSubType.SubType == 0)
                 {
-                    var NewSubSubType = new Type0Sub0();
-                    NewSubSubType.U0 = TempEffect.type0.Value.type0Sub0.Value.U0;
-                    NewSubSubType.U1 = TempEffect.type0.Value.type0Sub0.Value.U1;
-                    NewSubSubType.U2 = TempEffect.type0.Value.type0Sub0.Value.U2;
-                    NewSubSubType.U3 = TempEffect.type0.Value.type0Sub0.Value.U3;
-                    NewSubSubType.U4 = TempEffect.type0.Value.type0Sub0.Value.U4;
-                    NewSubSubType.U5 = TempEffect.type0.Value.type0Sub0.Value.U5;
-                    NewSubType.type0Sub0 = NewSubSubType;
+                    var NewSubSubType = new RollerEffect();
+                    NewSubSubType.Mass = TempEffect.type0.Value.Roller.Value.Mass;
+                    NewSubSubType.U1 = TempEffect.type0.Value.Roller.Value.U1;
+                    NewSubSubType.U2 = TempEffect.type0.Value.Roller.Value.U2;
+                    NewSubSubType.LaunchDirection = ArrayConv.Vector3ToArray(TempEffect.type0.Value.Roller.Value.LaunchDirection);
+                    NewSubType.Roller = NewSubSubType;
                 }
                 else if (NewSubType.SubType == 2)
                 {
@@ -87,8 +85,8 @@ namespace SSXLibrary.JsonFiles.Tricky
                 {
                     var NewSubSubType = new BoostEffect();
                     NewSubSubType.Mode = TempEffect.type0.Value.Boost.Value.Mode;
-                    NewSubSubType.U1 = TempEffect.type0.Value.Boost.Value.U1;
-                    NewSubSubType.U2 = TempEffect.type0.Value.Boost.Value.U2;
+                    NewSubSubType.Window = TempEffect.type0.Value.Boost.Value.Window;
+                    NewSubSubType.ApproachRate = TempEffect.type0.Value.Boost.Value.ApproachRate;
                     NewSubSubType.BoostAmount = TempEffect.type0.Value.Boost.Value.BoostAmount;
                     NewSubSubType.BoostDir = ArrayConv.Vector3ToArray(TempEffect.type0.Value.Boost.Value.BoostDir);
                     NewSubType.Boost = NewSubSubType;
@@ -96,22 +94,21 @@ namespace SSXLibrary.JsonFiles.Tricky
                 else if (NewSubType.SubType == 10)
                 {
                     var NewSubSubType = new UVScrolling();
-                    NewSubSubType.U0 = TempEffect.type0.Value.UVScroll.Value.U0;
-                    NewSubSubType.U1 = TempEffect.type0.Value.UVScroll.Value.U1;
-                    NewSubSubType.U2 = TempEffect.type0.Value.UVScroll.Value.U2;
-                    NewSubSubType.U3 = TempEffect.type0.Value.UVScroll.Value.U3;
-                    NewSubSubType.U4 = TempEffect.type0.Value.UVScroll.Value.U4;
-                    NewSubSubType.U5 = TempEffect.type0.Value.UVScroll.Value.U5;
+                    NewSubSubType.Mode = TempEffect.type0.Value.UVScroll.Value.Mode;
+                    NewSubSubType.Speed = ArrayConv.Vector2ToArray(TempEffect.type0.Value.UVScroll.Value.Speed);
+                    NewSubSubType.ActiveDuration = TempEffect.type0.Value.UVScroll.Value.ActiveDuration;
+                    NewSubSubType.PauseDuration = TempEffect.type0.Value.UVScroll.Value.PauseDuration;
+                    NewSubSubType.Lifetime = TempEffect.type0.Value.UVScroll.Value.Lifetime;
                     NewSubType.UVScroll = NewSubSubType;
                 }
                 else if (NewSubType.SubType == 11)
                 {
                     var NewSubSubType = new TextureFlipEffect();
-                    NewSubSubType.U0 = TempEffect.type0.Value.TextureFlip.Value.U0;
+                    NewSubSubType.StartFrame = TempEffect.type0.Value.TextureFlip.Value.StartFrame;
                     NewSubSubType.Direction = TempEffect.type0.Value.TextureFlip.Value.Direction;
                     NewSubSubType.Speed = TempEffect.type0.Value.TextureFlip.Value.Speed;
                     NewSubSubType.Length = TempEffect.type0.Value.TextureFlip.Value.Length;
-                    NewSubSubType.U4 = TempEffect.type0.Value.TextureFlip.Value.U4;
+                    NewSubSubType.PauseDwell = TempEffect.type0.Value.TextureFlip.Value.PauseDwell;
                     NewSubType.TextureFlip = NewSubSubType;
                 }
                 else if (NewSubType.SubType == 12)
@@ -123,64 +120,56 @@ namespace SSXLibrary.JsonFiles.Tricky
                 }
                 else if (NewSubType.SubType == 13)
                 {
-                    var NewSubSubType = new Type0Sub13();
-                    NewSubSubType.U0 = TempEffect.type0.Value.type0Sub13.Value.U0;
-                    NewSubSubType.U1 = TempEffect.type0.Value.type0Sub13.Value.U1;
-                    NewSubSubType.U2 = TempEffect.type0.Value.type0Sub13.Value.U2;
-                    NewSubSubType.U3 = TempEffect.type0.Value.type0Sub13.Value.U3;
-                    NewSubType.type0Sub13 = NewSubSubType;
+                    var NewSubSubType = new FlagEffect();
+                    NewSubSubType.Variant = TempEffect.type0.Value.Flag.Value.Variant;
+                    NewSubSubType.Amplitude = TempEffect.type0.Value.Flag.Value.Amplitude;
+                    NewSubSubType.Wavelength = TempEffect.type0.Value.Flag.Value.Wavelength;
+                    NewSubSubType.U3 = TempEffect.type0.Value.Flag.Value.U3;
+                    NewSubType.Flag = NewSubSubType;
                 }
                 else if (NewSubType.SubType == 14)
                 {
-                    var NewSubSubType = new Type0Sub14();
-                    NewSubSubType.U0 = TempEffect.type0.Value.type0Sub14.Value.U0;
-                    NewSubSubType.U1 = TempEffect.type0.Value.type0Sub14.Value.U1;
-                    NewSubType.type0Sub14 = NewSubSubType;
+                    var NewSubSubType = new CrackedEffect();
+                    NewSubSubType.CrackLifetime = TempEffect.type0.Value.Cracked.Value.CrackLifetime;
+                    NewSubSubType.Strength = TempEffect.type0.Value.Cracked.Value.Strength;
+                    NewSubType.Cracked = NewSubSubType;
                 }
                 else if (NewSubType.SubType == 15)
                 {
-                    var NewSubSubType = new Type0Sub15();
-                    NewSubSubType.U0 = TempEffect.type0.Value.type0Sub15.Value.U0;
-                    NewSubSubType.U1 = TempEffect.type0.Value.type0Sub15.Value.U1;
-                    NewSubSubType.U2 = TempEffect.type0.Value.type0Sub15.Value.U2;
-                    NewSubSubType.U3 = TempEffect.type0.Value.type0Sub15.Value.U3;
-                    NewSubSubType.U4 = TempEffect.type0.Value.type0Sub15.Value.U4;
-                    NewSubType.type0Sub15 = NewSubSubType;
+                    var NewSubSubType = new LapBoostEffect();
+                    NewSubSubType.ApproachRate = TempEffect.type0.Value.LapBoost.Value.ApproachRate;
+                    NewSubSubType.TargetSpeed = TempEffect.type0.Value.LapBoost.Value.TargetSpeed;
+                    NewSubSubType.Axis = ArrayConv.Vector3ToArray(TempEffect.type0.Value.LapBoost.Value.Axis);
+                    NewSubType.LapBoost = NewSubSubType;
                 }
                 else if (NewSubType.SubType == 17)
                 {
                     var NewSubSubType = new CrowdBox();
                     NewSubSubType.U0 = TempEffect.type0.Value.CrowdEffect.Value.U0;
-                    NewSubSubType.U1 = TempEffect.type0.Value.CrowdEffect.Value.U1;
-                    NewSubSubType.U2 = TempEffect.type0.Value.CrowdEffect.Value.U2;
+                    NewSubSubType.Rows = TempEffect.type0.Value.CrowdEffect.Value.Rows;
+                    NewSubSubType.Columns = TempEffect.type0.Value.CrowdEffect.Value.Columns;
                     NewSubType.CrowdEffect = NewSubSubType;
                 }
                 else if (NewSubType.SubType == 18)
                 {
-                    var NewSubSubType = new Type0Sub18();
-                    NewSubSubType.U0 = TempEffect.type0.Value.type0Sub18.Value.U0;
-                    NewSubSubType.U1 = TempEffect.type0.Value.type0Sub18.Value.U1;
-                    NewSubSubType.U2 = TempEffect.type0.Value.type0Sub18.Value.U2;
-                    NewSubSubType.U3 = TempEffect.type0.Value.type0Sub18.Value.U3;
-                    NewSubSubType.U4 = TempEffect.type0.Value.type0Sub18.Value.U4;
-                    NewSubSubType.U5 = TempEffect.type0.Value.type0Sub18.Value.U5;
-                    NewSubSubType.U6 = TempEffect.type0.Value.type0Sub18.Value.U6;
-                    NewSubType.type0Sub18 = NewSubSubType;
+                    var NewSubSubType = new ZBoostEffect();
+                    NewSubSubType.ApproachRate = TempEffect.type0.Value.ZBoost.Value.ApproachRate;
+                    NewSubSubType.TargetSpeed = TempEffect.type0.Value.ZBoost.Value.TargetSpeed;
+                    NewSubSubType.Axis = ArrayConv.Vector3ToArray(TempEffect.type0.Value.ZBoost.Value.Axis);
+                    NewSubSubType.TargetAltitude = TempEffect.type0.Value.ZBoost.Value.TargetAltitude;
+                    NewSubSubType.SnapTolerance = TempEffect.type0.Value.ZBoost.Value.SnapTolerance;
+                    NewSubType.ZBoost = NewSubSubType;
                 }
                 else if (NewSubType.SubType == 20)
                 {
-                    var NewSubSubType = new Type0Sub20();
-                    NewSubSubType.U0 = TempEffect.type0.Value.type0Sub20.Value.U0;
-                    NewSubSubType.U1 = TempEffect.type0.Value.type0Sub20.Value.U1;
-                    NewSubSubType.U2 = TempEffect.type0.Value.type0Sub20.Value.U2;
-                    NewSubSubType.U3 = TempEffect.type0.Value.type0Sub20.Value.U3;
-                    NewSubSubType.U4 = TempEffect.type0.Value.type0Sub20.Value.U4;
-                    NewSubSubType.U5 = TempEffect.type0.Value.type0Sub20.Value.U5;
-                    NewSubSubType.U6 = TempEffect.type0.Value.type0Sub20.Value.U6;
-                    NewSubSubType.U7 = TempEffect.type0.Value.type0Sub20.Value.U7;
-                    NewSubSubType.U8 = TempEffect.type0.Value.type0Sub20.Value.U8;
-                    NewSubSubType.U9 = TempEffect.type0.Value.type0Sub20.Value.U9;
-                    NewSubType.type0Sub20 = NewSubSubType;
+                    var NewSubSubType = new MeshAnimEffect();
+                    NewSubSubType.U0 = TempEffect.type0.Value.MeshAnim.Value.U0;
+                    NewSubSubType.FrameStep = TempEffect.type0.Value.MeshAnim.Value.FrameStep;
+                    NewSubSubType.Duration = TempEffect.type0.Value.MeshAnim.Value.Duration;
+                    NewSubSubType.ThrowDirection = ArrayConv.Vector3ToArray(TempEffect.type0.Value.MeshAnim.Value.ThrowDirection);
+                    NewSubSubType.VelocityScale = ArrayConv.Vector3ToArray(TempEffect.type0.Value.MeshAnim.Value.VelocityScale);
+                    NewSubSubType.DirectionScale = TempEffect.type0.Value.MeshAnim.Value.DirectionScale;
+                    NewSubType.MeshAnim = NewSubSubType;
                 }
                 else if (NewSubType.SubType == 23)
                 {
@@ -188,70 +177,62 @@ namespace SSXLibrary.JsonFiles.Tricky
                 }
                 else if (NewSubType.SubType == 24)
                 {
-                    var NewSubSubType = new Type0Sub24();
-                    NewSubSubType.U0 = TempEffect.type0.Value.type0Sub24.Value.U0;
-                    NewSubSubType.U1 = TempEffect.type0.Value.type0Sub24.Value.U1;
-                    NewSubSubType.U2 = TempEffect.type0.Value.type0Sub24.Value.U2;
-                    NewSubSubType.U3 = TempEffect.type0.Value.type0Sub24.Value.U3;
-                    NewSubSubType.U4 = TempEffect.type0.Value.type0Sub24.Value.U4;
-                    NewSubSubType.U5 = TempEffect.type0.Value.type0Sub24.Value.U5;
-                    NewSubSubType.U6 = TempEffect.type0.Value.type0Sub24.Value.U6;
-                    NewSubSubType.U7 = TempEffect.type0.Value.type0Sub24.Value.U7;
-                    NewSubSubType.U8 = TempEffect.type0.Value.type0Sub24.Value.U8;
-                    NewSubSubType.U9 = TempEffect.type0.Value.type0Sub24.Value.U9;
-                    NewSubSubType.U10 = TempEffect.type0.Value.type0Sub24.Value.U10;
-                    NewSubSubType.U11 = TempEffect.type0.Value.type0Sub24.Value.U11;
-                    NewSubSubType.U12 = TempEffect.type0.Value.type0Sub24.Value.U12;
-                    NewSubSubType.U13 = TempEffect.type0.Value.type0Sub24.Value.U13;
-                    NewSubSubType.U14 = TempEffect.type0.Value.type0Sub24.Value.U14;
-                    NewSubSubType.U15 = TempEffect.type0.Value.type0Sub24.Value.U15;
-                    NewSubSubType.U16 = TempEffect.type0.Value.type0Sub24.Value.U16;
-                    NewSubSubType.U17 = TempEffect.type0.Value.type0Sub24.Value.U17;
-                    NewSubSubType.U18 = TempEffect.type0.Value.type0Sub24.Value.U18;
-                    NewSubType.type0Sub24 = NewSubSubType;
+                    var NewSubSubType = new TubeEndBoostEffect();
+                    NewSubSubType.Mode = TempEffect.type0.Value.TubeEndBoost.Value.Mode;
+                    NewSubSubType.Window = TempEffect.type0.Value.TubeEndBoost.Value.Window;
+                    NewSubSubType.ApproachRate = TempEffect.type0.Value.TubeEndBoost.Value.ApproachRate;
+                    NewSubSubType.TargetSpeed = TempEffect.type0.Value.TubeEndBoost.Value.TargetSpeed;
+                    NewSubSubType.BaseAxis = ArrayConv.Vector3ToArray(TempEffect.type0.Value.TubeEndBoost.Value.BaseAxis);
+                    NewSubSubType.Stage1Direction = ArrayConv.Vector3ToArray(TempEffect.type0.Value.TubeEndBoost.Value.Stage1Direction);
+                    NewSubSubType.Stage2Direction = ArrayConv.Vector3ToArray(TempEffect.type0.Value.TubeEndBoost.Value.Stage2Direction);
+                    NewSubSubType.Stage3Direction = ArrayConv.Vector3ToArray(TempEffect.type0.Value.TubeEndBoost.Value.Stage3Direction);
+                    NewSubSubType.Stage1Speed = TempEffect.type0.Value.TubeEndBoost.Value.Stage1Speed;
+                    NewSubSubType.Stage2Speed = TempEffect.type0.Value.TubeEndBoost.Value.Stage2Speed;
+                    NewSubSubType.Stage3Speed = TempEffect.type0.Value.TubeEndBoost.Value.Stage3Speed;
+                    NewSubType.TubeEndBoost = NewSubSubType;
                 }
                 else if (NewSubType.SubType == 256)
                 {
-                    var NewSubSubType = new Type0Sub256();
-                    NewSubSubType.U0 = TempEffect.type0.Value.type0Sub256.Value.U0;
-                    NewSubSubType.U1 = TempEffect.type0.Value.type0Sub256.Value.U1;
-                    NewSubSubType.U2 = TempEffect.type0.Value.type0Sub256.Value.U2;
-                    NewSubSubType.U3 = TempEffect.type0.Value.type0Sub256.Value.U3;
-                    NewSubSubType.U4 = TempEffect.type0.Value.type0Sub256.Value.U4;
-                    NewSubSubType.U5 = TempEffect.type0.Value.type0Sub256.Value.U5;
-                    NewSubSubType.U6 = TempEffect.type0.Value.type0Sub256.Value.U6;
-                    NewSubSubType.U7 = TempEffect.type0.Value.type0Sub256.Value.U7;
-                    NewSubType.type0Sub256 = NewSubSubType;
+                    var NewSubSubType = new AnimObjectEffect();
+                    NewSubSubType.LoopMode = TempEffect.type0.Value.AnimObject.Value.LoopMode;
+                    NewSubSubType.WindowStart = TempEffect.type0.Value.AnimObject.Value.WindowStart;
+                    NewSubSubType.WindowEnd = TempEffect.type0.Value.AnimObject.Value.WindowEnd;
+                    NewSubSubType.Rate = TempEffect.type0.Value.AnimObject.Value.Rate;
+                    NewSubSubType.RandomRateUpper = TempEffect.type0.Value.AnimObject.Value.RandomRateUpper;
+                    NewSubSubType.Debounce = TempEffect.type0.Value.AnimObject.Value.Debounce;
+                    NewSubSubType.RandomStart = TempEffect.type0.Value.AnimObject.Value.RandomStart;
+                    NewSubSubType.DirectionMode = TempEffect.type0.Value.AnimObject.Value.DirectionMode;
+                    NewSubType.AnimObject = NewSubSubType;
                 }
                 else if (NewSubType.SubType == 257)
                 {
-                    var NewSubSubType = new Type0Sub257();
-                    NewSubSubType.U0 = TempEffect.type0.Value.type0Sub257.Value.U0;
-                    NewSubSubType.U1 = TempEffect.type0.Value.type0Sub257.Value.U1;
-                    NewSubSubType.U2 = TempEffect.type0.Value.type0Sub257.Value.U2;
-                    NewSubSubType.U3 = TempEffect.type0.Value.type0Sub257.Value.U3;
-                    NewSubSubType.U4 = TempEffect.type0.Value.type0Sub257.Value.U4;
-                    NewSubSubType.U5 = TempEffect.type0.Value.type0Sub257.Value.U5;
-                    NewSubSubType.U6 = TempEffect.type0.Value.type0Sub257.Value.U6;
-                    NewSubSubType.U7 = TempEffect.type0.Value.type0Sub257.Value.U7;
-                    NewSubType.type0Sub257 = NewSubSubType;
+                    var NewSubSubType = new AnimDeltaEffect();
+                    NewSubSubType.LoopMode = TempEffect.type0.Value.AnimDelta.Value.LoopMode;
+                    NewSubSubType.WindowStart = TempEffect.type0.Value.AnimDelta.Value.WindowStart;
+                    NewSubSubType.WindowEnd = TempEffect.type0.Value.AnimDelta.Value.WindowEnd;
+                    NewSubSubType.Rate = TempEffect.type0.Value.AnimDelta.Value.Rate;
+                    NewSubSubType.RandomRateUpper = TempEffect.type0.Value.AnimDelta.Value.RandomRateUpper;
+                    NewSubSubType.Debounce = TempEffect.type0.Value.AnimDelta.Value.Debounce;
+                    NewSubSubType.RandomStart = TempEffect.type0.Value.AnimDelta.Value.RandomStart;
+                    NewSubSubType.DirectionMode = TempEffect.type0.Value.AnimDelta.Value.DirectionMode;
+                    NewSubType.AnimDelta = NewSubSubType;
                 }
                 else if (NewSubType.SubType == 258)
                 {
-                    var NewSubSubType = new Type0Sub258();
-                    NewSubSubType.U0 = TempEffect.type0.Value.type0Sub258.Value.U0;
-                    NewSubSubType.U1 = TempEffect.type0.Value.type0Sub258.Value.U1;
-                    NewSubSubType.U2 = TempEffect.type0.Value.type0Sub258.Value.U2;
-                    NewSubSubType.U3 = TempEffect.type0.Value.type0Sub258.Value.U3;
-                    NewSubSubType.U4 = TempEffect.type0.Value.type0Sub258.Value.U4;
-                    NewSubSubType.U5 = TempEffect.type0.Value.type0Sub258.Value.U5;
-                    NewSubSubType.U6 = TempEffect.type0.Value.type0Sub258.Value.U6;
-                    NewSubSubType.U7 = TempEffect.type0.Value.type0Sub258.Value.U7;
-                    NewSubSubType.U8 = TempEffect.type0.Value.type0Sub258.Value.U8;
-                    NewSubSubType.U9 = TempEffect.type0.Value.type0Sub258.Value.U9;
-                    NewSubSubType.U10 = TempEffect.type0.Value.type0Sub258.Value.U10;
-                    NewSubSubType.U11 = TempEffect.type0.Value.type0Sub258.Value.U11;
-                    NewSubType.type0Sub258 = NewSubSubType;
+                    var NewSubSubType = new AnimComboEffect();
+                    NewSubSubType.LoopMode = TempEffect.type0.Value.AnimCombo.Value.LoopMode;
+                    NewSubSubType.WindowStart = TempEffect.type0.Value.AnimCombo.Value.WindowStart;
+                    NewSubSubType.WindowEnd = TempEffect.type0.Value.AnimCombo.Value.WindowEnd;
+                    NewSubSubType.Rate = TempEffect.type0.Value.AnimCombo.Value.Rate;
+                    NewSubSubType.RandomRateUpper = TempEffect.type0.Value.AnimCombo.Value.RandomRateUpper;
+                    NewSubSubType.Debounce = TempEffect.type0.Value.AnimCombo.Value.Debounce;
+                    NewSubSubType.RandomStart = TempEffect.type0.Value.AnimCombo.Value.RandomStart;
+                    NewSubSubType.DirectionMode = TempEffect.type0.Value.AnimCombo.Value.DirectionMode;
+                    NewSubSubType.ComboWindowStart = TempEffect.type0.Value.AnimCombo.Value.ComboWindowStart;
+                    NewSubSubType.ComboWindowEnd = TempEffect.type0.Value.AnimCombo.Value.ComboWindowEnd;
+                    NewSubSubType.ComboRate = TempEffect.type0.Value.AnimCombo.Value.ComboRate;
+                    NewSubSubType.ComboEndMode = TempEffect.type0.Value.AnimCombo.Value.ComboEndMode;
+                    NewSubType.AnimCombo = NewSubSubType;
                 }
                 else
                 {
@@ -267,134 +248,25 @@ namespace SSXLibrary.JsonFiles.Tricky
 
                 if (NewSubType.SubType == 0)
                 {
-                    var NewSubSubType = new Type2Sub0();
-                    NewSubSubType.U0 = TempEffect.type2.Value.type2Sub0.Value.U0;
-                    NewSubSubType.U1 = TempEffect.type2.Value.type2Sub0.Value.U1;
-                    NewSubSubType.U2 = TempEffect.type2.Value.type2Sub0.Value.U2;
-                    NewSubSubType.U3 = TempEffect.type2.Value.type2Sub0.Value.U3;
-                    NewSubSubType.U4 = TempEffect.type2.Value.type2Sub0.Value.U4;
-                    NewSubSubType.U5 = TempEffect.type2.Value.type2Sub0.Value.U5;
-                    NewSubSubType.U6 = TempEffect.type2.Value.type2Sub0.Value.U6;
-                    NewSubSubType.U7 = TempEffect.type2.Value.type2Sub0.Value.U7;
-                    NewSubSubType.U8 = TempEffect.type2.Value.type2Sub0.Value.U8;
-                    NewSubSubType.U9 = TempEffect.type2.Value.type2Sub0.Value.U9;
-                    NewSubSubType.U10 = TempEffect.type2.Value.type2Sub0.Value.U10;
-                    NewSubSubType.U11 = TempEffect.type2.Value.type2Sub0.Value.U11;
-                    NewSubSubType.U12 = TempEffect.type2.Value.type2Sub0.Value.U12;
-                    NewSubSubType.U13 = TempEffect.type2.Value.type2Sub0.Value.U13;
-                    NewSubSubType.U14 = TempEffect.type2.Value.type2Sub0.Value.U14;
-                    NewSubSubType.U15 = TempEffect.type2.Value.type2Sub0.Value.U15;
-                    NewSubSubType.U16 = TempEffect.type2.Value.type2Sub0.Value.U16;
-                    NewSubSubType.U17 = TempEffect.type2.Value.type2Sub0.Value.U17;
-                    NewSubSubType.U18 = TempEffect.type2.Value.type2Sub0.Value.U18;
-                    NewSubSubType.U19 = TempEffect.type2.Value.type2Sub0.Value.U19;
-                    NewSubSubType.U20 = TempEffect.type2.Value.type2Sub0.Value.U20;
-                    NewSubSubType.U21 = TempEffect.type2.Value.type2Sub0.Value.U21;
-                    NewSubSubType.U22 = TempEffect.type2.Value.type2Sub0.Value.U22;
-                    NewSubSubType.U23 = TempEffect.type2.Value.type2Sub0.Value.U23;
-                    NewSubSubType.U24 = TempEffect.type2.Value.type2Sub0.Value.U24;
-                    NewSubSubType.U25 = TempEffect.type2.Value.type2Sub0.Value.U25;
-                    NewSubSubType.U26 = TempEffect.type2.Value.type2Sub0.Value.U26;
-                    NewSubSubType.U27 = TempEffect.type2.Value.type2Sub0.Value.U27;
-                    NewSubSubType.U28 = TempEffect.type2.Value.type2Sub0.Value.U28;
-                    NewSubSubType.U29 = TempEffect.type2.Value.type2Sub0.Value.U29;
-                    NewSubSubType.U30 = TempEffect.type2.Value.type2Sub0.Value.U30;
-                    NewSubSubType.U31 = TempEffect.type2.Value.type2Sub0.Value.U31;
-                    NewSubSubType.U32 = TempEffect.type2.Value.type2Sub0.Value.U32;
-                    NewSubSubType.U33 = TempEffect.type2.Value.type2Sub0.Value.U33;
-                    NewSubSubType.U34 = TempEffect.type2.Value.type2Sub0.Value.U34;
-                    NewSubSubType.U35 = TempEffect.type2.Value.type2Sub0.Value.U35;
-                    NewSubSubType.U36 = TempEffect.type2.Value.type2Sub0.Value.U36;
-                    NewSubSubType.U37 = TempEffect.type2.Value.type2Sub0.Value.U37;
-                    NewSubSubType.U38 = TempEffect.type2.Value.type2Sub0.Value.U38;
-                    NewSubSubType.U39 = TempEffect.type2.Value.type2Sub0.Value.U39;
-                    NewSubSubType.U40 = TempEffect.type2.Value.type2Sub0.Value.U40;
-                    NewSubSubType.U41 = TempEffect.type2.Value.type2Sub0.Value.U41;
-                    NewSubSubType.U42 = TempEffect.type2.Value.type2Sub0.Value.U42;
-                    NewSubSubType.U43 = TempEffect.type2.Value.type2Sub0.Value.U43;
-                    NewSubSubType.U44 = TempEffect.type2.Value.type2Sub0.Value.U44;
-                    NewSubSubType.U45 = TempEffect.type2.Value.type2Sub0.Value.U45;
-                    NewSubSubType.U46 = TempEffect.type2.Value.type2Sub0.Value.U46;
-                    NewSubSubType.U47 = TempEffect.type2.Value.type2Sub0.Value.U47;
-                    NewSubSubType.U48 = TempEffect.type2.Value.type2Sub0.Value.U48;
-                    NewSubSubType.U49 = TempEffect.type2.Value.type2Sub0.Value.U49;
-                    NewSubSubType.U50 = TempEffect.type2.Value.type2Sub0.Value.U50;
-
-                    NewSubType.type2Sub0 = NewSubSubType;
+                    NewSubType.Emitter = EmitterToJSON(TempEffect.type2.Value.Emitter.Value);
                 }
                 else if (NewSubType.SubType == 1)
                 {
                     var NewSubSubType = new SplinePathAnimation();
                     NewSubSubType.SplineIndex = TempEffect.type2.Value.SplineAnimation.Value.SplineIndex;
-                    NewSubSubType.U1 = TempEffect.type2.Value.SplineAnimation.Value.U1;
-                    NewSubSubType.U2 = TempEffect.type2.Value.SplineAnimation.Value.U2;
+                    NewSubSubType.EndMode = TempEffect.type2.Value.SplineAnimation.Value.EndMode;
+                    NewSubSubType.OrientationMode = TempEffect.type2.Value.SplineAnimation.Value.OrientationMode;
                     NewSubSubType.InstanceCount = TempEffect.type2.Value.SplineAnimation.Value.InstanceCount;
                     NewSubSubType.AnimationSpeed = TempEffect.type2.Value.SplineAnimation.Value.AnimationSpeed;
-                    NewSubSubType.U5 = TempEffect.type2.Value.SplineAnimation.Value.U5;
-                    NewSubSubType.U6 = TempEffect.type2.Value.SplineAnimation.Value.U6;
-                    NewSubSubType.U7 = TempEffect.type2.Value.SplineAnimation.Value.U7;
-                    NewSubSubType.R = TempEffect.type2.Value.SplineAnimation.Value.R;
-                    NewSubSubType.G = TempEffect.type2.Value.SplineAnimation.Value.G;
-                    NewSubSubType.B = TempEffect.type2.Value.SplineAnimation.Value.B;
+                    NewSubSubType.YawOffset = TempEffect.type2.Value.SplineAnimation.Value.YawOffset;
+                    NewSubSubType.ShowRouteLine = TempEffect.type2.Value.SplineAnimation.Value.ShowRouteLine;
+                    NewSubSubType.RouteLineColour = ArrayConv.Vector4ToArray(TempEffect.type2.Value.SplineAnimation.Value.RouteLineColour);
 
                     NewSubType.SplineAnimation = NewSubSubType;
                 }
                 else if (NewSubType.SubType == 2)
                 {
-                    var NewSubSubType = new Type2Sub2();
-                    NewSubSubType.U0 = TempEffect.type2.Value.type2Sub2.Value.U0;
-                    NewSubSubType.U1 = TempEffect.type2.Value.type2Sub2.Value.U1;
-                    NewSubSubType.U2 = TempEffect.type2.Value.type2Sub2.Value.U2;
-                    NewSubSubType.U3 = TempEffect.type2.Value.type2Sub2.Value.U3;
-                    NewSubSubType.U4 = TempEffect.type2.Value.type2Sub2.Value.U4;
-                    NewSubSubType.U5 = TempEffect.type2.Value.type2Sub2.Value.U5;
-                    NewSubSubType.U6 = TempEffect.type2.Value.type2Sub2.Value.U6;
-                    NewSubSubType.U7 = TempEffect.type2.Value.type2Sub2.Value.U7;
-                    NewSubSubType.U8 = TempEffect.type2.Value.type2Sub2.Value.U8;
-                    NewSubSubType.U9 = TempEffect.type2.Value.type2Sub2.Value.U9;
-                    NewSubSubType.U10 = TempEffect.type2.Value.type2Sub2.Value.U10;
-                    NewSubSubType.U11 = TempEffect.type2.Value.type2Sub2.Value.U11;
-                    NewSubSubType.U12 = TempEffect.type2.Value.type2Sub2.Value.U12;
-                    NewSubSubType.U13 = TempEffect.type2.Value.type2Sub2.Value.U13;
-                    NewSubSubType.U14 = TempEffect.type2.Value.type2Sub2.Value.U14;
-                    NewSubSubType.U15 = TempEffect.type2.Value.type2Sub2.Value.U15;
-                    NewSubSubType.U16 = TempEffect.type2.Value.type2Sub2.Value.U16;
-                    NewSubSubType.U17 = TempEffect.type2.Value.type2Sub2.Value.U17;
-                    NewSubSubType.U18 = TempEffect.type2.Value.type2Sub2.Value.U18;
-                    NewSubSubType.U19 = TempEffect.type2.Value.type2Sub2.Value.U19;
-                    NewSubSubType.U20 = TempEffect.type2.Value.type2Sub2.Value.U20;
-                    NewSubSubType.U21 = TempEffect.type2.Value.type2Sub2.Value.U21;
-                    NewSubSubType.U22 = TempEffect.type2.Value.type2Sub2.Value.U22;
-                    NewSubSubType.U23 = TempEffect.type2.Value.type2Sub2.Value.U23;
-                    NewSubSubType.U24 = TempEffect.type2.Value.type2Sub2.Value.U24;
-                    NewSubSubType.U25 = TempEffect.type2.Value.type2Sub2.Value.U25;
-                    NewSubSubType.U26 = TempEffect.type2.Value.type2Sub2.Value.U26;
-                    NewSubSubType.U27 = TempEffect.type2.Value.type2Sub2.Value.U27;
-                    NewSubSubType.U28 = TempEffect.type2.Value.type2Sub2.Value.U28;
-                    NewSubSubType.U29 = TempEffect.type2.Value.type2Sub2.Value.U29;
-                    NewSubSubType.U30 = TempEffect.type2.Value.type2Sub2.Value.U30;
-                    NewSubSubType.U31 = TempEffect.type2.Value.type2Sub2.Value.U31;
-                    NewSubSubType.U32 = TempEffect.type2.Value.type2Sub2.Value.U32;
-                    NewSubSubType.U33 = TempEffect.type2.Value.type2Sub2.Value.U33;
-                    NewSubSubType.U34 = TempEffect.type2.Value.type2Sub2.Value.U34;
-                    NewSubSubType.U35 = TempEffect.type2.Value.type2Sub2.Value.U35;
-                    NewSubSubType.U36 = TempEffect.type2.Value.type2Sub2.Value.U36;
-                    NewSubSubType.U37 = TempEffect.type2.Value.type2Sub2.Value.U37;
-                    NewSubSubType.U38 = TempEffect.type2.Value.type2Sub2.Value.U38;
-                    NewSubSubType.U39 = TempEffect.type2.Value.type2Sub2.Value.U39;
-                    NewSubSubType.U40 = TempEffect.type2.Value.type2Sub2.Value.U40;
-                    NewSubSubType.U41 = TempEffect.type2.Value.type2Sub2.Value.U41;
-                    NewSubSubType.U42 = TempEffect.type2.Value.type2Sub2.Value.U42;
-                    NewSubSubType.U43 = TempEffect.type2.Value.type2Sub2.Value.U43;
-                    NewSubSubType.U44 = TempEffect.type2.Value.type2Sub2.Value.U44;
-                    NewSubSubType.U45 = TempEffect.type2.Value.type2Sub2.Value.U45;
-                    NewSubSubType.U46 = TempEffect.type2.Value.type2Sub2.Value.U46;
-                    NewSubSubType.U47 = TempEffect.type2.Value.type2Sub2.Value.U47;
-                    NewSubSubType.U48 = TempEffect.type2.Value.type2Sub2.Value.U48;
-                    NewSubSubType.U49 = TempEffect.type2.Value.type2Sub2.Value.U49;
-                    NewSubSubType.U50 = TempEffect.type2.Value.type2Sub2.Value.U50;
-
-                    NewSubType.type2Sub2 = NewSubSubType;
+                    NewSubType.CollisionEmitter = EmitterToJSON(TempEffect.type2.Value.CollisionEmitter.Value);
                 }
                 else
                 {
@@ -407,8 +279,8 @@ namespace SSXLibrary.JsonFiles.Tricky
             {
                 var NewSubType = new Type3();
 
-                NewSubType.U0 = TempEffect.type3.Value.U0;
-                NewSubType.U1 = TempEffect.type3.Value.U1;
+                NewSubType.Command = TempEffect.type3.Value.Command;
+                NewSubType.Parameter = TempEffect.type3.Value.Parameter;
 
                 NewEffect.type3 = NewSubType;
             }
@@ -420,9 +292,9 @@ namespace SSXLibrary.JsonFiles.Tricky
             {
                 var NewSubType = new Type5();
 
-                NewSubType.U0 = TempEffect.type5.Value.U0;
-                NewSubType.U1 = TempEffect.type5.Value.U1;
-                NewSubType.U2 = TempEffect.type5.Value.U2;
+                NewSubType.Mode = TempEffect.type5.Value.Mode;
+                NewSubType.Compare = TempEffect.type5.Value.Compare;
+                NewSubType.Threshold = TempEffect.type5.Value.Threshold;
 
                 NewEffect.type5 = NewSubType;
             }
@@ -443,8 +315,8 @@ namespace SSXLibrary.JsonFiles.Tricky
             {
                 var NewSubType = new Type9();
 
-                NewSubType.U0 = TempEffect.type9.Value.U0;
-                NewSubType.U1 = TempEffect.type9.Value.U1;
+                NewSubType.Command = TempEffect.type9.Value.Command;
+                NewSubType.Parameter = TempEffect.type9.Value.Parameter;
 
                 NewEffect.type9 = NewSubType;
             }
@@ -458,11 +330,11 @@ namespace SSXLibrary.JsonFiles.Tricky
             }
             else if (NewEffect.MainType == 17)
             {
-                NewEffect.type17 = TempEffect.type17;
+                NewEffect.SpeedBoostDuration = TempEffect.SpeedBoostDuration;
             }
             else if (NewEffect.MainType == 18)
             {
-                NewEffect.type18 = TempEffect.type18;
+                NewEffect.TrickBoostDuration = TempEffect.TrickBoostDuration;
             }
             else if (NewEffect.MainType == 21)
             {
@@ -513,14 +385,12 @@ namespace SSXLibrary.JsonFiles.Tricky
                 NewSubType.SubType = TempEffect.type0.Value.SubType;
                 if (NewSubType.SubType == 0)
                 {
-                    var NewSubSubType = new SSFHandler.Type0Sub0();
-                    NewSubSubType.U0 = TempEffect.type0.Value.type0Sub0.Value.U0;
-                    NewSubSubType.U1 = TempEffect.type0.Value.type0Sub0.Value.U1;
-                    NewSubSubType.U2 = TempEffect.type0.Value.type0Sub0.Value.U2;
-                    NewSubSubType.U3 = TempEffect.type0.Value.type0Sub0.Value.U3;
-                    NewSubSubType.U4 = TempEffect.type0.Value.type0Sub0.Value.U4;
-                    NewSubSubType.U5 = TempEffect.type0.Value.type0Sub0.Value.U5;
-                    NewSubType.type0Sub0 = NewSubSubType;
+                    var NewSubSubType = new SSFHandler.RollerEffect();
+                    NewSubSubType.Mass = TempEffect.type0.Value.Roller.Value.Mass;
+                    NewSubSubType.U1 = TempEffect.type0.Value.Roller.Value.U1;
+                    NewSubSubType.U2 = TempEffect.type0.Value.Roller.Value.U2;
+                    NewSubSubType.LaunchDirection = ArrayConv.ArrayToVector3(TempEffect.type0.Value.Roller.Value.LaunchDirection);
+                    NewSubType.Roller = NewSubSubType;
                 }
                 else if (NewSubType.SubType == 2)
                 {
@@ -541,8 +411,8 @@ namespace SSXLibrary.JsonFiles.Tricky
                 {
                     var NewSubSubType = new SSFHandler.BoostEffect();
                     NewSubSubType.Mode = TempEffect.type0.Value.Boost.Value.Mode;
-                    NewSubSubType.U1 = TempEffect.type0.Value.Boost.Value.U1;
-                    NewSubSubType.U2 = TempEffect.type0.Value.Boost.Value.U2;
+                    NewSubSubType.Window = TempEffect.type0.Value.Boost.Value.Window;
+                    NewSubSubType.ApproachRate = TempEffect.type0.Value.Boost.Value.ApproachRate;
                     NewSubSubType.BoostAmount = TempEffect.type0.Value.Boost.Value.BoostAmount;
                     NewSubSubType.BoostDir = ArrayConv.ArrayToVector3(TempEffect.type0.Value.Boost.Value.BoostDir);
                     NewSubType.Boost = NewSubSubType;
@@ -550,22 +420,21 @@ namespace SSXLibrary.JsonFiles.Tricky
                 else if (NewSubType.SubType == 10)
                 {
                     var NewSubSubType = new SSFHandler.UVScrolling();
-                    NewSubSubType.U0 = TempEffect.type0.Value.UVScroll.Value.U0;
-                    NewSubSubType.U1 = TempEffect.type0.Value.UVScroll.Value.U1;
-                    NewSubSubType.U2 = TempEffect.type0.Value.UVScroll.Value.U2;
-                    NewSubSubType.U3 = TempEffect.type0.Value.UVScroll.Value.U3;
-                    NewSubSubType.U4 = TempEffect.type0.Value.UVScroll.Value.U4;
-                    NewSubSubType.U5 = TempEffect.type0.Value.UVScroll.Value.U5;
+                    NewSubSubType.Mode = TempEffect.type0.Value.UVScroll.Value.Mode;
+                    NewSubSubType.Speed = ArrayConv.ArrayToVector2(TempEffect.type0.Value.UVScroll.Value.Speed);
+                    NewSubSubType.ActiveDuration = TempEffect.type0.Value.UVScroll.Value.ActiveDuration;
+                    NewSubSubType.PauseDuration = TempEffect.type0.Value.UVScroll.Value.PauseDuration;
+                    NewSubSubType.Lifetime = TempEffect.type0.Value.UVScroll.Value.Lifetime;
                     NewSubType.UVScroll = NewSubSubType;
                 }
                 else if (NewSubType.SubType == 11)
                 {
                     var NewSubSubType = new SSFHandler.TextureFlipEffect();
-                    NewSubSubType.U0 = TempEffect.type0.Value.TextureFlip.Value.U0;
+                    NewSubSubType.StartFrame = TempEffect.type0.Value.TextureFlip.Value.StartFrame;
                     NewSubSubType.Direction = TempEffect.type0.Value.TextureFlip.Value.Direction;
                     NewSubSubType.Speed = TempEffect.type0.Value.TextureFlip.Value.Speed;
                     NewSubSubType.Length = TempEffect.type0.Value.TextureFlip.Value.Length;
-                    NewSubSubType.U4 = TempEffect.type0.Value.TextureFlip.Value.U4;
+                    NewSubSubType.PauseDwell = TempEffect.type0.Value.TextureFlip.Value.PauseDwell;
                     NewSubType.TextureFlip = NewSubSubType;
                 }
                 else if (NewSubType.SubType == 12)
@@ -577,64 +446,56 @@ namespace SSXLibrary.JsonFiles.Tricky
                 }
                 else if (NewSubType.SubType == 13)
                 {
-                    var NewSubSubType = new SSFHandler.Type0Sub13();
-                    NewSubSubType.U0 = TempEffect.type0.Value.type0Sub13.Value.U0;
-                    NewSubSubType.U1 = TempEffect.type0.Value.type0Sub13.Value.U1;
-                    NewSubSubType.U2 = TempEffect.type0.Value.type0Sub13.Value.U2;
-                    NewSubSubType.U3 = TempEffect.type0.Value.type0Sub13.Value.U3;
-                    NewSubType.type0Sub13 = NewSubSubType;
+                    var NewSubSubType = new SSFHandler.FlagEffect();
+                    NewSubSubType.Variant = TempEffect.type0.Value.Flag.Value.Variant;
+                    NewSubSubType.Amplitude = TempEffect.type0.Value.Flag.Value.Amplitude;
+                    NewSubSubType.Wavelength = TempEffect.type0.Value.Flag.Value.Wavelength;
+                    NewSubSubType.U3 = TempEffect.type0.Value.Flag.Value.U3;
+                    NewSubType.Flag = NewSubSubType;
                 }
                 else if (NewSubType.SubType == 14)
                 {
-                    var NewSubSubType = new SSFHandler.Type0Sub14();
-                    NewSubSubType.U0 = TempEffect.type0.Value.type0Sub14.Value.U0;
-                    NewSubSubType.U1 = TempEffect.type0.Value.type0Sub14.Value.U1;
-                    NewSubType.type0Sub14 = NewSubSubType;
+                    var NewSubSubType = new SSFHandler.CrackedEffect();
+                    NewSubSubType.CrackLifetime = TempEffect.type0.Value.Cracked.Value.CrackLifetime;
+                    NewSubSubType.Strength = TempEffect.type0.Value.Cracked.Value.Strength;
+                    NewSubType.Cracked = NewSubSubType;
                 }
                 else if (NewSubType.SubType == 15)
                 {
-                    var NewSubSubType = new SSFHandler.Type0Sub15();
-                    NewSubSubType.U0 = TempEffect.type0.Value.type0Sub15.Value.U0;
-                    NewSubSubType.U1 = TempEffect.type0.Value.type0Sub15.Value.U1;
-                    NewSubSubType.U2 = TempEffect.type0.Value.type0Sub15.Value.U2;
-                    NewSubSubType.U3 = TempEffect.type0.Value.type0Sub15.Value.U3;
-                    NewSubSubType.U4 = TempEffect.type0.Value.type0Sub15.Value.U4;
-                    NewSubType.type0Sub15 = NewSubSubType;
+                    var NewSubSubType = new SSFHandler.LapBoostEffect();
+                    NewSubSubType.ApproachRate = TempEffect.type0.Value.LapBoost.Value.ApproachRate;
+                    NewSubSubType.TargetSpeed = TempEffect.type0.Value.LapBoost.Value.TargetSpeed;
+                    NewSubSubType.Axis = ArrayConv.ArrayToVector3(TempEffect.type0.Value.LapBoost.Value.Axis);
+                    NewSubType.LapBoost = NewSubSubType;
                 }
                 else if (NewSubType.SubType == 17)
                 {
                     var NewSubSubType = new SSFHandler.CrowdBox();
                     NewSubSubType.U0 = TempEffect.type0.Value.CrowdEffect.Value.U0;
-                    NewSubSubType.U1 = TempEffect.type0.Value.CrowdEffect.Value.U1;
-                    NewSubSubType.U2 = TempEffect.type0.Value.CrowdEffect.Value.U2;
+                    NewSubSubType.Rows = TempEffect.type0.Value.CrowdEffect.Value.Rows;
+                    NewSubSubType.Columns = TempEffect.type0.Value.CrowdEffect.Value.Columns;
                     NewSubType.CrowdEffect = NewSubSubType;
                 }
                 else if (NewSubType.SubType == 18)
                 {
-                    var NewSubSubType = new SSFHandler.Type0Sub18();
-                    NewSubSubType.U0 = TempEffect.type0.Value.type0Sub18.Value.U0;
-                    NewSubSubType.U1 = TempEffect.type0.Value.type0Sub18.Value.U1;
-                    NewSubSubType.U2 = TempEffect.type0.Value.type0Sub18.Value.U2;
-                    NewSubSubType.U3 = TempEffect.type0.Value.type0Sub18.Value.U3;
-                    NewSubSubType.U4 = TempEffect.type0.Value.type0Sub18.Value.U4;
-                    NewSubSubType.U5 = TempEffect.type0.Value.type0Sub18.Value.U5;
-                    NewSubSubType.U6 = TempEffect.type0.Value.type0Sub18.Value.U6;
-                    NewSubType.type0Sub18 = NewSubSubType;
+                    var NewSubSubType = new SSFHandler.ZBoostEffect();
+                    NewSubSubType.ApproachRate = TempEffect.type0.Value.ZBoost.Value.ApproachRate;
+                    NewSubSubType.TargetSpeed = TempEffect.type0.Value.ZBoost.Value.TargetSpeed;
+                    NewSubSubType.Axis = ArrayConv.ArrayToVector3(TempEffect.type0.Value.ZBoost.Value.Axis);
+                    NewSubSubType.TargetAltitude = TempEffect.type0.Value.ZBoost.Value.TargetAltitude;
+                    NewSubSubType.SnapTolerance = TempEffect.type0.Value.ZBoost.Value.SnapTolerance;
+                    NewSubType.ZBoost = NewSubSubType;
                 }
                 else if (NewSubType.SubType == 20)
                 {
-                    var NewSubSubType = new SSFHandler.Type0Sub20();
-                    NewSubSubType.U0 = TempEffect.type0.Value.type0Sub20.Value.U0;
-                    NewSubSubType.U1 = TempEffect.type0.Value.type0Sub20.Value.U1;
-                    NewSubSubType.U2 = TempEffect.type0.Value.type0Sub20.Value.U2;
-                    NewSubSubType.U3 = TempEffect.type0.Value.type0Sub20.Value.U3;
-                    NewSubSubType.U4 = TempEffect.type0.Value.type0Sub20.Value.U4;
-                    NewSubSubType.U5 = TempEffect.type0.Value.type0Sub20.Value.U5;
-                    NewSubSubType.U6 = TempEffect.type0.Value.type0Sub20.Value.U6;
-                    NewSubSubType.U7 = TempEffect.type0.Value.type0Sub20.Value.U7;
-                    NewSubSubType.U8 = TempEffect.type0.Value.type0Sub20.Value.U8;
-                    NewSubSubType.U9 = TempEffect.type0.Value.type0Sub20.Value.U9;
-                    NewSubType.type0Sub20 = NewSubSubType;
+                    var NewSubSubType = new SSFHandler.MeshAnimEffect();
+                    NewSubSubType.U0 = TempEffect.type0.Value.MeshAnim.Value.U0;
+                    NewSubSubType.FrameStep = TempEffect.type0.Value.MeshAnim.Value.FrameStep;
+                    NewSubSubType.Duration = TempEffect.type0.Value.MeshAnim.Value.Duration;
+                    NewSubSubType.ThrowDirection = ArrayConv.ArrayToVector3(TempEffect.type0.Value.MeshAnim.Value.ThrowDirection);
+                    NewSubSubType.VelocityScale = ArrayConv.ArrayToVector3(TempEffect.type0.Value.MeshAnim.Value.VelocityScale);
+                    NewSubSubType.DirectionScale = TempEffect.type0.Value.MeshAnim.Value.DirectionScale;
+                    NewSubType.MeshAnim = NewSubSubType;
                 }
                 else if (NewSubType.SubType == 23)
                 {
@@ -642,70 +503,62 @@ namespace SSXLibrary.JsonFiles.Tricky
                 }
                 else if (NewSubType.SubType == 24)
                 {
-                    var NewSubSubType = new SSFHandler.Type0Sub24();
-                    NewSubSubType.U0 = TempEffect.type0.Value.type0Sub24.Value.U0;
-                    NewSubSubType.U1 = TempEffect.type0.Value.type0Sub24.Value.U1;
-                    NewSubSubType.U2 = TempEffect.type0.Value.type0Sub24.Value.U2;
-                    NewSubSubType.U3 = TempEffect.type0.Value.type0Sub24.Value.U3;
-                    NewSubSubType.U4 = TempEffect.type0.Value.type0Sub24.Value.U4;
-                    NewSubSubType.U5 = TempEffect.type0.Value.type0Sub24.Value.U5;
-                    NewSubSubType.U6 = TempEffect.type0.Value.type0Sub24.Value.U6;
-                    NewSubSubType.U7 = TempEffect.type0.Value.type0Sub24.Value.U7;
-                    NewSubSubType.U8 = TempEffect.type0.Value.type0Sub24.Value.U8;
-                    NewSubSubType.U9 = TempEffect.type0.Value.type0Sub24.Value.U9;
-                    NewSubSubType.U10 = TempEffect.type0.Value.type0Sub24.Value.U10;
-                    NewSubSubType.U11 = TempEffect.type0.Value.type0Sub24.Value.U11;
-                    NewSubSubType.U12 = TempEffect.type0.Value.type0Sub24.Value.U12;
-                    NewSubSubType.U13 = TempEffect.type0.Value.type0Sub24.Value.U13;
-                    NewSubSubType.U14 = TempEffect.type0.Value.type0Sub24.Value.U14;
-                    NewSubSubType.U15 = TempEffect.type0.Value.type0Sub24.Value.U15;
-                    NewSubSubType.U16 = TempEffect.type0.Value.type0Sub24.Value.U16;
-                    NewSubSubType.U17 = TempEffect.type0.Value.type0Sub24.Value.U17;
-                    NewSubSubType.U18 = TempEffect.type0.Value.type0Sub24.Value.U18;
-                    NewSubType.type0Sub24 = NewSubSubType;
+                    var NewSubSubType = new SSFHandler.TubeEndBoostEffect();
+                    NewSubSubType.Mode = TempEffect.type0.Value.TubeEndBoost.Value.Mode;
+                    NewSubSubType.Window = TempEffect.type0.Value.TubeEndBoost.Value.Window;
+                    NewSubSubType.ApproachRate = TempEffect.type0.Value.TubeEndBoost.Value.ApproachRate;
+                    NewSubSubType.TargetSpeed = TempEffect.type0.Value.TubeEndBoost.Value.TargetSpeed;
+                    NewSubSubType.BaseAxis = ArrayConv.ArrayToVector3(TempEffect.type0.Value.TubeEndBoost.Value.BaseAxis);
+                    NewSubSubType.Stage1Direction = ArrayConv.ArrayToVector3(TempEffect.type0.Value.TubeEndBoost.Value.Stage1Direction);
+                    NewSubSubType.Stage2Direction = ArrayConv.ArrayToVector3(TempEffect.type0.Value.TubeEndBoost.Value.Stage2Direction);
+                    NewSubSubType.Stage3Direction = ArrayConv.ArrayToVector3(TempEffect.type0.Value.TubeEndBoost.Value.Stage3Direction);
+                    NewSubSubType.Stage1Speed = TempEffect.type0.Value.TubeEndBoost.Value.Stage1Speed;
+                    NewSubSubType.Stage2Speed = TempEffect.type0.Value.TubeEndBoost.Value.Stage2Speed;
+                    NewSubSubType.Stage3Speed = TempEffect.type0.Value.TubeEndBoost.Value.Stage3Speed;
+                    NewSubType.TubeEndBoost = NewSubSubType;
                 }
                 else if (NewSubType.SubType == 256)
                 {
-                    var NewSubSubType = new SSFHandler.Type0Sub256();
-                    NewSubSubType.U0 = TempEffect.type0.Value.type0Sub256.Value.U0;
-                    NewSubSubType.U1 = TempEffect.type0.Value.type0Sub256.Value.U1;
-                    NewSubSubType.U2 = TempEffect.type0.Value.type0Sub256.Value.U2;
-                    NewSubSubType.U3 = TempEffect.type0.Value.type0Sub256.Value.U3;
-                    NewSubSubType.U4 = TempEffect.type0.Value.type0Sub256.Value.U4;
-                    NewSubSubType.U5 = TempEffect.type0.Value.type0Sub256.Value.U5;
-                    NewSubSubType.U6 = TempEffect.type0.Value.type0Sub256.Value.U6;
-                    NewSubSubType.U7 = TempEffect.type0.Value.type0Sub256.Value.U7;
-                    NewSubType.type0Sub256 = NewSubSubType;
+                    var NewSubSubType = new SSFHandler.AnimObjectEffect();
+                    NewSubSubType.LoopMode = TempEffect.type0.Value.AnimObject.Value.LoopMode;
+                    NewSubSubType.WindowStart = TempEffect.type0.Value.AnimObject.Value.WindowStart;
+                    NewSubSubType.WindowEnd = TempEffect.type0.Value.AnimObject.Value.WindowEnd;
+                    NewSubSubType.Rate = TempEffect.type0.Value.AnimObject.Value.Rate;
+                    NewSubSubType.RandomRateUpper = TempEffect.type0.Value.AnimObject.Value.RandomRateUpper;
+                    NewSubSubType.Debounce = TempEffect.type0.Value.AnimObject.Value.Debounce;
+                    NewSubSubType.RandomStart = TempEffect.type0.Value.AnimObject.Value.RandomStart;
+                    NewSubSubType.DirectionMode = TempEffect.type0.Value.AnimObject.Value.DirectionMode;
+                    NewSubType.AnimObject = NewSubSubType;
                 }
                 else if (NewSubType.SubType == 257)
                 {
-                    var NewSubSubType = new SSFHandler.Type0Sub257();
-                    NewSubSubType.U0 = TempEffect.type0.Value.type0Sub257.Value.U0;
-                    NewSubSubType.U1 = TempEffect.type0.Value.type0Sub257.Value.U1;
-                    NewSubSubType.U2 = TempEffect.type0.Value.type0Sub257.Value.U2;
-                    NewSubSubType.U3 = TempEffect.type0.Value.type0Sub257.Value.U3;
-                    NewSubSubType.U4 = TempEffect.type0.Value.type0Sub257.Value.U4;
-                    NewSubSubType.U5 = TempEffect.type0.Value.type0Sub257.Value.U5;
-                    NewSubSubType.U6 = TempEffect.type0.Value.type0Sub257.Value.U6;
-                    NewSubSubType.U7 = TempEffect.type0.Value.type0Sub257.Value.U7;
-                    NewSubType.type0Sub257 = NewSubSubType;
+                    var NewSubSubType = new SSFHandler.AnimDeltaEffect();
+                    NewSubSubType.LoopMode = TempEffect.type0.Value.AnimDelta.Value.LoopMode;
+                    NewSubSubType.WindowStart = TempEffect.type0.Value.AnimDelta.Value.WindowStart;
+                    NewSubSubType.WindowEnd = TempEffect.type0.Value.AnimDelta.Value.WindowEnd;
+                    NewSubSubType.Rate = TempEffect.type0.Value.AnimDelta.Value.Rate;
+                    NewSubSubType.RandomRateUpper = TempEffect.type0.Value.AnimDelta.Value.RandomRateUpper;
+                    NewSubSubType.Debounce = TempEffect.type0.Value.AnimDelta.Value.Debounce;
+                    NewSubSubType.RandomStart = TempEffect.type0.Value.AnimDelta.Value.RandomStart;
+                    NewSubSubType.DirectionMode = TempEffect.type0.Value.AnimDelta.Value.DirectionMode;
+                    NewSubType.AnimDelta = NewSubSubType;
                 }
                 else if (NewSubType.SubType == 258)
                 {
-                    var NewSubSubType = new SSFHandler.Type0Sub258();
-                    NewSubSubType.U0 = TempEffect.type0.Value.type0Sub258.Value.U0;
-                    NewSubSubType.U1 = TempEffect.type0.Value.type0Sub258.Value.U1;
-                    NewSubSubType.U2 = TempEffect.type0.Value.type0Sub258.Value.U2;
-                    NewSubSubType.U3 = TempEffect.type0.Value.type0Sub258.Value.U3;
-                    NewSubSubType.U4 = TempEffect.type0.Value.type0Sub258.Value.U4;
-                    NewSubSubType.U5 = TempEffect.type0.Value.type0Sub258.Value.U5;
-                    NewSubSubType.U6 = TempEffect.type0.Value.type0Sub258.Value.U6;
-                    NewSubSubType.U7 = TempEffect.type0.Value.type0Sub258.Value.U7;
-                    NewSubSubType.U8 = TempEffect.type0.Value.type0Sub258.Value.U8;
-                    NewSubSubType.U9 = TempEffect.type0.Value.type0Sub258.Value.U9;
-                    NewSubSubType.U10 = TempEffect.type0.Value.type0Sub258.Value.U10;
-                    NewSubSubType.U11 = TempEffect.type0.Value.type0Sub258.Value.U11;
-                    NewSubType.type0Sub258 = NewSubSubType;
+                    var NewSubSubType = new SSFHandler.AnimComboEffect();
+                    NewSubSubType.LoopMode = TempEffect.type0.Value.AnimCombo.Value.LoopMode;
+                    NewSubSubType.WindowStart = TempEffect.type0.Value.AnimCombo.Value.WindowStart;
+                    NewSubSubType.WindowEnd = TempEffect.type0.Value.AnimCombo.Value.WindowEnd;
+                    NewSubSubType.Rate = TempEffect.type0.Value.AnimCombo.Value.Rate;
+                    NewSubSubType.RandomRateUpper = TempEffect.type0.Value.AnimCombo.Value.RandomRateUpper;
+                    NewSubSubType.Debounce = TempEffect.type0.Value.AnimCombo.Value.Debounce;
+                    NewSubSubType.RandomStart = TempEffect.type0.Value.AnimCombo.Value.RandomStart;
+                    NewSubSubType.DirectionMode = TempEffect.type0.Value.AnimCombo.Value.DirectionMode;
+                    NewSubSubType.ComboWindowStart = TempEffect.type0.Value.AnimCombo.Value.ComboWindowStart;
+                    NewSubSubType.ComboWindowEnd = TempEffect.type0.Value.AnimCombo.Value.ComboWindowEnd;
+                    NewSubSubType.ComboRate = TempEffect.type0.Value.AnimCombo.Value.ComboRate;
+                    NewSubSubType.ComboEndMode = TempEffect.type0.Value.AnimCombo.Value.ComboEndMode;
+                    NewSubType.AnimCombo = NewSubSubType;
                 }
                 else
                 {
@@ -721,134 +574,25 @@ namespace SSXLibrary.JsonFiles.Tricky
 
                 if (NewSubType.SubType == 0)
                 {
-                    var NewSubSubType = new SSFHandler.Type2Sub0();
-                    NewSubSubType.U0 = TempEffect.type2.Value.type2Sub0.Value.U0;
-                    NewSubSubType.U1 = TempEffect.type2.Value.type2Sub0.Value.U1;
-                    NewSubSubType.U2 = TempEffect.type2.Value.type2Sub0.Value.U2;
-                    NewSubSubType.U3 = TempEffect.type2.Value.type2Sub0.Value.U3;
-                    NewSubSubType.U4 = TempEffect.type2.Value.type2Sub0.Value.U4;
-                    NewSubSubType.U5 = TempEffect.type2.Value.type2Sub0.Value.U5;
-                    NewSubSubType.U6 = TempEffect.type2.Value.type2Sub0.Value.U6;
-                    NewSubSubType.U7 = TempEffect.type2.Value.type2Sub0.Value.U7;
-                    NewSubSubType.U8 = TempEffect.type2.Value.type2Sub0.Value.U8;
-                    NewSubSubType.U9 = TempEffect.type2.Value.type2Sub0.Value.U9;
-                    NewSubSubType.U10 = TempEffect.type2.Value.type2Sub0.Value.U10;
-                    NewSubSubType.U11 = TempEffect.type2.Value.type2Sub0.Value.U11;
-                    NewSubSubType.U12 = TempEffect.type2.Value.type2Sub0.Value.U12;
-                    NewSubSubType.U13 = TempEffect.type2.Value.type2Sub0.Value.U13;
-                    NewSubSubType.U14 = TempEffect.type2.Value.type2Sub0.Value.U14;
-                    NewSubSubType.U15 = TempEffect.type2.Value.type2Sub0.Value.U15;
-                    NewSubSubType.U16 = TempEffect.type2.Value.type2Sub0.Value.U16;
-                    NewSubSubType.U17 = TempEffect.type2.Value.type2Sub0.Value.U17;
-                    NewSubSubType.U18 = TempEffect.type2.Value.type2Sub0.Value.U18;
-                    NewSubSubType.U19 = TempEffect.type2.Value.type2Sub0.Value.U19;
-                    NewSubSubType.U20 = TempEffect.type2.Value.type2Sub0.Value.U20;
-                    NewSubSubType.U21 = TempEffect.type2.Value.type2Sub0.Value.U21;
-                    NewSubSubType.U22 = TempEffect.type2.Value.type2Sub0.Value.U22;
-                    NewSubSubType.U23 = TempEffect.type2.Value.type2Sub0.Value.U23;
-                    NewSubSubType.U24 = TempEffect.type2.Value.type2Sub0.Value.U24;
-                    NewSubSubType.U25 = TempEffect.type2.Value.type2Sub0.Value.U25;
-                    NewSubSubType.U26 = TempEffect.type2.Value.type2Sub0.Value.U26;
-                    NewSubSubType.U27 = TempEffect.type2.Value.type2Sub0.Value.U27;
-                    NewSubSubType.U28 = TempEffect.type2.Value.type2Sub0.Value.U28;
-                    NewSubSubType.U29 = TempEffect.type2.Value.type2Sub0.Value.U29;
-                    NewSubSubType.U30 = TempEffect.type2.Value.type2Sub0.Value.U30;
-                    NewSubSubType.U31 = TempEffect.type2.Value.type2Sub0.Value.U31;
-                    NewSubSubType.U32 = TempEffect.type2.Value.type2Sub0.Value.U32;
-                    NewSubSubType.U33 = TempEffect.type2.Value.type2Sub0.Value.U33;
-                    NewSubSubType.U34 = TempEffect.type2.Value.type2Sub0.Value.U34;
-                    NewSubSubType.U35 = TempEffect.type2.Value.type2Sub0.Value.U35;
-                    NewSubSubType.U36 = TempEffect.type2.Value.type2Sub0.Value.U36;
-                    NewSubSubType.U37 = TempEffect.type2.Value.type2Sub0.Value.U37;
-                    NewSubSubType.U38 = TempEffect.type2.Value.type2Sub0.Value.U38;
-                    NewSubSubType.U39 = TempEffect.type2.Value.type2Sub0.Value.U39;
-                    NewSubSubType.U40 = TempEffect.type2.Value.type2Sub0.Value.U40;
-                    NewSubSubType.U41 = TempEffect.type2.Value.type2Sub0.Value.U41;
-                    NewSubSubType.U42 = TempEffect.type2.Value.type2Sub0.Value.U42;
-                    NewSubSubType.U43 = TempEffect.type2.Value.type2Sub0.Value.U43;
-                    NewSubSubType.U44 = TempEffect.type2.Value.type2Sub0.Value.U44;
-                    NewSubSubType.U45 = TempEffect.type2.Value.type2Sub0.Value.U45;
-                    NewSubSubType.U46 = TempEffect.type2.Value.type2Sub0.Value.U46;
-                    NewSubSubType.U47 = TempEffect.type2.Value.type2Sub0.Value.U47;
-                    NewSubSubType.U48 = TempEffect.type2.Value.type2Sub0.Value.U48;
-                    NewSubSubType.U49 = TempEffect.type2.Value.type2Sub0.Value.U49;
-                    NewSubSubType.U50 = TempEffect.type2.Value.type2Sub0.Value.U50;
-
-                    NewSubType.type2Sub0 = NewSubSubType;
+                    NewSubType.Emitter = JSONToEmitter(TempEffect.type2.Value.Emitter.Value);
                 }
                 else if (NewSubType.SubType == 1)
                 {
                     var NewSubSubType = new SSFHandler.SplinePathAnimation();
                     NewSubSubType.SplineIndex = TempEffect.type2.Value.SplineAnimation.Value.SplineIndex;
-                    NewSubSubType.U1 = TempEffect.type2.Value.SplineAnimation.Value.U1;
-                    NewSubSubType.U2 = TempEffect.type2.Value.SplineAnimation.Value.U2;
+                    NewSubSubType.EndMode = TempEffect.type2.Value.SplineAnimation.Value.EndMode;
+                    NewSubSubType.OrientationMode = TempEffect.type2.Value.SplineAnimation.Value.OrientationMode;
                     NewSubSubType.InstanceCount = TempEffect.type2.Value.SplineAnimation.Value.InstanceCount;
                     NewSubSubType.AnimationSpeed = TempEffect.type2.Value.SplineAnimation.Value.AnimationSpeed;
-                    NewSubSubType.U5 = TempEffect.type2.Value.SplineAnimation.Value.U5;
-                    NewSubSubType.U6 = TempEffect.type2.Value.SplineAnimation.Value.U6;
-                    NewSubSubType.U7 = TempEffect.type2.Value.SplineAnimation.Value.U7;
-                    NewSubSubType.R = TempEffect.type2.Value.SplineAnimation.Value.R;
-                    NewSubSubType.G = TempEffect.type2.Value.SplineAnimation.Value.G;
-                    NewSubSubType.B = TempEffect.type2.Value.SplineAnimation.Value.B;
+                    NewSubSubType.YawOffset = TempEffect.type2.Value.SplineAnimation.Value.YawOffset;
+                    NewSubSubType.ShowRouteLine = TempEffect.type2.Value.SplineAnimation.Value.ShowRouteLine;
+                    NewSubSubType.RouteLineColour = ArrayConv.ArrayToVector4(TempEffect.type2.Value.SplineAnimation.Value.RouteLineColour);
 
                     NewSubType.SplineAnimation = NewSubSubType;
                 }
                 else if (NewSubType.SubType == 2)
                 {
-                    var NewSubSubType = new SSFHandler.Type2Sub2();
-                    NewSubSubType.U0 = TempEffect.type2.Value.type2Sub2.Value.U0;
-                    NewSubSubType.U1 = TempEffect.type2.Value.type2Sub2.Value.U1;
-                    NewSubSubType.U2 = TempEffect.type2.Value.type2Sub2.Value.U2;
-                    NewSubSubType.U3 = TempEffect.type2.Value.type2Sub2.Value.U3;
-                    NewSubSubType.U4 = TempEffect.type2.Value.type2Sub2.Value.U4;
-                    NewSubSubType.U5 = TempEffect.type2.Value.type2Sub2.Value.U5;
-                    NewSubSubType.U6 = TempEffect.type2.Value.type2Sub2.Value.U6;
-                    NewSubSubType.U7 = TempEffect.type2.Value.type2Sub2.Value.U7;
-                    NewSubSubType.U8 = TempEffect.type2.Value.type2Sub2.Value.U8;
-                    NewSubSubType.U9 = TempEffect.type2.Value.type2Sub2.Value.U9;
-                    NewSubSubType.U10 = TempEffect.type2.Value.type2Sub2.Value.U10;
-                    NewSubSubType.U11 = TempEffect.type2.Value.type2Sub2.Value.U11;
-                    NewSubSubType.U12 = TempEffect.type2.Value.type2Sub2.Value.U12;
-                    NewSubSubType.U13 = TempEffect.type2.Value.type2Sub2.Value.U13;
-                    NewSubSubType.U14 = TempEffect.type2.Value.type2Sub2.Value.U14;
-                    NewSubSubType.U15 = TempEffect.type2.Value.type2Sub2.Value.U15;
-                    NewSubSubType.U16 = TempEffect.type2.Value.type2Sub2.Value.U16;
-                    NewSubSubType.U17 = TempEffect.type2.Value.type2Sub2.Value.U17;
-                    NewSubSubType.U18 = TempEffect.type2.Value.type2Sub2.Value.U18;
-                    NewSubSubType.U19 = TempEffect.type2.Value.type2Sub2.Value.U19;
-                    NewSubSubType.U20 = TempEffect.type2.Value.type2Sub2.Value.U20;
-                    NewSubSubType.U21 = TempEffect.type2.Value.type2Sub2.Value.U21;
-                    NewSubSubType.U22 = TempEffect.type2.Value.type2Sub2.Value.U22;
-                    NewSubSubType.U23 = TempEffect.type2.Value.type2Sub2.Value.U23;
-                    NewSubSubType.U24 = TempEffect.type2.Value.type2Sub2.Value.U24;
-                    NewSubSubType.U25 = TempEffect.type2.Value.type2Sub2.Value.U25;
-                    NewSubSubType.U26 = TempEffect.type2.Value.type2Sub2.Value.U26;
-                    NewSubSubType.U27 = TempEffect.type2.Value.type2Sub2.Value.U27;
-                    NewSubSubType.U28 = TempEffect.type2.Value.type2Sub2.Value.U28;
-                    NewSubSubType.U29 = TempEffect.type2.Value.type2Sub2.Value.U29;
-                    NewSubSubType.U30 = TempEffect.type2.Value.type2Sub2.Value.U30;
-                    NewSubSubType.U31 = TempEffect.type2.Value.type2Sub2.Value.U31;
-                    NewSubSubType.U32 = TempEffect.type2.Value.type2Sub2.Value.U32;
-                    NewSubSubType.U33 = TempEffect.type2.Value.type2Sub2.Value.U33;
-                    NewSubSubType.U34 = TempEffect.type2.Value.type2Sub2.Value.U34;
-                    NewSubSubType.U35 = TempEffect.type2.Value.type2Sub2.Value.U35;
-                    NewSubSubType.U36 = TempEffect.type2.Value.type2Sub2.Value.U36;
-                    NewSubSubType.U37 = TempEffect.type2.Value.type2Sub2.Value.U37;
-                    NewSubSubType.U38 = TempEffect.type2.Value.type2Sub2.Value.U38;
-                    NewSubSubType.U39 = TempEffect.type2.Value.type2Sub2.Value.U39;
-                    NewSubSubType.U40 = TempEffect.type2.Value.type2Sub2.Value.U40;
-                    NewSubSubType.U41 = TempEffect.type2.Value.type2Sub2.Value.U41;
-                    NewSubSubType.U42 = TempEffect.type2.Value.type2Sub2.Value.U42;
-                    NewSubSubType.U43 = TempEffect.type2.Value.type2Sub2.Value.U43;
-                    NewSubSubType.U44 = TempEffect.type2.Value.type2Sub2.Value.U44;
-                    NewSubSubType.U45 = TempEffect.type2.Value.type2Sub2.Value.U45;
-                    NewSubSubType.U46 = TempEffect.type2.Value.type2Sub2.Value.U46;
-                    NewSubSubType.U47 = TempEffect.type2.Value.type2Sub2.Value.U47;
-                    NewSubSubType.U48 = TempEffect.type2.Value.type2Sub2.Value.U48;
-                    NewSubSubType.U49 = TempEffect.type2.Value.type2Sub2.Value.U49;
-                    NewSubSubType.U50 = TempEffect.type2.Value.type2Sub2.Value.U50;
-
-                    NewSubType.type2Sub2 = NewSubSubType;
+                    NewSubType.CollisionEmitter = JSONToEmitter(TempEffect.type2.Value.CollisionEmitter.Value);
                 }
                 else
                 {
@@ -861,8 +605,8 @@ namespace SSXLibrary.JsonFiles.Tricky
             {
                 var NewSubType = new SSFHandler.Type3();
 
-                NewSubType.U0 = TempEffect.type3.Value.U0;
-                NewSubType.U1 = TempEffect.type3.Value.U1;
+                NewSubType.Command = TempEffect.type3.Value.Command;
+                NewSubType.Parameter = TempEffect.type3.Value.Parameter;
 
                 NewEffect.type3 = NewSubType;
             }
@@ -874,9 +618,9 @@ namespace SSXLibrary.JsonFiles.Tricky
             {
                 var NewSubType = new SSFHandler.Type5();
 
-                NewSubType.U0 = TempEffect.type5.Value.U0;
-                NewSubType.U1 = TempEffect.type5.Value.U1;
-                NewSubType.U2 = TempEffect.type5.Value.U2;
+                NewSubType.Mode = TempEffect.type5.Value.Mode;
+                NewSubType.Compare = TempEffect.type5.Value.Compare;
+                NewSubType.Threshold = TempEffect.type5.Value.Threshold;
 
                 NewEffect.type5 = NewSubType;
             }
@@ -897,8 +641,8 @@ namespace SSXLibrary.JsonFiles.Tricky
             {
                 var NewSubType = new SSFHandler.Type9();
 
-                NewSubType.U0 = TempEffect.type9.Value.U0;
-                NewSubType.U1 = TempEffect.type9.Value.U1;
+                NewSubType.Command = TempEffect.type9.Value.Command;
+                NewSubType.Parameter = TempEffect.type9.Value.Parameter;
 
                 NewEffect.type9 = NewSubType;
             }
@@ -912,11 +656,11 @@ namespace SSXLibrary.JsonFiles.Tricky
             }
             else if (NewEffect.MainType == 17)
             {
-                NewEffect.type17 = TempEffect.type17.Value;
+                NewEffect.SpeedBoostDuration = TempEffect.SpeedBoostDuration.Value;
             }
             else if (NewEffect.MainType == 18)
             {
-                NewEffect.type18 = TempEffect.type18.Value;
+                NewEffect.TrickBoostDuration = TempEffect.TrickBoostDuration.Value;
             }
             else if (NewEffect.MainType == 21)
             {
@@ -955,6 +699,64 @@ namespace SSXLibrary.JsonFiles.Tricky
             return NewEffect;
         }
 
+        static EmitterEffect EmitterToJSON(SSFHandler.EmitterEffect TempEmitter)
+        {
+            var NewEmitter = new EmitterEffect();
+            NewEmitter.ParticleCount = TempEmitter.ParticleCount;
+            NewEmitter.TrailCopies = TempEmitter.TrailCopies;
+            NewEmitter.EmissionWindow = TempEmitter.EmissionWindow;
+            NewEmitter.TimeScale = TempEmitter.TimeScale;
+            NewEmitter.SizeCenter = TempEmitter.SizeCenter;
+            NewEmitter.ParticleLifeCenter = TempEmitter.ParticleLifeCenter;
+            NewEmitter.SizeSpan = TempEmitter.SizeSpan;
+            NewEmitter.ParticleLifeSpan = TempEmitter.ParticleLifeSpan;
+            NewEmitter.TrailSpacing = TempEmitter.TrailSpacing;
+            NewEmitter.Origin = ArrayConv.Vector3ToArray(TempEmitter.Origin);
+            NewEmitter.SpawnAxisA = ArrayConv.Vector3ToArray(TempEmitter.SpawnAxisA);
+            NewEmitter.SpawnAxisB = ArrayConv.Vector3ToArray(TempEmitter.SpawnAxisB);
+            NewEmitter.VelocityBase = ArrayConv.Vector3ToArray(TempEmitter.VelocityBase);
+            NewEmitter.VelocityAxisA = ArrayConv.Vector3ToArray(TempEmitter.VelocityAxisA);
+            NewEmitter.VelocityAxisB = ArrayConv.Vector3ToArray(TempEmitter.VelocityAxisB);
+            NewEmitter.VelocityAxisC = ArrayConv.Vector3ToArray(TempEmitter.VelocityAxisC);
+            NewEmitter.Gravity = ArrayConv.Vector3ToArray(TempEmitter.Gravity);
+            NewEmitter.ColourStop1 = ArrayConv.Vector4ToArray(TempEmitter.ColourStop1);
+            NewEmitter.ColourStop2 = ArrayConv.Vector4ToArray(TempEmitter.ColourStop2);
+            NewEmitter.ColourStop3 = ArrayConv.Vector4ToArray(TempEmitter.ColourStop3);
+            NewEmitter.ColourStop4 = ArrayConv.Vector4ToArray(TempEmitter.ColourStop4);
+            NewEmitter.SpriteIndex = TempEmitter.SpriteIndex;
+            NewEmitter.BlendMode = TempEmitter.BlendMode;
+            return NewEmitter;
+        }
+
+        static SSFHandler.EmitterEffect JSONToEmitter(EmitterEffect TempEmitter)
+        {
+            var NewEmitter = new SSFHandler.EmitterEffect();
+            NewEmitter.ParticleCount = TempEmitter.ParticleCount;
+            NewEmitter.TrailCopies = TempEmitter.TrailCopies;
+            NewEmitter.EmissionWindow = TempEmitter.EmissionWindow;
+            NewEmitter.TimeScale = TempEmitter.TimeScale;
+            NewEmitter.SizeCenter = TempEmitter.SizeCenter;
+            NewEmitter.ParticleLifeCenter = TempEmitter.ParticleLifeCenter;
+            NewEmitter.SizeSpan = TempEmitter.SizeSpan;
+            NewEmitter.ParticleLifeSpan = TempEmitter.ParticleLifeSpan;
+            NewEmitter.TrailSpacing = TempEmitter.TrailSpacing;
+            NewEmitter.Origin = ArrayConv.ArrayToVector3(TempEmitter.Origin);
+            NewEmitter.SpawnAxisA = ArrayConv.ArrayToVector3(TempEmitter.SpawnAxisA);
+            NewEmitter.SpawnAxisB = ArrayConv.ArrayToVector3(TempEmitter.SpawnAxisB);
+            NewEmitter.VelocityBase = ArrayConv.ArrayToVector3(TempEmitter.VelocityBase);
+            NewEmitter.VelocityAxisA = ArrayConv.ArrayToVector3(TempEmitter.VelocityAxisA);
+            NewEmitter.VelocityAxisB = ArrayConv.ArrayToVector3(TempEmitter.VelocityAxisB);
+            NewEmitter.VelocityAxisC = ArrayConv.ArrayToVector3(TempEmitter.VelocityAxisC);
+            NewEmitter.Gravity = ArrayConv.ArrayToVector3(TempEmitter.Gravity);
+            NewEmitter.ColourStop1 = ArrayConv.ArrayToVector4(TempEmitter.ColourStop1);
+            NewEmitter.ColourStop2 = ArrayConv.ArrayToVector4(TempEmitter.ColourStop2);
+            NewEmitter.ColourStop3 = ArrayConv.ArrayToVector4(TempEmitter.ColourStop3);
+            NewEmitter.ColourStop4 = ArrayConv.ArrayToVector4(TempEmitter.ColourStop4);
+            NewEmitter.SpriteIndex = TempEmitter.SpriteIndex;
+            NewEmitter.BlendMode = TempEmitter.BlendMode;
+            return NewEmitter;
+        }
+
         public struct EffectSlotJson
         {
             public string EffectSlotName;
@@ -974,45 +776,44 @@ namespace SSXLibrary.JsonFiles.Tricky
             public List<PhysicsData> PhysicsDatas;
         }
 
+        //Field notes and value enums (TrickyEnums.cs) are on the matching SSFHandler structs
         public struct PhysicsData
         {
-            public int U2;
+            public int OccupancyMaskEncoding;
 
-            public float UFloat0;
-            public float UFloat1;
-            public float UFloat2;
+            public float[] Center;
             public float UFloat3;
             public float UFloat4;
             public float UFloat5;
-            public float UFloat6;
-            public float UFloat7;
-            public float UFloat8;
-            public float UFloat9;
-            public float UFloat10;
-            public float UFloat11;
-            public float UFloat12;
-            public float UFloat13;
-            public float UFloat14;
-            public float UFloat15;
-            public float UFloat16;
-            public float UFloat17;
-            public float UFloat18;
-            public float UFloat19;
-            public float UFloat20;
-            public float UFloat21;
-            public float UFloat22;
-            public float UFloat23;
+            public float InertiaM11;
+            public float InertiaM12;
+            public float InertiaM13;
+            public float InertiaM21;
+            public float InertiaM22;
+            public float InertiaM23;
+            public float InertiaM31;
+            public float InertiaM32;
+            public float InertiaM33;
+            public float InverseInertiaM11;
+            public float InverseInertiaM12;
+            public float InverseInertiaM13;
+            public float InverseInertiaM21;
+            public float InverseInertiaM22;
+            public float InverseInertiaM23;
+            public float InverseInertiaM31;
+            public float InverseInertiaM32;
+            public float InverseInertiaM33;
 
-            public List<UPhysicsStruct> uPhysicsStruct0;
+            public List<OccupancyLevel> OccupancyLevels;
 
-            public byte[] UByteData;
+            public byte[] OccupancyMasks;
         }
 
-        public struct UPhysicsStruct
+        public struct OccupancyLevel
         {
-            public float U0;
-            public float U1;
-            public int U2;
+            public float SphereRadius;
+            public float ChildOffset;
+            public int MaskStride;
         }
 
         public struct EffectHeaderStruct
@@ -1030,7 +831,7 @@ namespace SSXLibrary.JsonFiles.Tricky
         #region Effects
         public struct Effect
         {
-            public int MainType;
+            public int MainType; //SSFMainType
 
             public Type0? type0;
             public Type2? type2;
@@ -1044,8 +845,8 @@ namespace SSXLibrary.JsonFiles.Tricky
             public HUDTextEffect? hudTextEffect;
             public float? type13;
             public float? MultiplierScore;
-            public float? type17;
-            public float? type18;
+            public float? SpeedBoostDuration;
+            public float? TrickBoostDuration;
             public int? FunctionRunIndex;
             public int? TeleportInstanceIndex;
             public SplineEffect? Spline;
@@ -1058,7 +859,7 @@ namespace SSXLibrary.JsonFiles.Tricky
         {
             public int SubType;
 
-            public Type0Sub0? type0Sub0; ///Roller?
+            public RollerEffect? Roller; //0
             public float? Debounce;  //Debounce?
             public int? DeadNodeMode; //5
             public CounterEffect? Counter; //6
@@ -1066,26 +867,24 @@ namespace SSXLibrary.JsonFiles.Tricky
             public UVScrolling? UVScroll; //10
             public TextureFlipEffect? TextureFlip; //11
             public FenceFlex? Fence; //12
-            public Type0Sub13? type0Sub13; //Flag
-            public Type0Sub14? type0Sub14; //Cracked
-            public Type0Sub15? type0Sub15; //LapBoost
+            public FlagEffect? Flag; //13
+            public CrackedEffect? Cracked; //14
+            public LapBoostEffect? LapBoost; //15
             public CrowdBox? CrowdEffect; //17
-            public Type0Sub18? type0Sub18; //ZBoost
-            public Type0Sub20? type0Sub20; //cMeshAnim
-            public Type0Sub24? type0Sub24; //TubeEndBoost
-            public Type0Sub256? type0Sub256; //AnimObject
-            public Type0Sub257? type0Sub257; //AnimDelta
-            public Type0Sub258? type0Sub258; //AnimCombo
+            public ZBoostEffect? ZBoost; //18
+            public MeshAnimEffect? MeshAnim; //20 cMeshAnim
+            public TubeEndBoostEffect? TubeEndBoost; //24
+            public AnimObjectEffect? AnimObject; //256
+            public AnimDeltaEffect? AnimDelta; //257
+            public AnimComboEffect? AnimCombo; //258
         }
 
-        public struct Type0Sub0
+        public struct RollerEffect
         {
-            public float U0;
+            public float Mass;
             public float U1;
             public float U2;
-            public float U3;
-            public float U4;
-            public float U5;
+            public float[] LaunchDirection;
         }
 
         public struct CounterEffect
@@ -1097,29 +896,28 @@ namespace SSXLibrary.JsonFiles.Tricky
         public struct BoostEffect
         {
             public int Mode;
-            public float U1;
-            public float U2;
+            public float Window;
+            public float ApproachRate;
             public float BoostAmount;
             public float[] BoostDir;
         }
 
         public struct UVScrolling
         {
-            public int U0;
-            public float U1;
-            public float U2;
-            public float U3;
-            public float U4;
-            public float U5;
+            public int Mode;
+            public float[] Speed;
+            public float ActiveDuration;
+            public float PauseDuration;
+            public float Lifetime;
         }
 
         public struct TextureFlipEffect
         {
-            public int U0;
+            public int StartFrame;
             public int Direction;
             public float Speed;
             public float Length;
-            public int U4;
+            public int PauseDwell;
         }
 
         public struct FenceFlex
@@ -1128,122 +926,106 @@ namespace SSXLibrary.JsonFiles.Tricky
             public float FlexAmmount;
         }
 
-        public struct Type0Sub13
+        public struct FlagEffect
         {
-            public int U0;
-            public float U1;
-            public float U2;
-            public int U3;
+            public int Variant;
+            public float Amplitude;
+            public float Wavelength;
+            public float U3;
         }
 
-        public struct Type0Sub14
+        public struct CrackedEffect
         {
-            public float U0;
-            public float U1;
+            public float CrackLifetime;
+            public float Strength;
         }
 
-        public struct Type0Sub15
+        public struct LapBoostEffect
         {
-            public float U0;
-            public float U1;
-            public int U2;
-            public int U3;
-            public float U4;
+            public float ApproachRate;
+            public float TargetSpeed;
+            public float[] Axis;
         }
 
         public struct CrowdBox
         {
             public int U0;
-            public int U1;
-            public int U2;
+            public int Rows;
+            public int Columns;
         }
 
-        public struct Type0Sub18
+        public struct ZBoostEffect
         {
-            public float U0;
-            public float U1;
-            public int U2;
-            public int U3;
-            public float U4;
-            public float U5;
-            public float U6;
+            public float ApproachRate;
+            public float TargetSpeed;
+            public float[] Axis;
+            public float TargetAltitude;
+            public float SnapTolerance;
         }
 
-        public struct Type0Sub20
+        public struct MeshAnimEffect
         {
             public int U0;
-            public float U1;
-            public float U2;
-            public int U3;
-            public int U4;
-            public int U5;
-            public float U6;
-            public float U7;
-            public float U8;
-            public float U9;
+            public float FrameStep;
+            public float Duration;
+            public float[] ThrowDirection;
+            public float[] VelocityScale;
+            public float DirectionScale;
         }
 
-        public struct Type0Sub24
+        public struct TubeEndBoostEffect
         {
-            public int U0;
-            public int U1;
-            public float U2;
-            public float U3;
-            public int U4;
-            public int U5;
-            public int U6;
-            public float U7;
-            public float U8;
-            public float U9;
-            public float U10;
-            public float U11;
-            public float U12;
-            public float U13;
-            public float U14;
-            public float U15;
-            public float U16;
-            public float U17;
-            public float U18;
+            public int Mode;
+            public float Window;
+            public float ApproachRate;
+            public float TargetSpeed;
+            public float[] BaseAxis;
+            public float[] Stage1Direction;
+            public float[] Stage2Direction;
+            public float[] Stage3Direction;
+            public float Stage1Speed;
+            public float Stage2Speed;
+            public float Stage3Speed;
         }
 
-        public struct Type0Sub256
+        public struct AnimObjectEffect
         {
-            public int U0;
-            public float U1;
-            public float U2;
-            public float U3;
-            public float U4;
-            public float U5;
-            public int U6;
-            public int U7;
+            public int LoopMode;
+            public float WindowStart;
+            public float WindowEnd;
+            public float Rate;
+            public float RandomRateUpper;
+            public float Debounce;
+            public int RandomStart;
+            public int DirectionMode;
         }
 
-        public struct Type0Sub257
+        public struct AnimDeltaEffect
         {
-            public int U0;
-            public int U1;
-            public float U2;
-            public float U3;
-            public int U4;
-            public float U5;
-            public int U6;
-            public int U7;
+            public int LoopMode;
+            public float WindowStart;
+            public float WindowEnd;
+            public float Rate;
+            public float RandomRateUpper;
+            public float Debounce;
+            public int RandomStart;
+            public int DirectionMode;
         }
 
-        public struct Type0Sub258
+        public struct AnimComboEffect
         {
-            public int U0;
-            public int U1;
-            public float U2;
-            public float U3;
-            public int U4;
-            public float U5;
-            public int U6;
-            public int U7;
-            public float U8;
-            public float U9;
-            public float U10;
-            public int U11;
+            public int LoopMode;
+            public float WindowStart;
+            public float WindowEnd;
+            public float Rate;
+            public float RandomRateUpper;
+            public float Debounce;
+            public int RandomStart;
+            public int DirectionMode;
+            public float ComboWindowStart;
+            public float ComboWindowEnd;
+            public float ComboRate;
+            public int ComboEndMode;
         }
         #endregion
 
@@ -1252,149 +1034,63 @@ namespace SSXLibrary.JsonFiles.Tricky
         {
             public int SubType;
 
-            public Type2Sub0? type2Sub0; //Emitter
+            public EmitterEffect? Emitter; //0
             public SplinePathAnimation? SplineAnimation; //SplinePath
-            public Type2Sub2? type2Sub2; //CollideEmitter
+            public EmitterEffect? CollisionEmitter; //2 CollideEmitter
         }
 
-        public struct Type2Sub0
+        public struct EmitterEffect
         {
-            public int U0;
-            public int U1;
-            public float U2;
-            public float U3;
-            public float U4;
-            public float U5;
-            public float U6;
-            public float U7;
-            public float U8;
-            public float U9;
-            public float U10;
-            public float U11;
-            public float U12;
-            public float U13;
-            public float U14;
-            public float U15;
-            public float U16;
-            public float U17;
-            public float U18;
-            public float U19;
-            public float U20;
-            public float U21;
-            public float U22;
-            public float U23;
-            public float U24;
-            public float U25;
-            public float U26;
-            public float U27;
-            public float U28;
-            public float U29;
-            public float U30;
-            public float U31;
-            public float U32;
-            public float U33;
-            public float U34;
-            public float U35;
-            public float U36;
-            public float U37;
-            public float U38;
-            public float U39;
-            public float U40;
-            public float U41;
-            public float U42;
-            public float U43;
-            public float U44;
-            public float U45;
-            public float U46;
-            public float U47;
-            public float U48;
-            public int U49;
-            public int U50;
+            public int ParticleCount;
+            public int TrailCopies;
+            public float EmissionWindow;
+            public float TimeScale;
+            public float SizeCenter;
+            public float ParticleLifeCenter;
+            public float SizeSpan;
+            public float ParticleLifeSpan;
+            public float TrailSpacing;
+            public float[] Origin;
+            public float[] SpawnAxisA;
+            public float[] SpawnAxisB;
+            public float[] VelocityBase;
+            public float[] VelocityAxisA;
+            public float[] VelocityAxisB;
+            public float[] VelocityAxisC;
+            public float[] Gravity;
+            public float[] ColourStop1; //R,G,B,A
+            public float[] ColourStop2;
+            public float[] ColourStop3;
+            public float[] ColourStop4;
+            public int SpriteIndex;
+            public int BlendMode;
         }
 
         public struct SplinePathAnimation
         {
             public int SplineIndex;
-            public int U1;
-            public int U2;
+            public int EndMode;
+            public int OrientationMode;
             public int InstanceCount;
             public float AnimationSpeed;
-            public float U5;
-            public int U6;
-            public float U7;
-            public float R;
-            public float G;
-            public float B;
-        }
-
-        public struct Type2Sub2
-        {
-            public int U0;
-            public int U1;
-            public int U2;
-            public int U3;
-            public int U4;
-            public int U5;
-            public int U6;
-            public int U7;
-            public int U8;
-            public int U9;
-            public int U10;
-            public int U11;
-            public int U12;
-            public int U13;
-            public int U14;
-            public int U15;
-            public int U16;
-            public int U17;
-            public int U18;
-            public int U19;
-            public int U20;
-            public int U21;
-            public int U22;
-            public int U23;
-            public int U24;
-            public int U25;
-            public int U26;
-            public int U27;
-            public int U28;
-            public int U29;
-            public int U30;
-            public int U31;
-            public int U32;
-            public int U33;
-            public int U34;
-            public int U35;
-            public int U36;
-            public int U37;
-            public int U38;
-            public int U39;
-            public int U40;
-            public int U41;
-            public int U42;
-            public int U43;
-            public int U44;
-            public int U45;
-            public int U46;
-            public int U47;
-            public int U48;
-            public int U49;
-            public int U50;
+            public float YawOffset;
+            public int ShowRouteLine;
+            public float[] RouteLineColour; //R,G,B,A
         }
         #endregion
 
 
         public struct Type3
         {
-            public int U0;
-            public float U1;
+            public int Command;
+            public float Parameter;
         }
 
         public struct Type5
         {
-            public int U0;
-            public float U1;
-            public int U2;
+            public int Mode;
+            public int Compare;
+            public float Threshold;
         }
 
         public struct InstanceEffect
@@ -1405,8 +1101,8 @@ namespace SSXLibrary.JsonFiles.Tricky
 
         public struct Type9
         {
-            public int U0;
-            public float U1;
+            public int Command;
+            public float Parameter;
         }
 
         public struct HUDTextEffect

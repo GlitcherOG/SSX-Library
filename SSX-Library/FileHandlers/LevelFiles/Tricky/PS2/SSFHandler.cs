@@ -66,11 +66,11 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky.PS2
                 {
                     var TempUstruct1 = new EffectSlot();
 
-                    TempUstruct1.Slot1 = StreamUtil.ReadUInt32(stream); //Constant
-                    TempUstruct1.Slot2 = StreamUtil.ReadUInt32(stream); //Collsion
+                    TempUstruct1.PersistantEffectSlot = StreamUtil.ReadUInt32(stream); //Constant
+                    TempUstruct1.CollisionEffectSlot = StreamUtil.ReadUInt32(stream); //Collsion
                     TempUstruct1.Slot3 = StreamUtil.ReadUInt32(stream);
                     TempUstruct1.Slot4 = StreamUtil.ReadUInt32(stream);
-                    TempUstruct1.Slot5 = StreamUtil.ReadUInt32(stream); //Effect Triggers (Effects and cause these to happen)
+                    TempUstruct1.EffectTriggerSlot = StreamUtil.ReadUInt32(stream); //Effect Triggers (Effects and cause these to happen)
                     TempUstruct1.Slot6 = StreamUtil.ReadUInt32(stream);
                     TempUstruct1.Slot7 = StreamUtil.ReadUInt32(stream);
                     EffectSlots.Add(TempUstruct1);
@@ -94,49 +94,47 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky.PS2
                         var NewPhysicsData = new PhysicsData();
 
                         NewPhysicsData.EndAlignment = StreamUtil.ReadUInt32(stream);
-                        NewPhysicsData.U1 = StreamUtil.ReadUInt32(stream);
-                        NewPhysicsData.U2 = StreamUtil.ReadUInt32(stream);
-                        NewPhysicsData.U3 = StreamUtil.ReadUInt32(stream);
+                        NewPhysicsData.OccupancyMaskSize = StreamUtil.ReadUInt32(stream);
+                        NewPhysicsData.OccupancyMaskEncoding = StreamUtil.ReadUInt32(stream);
+                        NewPhysicsData.OccupancyMaxDepth = StreamUtil.ReadUInt32(stream);
 
-                        NewPhysicsData.UFloat0 = StreamUtil.ReadFloat(stream);
-                        NewPhysicsData.UFloat1 = StreamUtil.ReadFloat(stream);
-                        NewPhysicsData.UFloat2 = StreamUtil.ReadFloat(stream);
+                        NewPhysicsData.Center = StreamUtil.ReadVector3(stream);
                         NewPhysicsData.UFloat3 = StreamUtil.ReadFloat(stream);
                         NewPhysicsData.UFloat4 = StreamUtil.ReadFloat(stream);
                         NewPhysicsData.UFloat5 = StreamUtil.ReadFloat(stream);
-                        NewPhysicsData.UFloat6 = StreamUtil.ReadFloat(stream);
-                        NewPhysicsData.UFloat7 = StreamUtil.ReadFloat(stream);
-                        NewPhysicsData.UFloat8 = StreamUtil.ReadFloat(stream);
-                        NewPhysicsData.UFloat9 = StreamUtil.ReadFloat(stream);
-                        NewPhysicsData.UFloat10 = StreamUtil.ReadFloat(stream);
-                        NewPhysicsData.UFloat11 = StreamUtil.ReadFloat(stream);
-                        NewPhysicsData.UFloat12 = StreamUtil.ReadFloat(stream);
-                        NewPhysicsData.UFloat13 = StreamUtil.ReadFloat(stream);
-                        NewPhysicsData.UFloat14 = StreamUtil.ReadFloat(stream);
-                        NewPhysicsData.UFloat15 = StreamUtil.ReadFloat(stream);
-                        NewPhysicsData.UFloat16 = StreamUtil.ReadFloat(stream);
-                        NewPhysicsData.UFloat17 = StreamUtil.ReadFloat(stream);
-                        NewPhysicsData.UFloat18 = StreamUtil.ReadFloat(stream);
-                        NewPhysicsData.UFloat19 = StreamUtil.ReadFloat(stream);
-                        NewPhysicsData.UFloat20 = StreamUtil.ReadFloat(stream);
-                        NewPhysicsData.UFloat21 = StreamUtil.ReadFloat(stream);
-                        NewPhysicsData.UFloat22 = StreamUtil.ReadFloat(stream);
-                        NewPhysicsData.UFloat23 = StreamUtil.ReadFloat(stream);
+                        NewPhysicsData.InertiaM11 = StreamUtil.ReadFloat(stream);
+                        NewPhysicsData.InertiaM12 = StreamUtil.ReadFloat(stream);
+                        NewPhysicsData.InertiaM13 = StreamUtil.ReadFloat(stream);
+                        NewPhysicsData.InertiaM21 = StreamUtil.ReadFloat(stream);
+                        NewPhysicsData.InertiaM22 = StreamUtil.ReadFloat(stream);
+                        NewPhysicsData.InertiaM23 = StreamUtil.ReadFloat(stream);
+                        NewPhysicsData.InertiaM31 = StreamUtil.ReadFloat(stream);
+                        NewPhysicsData.InertiaM32 = StreamUtil.ReadFloat(stream);
+                        NewPhysicsData.InertiaM33 = StreamUtil.ReadFloat(stream);
+                        NewPhysicsData.InverseInertiaM11 = StreamUtil.ReadFloat(stream);
+                        NewPhysicsData.InverseInertiaM12 = StreamUtil.ReadFloat(stream);
+                        NewPhysicsData.InverseInertiaM13 = StreamUtil.ReadFloat(stream);
+                        NewPhysicsData.InverseInertiaM21 = StreamUtil.ReadFloat(stream);
+                        NewPhysicsData.InverseInertiaM22 = StreamUtil.ReadFloat(stream);
+                        NewPhysicsData.InverseInertiaM23 = StreamUtil.ReadFloat(stream);
+                        NewPhysicsData.InverseInertiaM31 = StreamUtil.ReadFloat(stream);
+                        NewPhysicsData.InverseInertiaM32 = StreamUtil.ReadFloat(stream);
+                        NewPhysicsData.InverseInertiaM33 = StreamUtil.ReadFloat(stream);
 
-                        NewPhysicsData.uPhysicsStruct0 = new List<UPhysicsStruct>();
+                        NewPhysicsData.OccupancyLevels = new List<OccupancyLevel>();
 
-                        for (int b = 0; b < NewPhysicsData.U3 + 1; b++)
+                        for (int b = 0; b < NewPhysicsData.OccupancyMaxDepth + 1; b++)
                         {
-                            var NewPhysicsStruct = new UPhysicsStruct();
+                            var NewPhysicsStruct = new OccupancyLevel();
 
-                            NewPhysicsStruct.U0 = StreamUtil.ReadFloat(stream);
-                            NewPhysicsStruct.U1 = StreamUtil.ReadFloat(stream);
-                            NewPhysicsStruct.U2 = StreamUtil.ReadUInt32(stream);
+                            NewPhysicsStruct.SphereRadius = StreamUtil.ReadFloat(stream);
+                            NewPhysicsStruct.ChildOffset = StreamUtil.ReadFloat(stream);
+                            NewPhysicsStruct.MaskStride = StreamUtil.ReadUInt32(stream);
 
-                            NewPhysicsData.uPhysicsStruct0.Add(NewPhysicsStruct);
+                            NewPhysicsData.OccupancyLevels.Add(NewPhysicsStruct);
                         }
 
-                        NewPhysicsData.UByteData = StreamUtil.ReadBytes(stream, NewPhysicsData.U1);
+                        NewPhysicsData.OccupancyMasks = StreamUtil.ReadBytes(stream, NewPhysicsData.OccupancyMaskSize);
                         stream.Position += NewPhysicsData.EndAlignment;
 
                         TempUstruct2.PhysicsDatas.Add(NewPhysicsData);
@@ -279,7 +277,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky.PS2
                 for (int i = 0; i < ObjectPropertiesCount; i++)
                 {
                     var TempUstruct5 = new ObjectPropertiesStruct();
-                    TempUstruct5.U0 = StreamUtil.ReadFloat(stream);
+                    TempUstruct5.CollisionResponseMass = StreamUtil.ReadFloat(stream);
 
                     TempUstruct5.PlayerBounce = StreamUtil.ReadFloat(stream);
 
@@ -320,7 +318,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky.PS2
                 {
                     var TempUstruct6 = new Spline();
                     TempUstruct6.U1 = StreamUtil.ReadInt16(stream);
-                    TempUstruct6.U2 = StreamUtil.ReadInt16(stream);
+                    TempUstruct6.RailFlags = StreamUtil.ReadInt16(stream);
                     TempUstruct6.SplineStyle = StreamUtil.ReadUInt32(stream); 
                     Splines.Add(TempUstruct6);
                 }
@@ -345,14 +343,12 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky.PS2
 
                 if (NewMainType.SubType == 0)
                 {
-                    var NewSubType = new Type0Sub0();
-                    NewSubType.U0 = StreamUtil.ReadFloat(stream);
+                    var NewSubType = new RollerEffect();
+                    NewSubType.Mass = StreamUtil.ReadFloat(stream);
                     NewSubType.U1 = StreamUtil.ReadFloat(stream);
                     NewSubType.U2 = StreamUtil.ReadFloat(stream);
-                    NewSubType.U3 = StreamUtil.ReadFloat(stream);
-                    NewSubType.U4 = StreamUtil.ReadFloat(stream);
-                    NewSubType.U5 = StreamUtil.ReadFloat(stream);
-                    NewMainType.type0Sub0 = NewSubType;
+                    NewSubType.LaunchDirection = StreamUtil.ReadVector3(stream);
+                    NewMainType.Roller = NewSubType;
                 }
                 else
                 if (NewMainType.SubType == 2)
@@ -377,8 +373,8 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky.PS2
                 {
                     var NewSubType = new BoostEffect();
                     NewSubType.Mode = StreamUtil.ReadUInt32(stream);
-                    NewSubType.U1 = StreamUtil.ReadFloat(stream);
-                    NewSubType.U2 = StreamUtil.ReadFloat(stream);
+                    NewSubType.Window = StreamUtil.ReadFloat(stream);
+                    NewSubType.ApproachRate = StreamUtil.ReadFloat(stream);
                     NewSubType.BoostAmount = StreamUtil.ReadFloat(stream);
                     NewSubType.BoostDir = StreamUtil.ReadVector3(stream);
                     NewMainType.Boost = NewSubType;
@@ -387,23 +383,22 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky.PS2
                 if (NewMainType.SubType == 10)
                 {
                     var NewSubType = new UVScrolling();
-                    NewSubType.U0 = StreamUtil.ReadUInt32(stream); // Mode: 0 linear, 1 eased ping-pong, 2 constant ping-pong
-                    NewSubType.U1 = StreamUtil.ReadFloat(stream); // Horizontal UV units per tick
-                    NewSubType.U2 = StreamUtil.ReadFloat(stream); // Vertical UV units per tick
-                    NewSubType.U3 = StreamUtil.ReadFloat(stream); // Active duration (seconds)
-                    NewSubType.U4 = StreamUtil.ReadFloat(stream); // Pause duration (seconds)
-                    NewSubType.U5 = StreamUtil.ReadFloat(stream); // Total lifetime (seconds; 0 = until slot unload)
+                    NewSubType.Mode = StreamUtil.ReadUInt32(stream); // Mode: 0 linear, 1 eased ping-pong, 2 constant ping-pong
+                    NewSubType.Speed = StreamUtil.ReadVector2(stream); // Horizontal and vertical UV units per tick
+                    NewSubType.ActiveDuration = StreamUtil.ReadFloat(stream); // Active duration (seconds)
+                    NewSubType.PauseDuration = StreamUtil.ReadFloat(stream); // Pause duration (seconds)
+                    NewSubType.Lifetime = StreamUtil.ReadFloat(stream); // Total lifetime (seconds; 0 = until slot unload)
                     NewMainType.UVScroll = NewSubType;
                 }
                 else
                 if (NewMainType.SubType == 11)
                 {
                     var NewSubType = new TextureFlipEffect();
-                    NewSubType.U0 = StreamUtil.ReadUInt32(stream); //Nothing
+                    NewSubType.StartFrame = StreamUtil.ReadUInt32(stream);
                     NewSubType.Direction = StreamUtil.ReadUInt32(stream); //Direction 0-Forwards, Anything else-backwards
                     NewSubType.Speed = StreamUtil.ReadFloat(stream);
                     NewSubType.Length = StreamUtil.ReadFloat(stream);
-                    NewSubType.U4 = StreamUtil.ReadUInt32(stream); //Pauses on frame? Display pattern?
+                    NewSubType.PauseDwell = StreamUtil.ReadUInt32(stream); //Pauses on frame? Display pattern?
                     NewMainType.TextureFlip = NewSubType;
                 }
                 else
@@ -417,31 +412,29 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky.PS2
                 else
                 if (NewMainType.SubType == 13)
                 {
-                    var NewSubType = new Type0Sub13();
-                    NewSubType.U0 = StreamUtil.ReadUInt32(stream);
-                    NewSubType.U1 = StreamUtil.ReadFloat(stream);
-                    NewSubType.U2 = StreamUtil.ReadFloat(stream);
-                    NewSubType.U3 = StreamUtil.ReadUInt32(stream);
-                    NewMainType.type0Sub13 = NewSubType;
+                    var NewSubType = new FlagEffect();
+                    NewSubType.Variant = StreamUtil.ReadUInt32(stream);
+                    NewSubType.Amplitude = StreamUtil.ReadFloat(stream);
+                    NewSubType.Wavelength = StreamUtil.ReadFloat(stream);
+                    NewSubType.U3 = StreamUtil.ReadFloat(stream);
+                    NewMainType.Flag = NewSubType;
                 }
                 else
                 if (NewMainType.SubType == 14)
                 {
-                    var NewSubType = new Type0Sub14();
-                    NewSubType.U0 = StreamUtil.ReadFloat(stream);
-                    NewSubType.U1 = StreamUtil.ReadFloat(stream);
-                    NewMainType.type0Sub14 = NewSubType;
+                    var NewSubType = new CrackedEffect();
+                    NewSubType.CrackLifetime = StreamUtil.ReadFloat(stream);
+                    NewSubType.Strength = StreamUtil.ReadFloat(stream);
+                    NewMainType.Cracked = NewSubType;
                 }
                 else
                 if (NewMainType.SubType == 15)
                 {
-                    var NewSubType = new Type0Sub15();
-                    NewSubType.U0 = StreamUtil.ReadFloat(stream);
-                    NewSubType.U1 = StreamUtil.ReadFloat(stream);
-                    NewSubType.U2 = StreamUtil.ReadUInt32(stream);
-                    NewSubType.U3 = StreamUtil.ReadUInt32(stream);
-                    NewSubType.U4 = StreamUtil.ReadFloat(stream);
-                    NewMainType.type0Sub15 = NewSubType;
+                    var NewSubType = new LapBoostEffect();
+                    NewSubType.ApproachRate = StreamUtil.ReadFloat(stream);
+                    NewSubType.TargetSpeed = StreamUtil.ReadFloat(stream);
+                    NewSubType.Axis = StreamUtil.ReadVector3(stream);
+                    NewMainType.LapBoost = NewSubType;
                 }
                 else
                 if (NewMainType.SubType == 17)
@@ -449,39 +442,33 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky.PS2
                     var NewSubType = new CrowdBox();
                     NewSubType.U0 = StreamUtil.ReadUInt32(stream);
                     //Both Effect How Many Rows Of People
-                    NewSubType.U1 = StreamUtil.ReadUInt32(stream); //Row
-                    NewSubType.U2 = StreamUtil.ReadUInt32(stream); //Column
+                    NewSubType.Rows = StreamUtil.ReadUInt32(stream); //Row
+                    NewSubType.Columns = StreamUtil.ReadUInt32(stream); //Column
                     NewMainType.CrowdEffect = NewSubType;
                 }
                 else
                 if (NewMainType.SubType == 18)
                 {
-                    var NewSubType = new Type0Sub18();
-                    NewSubType.U0 = StreamUtil.ReadFloat(stream);
-                    NewSubType.U1 = StreamUtil.ReadFloat(stream);
-                    NewSubType.U2 = StreamUtil.ReadUInt32(stream);
-                    NewSubType.U3 = StreamUtil.ReadUInt32(stream);
-                    NewSubType.U4 = StreamUtil.ReadFloat(stream);
-                    NewSubType.U5 = StreamUtil.ReadFloat(stream);
-                    NewSubType.U6 = StreamUtil.ReadFloat(stream);
-                    NewMainType.type0Sub18 = NewSubType;
+                    var NewSubType = new ZBoostEffect();
+                    NewSubType.ApproachRate = StreamUtil.ReadFloat(stream);
+                    NewSubType.TargetSpeed = StreamUtil.ReadFloat(stream);
+                    NewSubType.Axis = StreamUtil.ReadVector3(stream);
+                    NewSubType.TargetAltitude = StreamUtil.ReadFloat(stream);
+                    NewSubType.SnapTolerance = StreamUtil.ReadFloat(stream);
+                    NewMainType.ZBoost = NewSubType;
                 }
                 else
                 if (NewMainType.SubType == 20)
                 {
-                    var NewSubType = new Type0Sub20();
+                    var NewSubType = new MeshAnimEffect();
                     NewSubType.U0 = StreamUtil.ReadUInt32(stream);
-                    NewSubType.U1 = StreamUtil.ReadFloat(stream);
-                    NewSubType.U2 = StreamUtil.ReadFloat(stream);
-                    NewSubType.U3 = StreamUtil.ReadUInt32(stream);
-                    NewSubType.U4 = StreamUtil.ReadUInt32(stream);
-                    NewSubType.U5 = StreamUtil.ReadUInt32(stream);
-                    NewSubType.U6 = StreamUtil.ReadFloat(stream);
-                    NewSubType.U7 = StreamUtil.ReadFloat(stream);
-                    NewSubType.U8 = StreamUtil.ReadFloat(stream);
-                    NewSubType.U9 = StreamUtil.ReadFloat(stream);
+                    NewSubType.FrameStep = StreamUtil.ReadFloat(stream);
+                    NewSubType.Duration = StreamUtil.ReadFloat(stream);
+                    NewSubType.ThrowDirection = StreamUtil.ReadVector3(stream);
+                    NewSubType.VelocityScale = StreamUtil.ReadVector3(stream);
+                    NewSubType.DirectionScale = StreamUtil.ReadFloat(stream);
 
-                    NewMainType.type0Sub20 = NewSubType;
+                    NewMainType.MeshAnim = NewSubType;
                 }
                 else
                 if (NewMainType.SubType == 23) 
@@ -491,74 +478,66 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky.PS2
                 else
                 if (NewMainType.SubType == 24)
                 {
-                    var NewSubType = new Type0Sub24();
-                    NewSubType.U0 = StreamUtil.ReadUInt32(stream);
-                    NewSubType.U1 = StreamUtil.ReadUInt32(stream);
-                    NewSubType.U2 = StreamUtil.ReadFloat(stream);
-                    NewSubType.U3 = StreamUtil.ReadFloat(stream);
-                    NewSubType.U4 = StreamUtil.ReadUInt32(stream);
-                    NewSubType.U5 = StreamUtil.ReadUInt32(stream);
-                    NewSubType.U6 = StreamUtil.ReadUInt32(stream);
-                    NewSubType.U7 = StreamUtil.ReadFloat(stream);
-                    NewSubType.U8 = StreamUtil.ReadFloat(stream);
-                    NewSubType.U9 = StreamUtil.ReadFloat(stream);
-                    NewSubType.U10 = StreamUtil.ReadFloat(stream);
-                    NewSubType.U11 = StreamUtil.ReadFloat(stream);
-                    NewSubType.U12 = StreamUtil.ReadFloat(stream);
-                    NewSubType.U13 = StreamUtil.ReadFloat(stream);
-                    NewSubType.U14 = StreamUtil.ReadFloat(stream);
-                    NewSubType.U15 = StreamUtil.ReadFloat(stream);
-                    NewSubType.U16 = StreamUtil.ReadFloat(stream);
-                    NewSubType.U17 = StreamUtil.ReadFloat(stream);
-                    NewSubType.U18 = StreamUtil.ReadFloat(stream);
+                    var NewSubType = new TubeEndBoostEffect();
+                    NewSubType.Mode = StreamUtil.ReadUInt32(stream);
+                    NewSubType.Window = StreamUtil.ReadFloat(stream);
+                    NewSubType.ApproachRate = StreamUtil.ReadFloat(stream);
+                    NewSubType.TargetSpeed = StreamUtil.ReadFloat(stream);
+                    NewSubType.BaseAxis = StreamUtil.ReadVector3(stream);
+                    NewSubType.Stage1Direction = StreamUtil.ReadVector3(stream);
+                    NewSubType.Stage2Direction = StreamUtil.ReadVector3(stream);
+                    NewSubType.Stage3Direction = StreamUtil.ReadVector3(stream);
+                    NewSubType.Stage1Speed = StreamUtil.ReadFloat(stream);
+                    NewSubType.Stage2Speed = StreamUtil.ReadFloat(stream);
+                    NewSubType.Stage3Speed = StreamUtil.ReadFloat(stream);
 
-                    NewMainType.type0Sub24 = NewSubType;
+                    NewMainType.TubeEndBoost = NewSubType;
                 }
                 else if (NewMainType.SubType == 256)
                 {
-                    var NewSubType = new Type0Sub256();
-                    NewSubType.U0 = StreamUtil.ReadUInt32(stream);
-                    NewSubType.U1 = StreamUtil.ReadFloat(stream);
-                    NewSubType.U2 = StreamUtil.ReadFloat(stream);
-                    NewSubType.U3 = StreamUtil.ReadFloat(stream);
-                    NewSubType.U4 = StreamUtil.ReadFloat(stream);
-                    NewSubType.U5 = StreamUtil.ReadFloat(stream);
-                    NewSubType.U6 = StreamUtil.ReadUInt32(stream);
-                    NewSubType.U7 = StreamUtil.ReadUInt32(stream);
+                    var NewSubType = new AnimObjectEffect();
+                    NewSubType.LoopMode = StreamUtil.ReadUInt32(stream);
+                    NewSubType.WindowStart = StreamUtil.ReadFloat(stream);
+                    NewSubType.WindowEnd = StreamUtil.ReadFloat(stream);
+                    NewSubType.Rate = StreamUtil.ReadFloat(stream);
+                    NewSubType.RandomRateUpper = StreamUtil.ReadFloat(stream);
+                    NewSubType.Debounce = StreamUtil.ReadFloat(stream);
+                    NewSubType.RandomStart = StreamUtil.ReadUInt32(stream);
+                    NewSubType.DirectionMode = StreamUtil.ReadUInt32(stream);
 
-                    NewMainType.type0Sub256 = NewSubType;
+                    NewMainType.AnimObject = NewSubType;
                 }
                 else if (NewMainType.SubType == 257)
                 {
-                    var NewSubType = new Type0Sub257();
-                    NewSubType.U0 = StreamUtil.ReadUInt32(stream);
-                    NewSubType.U1 = StreamUtil.ReadUInt32(stream);
-                    NewSubType.U2 = StreamUtil.ReadFloat(stream);
-                    NewSubType.U3 = StreamUtil.ReadFloat(stream);
-                    NewSubType.U4 = StreamUtil.ReadUInt32(stream);
-                    NewSubType.U5 = StreamUtil.ReadFloat(stream);
-                    NewSubType.U6 = StreamUtil.ReadUInt32(stream);
-                    NewSubType.U7 = StreamUtil.ReadUInt32(stream);
+                    var NewSubType = new AnimDeltaEffect();
+                    NewSubType.LoopMode = StreamUtil.ReadUInt32(stream);
+                    NewSubType.WindowStart = StreamUtil.ReadFloat(stream);
+                    NewSubType.WindowEnd = StreamUtil.ReadFloat(stream);
+                    NewSubType.Rate = StreamUtil.ReadFloat(stream);
+                    NewSubType.RandomRateUpper = StreamUtil.ReadFloat(stream);
+                    NewSubType.Debounce = StreamUtil.ReadFloat(stream);
+                    NewSubType.RandomStart = StreamUtil.ReadUInt32(stream);
+                    NewSubType.DirectionMode = StreamUtil.ReadUInt32(stream);
 
-                    NewMainType.type0Sub257 = NewSubType;
+                    NewMainType.AnimDelta = NewSubType;
                 }
                 else if (NewMainType.SubType == 258)
                 {
-                    var NewSubType = new Type0Sub258();
-                    NewSubType.U0 = StreamUtil.ReadUInt32(stream);
-                    NewSubType.U1 = StreamUtil.ReadUInt32(stream);
-                    NewSubType.U2 = StreamUtil.ReadFloat(stream);
-                    NewSubType.U3 = StreamUtil.ReadFloat(stream);
-                    NewSubType.U4 = StreamUtil.ReadUInt32(stream);
-                    NewSubType.U5 = StreamUtil.ReadFloat(stream);
-                    NewSubType.U6 = StreamUtil.ReadUInt32(stream);
-                    NewSubType.U7 = StreamUtil.ReadUInt32(stream);
-                    NewSubType.U8 = StreamUtil.ReadFloat(stream);
-                    NewSubType.U9 = StreamUtil.ReadFloat(stream);
-                    NewSubType.U10 = StreamUtil.ReadFloat(stream);
-                    NewSubType.U11 = StreamUtil.ReadUInt32(stream);
+                    var NewSubType = new AnimComboEffect();
+                    NewSubType.LoopMode = StreamUtil.ReadUInt32(stream);
+                    NewSubType.WindowStart = StreamUtil.ReadFloat(stream);
+                    NewSubType.WindowEnd = StreamUtil.ReadFloat(stream);
+                    NewSubType.Rate = StreamUtil.ReadFloat(stream);
+                    NewSubType.RandomRateUpper = StreamUtil.ReadFloat(stream);
+                    NewSubType.Debounce = StreamUtil.ReadFloat(stream);
+                    NewSubType.RandomStart = StreamUtil.ReadUInt32(stream);
+                    NewSubType.DirectionMode = StreamUtil.ReadUInt32(stream);
+                    NewSubType.ComboWindowStart = StreamUtil.ReadFloat(stream);
+                    NewSubType.ComboWindowEnd = StreamUtil.ReadFloat(stream);
+                    NewSubType.ComboRate = StreamUtil.ReadFloat(stream);
+                    NewSubType.ComboEndMode = StreamUtil.ReadUInt32(stream);
 
-                    NewMainType.type0Sub258 = NewSubType;
+                    NewMainType.AnimCombo = NewSubType;
                 }
                 else
                 {
@@ -574,163 +553,27 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky.PS2
 
                 if (NewMainType.SubType == 0)
                 {
-                    var NewSubType = new Type2Sub0();
-
-                    NewSubType.U0 = StreamUtil.ReadUInt32(stream);
-                    NewSubType.U1 = StreamUtil.ReadUInt32(stream);
-                    NewSubType.U2 = StreamUtil.ReadFloat(stream);
-                    NewSubType.U3 = StreamUtil.ReadFloat(stream);
-
-                    NewSubType.U4 = StreamUtil.ReadFloat(stream);
-                    NewSubType.U5 = StreamUtil.ReadFloat(stream);
-                    NewSubType.U6 = StreamUtil.ReadFloat(stream);
-                    NewSubType.U7 = StreamUtil.ReadFloat(stream);
-
-                    NewSubType.U8 = StreamUtil.ReadFloat(stream);
-                    NewSubType.U9 = StreamUtil.ReadFloat(stream);
-                    NewSubType.U10 = StreamUtil.ReadFloat(stream);
-                    NewSubType.U11 = StreamUtil.ReadFloat(stream);
-
-                    NewSubType.U12 = StreamUtil.ReadFloat(stream);
-                    NewSubType.U13 = StreamUtil.ReadFloat(stream);
-                    NewSubType.U14 = StreamUtil.ReadFloat(stream);
-                    NewSubType.U15 = StreamUtil.ReadFloat(stream);
-
-                    NewSubType.U16 = StreamUtil.ReadFloat(stream);
-                    NewSubType.U17 = StreamUtil.ReadFloat(stream);
-                    NewSubType.U18 = StreamUtil.ReadFloat(stream);
-                    NewSubType.U19 = StreamUtil.ReadFloat(stream);
-
-                    NewSubType.U20 = StreamUtil.ReadFloat(stream);
-                    NewSubType.U21 = StreamUtil.ReadFloat(stream);
-                    NewSubType.U22 = StreamUtil.ReadFloat(stream);
-                    NewSubType.U23 = StreamUtil.ReadFloat(stream);
-
-                    NewSubType.U24 = StreamUtil.ReadFloat(stream);
-                    NewSubType.U25 = StreamUtil.ReadFloat(stream);
-                    NewSubType.U26 = StreamUtil.ReadFloat(stream);
-                    NewSubType.U27 = StreamUtil.ReadFloat(stream);
-
-                    NewSubType.U28 = StreamUtil.ReadFloat(stream);
-                    NewSubType.U29 = StreamUtil.ReadFloat(stream);
-                    NewSubType.U30 = StreamUtil.ReadFloat(stream);
-                    NewSubType.U31 = StreamUtil.ReadFloat(stream);
-
-                    NewSubType.U32 = StreamUtil.ReadFloat(stream);
-                    NewSubType.U33 = StreamUtil.ReadFloat(stream);
-                    NewSubType.U34 = StreamUtil.ReadFloat(stream);
-                    NewSubType.U35 = StreamUtil.ReadFloat(stream);
-
-                    NewSubType.U36 = StreamUtil.ReadFloat(stream);
-                    NewSubType.U37 = StreamUtil.ReadFloat(stream);
-                    NewSubType.U38 = StreamUtil.ReadFloat(stream);
-                    NewSubType.U39 = StreamUtil.ReadFloat(stream);
-
-                    NewSubType.U40 = StreamUtil.ReadFloat(stream);
-                    NewSubType.U41 = StreamUtil.ReadFloat(stream);
-                    NewSubType.U42 = StreamUtil.ReadFloat(stream);
-                    NewSubType.U43 = StreamUtil.ReadFloat(stream);
-
-                    NewSubType.U44 = StreamUtil.ReadFloat(stream);
-                    NewSubType.U45 = StreamUtil.ReadFloat(stream);
-                    NewSubType.U46 = StreamUtil.ReadFloat(stream);
-                    NewSubType.U47 = StreamUtil.ReadFloat(stream);
-
-                    NewSubType.U48 = StreamUtil.ReadFloat(stream);
-                    NewSubType.U49 = StreamUtil.ReadUInt32(stream);
-                    NewSubType.U50 = StreamUtil.ReadUInt32(stream);
-
-                    NewMainType.type2Sub0 = NewSubType;
+                    NewMainType.Emitter = ReadEmitter(stream);
                 }
                 else if (NewMainType.SubType == 1)
                 {
                     var NewSubType = new SplinePathAnimation();
 
                     NewSubType.SplineIndex = StreamUtil.ReadUInt32(stream);
-                    NewSubType.U1 = StreamUtil.ReadUInt32(stream);
-                    NewSubType.U2 = StreamUtil.ReadUInt32(stream);
+                    NewSubType.EndMode = StreamUtil.ReadUInt32(stream);
+                    NewSubType.OrientationMode = StreamUtil.ReadUInt32(stream);
                     NewSubType.InstanceCount = StreamUtil.ReadUInt32(stream);
 
                     NewSubType.AnimationSpeed = StreamUtil.ReadFloat(stream);
-                    NewSubType.U5 = StreamUtil.ReadFloat(stream);
-                    NewSubType.U6 = StreamUtil.ReadUInt32(stream);
-                    NewSubType.U7 = StreamUtil.ReadFloat(stream);
-
-                    NewSubType.R = StreamUtil.ReadFloat(stream);
-                    NewSubType.G = StreamUtil.ReadFloat(stream);
-                    NewSubType.B = StreamUtil.ReadFloat(stream);
+                    NewSubType.YawOffset = StreamUtil.ReadFloat(stream);
+                    NewSubType.ShowRouteLine = StreamUtil.ReadUInt32(stream);
+                    NewSubType.RouteLineColour = ReadColourARGB(stream);
 
                     NewMainType.SplineAnimation = NewSubType;
                 }
                 else if (NewMainType.SubType == 2)
                 {
-                    var NewSubType = new Type2Sub2();
-
-                    NewSubType.U0 = StreamUtil.ReadUInt32(stream);
-                    NewSubType.U1 = StreamUtil.ReadUInt32(stream);
-                    NewSubType.U2 = StreamUtil.ReadUInt32(stream);
-                    NewSubType.U3 = StreamUtil.ReadUInt32(stream);
-
-                    NewSubType.U4 = StreamUtil.ReadUInt32(stream);
-                    NewSubType.U5 = StreamUtil.ReadUInt32(stream);
-                    NewSubType.U6 = StreamUtil.ReadUInt32(stream);
-                    NewSubType.U7 = StreamUtil.ReadUInt32(stream);
-
-                    NewSubType.U8 = StreamUtil.ReadUInt32(stream);
-                    NewSubType.U9 = StreamUtil.ReadUInt32(stream);
-                    NewSubType.U10 = StreamUtil.ReadUInt32(stream);
-                    NewSubType.U11 = StreamUtil.ReadUInt32(stream);
-
-                    NewSubType.U12 = StreamUtil.ReadUInt32(stream);
-                    NewSubType.U13 = StreamUtil.ReadUInt32(stream);
-                    NewSubType.U14 = StreamUtil.ReadUInt32(stream);
-                    NewSubType.U15 = StreamUtil.ReadUInt32(stream);
-
-                    NewSubType.U16 = StreamUtil.ReadUInt32(stream);
-                    NewSubType.U17 = StreamUtil.ReadUInt32(stream);
-                    NewSubType.U18 = StreamUtil.ReadUInt32(stream);
-                    NewSubType.U19 = StreamUtil.ReadUInt32(stream);
-
-                    NewSubType.U20 = StreamUtil.ReadUInt32(stream);
-                    NewSubType.U21 = StreamUtil.ReadUInt32(stream);
-                    NewSubType.U22 = StreamUtil.ReadUInt32(stream);
-                    NewSubType.U23 = StreamUtil.ReadUInt32(stream);
-
-                    NewSubType.U24 = StreamUtil.ReadUInt32(stream);
-                    NewSubType.U25 = StreamUtil.ReadUInt32(stream);
-                    NewSubType.U26 = StreamUtil.ReadUInt32(stream);
-                    NewSubType.U27 = StreamUtil.ReadUInt32(stream);
-
-                    NewSubType.U28 = StreamUtil.ReadUInt32(stream);
-                    NewSubType.U29 = StreamUtil.ReadUInt32(stream);
-                    NewSubType.U30 = StreamUtil.ReadUInt32(stream);
-                    NewSubType.U31 = StreamUtil.ReadUInt32(stream);
-
-                    NewSubType.U32 = StreamUtil.ReadUInt32(stream);
-                    NewSubType.U33 = StreamUtil.ReadUInt32(stream);
-                    NewSubType.U34 = StreamUtil.ReadUInt32(stream);
-                    NewSubType.U35 = StreamUtil.ReadUInt32(stream);
-
-                    NewSubType.U36 = StreamUtil.ReadUInt32(stream);
-                    NewSubType.U37 = StreamUtil.ReadUInt32(stream);
-                    NewSubType.U38 = StreamUtil.ReadUInt32(stream);
-                    NewSubType.U39 = StreamUtil.ReadUInt32(stream);
-
-                    NewSubType.U40 = StreamUtil.ReadUInt32(stream);
-                    NewSubType.U41 = StreamUtil.ReadUInt32(stream);
-                    NewSubType.U42 = StreamUtil.ReadUInt32(stream);
-                    NewSubType.U43 = StreamUtil.ReadUInt32(stream);
-
-                    NewSubType.U44 = StreamUtil.ReadUInt32(stream);
-                    NewSubType.U45 = StreamUtil.ReadUInt32(stream);
-                    NewSubType.U46 = StreamUtil.ReadUInt32(stream);
-                    NewSubType.U47 = StreamUtil.ReadUInt32(stream);
-
-                    NewSubType.U48 = StreamUtil.ReadUInt32(stream);
-                    NewSubType.U49 = StreamUtil.ReadUInt32(stream);
-                    NewSubType.U50 = StreamUtil.ReadUInt32(stream);
-
-                    NewMainType.type2Sub2 = NewSubType;
+                    NewMainType.CollisionEmitter = ReadEmitter(stream);
                 }
                 else
                 {
@@ -744,8 +587,8 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky.PS2
             {
                 var NewMainType = new Type3();
 
-                NewMainType.U0 = StreamUtil.ReadUInt32(stream);
-                NewMainType.U1 = StreamUtil.ReadFloat(stream);
+                NewMainType.Command = StreamUtil.ReadUInt32(stream);
+                NewMainType.Parameter = StreamUtil.ReadFloat(stream);
 
                 NewEffect.type3 = NewMainType;
             }
@@ -757,9 +600,9 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky.PS2
             {
                 var NewMainType = new Type5();
 
-                NewMainType.U0 = StreamUtil.ReadUInt32(stream);
-                NewMainType.U1 = StreamUtil.ReadFloat(stream); //Not Actually Sure
-                NewMainType.U2 = StreamUtil.ReadUInt32(stream);
+                NewMainType.Mode = StreamUtil.ReadUInt32(stream);
+                NewMainType.Compare = StreamUtil.ReadUInt32(stream);
+                NewMainType.Threshold = StreamUtil.ReadFloat(stream);
 
                 NewEffect.type5 = NewMainType;
             }
@@ -780,8 +623,8 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky.PS2
             {
                 var NewMainType = new Type9();
 
-                NewMainType.U0 = StreamUtil.ReadUInt32(stream);
-                NewMainType.U1 = StreamUtil.ReadFloat(stream);
+                NewMainType.Command = StreamUtil.ReadUInt32(stream);
+                NewMainType.Parameter = StreamUtil.ReadFloat(stream);
 
                 NewEffect.type9 = NewMainType;
             }
@@ -795,11 +638,11 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky.PS2
             } //Done
             else if (NewEffect.MainType == 17)
             {
-                NewEffect.type17 = StreamUtil.ReadFloat(stream);
+                NewEffect.SpeedBoostDuration = StreamUtil.ReadFloat(stream);
             }
             else if (NewEffect.MainType == 18)
             {
-                NewEffect.type18 = StreamUtil.ReadFloat(stream);
+                NewEffect.TrickBoostDuration = StreamUtil.ReadFloat(stream);
             }
             else if (NewEffect.MainType == 21)
             {
@@ -842,6 +685,88 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky.PS2
             return NewEffect;
         }
 
+        //Main type 2 sub types 0 and 2 share this layout
+        static EmitterEffect ReadEmitter(Stream stream)
+        {
+            var NewEmitter = new EmitterEffect();
+
+            NewEmitter.ParticleCount = StreamUtil.ReadUInt32(stream);
+            NewEmitter.TrailCopies = StreamUtil.ReadUInt32(stream);
+            NewEmitter.EmissionWindow = StreamUtil.ReadFloat(stream);
+            NewEmitter.TimeScale = StreamUtil.ReadFloat(stream);
+
+            NewEmitter.SizeCenter = StreamUtil.ReadFloat(stream);
+            NewEmitter.ParticleLifeCenter = StreamUtil.ReadFloat(stream);
+            NewEmitter.SizeSpan = StreamUtil.ReadFloat(stream);
+            NewEmitter.ParticleLifeSpan = StreamUtil.ReadFloat(stream);
+
+            NewEmitter.TrailSpacing = StreamUtil.ReadFloat(stream);
+            NewEmitter.Origin = StreamUtil.ReadVector3(stream);
+            NewEmitter.SpawnAxisA = StreamUtil.ReadVector3(stream);
+            NewEmitter.SpawnAxisB = StreamUtil.ReadVector3(stream);
+            NewEmitter.VelocityBase = StreamUtil.ReadVector3(stream);
+            NewEmitter.VelocityAxisA = StreamUtil.ReadVector3(stream);
+            NewEmitter.VelocityAxisB = StreamUtil.ReadVector3(stream);
+            NewEmitter.VelocityAxisC = StreamUtil.ReadVector3(stream);
+            NewEmitter.Gravity = StreamUtil.ReadVector3(stream);
+
+            NewEmitter.ColourStop1 = ReadColourARGB(stream);
+            NewEmitter.ColourStop2 = ReadColourARGB(stream);
+            NewEmitter.ColourStop3 = ReadColourARGB(stream);
+            NewEmitter.ColourStop4 = ReadColourARGB(stream);
+
+            NewEmitter.SpriteIndex = StreamUtil.ReadUInt32(stream);
+            NewEmitter.BlendMode = StreamUtil.ReadUInt32(stream);
+
+            return NewEmitter;
+        }
+
+        static void WriteEmitter(Stream stream, EmitterEffect Emitter)
+        {
+            StreamUtil.WriteInt32(stream, Emitter.ParticleCount);
+            StreamUtil.WriteInt32(stream, Emitter.TrailCopies);
+            StreamUtil.WriteFloat32(stream, Emitter.EmissionWindow);
+            StreamUtil.WriteFloat32(stream, Emitter.TimeScale);
+
+            StreamUtil.WriteFloat32(stream, Emitter.SizeCenter);
+            StreamUtil.WriteFloat32(stream, Emitter.ParticleLifeCenter);
+            StreamUtil.WriteFloat32(stream, Emitter.SizeSpan);
+            StreamUtil.WriteFloat32(stream, Emitter.ParticleLifeSpan);
+
+            StreamUtil.WriteFloat32(stream, Emitter.TrailSpacing);
+            StreamUtil.WriteVector3(stream, Emitter.Origin);
+            StreamUtil.WriteVector3(stream, Emitter.SpawnAxisA);
+            StreamUtil.WriteVector3(stream, Emitter.SpawnAxisB);
+            StreamUtil.WriteVector3(stream, Emitter.VelocityBase);
+            StreamUtil.WriteVector3(stream, Emitter.VelocityAxisA);
+            StreamUtil.WriteVector3(stream, Emitter.VelocityAxisB);
+            StreamUtil.WriteVector3(stream, Emitter.VelocityAxisC);
+            StreamUtil.WriteVector3(stream, Emitter.Gravity);
+
+            WriteColourARGB(stream, Emitter.ColourStop1);
+            WriteColourARGB(stream, Emitter.ColourStop2);
+            WriteColourARGB(stream, Emitter.ColourStop3);
+            WriteColourARGB(stream, Emitter.ColourStop4);
+
+            StreamUtil.WriteInt32(stream, Emitter.SpriteIndex);
+            StreamUtil.WriteInt32(stream, Emitter.BlendMode);
+        }
+
+        //Effect colours are stored A,R,G,B. In memory the Vector4 is R,G,B,A
+        static Vector4 ReadColourARGB(Stream stream)
+        {
+            float Alpha = StreamUtil.ReadFloat(stream);
+            return new Vector4(StreamUtil.ReadVector3(stream), Alpha);
+        }
+
+        static void WriteColourARGB(Stream stream, Vector4 Colour)
+        {
+            StreamUtil.WriteFloat32(stream, Colour.W);
+            StreamUtil.WriteFloat32(stream, Colour.X);
+            StreamUtil.WriteFloat32(stream, Colour.Y);
+            StreamUtil.WriteFloat32(stream, Colour.Z);
+        }
+
         /// <summary>Payload bytes of one effect node: its size field counts the whole node, main type
         /// and size included, so the payload is what is left after those two words.</summary>
         /// <remarks>A size that cannot be a whole node would seek the chain loop backwards and hang
@@ -876,12 +801,10 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky.PS2
                 StreamUtil.WriteInt32(stream, Type0Temp.SubType);
                 if (EffectData.type0.Value.SubType == 0)
                 {
-                    StreamUtil.WriteFloat32(stream, Type0Temp.type0Sub0.Value.U0);
-                    StreamUtil.WriteFloat32(stream, Type0Temp.type0Sub0.Value.U1);
-                    StreamUtil.WriteFloat32(stream, Type0Temp.type0Sub0.Value.U2);
-                    StreamUtil.WriteFloat32(stream, Type0Temp.type0Sub0.Value.U3);
-                    StreamUtil.WriteFloat32(stream, Type0Temp.type0Sub0.Value.U4);
-                    StreamUtil.WriteFloat32(stream, Type0Temp.type0Sub0.Value.U5);
+                    StreamUtil.WriteFloat32(stream, Type0Temp.Roller.Value.Mass);
+                    StreamUtil.WriteFloat32(stream, Type0Temp.Roller.Value.U1);
+                    StreamUtil.WriteFloat32(stream, Type0Temp.Roller.Value.U2);
+                    StreamUtil.WriteVector3(stream, Type0Temp.Roller.Value.LaunchDirection);
                 }
                 else if (EffectData.type0.Value.SubType == 2)
                 {
@@ -899,27 +822,26 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky.PS2
                 else if (EffectData.type0.Value.SubType == 7)
                 {
                     StreamUtil.WriteInt32(stream, Type0Temp.Boost.Value.Mode);
-                    StreamUtil.WriteFloat32(stream, Type0Temp.Boost.Value.U1);
-                    StreamUtil.WriteFloat32(stream, Type0Temp.Boost.Value.U2);
+                    StreamUtil.WriteFloat32(stream, Type0Temp.Boost.Value.Window);
+                    StreamUtil.WriteFloat32(stream, Type0Temp.Boost.Value.ApproachRate);
                     StreamUtil.WriteFloat32(stream, Type0Temp.Boost.Value.BoostAmount);
                     StreamUtil.WriteVector3(stream, Type0Temp.Boost.Value.BoostDir);
                 }
                 else if (EffectData.type0.Value.SubType == 10)
                 {
-                    StreamUtil.WriteInt32(stream, Type0Temp.UVScroll.Value.U0);
-                    StreamUtil.WriteFloat32(stream, Type0Temp.UVScroll.Value.U1);
-                    StreamUtil.WriteFloat32(stream, Type0Temp.UVScroll.Value.U2);
-                    StreamUtil.WriteFloat32(stream, Type0Temp.UVScroll.Value.U3);
-                    StreamUtil.WriteFloat32(stream, Type0Temp.UVScroll.Value.U4);
-                    StreamUtil.WriteFloat32(stream, Type0Temp.UVScroll.Value.U5);
+                    StreamUtil.WriteInt32(stream, Type0Temp.UVScroll.Value.Mode);
+                    StreamUtil.WriteVector2(stream, Type0Temp.UVScroll.Value.Speed);
+                    StreamUtil.WriteFloat32(stream, Type0Temp.UVScroll.Value.ActiveDuration);
+                    StreamUtil.WriteFloat32(stream, Type0Temp.UVScroll.Value.PauseDuration);
+                    StreamUtil.WriteFloat32(stream, Type0Temp.UVScroll.Value.Lifetime);
                 }
                 else if (EffectData.type0.Value.SubType == 11)
                 {
-                    StreamUtil.WriteInt32(stream, Type0Temp.TextureFlip.Value.U0);
+                    StreamUtil.WriteInt32(stream, Type0Temp.TextureFlip.Value.StartFrame);
                     StreamUtil.WriteInt32(stream, Type0Temp.TextureFlip.Value.Direction);
                     StreamUtil.WriteFloat32(stream, Type0Temp.TextureFlip.Value.Speed);
                     StreamUtil.WriteFloat32(stream, Type0Temp.TextureFlip.Value.Length);
-                    StreamUtil.WriteInt32(stream, Type0Temp.TextureFlip.Value.U4);
+                    StreamUtil.WriteInt32(stream, Type0Temp.TextureFlip.Value.PauseDwell);
                 }
                 else if (EffectData.type0.Value.SubType == 12)
                 {
@@ -928,52 +850,44 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky.PS2
                 }
                 else if (EffectData.type0.Value.SubType == 13)
                 {
-                    StreamUtil.WriteInt32(stream, Type0Temp.type0Sub13.Value.U0);
-                    StreamUtil.WriteFloat32(stream, Type0Temp.type0Sub13.Value.U1);
-                    StreamUtil.WriteFloat32(stream, Type0Temp.type0Sub13.Value.U2);
-                    StreamUtil.WriteInt32(stream, Type0Temp.type0Sub13.Value.U3);
+                    StreamUtil.WriteInt32(stream, Type0Temp.Flag.Value.Variant);
+                    StreamUtil.WriteFloat32(stream, Type0Temp.Flag.Value.Amplitude);
+                    StreamUtil.WriteFloat32(stream, Type0Temp.Flag.Value.Wavelength);
+                    StreamUtil.WriteFloat32(stream, Type0Temp.Flag.Value.U3);
                 }
                 else if (EffectData.type0.Value.SubType == 14)
                 {
-                    StreamUtil.WriteFloat32(stream, Type0Temp.type0Sub14.Value.U0);
-                    StreamUtil.WriteFloat32(stream, Type0Temp.type0Sub14.Value.U1);
+                    StreamUtil.WriteFloat32(stream, Type0Temp.Cracked.Value.CrackLifetime);
+                    StreamUtil.WriteFloat32(stream, Type0Temp.Cracked.Value.Strength);
                 }
                 else if (EffectData.type0.Value.SubType == 15)
                 {
-                    StreamUtil.WriteFloat32(stream, Type0Temp.type0Sub15.Value.U0);
-                    StreamUtil.WriteFloat32(stream, Type0Temp.type0Sub15.Value.U1);
-                    StreamUtil.WriteInt32(stream, Type0Temp.type0Sub15.Value.U2);
-                    StreamUtil.WriteInt32(stream, Type0Temp.type0Sub15.Value.U3);
-                    StreamUtil.WriteFloat32(stream, Type0Temp.type0Sub15.Value.U4);
+                    StreamUtil.WriteFloat32(stream, Type0Temp.LapBoost.Value.ApproachRate);
+                    StreamUtil.WriteFloat32(stream, Type0Temp.LapBoost.Value.TargetSpeed);
+                    StreamUtil.WriteVector3(stream, Type0Temp.LapBoost.Value.Axis);
                 }
                 else if (EffectData.type0.Value.SubType == 17)
                 {
                     StreamUtil.WriteInt32(stream, Type0Temp.CrowdEffect.Value.U0);
-                    StreamUtil.WriteInt32(stream, Type0Temp.CrowdEffect.Value.U1);
-                    StreamUtil.WriteInt32(stream, Type0Temp.CrowdEffect.Value.U2);
+                    StreamUtil.WriteInt32(stream, Type0Temp.CrowdEffect.Value.Rows);
+                    StreamUtil.WriteInt32(stream, Type0Temp.CrowdEffect.Value.Columns);
                 }
                 else if (EffectData.type0.Value.SubType == 18)
                 {
-                    StreamUtil.WriteFloat32(stream, Type0Temp.type0Sub18.Value.U0);
-                    StreamUtil.WriteFloat32(stream, Type0Temp.type0Sub18.Value.U1);
-                    StreamUtil.WriteInt32(stream, Type0Temp.type0Sub18.Value.U2);
-                    StreamUtil.WriteInt32(stream, Type0Temp.type0Sub18.Value.U3);
-                    StreamUtil.WriteFloat32(stream, Type0Temp.type0Sub18.Value.U4);
-                    StreamUtil.WriteFloat32(stream, Type0Temp.type0Sub18.Value.U5);
-                    StreamUtil.WriteFloat32(stream, Type0Temp.type0Sub18.Value.U6);
+                    StreamUtil.WriteFloat32(stream, Type0Temp.ZBoost.Value.ApproachRate);
+                    StreamUtil.WriteFloat32(stream, Type0Temp.ZBoost.Value.TargetSpeed);
+                    StreamUtil.WriteVector3(stream, Type0Temp.ZBoost.Value.Axis);
+                    StreamUtil.WriteFloat32(stream, Type0Temp.ZBoost.Value.TargetAltitude);
+                    StreamUtil.WriteFloat32(stream, Type0Temp.ZBoost.Value.SnapTolerance);
                 }
                 else if (EffectData.type0.Value.SubType == 20)
                 {
-                    StreamUtil.WriteInt32(stream, Type0Temp.type0Sub20.Value.U0);
-                    StreamUtil.WriteFloat32(stream, Type0Temp.type0Sub20.Value.U1);
-                    StreamUtil.WriteFloat32(stream, Type0Temp.type0Sub20.Value.U2);
-                    StreamUtil.WriteInt32(stream, Type0Temp.type0Sub20.Value.U3);
-                    StreamUtil.WriteInt32(stream, Type0Temp.type0Sub20.Value.U4);
-                    StreamUtil.WriteInt32(stream, Type0Temp.type0Sub20.Value.U5);
-                    StreamUtil.WriteFloat32(stream, Type0Temp.type0Sub20.Value.U6);
-                    StreamUtil.WriteFloat32(stream, Type0Temp.type0Sub20.Value.U7);
-                    StreamUtil.WriteFloat32(stream, Type0Temp.type0Sub20.Value.U8);
-                    StreamUtil.WriteFloat32(stream, Type0Temp.type0Sub20.Value.U9);
+                    StreamUtil.WriteInt32(stream, Type0Temp.MeshAnim.Value.U0);
+                    StreamUtil.WriteFloat32(stream, Type0Temp.MeshAnim.Value.FrameStep);
+                    StreamUtil.WriteFloat32(stream, Type0Temp.MeshAnim.Value.Duration);
+                    StreamUtil.WriteVector3(stream, Type0Temp.MeshAnim.Value.ThrowDirection);
+                    StreamUtil.WriteVector3(stream, Type0Temp.MeshAnim.Value.VelocityScale);
+                    StreamUtil.WriteFloat32(stream, Type0Temp.MeshAnim.Value.DirectionScale);
                 }
                 else if (EffectData.type0.Value.SubType == 23)
                 {
@@ -981,62 +895,54 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky.PS2
                 }
                 else if (EffectData.type0.Value.SubType == 24)
                 {
-                    StreamUtil.WriteInt32(stream, Type0Temp.type0Sub24.Value.U0);
-                    StreamUtil.WriteInt32(stream, Type0Temp.type0Sub24.Value.U1);
-                    StreamUtil.WriteFloat32(stream, Type0Temp.type0Sub24.Value.U2);
-                    StreamUtil.WriteFloat32(stream, Type0Temp.type0Sub24.Value.U3);
-                    StreamUtil.WriteInt32(stream, Type0Temp.type0Sub24.Value.U4);
-                    StreamUtil.WriteInt32(stream, Type0Temp.type0Sub24.Value.U5);
-                    StreamUtil.WriteInt32(stream, Type0Temp.type0Sub24.Value.U6);
-                    StreamUtil.WriteFloat32(stream, Type0Temp.type0Sub24.Value.U7);
-                    StreamUtil.WriteFloat32(stream, Type0Temp.type0Sub24.Value.U8);
-                    StreamUtil.WriteFloat32(stream, Type0Temp.type0Sub24.Value.U9);
-                    StreamUtil.WriteFloat32(stream, Type0Temp.type0Sub24.Value.U10);
-                    StreamUtil.WriteFloat32(stream, Type0Temp.type0Sub24.Value.U11);
-                    StreamUtil.WriteFloat32(stream, Type0Temp.type0Sub24.Value.U12);
-                    StreamUtil.WriteFloat32(stream, Type0Temp.type0Sub24.Value.U13);
-                    StreamUtil.WriteFloat32(stream, Type0Temp.type0Sub24.Value.U14);
-                    StreamUtil.WriteFloat32(stream, Type0Temp.type0Sub24.Value.U15);
-                    StreamUtil.WriteFloat32(stream, Type0Temp.type0Sub24.Value.U16);
-                    StreamUtil.WriteFloat32(stream, Type0Temp.type0Sub24.Value.U17);
-                    StreamUtil.WriteFloat32(stream, Type0Temp.type0Sub24.Value.U18);
+                    StreamUtil.WriteInt32(stream, Type0Temp.TubeEndBoost.Value.Mode);
+                    StreamUtil.WriteFloat32(stream, Type0Temp.TubeEndBoost.Value.Window);
+                    StreamUtil.WriteFloat32(stream, Type0Temp.TubeEndBoost.Value.ApproachRate);
+                    StreamUtil.WriteFloat32(stream, Type0Temp.TubeEndBoost.Value.TargetSpeed);
+                    StreamUtil.WriteVector3(stream, Type0Temp.TubeEndBoost.Value.BaseAxis);
+                    StreamUtil.WriteVector3(stream, Type0Temp.TubeEndBoost.Value.Stage1Direction);
+                    StreamUtil.WriteVector3(stream, Type0Temp.TubeEndBoost.Value.Stage2Direction);
+                    StreamUtil.WriteVector3(stream, Type0Temp.TubeEndBoost.Value.Stage3Direction);
+                    StreamUtil.WriteFloat32(stream, Type0Temp.TubeEndBoost.Value.Stage1Speed);
+                    StreamUtil.WriteFloat32(stream, Type0Temp.TubeEndBoost.Value.Stage2Speed);
+                    StreamUtil.WriteFloat32(stream, Type0Temp.TubeEndBoost.Value.Stage3Speed);
                 }
                 else if (EffectData.type0.Value.SubType == 256)
                 {
-                    StreamUtil.WriteInt32(stream, Type0Temp.type0Sub256.Value.U0);
-                    StreamUtil.WriteFloat32(stream, Type0Temp.type0Sub256.Value.U1);
-                    StreamUtil.WriteFloat32(stream, Type0Temp.type0Sub256.Value.U2);
-                    StreamUtil.WriteFloat32(stream, Type0Temp.type0Sub256.Value.U3);
-                    StreamUtil.WriteFloat32(stream, Type0Temp.type0Sub256.Value.U4);
-                    StreamUtil.WriteFloat32(stream, Type0Temp.type0Sub256.Value.U5);
-                    StreamUtil.WriteInt32(stream, Type0Temp.type0Sub256.Value.U6);
-                    StreamUtil.WriteInt32(stream, Type0Temp.type0Sub256.Value.U7);
+                    StreamUtil.WriteInt32(stream, Type0Temp.AnimObject.Value.LoopMode);
+                    StreamUtil.WriteFloat32(stream, Type0Temp.AnimObject.Value.WindowStart);
+                    StreamUtil.WriteFloat32(stream, Type0Temp.AnimObject.Value.WindowEnd);
+                    StreamUtil.WriteFloat32(stream, Type0Temp.AnimObject.Value.Rate);
+                    StreamUtil.WriteFloat32(stream, Type0Temp.AnimObject.Value.RandomRateUpper);
+                    StreamUtil.WriteFloat32(stream, Type0Temp.AnimObject.Value.Debounce);
+                    StreamUtil.WriteInt32(stream, Type0Temp.AnimObject.Value.RandomStart);
+                    StreamUtil.WriteInt32(stream, Type0Temp.AnimObject.Value.DirectionMode);
                 }
                 else if (EffectData.type0.Value.SubType == 257)
                 {
-                    StreamUtil.WriteInt32(stream, Type0Temp.type0Sub257.Value.U0);
-                    StreamUtil.WriteInt32(stream, Type0Temp.type0Sub257.Value.U1);
-                    StreamUtil.WriteFloat32(stream, Type0Temp.type0Sub257.Value.U2);
-                    StreamUtil.WriteFloat32(stream, Type0Temp.type0Sub257.Value.U3);
-                    StreamUtil.WriteInt32(stream, Type0Temp.type0Sub257.Value.U4);
-                    StreamUtil.WriteFloat32(stream, Type0Temp.type0Sub257.Value.U5);
-                    StreamUtil.WriteInt32(stream, Type0Temp.type0Sub257.Value.U6);
-                    StreamUtil.WriteInt32(stream, Type0Temp.type0Sub257.Value.U7);
+                    StreamUtil.WriteInt32(stream, Type0Temp.AnimDelta.Value.LoopMode);
+                    StreamUtil.WriteFloat32(stream, Type0Temp.AnimDelta.Value.WindowStart);
+                    StreamUtil.WriteFloat32(stream, Type0Temp.AnimDelta.Value.WindowEnd);
+                    StreamUtil.WriteFloat32(stream, Type0Temp.AnimDelta.Value.Rate);
+                    StreamUtil.WriteFloat32(stream, Type0Temp.AnimDelta.Value.RandomRateUpper);
+                    StreamUtil.WriteFloat32(stream, Type0Temp.AnimDelta.Value.Debounce);
+                    StreamUtil.WriteInt32(stream, Type0Temp.AnimDelta.Value.RandomStart);
+                    StreamUtil.WriteInt32(stream, Type0Temp.AnimDelta.Value.DirectionMode);
                 }
                 else if (EffectData.type0.Value.SubType == 258)
                 {
-                    StreamUtil.WriteInt32(stream, Type0Temp.type0Sub258.Value.U0);
-                    StreamUtil.WriteInt32(stream, Type0Temp.type0Sub258.Value.U1);
-                    StreamUtil.WriteFloat32(stream, Type0Temp.type0Sub258.Value.U2);
-                    StreamUtil.WriteFloat32(stream, Type0Temp.type0Sub258.Value.U3);
-                    StreamUtil.WriteInt32(stream, Type0Temp.type0Sub258.Value.U4);
-                    StreamUtil.WriteFloat32(stream, Type0Temp.type0Sub258.Value.U5);
-                    StreamUtil.WriteInt32(stream, Type0Temp.type0Sub258.Value.U6);
-                    StreamUtil.WriteInt32(stream, Type0Temp.type0Sub258.Value.U7);
-                    StreamUtil.WriteFloat32(stream, Type0Temp.type0Sub258.Value.U8);
-                    StreamUtil.WriteFloat32(stream, Type0Temp.type0Sub258.Value.U9);
-                    StreamUtil.WriteFloat32(stream, Type0Temp.type0Sub258.Value.U10);
-                    StreamUtil.WriteInt32(stream, Type0Temp.type0Sub258.Value.U11);
+                    StreamUtil.WriteInt32(stream, Type0Temp.AnimCombo.Value.LoopMode);
+                    StreamUtil.WriteFloat32(stream, Type0Temp.AnimCombo.Value.WindowStart);
+                    StreamUtil.WriteFloat32(stream, Type0Temp.AnimCombo.Value.WindowEnd);
+                    StreamUtil.WriteFloat32(stream, Type0Temp.AnimCombo.Value.Rate);
+                    StreamUtil.WriteFloat32(stream, Type0Temp.AnimCombo.Value.RandomRateUpper);
+                    StreamUtil.WriteFloat32(stream, Type0Temp.AnimCombo.Value.Debounce);
+                    StreamUtil.WriteInt32(stream, Type0Temp.AnimCombo.Value.RandomStart);
+                    StreamUtil.WriteInt32(stream, Type0Temp.AnimCombo.Value.DirectionMode);
+                    StreamUtil.WriteFloat32(stream, Type0Temp.AnimCombo.Value.ComboWindowStart);
+                    StreamUtil.WriteFloat32(stream, Type0Temp.AnimCombo.Value.ComboWindowEnd);
+                    StreamUtil.WriteFloat32(stream, Type0Temp.AnimCombo.Value.ComboRate);
+                    StreamUtil.WriteInt32(stream, Type0Temp.AnimCombo.Value.ComboEndMode);
                 }
                 else
                 {
@@ -1049,151 +955,23 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky.PS2
 
                 if(EffectData.type2.Value.SubType == 0)
                 {
-                    StreamUtil.WriteInt32(stream, EffectData.type2.Value.type2Sub0.Value.U0);
-                    StreamUtil.WriteInt32(stream, EffectData.type2.Value.type2Sub0.Value.U1);
-                    StreamUtil.WriteFloat32(stream, EffectData.type2.Value.type2Sub0.Value.U2);
-                    StreamUtil.WriteFloat32(stream, EffectData.type2.Value.type2Sub0.Value.U3);
-
-                    StreamUtil.WriteFloat32(stream, EffectData.type2.Value.type2Sub0.Value.U4);
-                    StreamUtil.WriteFloat32(stream, EffectData.type2.Value.type2Sub0.Value.U5);
-                    StreamUtil.WriteFloat32(stream, EffectData.type2.Value.type2Sub0.Value.U6);
-                    StreamUtil.WriteFloat32(stream, EffectData.type2.Value.type2Sub0.Value.U7);
-
-                    StreamUtil.WriteFloat32(stream, EffectData.type2.Value.type2Sub0.Value.U8);
-                    StreamUtil.WriteFloat32(stream, EffectData.type2.Value.type2Sub0.Value.U9);
-                    StreamUtil.WriteFloat32(stream, EffectData.type2.Value.type2Sub0.Value.U10);
-                    StreamUtil.WriteFloat32(stream, EffectData.type2.Value.type2Sub0.Value.U11);
-
-                    StreamUtil.WriteFloat32(stream, EffectData.type2.Value.type2Sub0.Value.U12);
-                    StreamUtil.WriteFloat32(stream, EffectData.type2.Value.type2Sub0.Value.U13);
-                    StreamUtil.WriteFloat32(stream, EffectData.type2.Value.type2Sub0.Value.U14);
-                    StreamUtil.WriteFloat32(stream, EffectData.type2.Value.type2Sub0.Value.U15);
-
-                    StreamUtil.WriteFloat32(stream, EffectData.type2.Value.type2Sub0.Value.U16);
-                    StreamUtil.WriteFloat32(stream, EffectData.type2.Value.type2Sub0.Value.U17);
-                    StreamUtil.WriteFloat32(stream, EffectData.type2.Value.type2Sub0.Value.U18);
-                    StreamUtil.WriteFloat32(stream, EffectData.type2.Value.type2Sub0.Value.U19); 
-
-                    StreamUtil.WriteFloat32(stream, EffectData.type2.Value.type2Sub0.Value.U20);
-                    StreamUtil.WriteFloat32(stream, EffectData.type2.Value.type2Sub0.Value.U21);
-                    StreamUtil.WriteFloat32(stream, EffectData.type2.Value.type2Sub0.Value.U22);
-                    StreamUtil.WriteFloat32(stream, EffectData.type2.Value.type2Sub0.Value.U23);
-
-                    StreamUtil.WriteFloat32(stream, EffectData.type2.Value.type2Sub0.Value.U24);
-                    StreamUtil.WriteFloat32(stream, EffectData.type2.Value.type2Sub0.Value.U25);
-                    StreamUtil.WriteFloat32(stream, EffectData.type2.Value.type2Sub0.Value.U26);
-                    StreamUtil.WriteFloat32(stream, EffectData.type2.Value.type2Sub0.Value.U27);
-
-                    StreamUtil.WriteFloat32(stream, EffectData.type2.Value.type2Sub0.Value.U28);
-                    StreamUtil.WriteFloat32(stream, EffectData.type2.Value.type2Sub0.Value.U29);
-                    StreamUtil.WriteFloat32(stream, EffectData.type2.Value.type2Sub0.Value.U30);
-                    StreamUtil.WriteFloat32(stream, EffectData.type2.Value.type2Sub0.Value.U31);
-
-                    StreamUtil.WriteFloat32(stream, EffectData.type2.Value.type2Sub0.Value.U32);
-                    StreamUtil.WriteFloat32(stream, EffectData.type2.Value.type2Sub0.Value.U33);
-                    StreamUtil.WriteFloat32(stream, EffectData.type2.Value.type2Sub0.Value.U34);
-                    StreamUtil.WriteFloat32(stream, EffectData.type2.Value.type2Sub0.Value.U35);
-
-                    StreamUtil.WriteFloat32(stream, EffectData.type2.Value.type2Sub0.Value.U36);
-                    StreamUtil.WriteFloat32(stream, EffectData.type2.Value.type2Sub0.Value.U37);
-                    StreamUtil.WriteFloat32(stream, EffectData.type2.Value.type2Sub0.Value.U38);
-                    StreamUtil.WriteFloat32(stream, EffectData.type2.Value.type2Sub0.Value.U39);
-
-                    StreamUtil.WriteFloat32(stream, EffectData.type2.Value.type2Sub0.Value.U40);
-                    StreamUtil.WriteFloat32(stream, EffectData.type2.Value.type2Sub0.Value.U41);
-                    StreamUtil.WriteFloat32(stream, EffectData.type2.Value.type2Sub0.Value.U42);
-                    StreamUtil.WriteFloat32(stream, EffectData.type2.Value.type2Sub0.Value.U43);
-
-                    StreamUtil.WriteFloat32(stream, EffectData.type2.Value.type2Sub0.Value.U44);
-                    StreamUtil.WriteFloat32(stream, EffectData.type2.Value.type2Sub0.Value.U45);
-                    StreamUtil.WriteFloat32(stream, EffectData.type2.Value.type2Sub0.Value.U46);
-                    StreamUtil.WriteFloat32(stream, EffectData.type2.Value.type2Sub0.Value.U47);
-
-                    StreamUtil.WriteFloat32(stream, EffectData.type2.Value.type2Sub0.Value.U48);
-                    StreamUtil.WriteInt32(stream, EffectData.type2.Value.type2Sub0.Value.U49);
-                    StreamUtil.WriteInt32(stream, EffectData.type2.Value.type2Sub0.Value.U50);
+                    WriteEmitter(stream, EffectData.type2.Value.Emitter.Value);
                 }
                 else if (EffectData.type2.Value.SubType == 1)
                 {
                     StreamUtil.WriteInt32(stream, EffectData.type2.Value.SplineAnimation.Value.SplineIndex);
-                    StreamUtil.WriteInt32(stream, EffectData.type2.Value.SplineAnimation.Value.U1);
-                    StreamUtil.WriteInt32(stream, EffectData.type2.Value.SplineAnimation.Value.U2);
+                    StreamUtil.WriteInt32(stream, EffectData.type2.Value.SplineAnimation.Value.EndMode);
+                    StreamUtil.WriteInt32(stream, EffectData.type2.Value.SplineAnimation.Value.OrientationMode);
                     StreamUtil.WriteInt32(stream, EffectData.type2.Value.SplineAnimation.Value.InstanceCount);
 
                     StreamUtil.WriteFloat32(stream, EffectData.type2.Value.SplineAnimation.Value.AnimationSpeed);
-                    StreamUtil.WriteFloat32(stream, EffectData.type2.Value.SplineAnimation.Value.U5);
-                    StreamUtil.WriteInt32(stream, EffectData.type2.Value.SplineAnimation.Value.U6);
-                    StreamUtil.WriteFloat32(stream, EffectData.type2.Value.SplineAnimation.Value.U7);
-
-                    StreamUtil.WriteFloat32(stream, EffectData.type2.Value.SplineAnimation.Value.R);
-                    StreamUtil.WriteFloat32(stream, EffectData.type2.Value.SplineAnimation.Value.G);
-                    StreamUtil.WriteFloat32(stream, EffectData.type2.Value.SplineAnimation.Value.B);
+                    StreamUtil.WriteFloat32(stream, EffectData.type2.Value.SplineAnimation.Value.YawOffset);
+                    StreamUtil.WriteInt32(stream, EffectData.type2.Value.SplineAnimation.Value.ShowRouteLine);
+                    WriteColourARGB(stream, EffectData.type2.Value.SplineAnimation.Value.RouteLineColour);
                 }
                 else if (EffectData.type2.Value.SubType == 2)
                 {
-                    StreamUtil.WriteInt32(stream, EffectData.type2.Value.type2Sub2.Value.U0);
-                    StreamUtil.WriteInt32(stream, EffectData.type2.Value.type2Sub2.Value.U1);
-                    StreamUtil.WriteInt32(stream, EffectData.type2.Value.type2Sub2.Value.U2);
-                    StreamUtil.WriteInt32(stream, EffectData.type2.Value.type2Sub2.Value.U3);
-
-                    StreamUtil.WriteInt32(stream, EffectData.type2.Value.type2Sub2.Value.U4);
-                    StreamUtil.WriteInt32(stream, EffectData.type2.Value.type2Sub2.Value.U5);
-                    StreamUtil.WriteInt32(stream, EffectData.type2.Value.type2Sub2.Value.U6);
-                    StreamUtil.WriteInt32(stream, EffectData.type2.Value.type2Sub2.Value.U7);
-
-                    StreamUtil.WriteInt32(stream, EffectData.type2.Value.type2Sub2.Value.U8);
-                    StreamUtil.WriteInt32(stream, EffectData.type2.Value.type2Sub2.Value.U9);
-                    StreamUtil.WriteInt32(stream, EffectData.type2.Value.type2Sub2.Value.U10);
-                    StreamUtil.WriteInt32(stream, EffectData.type2.Value.type2Sub2.Value.U11);
-
-                    StreamUtil.WriteInt32(stream, EffectData.type2.Value.type2Sub2.Value.U12);
-                    StreamUtil.WriteInt32(stream, EffectData.type2.Value.type2Sub2.Value.U13);
-                    StreamUtil.WriteInt32(stream, EffectData.type2.Value.type2Sub2.Value.U14);
-                    StreamUtil.WriteInt32(stream, EffectData.type2.Value.type2Sub2.Value.U15);
-
-                    StreamUtil.WriteInt32(stream, EffectData.type2.Value.type2Sub2.Value.U16);
-                    StreamUtil.WriteInt32(stream, EffectData.type2.Value.type2Sub2.Value.U17);
-                    StreamUtil.WriteInt32(stream, EffectData.type2.Value.type2Sub2.Value.U18);
-                    StreamUtil.WriteInt32(stream, EffectData.type2.Value.type2Sub2.Value.U19);
-
-                    StreamUtil.WriteInt32(stream, EffectData.type2.Value.type2Sub2.Value.U20);
-                    StreamUtil.WriteInt32(stream, EffectData.type2.Value.type2Sub2.Value.U21);
-                    StreamUtil.WriteInt32(stream, EffectData.type2.Value.type2Sub2.Value.U22);
-                    StreamUtil.WriteInt32(stream, EffectData.type2.Value.type2Sub2.Value.U23);
-
-                    StreamUtil.WriteInt32(stream, EffectData.type2.Value.type2Sub2.Value.U24);
-                    StreamUtil.WriteInt32(stream, EffectData.type2.Value.type2Sub2.Value.U25);
-                    StreamUtil.WriteInt32(stream, EffectData.type2.Value.type2Sub2.Value.U26);
-                    StreamUtil.WriteInt32(stream, EffectData.type2.Value.type2Sub2.Value.U27);
-
-                    StreamUtil.WriteInt32(stream, EffectData.type2.Value.type2Sub2.Value.U28);
-                    StreamUtil.WriteInt32(stream, EffectData.type2.Value.type2Sub2.Value.U29);
-                    StreamUtil.WriteInt32(stream, EffectData.type2.Value.type2Sub2.Value.U30);
-                    StreamUtil.WriteInt32(stream, EffectData.type2.Value.type2Sub2.Value.U31);
-
-                    StreamUtil.WriteInt32(stream, EffectData.type2.Value.type2Sub2.Value.U32);
-                    StreamUtil.WriteInt32(stream, EffectData.type2.Value.type2Sub2.Value.U33);
-                    StreamUtil.WriteInt32(stream, EffectData.type2.Value.type2Sub2.Value.U34);
-                    StreamUtil.WriteInt32(stream, EffectData.type2.Value.type2Sub2.Value.U35);
-
-                    StreamUtil.WriteInt32(stream, EffectData.type2.Value.type2Sub2.Value.U36);
-                    StreamUtil.WriteInt32(stream, EffectData.type2.Value.type2Sub2.Value.U37);
-                    StreamUtil.WriteInt32(stream, EffectData.type2.Value.type2Sub2.Value.U38);
-                    StreamUtil.WriteInt32(stream, EffectData.type2.Value.type2Sub2.Value.U39);
-
-                    StreamUtil.WriteInt32(stream, EffectData.type2.Value.type2Sub2.Value.U40);
-                    StreamUtil.WriteInt32(stream, EffectData.type2.Value.type2Sub2.Value.U41);
-                    StreamUtil.WriteInt32(stream, EffectData.type2.Value.type2Sub2.Value.U42);
-                    StreamUtil.WriteInt32(stream, EffectData.type2.Value.type2Sub2.Value.U43);
-
-                    StreamUtil.WriteInt32(stream, EffectData.type2.Value.type2Sub2.Value.U44);
-                    StreamUtil.WriteInt32(stream, EffectData.type2.Value.type2Sub2.Value.U45);
-                    StreamUtil.WriteInt32(stream, EffectData.type2.Value.type2Sub2.Value.U46);
-                    StreamUtil.WriteInt32(stream, EffectData.type2.Value.type2Sub2.Value.U47);
-
-                    StreamUtil.WriteInt32(stream, EffectData.type2.Value.type2Sub2.Value.U48);
-                    StreamUtil.WriteInt32(stream, EffectData.type2.Value.type2Sub2.Value.U49);
-                    StreamUtil.WriteInt32(stream, EffectData.type2.Value.type2Sub2.Value.U50);
+                    WriteEmitter(stream, EffectData.type2.Value.CollisionEmitter.Value);
                 }
                 else
                 {
@@ -1202,8 +980,8 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky.PS2
             }
             else if (EffectData.MainType == 3)
             {
-                StreamUtil.WriteInt32(stream, EffectData.type3.Value.U0);
-                StreamUtil.WriteFloat32(stream, EffectData.type3.Value.U1);
+                StreamUtil.WriteInt32(stream, EffectData.type3.Value.Command);
+                StreamUtil.WriteFloat32(stream, EffectData.type3.Value.Parameter);
             }
             else if (EffectData.MainType == 4)
             {
@@ -1211,9 +989,9 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky.PS2
             }
             else if (EffectData.MainType == 5)
             {
-                StreamUtil.WriteInt32(stream, EffectData.type5.Value.U0);
-                StreamUtil.WriteFloat32(stream, EffectData.type5.Value.U1);
-                StreamUtil.WriteInt32(stream, EffectData.type5.Value.U2);
+                StreamUtil.WriteInt32(stream, EffectData.type5.Value.Mode);
+                StreamUtil.WriteInt32(stream, EffectData.type5.Value.Compare);
+                StreamUtil.WriteFloat32(stream, EffectData.type5.Value.Threshold);
             }
             else if (EffectData.MainType == 7)
             {
@@ -1226,8 +1004,8 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky.PS2
             }
             else if (EffectData.MainType == 9)
             {
-                StreamUtil.WriteInt32(stream, EffectData.type9.Value.U0);
-                StreamUtil.WriteFloat32(stream, EffectData.type9.Value.U1);
+                StreamUtil.WriteInt32(stream, EffectData.type9.Value.Command);
+                StreamUtil.WriteFloat32(stream, EffectData.type9.Value.Parameter);
             }
             else if (EffectData.MainType == 13)
             {
@@ -1239,11 +1017,11 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky.PS2
             }
             else if (EffectData.MainType == 17)
             {
-                StreamUtil.WriteFloat32(stream, EffectData.type17);
+                StreamUtil.WriteFloat32(stream, EffectData.SpeedBoostDuration);
             }
             else if (EffectData.MainType == 18)
             {
-                StreamUtil.WriteFloat32(stream, EffectData.type18);
+                StreamUtil.WriteFloat32(stream, EffectData.TrickBoostDuration);
             }
             else if (EffectData.MainType == 21)
             {
@@ -1304,11 +1082,11 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky.PS2
             EffectSlotsOffset = (int)stream.Position;
             for (int i = 0; i < EffectSlots.Count; i++)
             {
-                StreamUtil.WriteInt32(stream, EffectSlots[i].Slot1);
-                StreamUtil.WriteInt32(stream, EffectSlots[i].Slot2);
+                StreamUtil.WriteInt32(stream, EffectSlots[i].PersistantEffectSlot);
+                StreamUtil.WriteInt32(stream, EffectSlots[i].CollisionEffectSlot);
                 StreamUtil.WriteInt32(stream, EffectSlots[i].Slot3);
                 StreamUtil.WriteInt32(stream, EffectSlots[i].Slot4);
-                StreamUtil.WriteInt32(stream, EffectSlots[i].Slot5);
+                StreamUtil.WriteInt32(stream, EffectSlots[i].EffectTriggerSlot);
                 StreamUtil.WriteInt32(stream, EffectSlots[i].Slot6);
                 StreamUtil.WriteInt32(stream, EffectSlots[i].Slot7);
             }
@@ -1359,43 +1137,41 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky.PS2
                 {
                     long U0Pos = stream.Position;
                     stream.Position += 4;
-                    StreamUtil.WriteInt32(stream, TempHeader.PhysicsDatas[a].UByteData.Length);
-                    StreamUtil.WriteInt32(stream, TempHeader.PhysicsDatas[a].U2);
-                    StreamUtil.WriteInt32(stream, TempHeader.PhysicsDatas[a].uPhysicsStruct0.Count - 1);
+                    StreamUtil.WriteInt32(stream, TempHeader.PhysicsDatas[a].OccupancyMasks.Length);
+                    StreamUtil.WriteInt32(stream, TempHeader.PhysicsDatas[a].OccupancyMaskEncoding);
+                    StreamUtil.WriteInt32(stream, TempHeader.PhysicsDatas[a].OccupancyLevels.Count - 1);
 
-                    StreamUtil.WriteFloat32(stream, TempHeader.PhysicsDatas[a].UFloat0);
-                    StreamUtil.WriteFloat32(stream, TempHeader.PhysicsDatas[a].UFloat1);
-                    StreamUtil.WriteFloat32(stream, TempHeader.PhysicsDatas[a].UFloat2);
+                    StreamUtil.WriteVector3(stream, TempHeader.PhysicsDatas[a].Center);
                     StreamUtil.WriteFloat32(stream, TempHeader.PhysicsDatas[a].UFloat3);
                     StreamUtil.WriteFloat32(stream, TempHeader.PhysicsDatas[a].UFloat4);
                     StreamUtil.WriteFloat32(stream, TempHeader.PhysicsDatas[a].UFloat5);
-                    StreamUtil.WriteFloat32(stream, TempHeader.PhysicsDatas[a].UFloat6);
-                    StreamUtil.WriteFloat32(stream, TempHeader.PhysicsDatas[a].UFloat7);
-                    StreamUtil.WriteFloat32(stream, TempHeader.PhysicsDatas[a].UFloat8);
-                    StreamUtil.WriteFloat32(stream, TempHeader.PhysicsDatas[a].UFloat9);
-                    StreamUtil.WriteFloat32(stream, TempHeader.PhysicsDatas[a].UFloat10);
-                    StreamUtil.WriteFloat32(stream, TempHeader.PhysicsDatas[a].UFloat11);
-                    StreamUtil.WriteFloat32(stream, TempHeader.PhysicsDatas[a].UFloat12);
-                    StreamUtil.WriteFloat32(stream, TempHeader.PhysicsDatas[a].UFloat13);
-                    StreamUtil.WriteFloat32(stream, TempHeader.PhysicsDatas[a].UFloat14);
-                    StreamUtil.WriteFloat32(stream, TempHeader.PhysicsDatas[a].UFloat15);
-                    StreamUtil.WriteFloat32(stream, TempHeader.PhysicsDatas[a].UFloat16);
-                    StreamUtil.WriteFloat32(stream, TempHeader.PhysicsDatas[a].UFloat17);
-                    StreamUtil.WriteFloat32(stream, TempHeader.PhysicsDatas[a].UFloat18);
-                    StreamUtil.WriteFloat32(stream, TempHeader.PhysicsDatas[a].UFloat19);
-                    StreamUtil.WriteFloat32(stream, TempHeader.PhysicsDatas[a].UFloat20);
-                    StreamUtil.WriteFloat32(stream, TempHeader.PhysicsDatas[a].UFloat21);
-                    StreamUtil.WriteFloat32(stream, TempHeader.PhysicsDatas[a].UFloat22);
-                    StreamUtil.WriteFloat32(stream, TempHeader.PhysicsDatas[a].UFloat23);
+                    StreamUtil.WriteFloat32(stream, TempHeader.PhysicsDatas[a].InertiaM11);
+                    StreamUtil.WriteFloat32(stream, TempHeader.PhysicsDatas[a].InertiaM12);
+                    StreamUtil.WriteFloat32(stream, TempHeader.PhysicsDatas[a].InertiaM13);
+                    StreamUtil.WriteFloat32(stream, TempHeader.PhysicsDatas[a].InertiaM21);
+                    StreamUtil.WriteFloat32(stream, TempHeader.PhysicsDatas[a].InertiaM22);
+                    StreamUtil.WriteFloat32(stream, TempHeader.PhysicsDatas[a].InertiaM23);
+                    StreamUtil.WriteFloat32(stream, TempHeader.PhysicsDatas[a].InertiaM31);
+                    StreamUtil.WriteFloat32(stream, TempHeader.PhysicsDatas[a].InertiaM32);
+                    StreamUtil.WriteFloat32(stream, TempHeader.PhysicsDatas[a].InertiaM33);
+                    StreamUtil.WriteFloat32(stream, TempHeader.PhysicsDatas[a].InverseInertiaM11);
+                    StreamUtil.WriteFloat32(stream, TempHeader.PhysicsDatas[a].InverseInertiaM12);
+                    StreamUtil.WriteFloat32(stream, TempHeader.PhysicsDatas[a].InverseInertiaM13);
+                    StreamUtil.WriteFloat32(stream, TempHeader.PhysicsDatas[a].InverseInertiaM21);
+                    StreamUtil.WriteFloat32(stream, TempHeader.PhysicsDatas[a].InverseInertiaM22);
+                    StreamUtil.WriteFloat32(stream, TempHeader.PhysicsDatas[a].InverseInertiaM23);
+                    StreamUtil.WriteFloat32(stream, TempHeader.PhysicsDatas[a].InverseInertiaM31);
+                    StreamUtil.WriteFloat32(stream, TempHeader.PhysicsDatas[a].InverseInertiaM32);
+                    StreamUtil.WriteFloat32(stream, TempHeader.PhysicsDatas[a].InverseInertiaM33);
 
-                    for (int b = 0; b < TempHeader.PhysicsDatas[a].uPhysicsStruct0.Count; b++)
+                    for (int b = 0; b < TempHeader.PhysicsDatas[a].OccupancyLevels.Count; b++)
                     {
-                        StreamUtil.WriteFloat32(stream, TempHeader.PhysicsDatas[a].uPhysicsStruct0[b].U0);
-                        StreamUtil.WriteFloat32(stream, TempHeader.PhysicsDatas[a].uPhysicsStruct0[b].U1);
-                        StreamUtil.WriteInt32(stream, TempHeader.PhysicsDatas[a].uPhysicsStruct0[b].U2);
+                        StreamUtil.WriteFloat32(stream, TempHeader.PhysicsDatas[a].OccupancyLevels[b].SphereRadius);
+                        StreamUtil.WriteFloat32(stream, TempHeader.PhysicsDatas[a].OccupancyLevels[b].ChildOffset);
+                        StreamUtil.WriteInt32(stream, TempHeader.PhysicsDatas[a].OccupancyLevels[b].MaskStride);
                     }
 
-                    StreamUtil.WriteBytes(stream, TempHeader.PhysicsDatas[a].UByteData);
+                    StreamUtil.WriteBytes(stream, TempHeader.PhysicsDatas[a].OccupancyMasks);
 
                     long TempPos = stream.Position;
                     StreamUtil.AlignBy(stream, 4);
@@ -1500,7 +1276,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky.PS2
             {
                 var TempUstruct5 = ObjectProperties[i];
 
-                StreamUtil.WriteFloat32(stream, TempUstruct5.U0);
+                StreamUtil.WriteFloat32(stream, TempUstruct5.CollisionResponseMass);
 
                 StreamUtil.WriteFloat32(stream, TempUstruct5.PlayerBounce);
 
@@ -1533,7 +1309,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky.PS2
             for (int i = 0; i < Splines.Count; i++)
             {
                 StreamUtil.WriteInt16(stream, Splines[i].U1);
-                StreamUtil.WriteInt16(stream, Splines[i].U2);
+                StreamUtil.WriteInt16(stream, Splines[i].RailFlags);
                 StreamUtil.WriteInt32(stream, Splines[i].SplineStyle);
             }
 
@@ -1629,11 +1405,11 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky.PS2
 
         public struct EffectSlot
         {
-            public int Slot1;
-            public int Slot2;
+            public int PersistantEffectSlot;
+            public int CollisionEffectSlot;
             public int Slot3;
             public int Slot4;
-            public int Slot5;
+            public int EffectTriggerSlot;
             public int Slot6;
             public int Slot7;
         }
@@ -1649,51 +1425,50 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky.PS2
 
         public struct PhysicsData
         {
+            //A mode-3 collision body: an octree of spheres around Center, plus its rigid body mass properties
             public int EndAlignment; //End Bytes
-            public int U1; //End Data
-            public int U2; //Struct 1
-            public int U3; //Struct 2
+            public int OccupancyMaskSize; //Byte length of OccupancyMasks
+            public int OccupancyMaskEncoding; //SSFOccupancyMaskEncoding
+            public int OccupancyMaxDepth; //OccupancyLevels count - 1
 
-            public float UFloat0;
-            public float UFloat1;
-            public float UFloat2;
-            public float UFloat3;
+            public Vector3 Center; //Body space, cm
+            public float UFloat3; //UFloat3-5 another point (OpenSlope disagrees on whether it's the centre of mass)
 
             public float UFloat4;
             public float UFloat5;
-            public float UFloat6;
-            public float UFloat7;
+            public float InertiaM11; //Inertia and InverseInertia are 3x3 row-major
+            public float InertiaM12;
 
-            public float UFloat8;
-            public float UFloat9;
-            public float UFloat10;
-            public float UFloat11;
+            public float InertiaM13;
+            public float InertiaM21;
+            public float InertiaM22;
+            public float InertiaM23;
 
-            public float UFloat12;
-            public float UFloat13;
-            public float UFloat14;
-            public float UFloat15;
+            public float InertiaM31;
+            public float InertiaM32;
+            public float InertiaM33;
+            public float InverseInertiaM11;
 
-            public float UFloat16;
-            public float UFloat17;
-            public float UFloat18;
-            public float UFloat19;
+            public float InverseInertiaM12;
+            public float InverseInertiaM13;
+            public float InverseInertiaM21;
+            public float InverseInertiaM22;
 
-            public float UFloat20;
-            public float UFloat21;
-            public float UFloat22;
-            public float UFloat23;
+            public float InverseInertiaM23;
+            public float InverseInertiaM31;
+            public float InverseInertiaM32;
+            public float InverseInertiaM33;
 
-            public List<UPhysicsStruct> uPhysicsStruct0;
+            public List<OccupancyLevel> OccupancyLevels; //One per depth
 
-            public byte[] UByteData;
+            public byte[] OccupancyMasks; //One child mask byte per node, levels laid out root first
         }
 
-        public struct UPhysicsStruct
+        public struct OccupancyLevel
         {
-            public float U0;
-            public float U1;
-            public int U2;
+            public float SphereRadius; //Radius of a node sphere at this depth, a leaf when its mask is 0
+            public float ChildOffset; //Offset from the parent centre to a child octant at this depth
+            public int MaskStride; //Child mask offset = parent offset + (bit + 1) * MaskStride
         }
 
         public struct CollisonModelPointer
@@ -1729,11 +1504,11 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky.PS2
 
         public struct ObjectPropertiesStruct
         {
-            public float U0;
+            public float CollisionResponseMass; //Exactly 0 is pass-through
             public float PlayerBounce;
 
             public int U2;
-            public int BitFlags;
+            public int BitFlags; //SSFObjectPropertyFlags
 
             //BitFlags1 - 8
             //1 - Visable
@@ -1755,8 +1530,8 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky.PS2
             //64
             //128
 
-            public int SurfaceType;
-            public int CollsionMode;
+            public int SurfaceType; //TrickySurfaceType
+            public int CollsionMode; //SSFCollisionMode
             public int CollisonModelIndex;
             public int EffectSlotIndex;
 
@@ -1768,8 +1543,8 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky.PS2
         public struct Spline
         {
             public int U1;
-            public int U2;
-            public int SplineStyle;
+            public int RailFlags; //Bit 0 - can be grinded (rail candidacy), toggled at runtime by MainType 25
+            public int SplineStyle; //SSFSplineStyle
         }
 
         public struct EffectHeaderStruct
@@ -1786,7 +1561,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky.PS2
             //Debug Info
             public int Offset;
 
-            public int MainType;
+            public int MainType; //SSFMainType
             public int ByteSize;
 
             //4 - Wait
@@ -1815,8 +1590,8 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky.PS2
             public HUDTextEffect? hudTextEffect;
             public float type13; //Reset Value
             public float MultiplierScore;
-            public float type17;
-            public float type18;
+            public float SpeedBoostDuration; //Seconds the rider's speed limit stays raised
+            public float TrickBoostDuration; //Seconds
             public int FunctionRunIndex; //Script Used By Screenlogo
             public int TeleportInstanceIndex;
             public SplineEffect? Spline;
@@ -1826,7 +1601,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky.PS2
         #region Type0
         public struct Type0
         {
-            public int SubType;
+            public int SubType; //SSFPropertyType
 
             //5 - DeadNode (Add, Destroy, Remove, Enable)
             //6 - Counter
@@ -1836,34 +1611,32 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky.PS2
             //17 - Crowd
             //23 - Movie?
 
-            public Type0Sub0? type0Sub0; ///Roller?
+            public RollerEffect? Roller; //0
             public float Debounce;  //Debounce?
-            public int DeadNodeMode; //5
+            public int DeadNodeMode; //5 SSFDeadNodeMode
             public CounterEffect? Counter; //6
             public BoostEffect? Boost; //Boost
             public UVScrolling? UVScroll; //10
             public TextureFlipEffect? TextureFlip; //11
             public FenceFlex? Fence; //12
-            public Type0Sub13? type0Sub13; //Flag
-            public Type0Sub14? type0Sub14; //Cracked
-            public Type0Sub15? type0Sub15; //LapBoost
+            public FlagEffect? Flag; //13
+            public CrackedEffect? Cracked; //14
+            public LapBoostEffect? LapBoost; //15
             public CrowdBox? CrowdEffect; //17
-            public Type0Sub18? type0Sub18; //ZBoost
-            public Type0Sub20? type0Sub20; //cMeshAnim
-            public Type0Sub24? type0Sub24; //TubeEndBoost
-            public Type0Sub256? type0Sub256; //AnimObject
-            public Type0Sub257? type0Sub257; //AnimDelta
-            public Type0Sub258? type0Sub258; //AnimCombo
+            public ZBoostEffect? ZBoost; //18
+            public MeshAnimEffect? MeshAnim; //20 cMeshAnim
+            public TubeEndBoostEffect? TubeEndBoost; //24
+            public AnimObjectEffect? AnimObject; //256
+            public AnimDeltaEffect? AnimDelta; //257
+            public AnimComboEffect? AnimCombo; //258
         }
 
-        public struct Type0Sub0
+        public struct RollerEffect
         {
-            public float U0;
+            public float Mass; //Must be > 0 for the prop to move
             public float U1;
             public float U2;
-            public float U3;
-            public float U4;
-            public float U5;
+            public Vector3 LaunchDirection; //All zero uses the way the prop faces
         }
 
         public struct CounterEffect
@@ -1874,30 +1647,29 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky.PS2
 
         public struct BoostEffect
         {
-            public int Mode;
-            public float U1;
-            public float U2; //Might be acceleration
+            public int Mode; //SSFBoostMode
+            public float Window; //Seconds the node stays armed after it fires
+            public float ApproachRate; //Per second, how quickly speed along BoostDir approaches BoostAmount
             public float BoostAmount;
-            public Vector3 BoostDir;
+            public Vector3 BoostDir; //World space, not rotated with the prop
         }
 
         public struct UVScrolling
         {
-            public int U0;
-            public float U1;
-            public float U2;
-            public float U3;
-            public float U4;
-            public float U5;
+            public int Mode; //SSFUVScrollMode
+            public Vector2 Speed; //UV per 60Hz tick
+            public float ActiveDuration; //Seconds
+            public float PauseDuration; //Seconds
+            public float Lifetime; //Seconds, 0 runs until unloaded
         }
 
         public struct TextureFlipEffect
         {
-            public int U0;
+            public int StartFrame; //Flipbook frame the flip starts on
             public int Direction;
             public float Speed;
             public float Length;
-            public int U4;
+            public int PauseDwell; //Hold frame 0 and flash frame 1
         }
 
         public struct FenceFlex
@@ -1906,273 +1678,180 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky.PS2
             public float FlexAmmount;
         }
 
-        public struct Type0Sub13
+        public struct FlagEffect
         {
-            public int U0;
-            public float U1;
-            public float U2;
-            public int U3;
+            public int Variant;
+            public float Amplitude;
+            public float Wavelength;
+            public float U3;
         }
 
-        public struct Type0Sub14
+        public struct CrackedEffect
         {
-            public float U0;
-            public float U1;
+            public float CrackLifetime; //Seconds before the crack heals, -1 never
+            public float Strength; //Impact budget, runs EffectTriggerSlot when spent
         }
 
-        public struct Type0Sub15
+        public struct LapBoostEffect
         {
-            public float U0;
-            public float U1;
-            public int U2;
-            public int U3;
-            public float U4;
+            public float ApproachRate;
+            public float TargetSpeed;
+            public Vector3 Axis;
         }
 
         public struct CrowdBox
         {
             public int U0;
-            public int U1;
-            public int U2;
+            public int Rows;
+            public int Columns;
         }
 
-        public struct Type0Sub18
+        public struct ZBoostEffect
         {
-            public float U0;
-            public float U1;
-            public int U2;
-            public int U3;
-            public float U4;
-            public float U5;
-            public float U6;
+            public float ApproachRate;
+            public float TargetSpeed;
+            public Vector3 Axis;
+            public float TargetAltitude; //World Z, only riders below it are lifted
+            public float SnapTolerance; //0 eases all the way in
         }
 
-        public struct Type0Sub20
+        public struct MeshAnimEffect
         {
             public int U0;
-            public float U1;
-            public float U2;
-            public int U3;
-            public int U4;
-            public int U5;
-            public float U6;
-            public float U7;
-            public float U8;
-            public float U9;
+            public float FrameStep; //Seconds
+            public float Duration; //Seconds
+            public Vector3 ThrowDirection;
+            public Vector3 VelocityScale;
+            public float DirectionScale;
         }
 
-        public struct Type0Sub24
+        public struct TubeEndBoostEffect
         {
-            public int U0;
-            public int U1;
-            public float U2;
-            public float U3;
-            public int U4;
-            public int U5;
-            public int U6;
-            public float U7;
-            public float U8;
-            public float U9;
-            public float U10;
-            public float U11;
-            public float U12;
-            public float U13;
-            public float U14;
-            public float U15;
-            public float U16;
-            public float U17;
-            public float U18;
+            //Inherits the BoostEffect layout, then adds three launch stages
+            public int Mode; //SSFBoostMode
+            public float Window;
+            public float ApproachRate;
+            public float TargetSpeed;
+            public Vector3 BaseAxis; //All zero in retail
+            public Vector3 Stage1Direction;
+            public Vector3 Stage2Direction;
+            public Vector3 Stage3Direction;
+            public float Stage1Speed;
+            public float Stage2Speed;
+            public float Stage3Speed;
         }
 
-        public struct Type0Sub256
+        public struct AnimObjectEffect
         {
-            public int U0;
-            public float U1;
-            public float U2;
-            public float U3;
-            public float U4;
-            public float U5;
-            public int U6;
-            public int U7;
+            public int LoopMode; //SSFAnimLoopMode
+            public float WindowStart; //Frame, negative plays the whole clip
+            public float WindowEnd; //Frame, negative plays the whole clip
+            public float Rate; //Frames per second, 30 is real time
+            public float RandomRateUpper; //0 turns the random rate off
+            public float Debounce; //Cooldown before the instance can be triggered again
+            public int RandomStart; //Non-zero randomises the starting phase
+            public int DirectionMode; //SSFAnimDirectionMode
         }
 
-        public struct Type0Sub257
+        public struct AnimDeltaEffect
         {
-            public int U0;
-            public int U1;
-            public float U2;
-            public float U3;
-            public int U4;
-            public float U5;
-            public int U6;
-            public int U7;
+            //Same as AnimObjectEffect, but frozen until a MainType 3/9 command grants it clip time
+            public int LoopMode; //SSFAnimLoopMode
+            public float WindowStart;
+            public float WindowEnd;
+            public float Rate;
+            public float RandomRateUpper;
+            public float Debounce; //Cooldown before the instance can be triggered again
+            public int RandomStart;
+            public int DirectionMode; //SSFAnimDirectionMode
         }
 
-        public struct Type0Sub258
+        public struct AnimComboEffect
         {
-            public int U0;
-            public int U1;
-            public float U2;
-            public float U3;
-            public int U4;
-            public float U5;
-            public int U6;
-            public int U7;
-            public float U8;
-            public float U9;
-            public float U10;
-            public int U11;
+            //The first eight are the idle window, as AnimObjectEffect. The combo window plays over it on command 3
+            public int LoopMode; //SSFAnimLoopMode
+            public float WindowStart;
+            public float WindowEnd;
+            public float Rate;
+            public float RandomRateUpper;
+            public float Debounce; //Cooldown before the instance can be triggered again
+            public int RandomStart;
+            public int DirectionMode; //SSFAnimDirectionMode
+            public float ComboWindowStart; //Negative carries on from the idle window's end
+            public float ComboWindowEnd; //Negative runs to the end of the clip
+            public float ComboRate;
+            public int ComboEndMode; //SSFAnimComboEndMode
         }
         #endregion
 
         #region Type2
         public struct Type2
         {
-            public int SubType;
+            public int SubType; //SSFEmitterType
 
-            public Type2Sub0? type2Sub0; //Emitter
+            public EmitterEffect? Emitter; //0
             public SplinePathAnimation? SplineAnimation; //SplinePath
-            public Type2Sub2? type2Sub2; //CollideEmitter
+            public EmitterEffect? CollisionEmitter; //2 CollideEmitter, fired from the contact point
         }
 
-        public struct Type2Sub0
+        public struct EmitterEffect
         {
-            public int U0;
-            public int U1;
-            public float U2;
-            public float U3;
-            public float U4;
-            public float U5;
-            public float U6;
-            public float U7;
-            public float U8;
-            public float U9;
-            public float U10;
-            public float U11;
-            public float U12;
-            public float U13;
-            public float U14;
-            public float U15;
-            public float U16;
-            public float U17;
-            public float U18;
-            public float U19;
-            public float U20;
-            public float U21;
-            public float U22;
-            public float U23;
-            public float U24;
-            public float U25;
-            public float U26;
-            public float U27;
-            public float U28;
-            public float U29;
-            public float U30;
-            public float U31;
-            public float U32;
-            public float U33;
-            public float U34;
-            public float U35;
-            public float U36;
-            public float U37;
-            public float U38;
-            public float U39;
-            public float U40;
-            public float U41;
-            public float U42;
-            public float U43;
-            public float U44;
-            public float U45;
-            public float U46;
-            public float U47;
-            public float U48;
-            public int U49;
-            public int U50;
+            public int ParticleCount; //Per burst
+            public int TrailCopies;
+            public float EmissionWindow; //Seconds the starts are staggered over, negative keeps the stream alive
+            public float TimeScale;
+            public float SizeCenter;
+            public float ParticleLifeCenter;
+            public float SizeSpan;
+            public float ParticleLifeSpan;
+            public float TrailSpacing; //Seconds between trail copies
+            public Vector3 Origin; //cm from the prop. A collision emitter replaces it with the contact point
+            public Vector3 SpawnAxisA;
+            public Vector3 SpawnAxisB;
+            public Vector3 VelocityBase; //A collision emitter keeps only its length, along the contact normal
+            public Vector3 VelocityAxisA;
+            public Vector3 VelocityAxisB;
+            public Vector3 VelocityAxisC;
+            public Vector3 Gravity;
+            public Vector4 ColourStop1; //R,G,B,A
+            public Vector4 ColourStop2;
+            public Vector4 ColourStop3;
+            public Vector4 ColourStop4;
+            public int SpriteIndex; //Into the shared particle sprite set
+            public int BlendMode; //Remapped by the engine before it sets the blend state
         }
 
         public struct SplinePathAnimation
         {
             public int SplineIndex;
-            public int U1;
-            public int U2;
+            public int EndMode; //SSFSplineEndMode
+            public int OrientationMode; //SSFSplineOrientationMode
             public int InstanceCount;
             public float AnimationSpeed;
-            public float U5;
-            public int U6;
-            public float U7;
-            public float R;
-            public float G;
-            public float B;
-        }
-
-        public struct Type2Sub2
-        {
-            public int U0;
-            public int U1;
-            public int U2;
-            public int U3;
-            public int U4;
-            public int U5;
-            public int U6;
-            public int U7;
-            public int U8;
-            public int U9;
-            public int U10;
-            public int U11;
-            public int U12;
-            public int U13;
-            public int U14;
-            public int U15;
-            public int U16;
-            public int U17;
-            public int U18;
-            public int U19;
-            public int U20;
-            public int U21;
-            public int U22;
-            public int U23;
-            public int U24;
-            public int U25;
-            public int U26;
-            public int U27;
-            public int U28;
-            public int U29;
-            public int U30;
-            public int U31;
-            public int U32;
-            public int U33;
-            public int U34;
-            public int U35;
-            public int U36;
-            public int U37;
-            public int U38;
-            public int U39;
-            public int U40;
-            public int U41;
-            public int U42;
-            public int U43;
-            public int U44;
-            public int U45;
-            public int U46;
-            public int U47;
-            public int U48;
-            public int U49;
-            public int U50;
+            public float YawOffset; //Radians
+            public int ShowRouteLine; //Draws the spline as a line, like a gondola cable, in RouteLineColour
+            public Vector4 RouteLineColour; //R,G,B,A
         }
         #endregion
 
 
         public struct Type3
         {
-            public int U0;
-            public float U1;
+            //A command for the property node installed on the bound instance. Known commands by receiver:
+            //AnimDelta 2 - grant Parameter frames of clip time, AnimCombo 3 - play the combo window
+            //TextureFlip 2 - show frame Parameter, UVScroll 6 - jump the V offset to Parameter
+            //Counter 1 - mark input Parameter, Counter 3 - count down by one
+            //Any 7 - clear instance flag 0x800, Any 8 - set instance flag 0x800
+            public int Command;
+            public float Parameter;
         }
 
         public struct Type5
         {
-            public int U0;
-            public float U1;
-            public int U2;
+            //When the test fails the chain ends
+            public int Mode; //SSFGateMode
+            public int Compare; //0 passes at most Threshold, non-zero at least
+            public float Threshold;
         }
 
         public struct InstanceEffect
@@ -2191,8 +1870,9 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky.PS2
 
         public struct Type9
         {
-            public int U0;
-            public float U1;
+            //As Type3, without its missing-node guard
+            public int Command;
+            public float Parameter;
         }
 
         public struct SplineEffect
