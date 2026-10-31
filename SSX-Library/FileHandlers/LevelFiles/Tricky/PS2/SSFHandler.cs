@@ -553,7 +553,37 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky.PS2
 
                 if (NewMainType.SubType == 0)
                 {
-                    NewMainType.Emitter = ReadEmitter(stream);
+                   var NewEmitter = new EmitterEffect();
+
+                    NewEmitter.ParticleCount = StreamUtil.ReadUInt32(stream);
+                    NewEmitter.TrailCopies = StreamUtil.ReadUInt32(stream);
+                    NewEmitter.EmissionWindow = StreamUtil.ReadFloat(stream);
+                    NewEmitter.TimeScale = StreamUtil.ReadFloat(stream);
+
+                    NewEmitter.SizeCenter = StreamUtil.ReadFloat(stream);
+                    NewEmitter.ParticleLifeCenter = StreamUtil.ReadFloat(stream);
+                    NewEmitter.SizeSpan = StreamUtil.ReadFloat(stream);
+                    NewEmitter.ParticleLifeSpan = StreamUtil.ReadFloat(stream);
+
+                    NewEmitter.TrailSpacing = StreamUtil.ReadFloat(stream);
+                    NewEmitter.Origin = StreamUtil.ReadVector3(stream);
+                    NewEmitter.SpawnAxisA = StreamUtil.ReadVector3(stream);
+                    NewEmitter.SpawnAxisB = StreamUtil.ReadVector3(stream);
+                    NewEmitter.VelocityBase = StreamUtil.ReadVector3(stream);
+                    NewEmitter.VelocityAxisA = StreamUtil.ReadVector3(stream);
+                    NewEmitter.VelocityAxisB = StreamUtil.ReadVector3(stream);
+                    NewEmitter.VelocityAxisC = StreamUtil.ReadVector3(stream);
+                    NewEmitter.Gravity = StreamUtil.ReadVector3(stream);
+
+                    NewEmitter.ColourStop1 = StreamUtil.ReadColourARGB(stream);
+                    NewEmitter.ColourStop2 = StreamUtil.ReadColourARGB(stream);
+                    NewEmitter.ColourStop3 = StreamUtil.ReadColourARGB(stream);
+                    NewEmitter.ColourStop4 = StreamUtil.ReadColourARGB(stream);
+
+                    NewEmitter.SpriteIndex = StreamUtil.ReadUInt32(stream);
+                    NewEmitter.BlendMode = StreamUtil.ReadUInt32(stream);
+
+                    NewMainType.Emitter = NewEmitter;
                 }
                 else if (NewMainType.SubType == 1)
                 {
@@ -567,13 +597,43 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky.PS2
                     NewSubType.AnimationSpeed = StreamUtil.ReadFloat(stream);
                     NewSubType.YawOffset = StreamUtil.ReadFloat(stream);
                     NewSubType.ShowRouteLine = StreamUtil.ReadUInt32(stream);
-                    NewSubType.RouteLineColour = ReadColourARGB(stream);
+                    NewSubType.RouteLineColour = StreamUtil.ReadColourARGB(stream);
 
                     NewMainType.SplineAnimation = NewSubType;
                 }
                 else if (NewMainType.SubType == 2)
                 {
-                    NewMainType.CollisionEmitter = ReadEmitter(stream);
+                    var NewEmitter = new EmitterEffect();
+
+                    NewEmitter.ParticleCount = StreamUtil.ReadUInt32(stream);
+                    NewEmitter.TrailCopies = StreamUtil.ReadUInt32(stream);
+                    NewEmitter.EmissionWindow = StreamUtil.ReadFloat(stream);
+                    NewEmitter.TimeScale = StreamUtil.ReadFloat(stream);
+
+                    NewEmitter.SizeCenter = StreamUtil.ReadFloat(stream);
+                    NewEmitter.ParticleLifeCenter = StreamUtil.ReadFloat(stream);
+                    NewEmitter.SizeSpan = StreamUtil.ReadFloat(stream);
+                    NewEmitter.ParticleLifeSpan = StreamUtil.ReadFloat(stream);
+
+                    NewEmitter.TrailSpacing = StreamUtil.ReadFloat(stream);
+                    NewEmitter.Origin = StreamUtil.ReadVector3(stream);
+                    NewEmitter.SpawnAxisA = StreamUtil.ReadVector3(stream);
+                    NewEmitter.SpawnAxisB = StreamUtil.ReadVector3(stream);
+                    NewEmitter.VelocityBase = StreamUtil.ReadVector3(stream);
+                    NewEmitter.VelocityAxisA = StreamUtil.ReadVector3(stream);
+                    NewEmitter.VelocityAxisB = StreamUtil.ReadVector3(stream);
+                    NewEmitter.VelocityAxisC = StreamUtil.ReadVector3(stream);
+                    NewEmitter.Gravity = StreamUtil.ReadVector3(stream);
+
+                    NewEmitter.ColourStop1 = StreamUtil.ReadColourARGB(stream);
+                    NewEmitter.ColourStop2 = StreamUtil.ReadColourARGB(stream);
+                    NewEmitter.ColourStop3 = StreamUtil.ReadColourARGB(stream);
+                    NewEmitter.ColourStop4 = StreamUtil.ReadColourARGB(stream);
+
+                    NewEmitter.SpriteIndex = StreamUtil.ReadUInt32(stream);
+                    NewEmitter.BlendMode = StreamUtil.ReadUInt32(stream);
+
+                    NewMainType.CollisionEmitter = NewEmitter;
                 }
                 else
                 {
@@ -683,88 +743,6 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky.PS2
             }
 
             return NewEffect;
-        }
-
-        //Main type 2 sub types 0 and 2 share this layout
-        static EmitterEffect ReadEmitter(Stream stream)
-        {
-            var NewEmitter = new EmitterEffect();
-
-            NewEmitter.ParticleCount = StreamUtil.ReadUInt32(stream);
-            NewEmitter.TrailCopies = StreamUtil.ReadUInt32(stream);
-            NewEmitter.EmissionWindow = StreamUtil.ReadFloat(stream);
-            NewEmitter.TimeScale = StreamUtil.ReadFloat(stream);
-
-            NewEmitter.SizeCenter = StreamUtil.ReadFloat(stream);
-            NewEmitter.ParticleLifeCenter = StreamUtil.ReadFloat(stream);
-            NewEmitter.SizeSpan = StreamUtil.ReadFloat(stream);
-            NewEmitter.ParticleLifeSpan = StreamUtil.ReadFloat(stream);
-
-            NewEmitter.TrailSpacing = StreamUtil.ReadFloat(stream);
-            NewEmitter.Origin = StreamUtil.ReadVector3(stream);
-            NewEmitter.SpawnAxisA = StreamUtil.ReadVector3(stream);
-            NewEmitter.SpawnAxisB = StreamUtil.ReadVector3(stream);
-            NewEmitter.VelocityBase = StreamUtil.ReadVector3(stream);
-            NewEmitter.VelocityAxisA = StreamUtil.ReadVector3(stream);
-            NewEmitter.VelocityAxisB = StreamUtil.ReadVector3(stream);
-            NewEmitter.VelocityAxisC = StreamUtil.ReadVector3(stream);
-            NewEmitter.Gravity = StreamUtil.ReadVector3(stream);
-
-            NewEmitter.ColourStop1 = ReadColourARGB(stream);
-            NewEmitter.ColourStop2 = ReadColourARGB(stream);
-            NewEmitter.ColourStop3 = ReadColourARGB(stream);
-            NewEmitter.ColourStop4 = ReadColourARGB(stream);
-
-            NewEmitter.SpriteIndex = StreamUtil.ReadUInt32(stream);
-            NewEmitter.BlendMode = StreamUtil.ReadUInt32(stream);
-
-            return NewEmitter;
-        }
-
-        static void WriteEmitter(Stream stream, EmitterEffect Emitter)
-        {
-            StreamUtil.WriteInt32(stream, Emitter.ParticleCount);
-            StreamUtil.WriteInt32(stream, Emitter.TrailCopies);
-            StreamUtil.WriteFloat32(stream, Emitter.EmissionWindow);
-            StreamUtil.WriteFloat32(stream, Emitter.TimeScale);
-
-            StreamUtil.WriteFloat32(stream, Emitter.SizeCenter);
-            StreamUtil.WriteFloat32(stream, Emitter.ParticleLifeCenter);
-            StreamUtil.WriteFloat32(stream, Emitter.SizeSpan);
-            StreamUtil.WriteFloat32(stream, Emitter.ParticleLifeSpan);
-
-            StreamUtil.WriteFloat32(stream, Emitter.TrailSpacing);
-            StreamUtil.WriteVector3(stream, Emitter.Origin);
-            StreamUtil.WriteVector3(stream, Emitter.SpawnAxisA);
-            StreamUtil.WriteVector3(stream, Emitter.SpawnAxisB);
-            StreamUtil.WriteVector3(stream, Emitter.VelocityBase);
-            StreamUtil.WriteVector3(stream, Emitter.VelocityAxisA);
-            StreamUtil.WriteVector3(stream, Emitter.VelocityAxisB);
-            StreamUtil.WriteVector3(stream, Emitter.VelocityAxisC);
-            StreamUtil.WriteVector3(stream, Emitter.Gravity);
-
-            WriteColourARGB(stream, Emitter.ColourStop1);
-            WriteColourARGB(stream, Emitter.ColourStop2);
-            WriteColourARGB(stream, Emitter.ColourStop3);
-            WriteColourARGB(stream, Emitter.ColourStop4);
-
-            StreamUtil.WriteInt32(stream, Emitter.SpriteIndex);
-            StreamUtil.WriteInt32(stream, Emitter.BlendMode);
-        }
-
-        //Effect colours are stored A,R,G,B. In memory the Vector4 is R,G,B,A
-        static Vector4 ReadColourARGB(Stream stream)
-        {
-            float Alpha = StreamUtil.ReadFloat(stream);
-            return new Vector4(StreamUtil.ReadVector3(stream), Alpha);
-        }
-
-        static void WriteColourARGB(Stream stream, Vector4 Colour)
-        {
-            StreamUtil.WriteFloat32(stream, Colour.W);
-            StreamUtil.WriteFloat32(stream, Colour.X);
-            StreamUtil.WriteFloat32(stream, Colour.Y);
-            StreamUtil.WriteFloat32(stream, Colour.Z);
         }
 
         /// <summary>Payload bytes of one effect node: its size field counts the whole node, main type
@@ -955,7 +933,35 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky.PS2
 
                 if(EffectData.type2.Value.SubType == 0)
                 {
-                    WriteEmitter(stream, EffectData.type2.Value.Emitter.Value);
+                    var Emitter = EffectData.type2.Value.Emitter.Value;
+
+                    StreamUtil.WriteInt32(stream, Emitter.ParticleCount);
+                    StreamUtil.WriteInt32(stream, Emitter.TrailCopies);
+                    StreamUtil.WriteFloat32(stream, Emitter.EmissionWindow);
+                    StreamUtil.WriteFloat32(stream, Emitter.TimeScale);
+
+                    StreamUtil.WriteFloat32(stream, Emitter.SizeCenter);
+                    StreamUtil.WriteFloat32(stream, Emitter.ParticleLifeCenter);
+                    StreamUtil.WriteFloat32(stream, Emitter.SizeSpan);
+                    StreamUtil.WriteFloat32(stream, Emitter.ParticleLifeSpan);
+
+                    StreamUtil.WriteFloat32(stream, Emitter.TrailSpacing);
+                    StreamUtil.WriteVector3(stream, Emitter.Origin);
+                    StreamUtil.WriteVector3(stream, Emitter.SpawnAxisA);
+                    StreamUtil.WriteVector3(stream, Emitter.SpawnAxisB);
+                    StreamUtil.WriteVector3(stream, Emitter.VelocityBase);
+                    StreamUtil.WriteVector3(stream, Emitter.VelocityAxisA);
+                    StreamUtil.WriteVector3(stream, Emitter.VelocityAxisB);
+                    StreamUtil.WriteVector3(stream, Emitter.VelocityAxisC);
+                    StreamUtil.WriteVector3(stream, Emitter.Gravity);
+
+                    StreamUtil.WriteColourARGB(stream, Emitter.ColourStop1);
+                    StreamUtil.WriteColourARGB(stream, Emitter.ColourStop2);
+                    StreamUtil.WriteColourARGB(stream, Emitter.ColourStop3);
+                    StreamUtil.WriteColourARGB(stream, Emitter.ColourStop4);
+
+                    StreamUtil.WriteInt32(stream, Emitter.SpriteIndex);
+                    StreamUtil.WriteInt32(stream, Emitter.BlendMode);
                 }
                 else if (EffectData.type2.Value.SubType == 1)
                 {
@@ -967,11 +973,39 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky.PS2
                     StreamUtil.WriteFloat32(stream, EffectData.type2.Value.SplineAnimation.Value.AnimationSpeed);
                     StreamUtil.WriteFloat32(stream, EffectData.type2.Value.SplineAnimation.Value.YawOffset);
                     StreamUtil.WriteInt32(stream, EffectData.type2.Value.SplineAnimation.Value.ShowRouteLine);
-                    WriteColourARGB(stream, EffectData.type2.Value.SplineAnimation.Value.RouteLineColour);
+                    StreamUtil.WriteColourARGB(stream, EffectData.type2.Value.SplineAnimation.Value.RouteLineColour);
                 }
                 else if (EffectData.type2.Value.SubType == 2)
                 {
-                    WriteEmitter(stream, EffectData.type2.Value.CollisionEmitter.Value);
+                    var Emitter = EffectData.type2.Value.CollisionEmitter.Value;
+
+                    StreamUtil.WriteInt32(stream, Emitter.ParticleCount);
+                    StreamUtil.WriteInt32(stream, Emitter.TrailCopies);
+                    StreamUtil.WriteFloat32(stream, Emitter.EmissionWindow);
+                    StreamUtil.WriteFloat32(stream, Emitter.TimeScale);
+
+                    StreamUtil.WriteFloat32(stream, Emitter.SizeCenter);
+                    StreamUtil.WriteFloat32(stream, Emitter.ParticleLifeCenter);
+                    StreamUtil.WriteFloat32(stream, Emitter.SizeSpan);
+                    StreamUtil.WriteFloat32(stream, Emitter.ParticleLifeSpan);
+
+                    StreamUtil.WriteFloat32(stream, Emitter.TrailSpacing);
+                    StreamUtil.WriteVector3(stream, Emitter.Origin);
+                    StreamUtil.WriteVector3(stream, Emitter.SpawnAxisA);
+                    StreamUtil.WriteVector3(stream, Emitter.SpawnAxisB);
+                    StreamUtil.WriteVector3(stream, Emitter.VelocityBase);
+                    StreamUtil.WriteVector3(stream, Emitter.VelocityAxisA);
+                    StreamUtil.WriteVector3(stream, Emitter.VelocityAxisB);
+                    StreamUtil.WriteVector3(stream, Emitter.VelocityAxisC);
+                    StreamUtil.WriteVector3(stream, Emitter.Gravity);
+
+                    StreamUtil.WriteColourARGB(stream, Emitter.ColourStop1);
+                    StreamUtil.WriteColourARGB(stream, Emitter.ColourStop2);
+                    StreamUtil.WriteColourARGB(stream, Emitter.ColourStop3);
+                    StreamUtil.WriteColourARGB(stream, Emitter.ColourStop4);
+
+                    StreamUtil.WriteInt32(stream, Emitter.SpriteIndex);
+                    StreamUtil.WriteInt32(stream, Emitter.BlendMode);
                 }
                 else
                 {
