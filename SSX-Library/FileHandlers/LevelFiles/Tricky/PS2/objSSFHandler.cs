@@ -13,7 +13,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky.PS2
     public class objSSFHandler
     {
 
-        public static SSFHandler.CollisonModel LoadModel(SSFHandler.CollisonModel Model, string FolderPath)
+        public static SFHandler.CollisonModel LoadModel(SFHandler.CollisonModel Model, string FolderPath)
         {
             Model.Vertices = new List<Vector4>();
             Model.FaceNormals = new List<Vector4>();

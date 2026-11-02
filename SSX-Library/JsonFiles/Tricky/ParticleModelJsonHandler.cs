@@ -58,7 +58,7 @@ namespace SSXLibrary.JsonFiles.Tricky
         {
             public float[] Position;
             public float[] Rotation;
-            public float Unknown;
+            public float Radius;
         }
     }
 }

@@ -72,7 +72,7 @@ namespace SSXLibrary.JsonFiles.Tricky
             public int UnknownInt31;
             public int UnknownInt32;
 
-            public int LTGState;
+            public int LTGState; //TrickyLTGState
 
             public int Hash;
             public bool IncludeSound;
@@ -80,7 +80,7 @@ namespace SSXLibrary.JsonFiles.Tricky
 
             //Object Properties
 
-            public float U0;
+            public float CollisionResponseMass;
             public float PlayerBounceAmmount;
             public int U2;
             public bool Visable;
@@ -89,8 +89,8 @@ namespace SSXLibrary.JsonFiles.Tricky
             public bool Unknown241;
             public bool UVScroll;
 
-            public int SurfaceType;
-            public int CollsionMode;
+            public int SurfaceType; //TrickySurfaceType
+            public int CollsionMode; //SSFCollisionMode
             public string[] CollsionModelPaths;
             public int EffectSlotIndex;
             public int PhysicsIndex;
@@ -105,12 +105,10 @@ namespace SSXLibrary.JsonFiles.Tricky
         [Serializable]
         public struct ExternalSound
         {
-            public int U0;
+            public int EmitterType; //ADLEmitterType, see ADLHandler.ExternalSound for the U6-U11 layout
             public int SoundIndex;
-            public float U2;
-            public float U3;
-            public float U4;
-            public float U5;
+            public float[] Offset;
+            public float Radius;
             public float U6;
             public float U7;
             public float U8;

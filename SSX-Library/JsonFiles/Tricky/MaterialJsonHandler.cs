@@ -66,7 +66,7 @@ namespace SSXLibrary.JsonFiles.Tricky
             public int UnknownInt15;
             public int UnknownInt16;
             public int UnknownInt17;
-            public int UnknownInt18;
+            public int AppearanceFlags; //TrickyMaterialAppearanceFlags
 
             public List<string> TextureFlipbook;
             public int UnknownInt20;

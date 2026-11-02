@@ -322,6 +322,13 @@ namespace SSXLibrary.Internal.Utilities
 
             return matrix4X4;
         }
+
+        //Effect colours are stored A,R,G,B. In memory the Vector4 is R,G,B,A
+        public static Vector4 ReadColourARGB(Stream stream)
+        {
+            float Alpha = StreamUtil.ReadFloat(stream);
+            return new Vector4(StreamUtil.ReadVector3(stream), Alpha);
+        }
         #endregion
 
         #region Write
@@ -538,6 +545,14 @@ namespace SSXLibrary.Internal.Utilities
             byte[] Buffer = new byte[Length];
             Buffer = ReadBytes(Input, (int)Length);
             WriteBytes(MainStream, Buffer);
+        }
+
+        public static void WriteColourARGB(Stream stream, Vector4 Colour)
+        {
+            StreamUtil.WriteFloat32(stream, Colour.W);
+            StreamUtil.WriteFloat32(stream, Colour.X);
+            StreamUtil.WriteFloat32(stream, Colour.Y);
+            StreamUtil.WriteFloat32(stream, Colour.Z);
         }
 
         #endregion

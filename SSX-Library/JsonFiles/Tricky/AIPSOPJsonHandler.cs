@@ -47,7 +47,7 @@ namespace SSXLibrary.JsonFiles.Tricky
         {
             public string Name;
 
-            public int U3;
+            public int Rating;
             public bool Respawnable;
 
             public float[] PathPos;
@@ -58,7 +58,7 @@ namespace SSXLibrary.JsonFiles.Tricky
         [System.Serializable]
         public struct PathEvent
         {
-            public int EventType;
+            public int EventType; //PathEventType
             public int EventValue;
             public float EventStart;
             public float EventEnd;
