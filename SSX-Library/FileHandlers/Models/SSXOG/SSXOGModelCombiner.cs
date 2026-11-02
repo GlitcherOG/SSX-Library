@@ -249,6 +249,7 @@ namespace SSXLibrary.FileHandlers.Models.SSXOG
         // - Static chunks hold one bone so only faces fully weighted to a single slot go static, everything else goes flex.
         // - Flex vertices need a copy of the position in every weighted bones space, these come from the solved bind pose the glTF mesh is kept in.
         //   If the glTF skin has a different bind pose (the bones got moved in whatever edited it) the mesh gets moved back into ours first.
+        //   Bones are compared by their joints, Blender gives bones its own axes so the bind matrices alone look like everything rotated.
         // - NvTriStrip merges double sided faces, flips winding and drops or invents faces next to edges with 3+ faces,
         //   so double sided faces get their own pass, every strip triangle is checked against the input and anything missing is added back.
         //VU1 input buffer, every chunk type in the original files fills it up to 181 quad words
@@ -338,16 +339,16 @@ namespace SSXLibrary.FileHandlers.Models.SSXOG
         //The imported mesh is in the bind pose of its skin, which is ours unless the bones got moved in whatever edited it
         List<ReassignedMesh> ImportToBindPose(SSXOGModelCombiner ImportCombiner, int[] BoneMap)
         {
-            //How each bone moved from our bind pose to the imported one
+            //How each bone moved from our bind pose to the imported one (parents come before children in the imported list)
             var Moves = new Dictionary<int, Matrix4x4>();
+            var Rotations = new Dictionary<int, (Matrix4x4 Rotation, bool FromBind)>();
             for (int i = 0; i < ImportCombiner.bones.Count; i++)
             {
                 if (BoneMap[i] == -1)
                 {
                     continue;
                 }
-                Matrix4x4.Invert(bones[BoneMap[i]].WorldMatrix, out Matrix4x4 BindInverse);
-                Matrix4x4 Move = BindInverse * ImportCombiner.bones[i].WorldMatrix;
+                Matrix4x4 Move = BoneMove(ImportCombiner, BoneMap, i, Rotations);
                 if (!NearlyIdentity(Move))
                 {
                     Moves.Add(i, Move);
@@ -374,6 +375,86 @@ namespace SSXLibrary.FileHandlers.Models.SSXOG
                 Meshes.Add(TempMesh);
             }
             return Meshes;
+        }
+
+        //Blender and other tools give bones their own axes (Blender points them down Y), so a bind matrix can be rotated
+        //120 degrees without the bone moving at all. The joints are what actually say where a bone went.
+        Matrix4x4 BoneMove(SSXOGModelCombiner ImportCombiner, int[] BoneMap, int Bone, Dictionary<int, (Matrix4x4 Rotation, bool FromBind)> Rotations)
+        {
+            Matrix4x4 OurBind = bones[BoneMap[Bone]].WorldMatrix;
+            Matrix4x4 TheirBind = ImportCombiner.bones[Bone].WorldMatrix;
+            Vector3 OurJoint = OurBind.Translation;
+            Vector3 TheirJoint = TheirBind.Translation;
+
+            //Directions to the child joints, the same whatever axes the bones were given
+            var OurDirections = new List<Vector3>();
+            var TheirDirections = new List<Vector3>();
+            for (int i = 0; i < ImportCombiner.bones.Count; i++)
+            {
+                if (ImportCombiner.bones[i].ParentBone != Bone || BoneMap[i] == -1)
+                {
+                    continue;
+                }
+                Vector3 Ours = bones[BoneMap[i]].WorldMatrix.Translation - OurJoint;
+                Vector3 Theirs = ImportCombiner.bones[i].WorldMatrix.Translation - TheirJoint;
+                if (Ours.Length() > 0.001f && Theirs.Length() > 0.001f)
+                {
+                    OurDirections.Add(Ours);
+                    TheirDirections.Add(Theirs);
+                }
+            }
+
+            //Same axes as ours: the bind matrices give the exact move, twist included
+            Matrix4x4.Invert(OurBind, out Matrix4x4 BindInverse);
+            Matrix4x4 BindMove = BindInverse * TheirBind;
+            bool SameAxes = Enumerable.Range(0, OurDirections.Count).All(x => Vector3.Distance(Vector3.TransformNormal(OurDirections[x], BindMove), TheirDirections[x]) <= 0.01f * OurDirections[x].Length() + 0.01f);
+            int Parent = ImportCombiner.bones[Bone].ParentBone;
+            if (OurDirections.Count == 0 && Parent != -1 && Rotations.TryGetValue(Parent, out var ParentRotation))
+            {
+                //End bones have nothing to check against, they follow their parent
+                SameAxes = ParentRotation.FromBind;
+            }
+            if (SameAxes)
+            {
+                Matrix4x4 BindRotation = BindMove;
+                BindRotation.Translation = Vector3.Zero;
+                Rotations[Bone] = (BindRotation, true);
+                return BindMove;
+            }
+
+            //Different axes: turn the bone to face its children again and move it with its joint, twist cant be told apart from the axes
+            Matrix4x4 Rotation = Matrix4x4.Identity;
+            if (OurDirections.Count >= 2 && SolveRigidTransform(OurDirections.Prepend(Vector3.Zero).ToList(), TheirDirections.Prepend(Vector3.Zero).ToList(), out Matrix4x4 Fit, out _, 3))
+            {
+                Rotation = Matrix4x4.CreateFromQuaternion(Quaternion.CreateFromRotationMatrix(Fit));
+            }
+            else if (OurDirections.Count >= 1)
+            {
+                Rotation = Matrix4x4.CreateFromQuaternion(RotationBetween(OurDirections[0], TheirDirections[0]));
+            }
+            else if (Parent != -1 && Rotations.TryGetValue(Parent, out var ParentFallback))
+            {
+                Rotation = ParentFallback.Rotation;
+            }
+            Rotations[Bone] = (Rotation, false);
+            return Matrix4x4.CreateTranslation(-OurJoint) * Rotation * Matrix4x4.CreateTranslation(TheirJoint);
+        }
+
+        static Quaternion RotationBetween(Vector3 From, Vector3 To)
+        {
+            From = Vector3.Normalize(From);
+            To = Vector3.Normalize(To);
+            float Dot = Vector3.Dot(From, To);
+            if (Dot > 0.99999f)
+            {
+                return Quaternion.Identity;
+            }
+            if (Dot < -0.99999f)
+            {
+                Vector3 Side = MathF.Abs(From.X) < 0.9f ? Vector3.UnitX : Vector3.UnitY;
+                return Quaternion.CreateFromAxisAngle(Vector3.Normalize(Vector3.Cross(From, Side)), MathF.PI);
+            }
+            return Quaternion.CreateFromAxisAngle(Vector3.Normalize(Vector3.Cross(From, To)), MathF.Acos(Dot));
         }
 
         static (Vector3, Vector3) VertexToBindPose(Vector3 Position, Vector3 Normal, SSXMPFModelHandler.WeightedVertex Weight, Dictionary<int, Matrix4x4> Moves)
