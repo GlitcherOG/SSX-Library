@@ -4,7 +4,6 @@ using System.Numerics;
 using System.Collections;
 using SSXLibrary.EATextureLibrary;
 using SSXLibrary.FileHandlers.LevelFiles.Tricky;
-using SSXLibrary.FileHandlers.LevelFiles.Tricky.PS2;
 
 
 namespace SSXLibrary
@@ -82,11 +81,15 @@ namespace SSXLibrary
                 adlHandler.Load(LoadPath + ".adl");
             }
 
-            Console.WriteLine("Loading SSF File");
-            SSFHandler ssfHandler = new SSFHandler();
+            Console.WriteLine("Loading *SF File");
+            SFHandler ssfHandler = new SFHandler();
             if (consoleVersion == ConsoleVersion.PS2)
             {
                 ssfHandler.Load(LoadPath + ".ssf");
+            }
+            if(consoleVersion == ConsoleVersion.Xbox)
+            {
+                ssfHandler.Load(LoadPath + ".xsf");
             }
 
             //Load Map
@@ -1390,11 +1393,11 @@ namespace SSXLibrary
             //Load PBDHandler
             BDHandler pbdHandler = new BDHandler();
 
-            SSFHandler ssfHandler = new SSFHandler();
+            SFHandler ssfHandler = new SFHandler();
 
             ADLHandler adlHandler = new ADLHandler();
-            ssfHandler.CollisonModelPointers = new List<SSFHandler.CollisonModelPointer>();
-            ssfHandler.ObjectProperties = new List<SSFHandler.ObjectPropertiesStruct>();
+            ssfHandler.CollisonModelPointers = new List<SFHandler.CollisonModelPointer>();
+            ssfHandler.ObjectProperties = new List<SFHandler.ObjectPropertiesStruct>();
 
             if (MAPGenerate || PBDGenerate || LTGGenerate || ADLGenerate || SSFGenerate)
             {
@@ -1538,7 +1541,7 @@ namespace SSXLibrary
                 pbdHandler.splines = new List<Spline>();
                 pbdHandler.splinesSegments = new List<SplinesSegments>();
                 mapHandler.Splines = new List<LinkerItem>();
-                ssfHandler.Splines = new List<SSFHandler.Spline>();
+                ssfHandler.Splines = new List<SFHandler.Spline>();
                 int SegmentPos = 0;
                 for (int i = 0; i < splineJsonHandler.Splines.Count; i++)
                 {
@@ -1626,7 +1629,7 @@ namespace SSXLibrary
 
                     if (SSFGenerate)
                     {
-                        var NewSpline = new SSFHandler.Spline();
+                        var NewSpline = new SFHandler.Spline();
 
                         NewSpline.U1 = TempSpline.U0;
                         NewSpline.RailFlags = TempSpline.RailFlags;
@@ -1735,12 +1738,12 @@ namespace SSXLibrary
                             if (Oldinstance.CollsionModelPaths.Length != 0)
                             {
                                 //Make Collision and test if exists
-                                var NewCollision = new SSFHandler.CollisonModelPointer();
-                                NewCollision.Models = new List<SSFHandler.CollisonModel>();
+                                var NewCollision = new SFHandler.CollisonModelPointer();
+                                NewCollision.Models = new List<SFHandler.CollisonModel>();
 
                                 for (int a = 0; a < Oldinstance.CollsionModelPaths.Length; a++)
                                 {
-                                    var NewCollisionModel = new SSFHandler.CollisonModel();
+                                    var NewCollisionModel = new SFHandler.CollisonModel();
 
                                     NewCollisionModel.MeshPath = Oldinstance.CollsionModelPaths[a];
 
@@ -1780,7 +1783,7 @@ namespace SSXLibrary
                             }
                         }
                         //Make Object Properties and Test if Exists
-                        var NewObjectProperties = new SSFHandler.ObjectPropertiesStruct();
+                        var NewObjectProperties = new SFHandler.ObjectPropertiesStruct();
 
                         NewObjectProperties.CollisionResponseMass = Oldinstance.CollisionResponseMass;
                         NewObjectProperties.PlayerBounce = Oldinstance.PlayerBounceAmmount;
@@ -2595,13 +2598,13 @@ namespace SSXLibrary
             {
                 ssfJsonHandler = new SSFJsonHandler();
                 ssfJsonHandler = SSFJsonHandler.Load(LoadPath + "/SSFLogic.json");
-                ssfHandler.EffectSlots = new List<SSFHandler.EffectSlot>();
+                ssfHandler.EffectSlots = new List<SFHandler.EffectSlot>();
                 //Effect Slot
                 for (int i = 0; i < ssfJsonHandler.EffectSlots.Count; i++)
                 {
                     //ErrorManager.ErrorMessage = "Error with Effect Slot (" + i + ") " + ssfJsonHandler.EffectSlots[i].EffectSlotName;
                     Console.WriteLine("Effect Slots: " + (i + 1) + "/" + ssfJsonHandler.EffectSlots.Count + " " + ssfJsonHandler.EffectSlots[i].EffectSlotName);
-                    var NewEffectSlot = new SSFHandler.EffectSlot();
+                    var NewEffectSlot = new SFHandler.EffectSlot();
                     NewEffectSlot.PersistantEffectSlot = ssfJsonHandler.EffectSlots[i].PersistantEffectSlot;
                     NewEffectSlot.CollisionEffectSlot = ssfJsonHandler.EffectSlots[i].CollisionEffectSlot;
                     NewEffectSlot.Slot3 = ssfJsonHandler.EffectSlots[i].Slot3;
@@ -2614,17 +2617,17 @@ namespace SSXLibrary
                 }
 
                 //Physics
-                ssfHandler.PhysicsHeaders = new List<SSFHandler.PhysicsHeader>();
+                ssfHandler.PhysicsHeaders = new List<SFHandler.PhysicsHeader>();
                 for (int i = 0; i < ssfJsonHandler.PhysicsHeaders.Count; i++)
                 {
                     //ErrorManager.ErrorMessage = "Error with Physics (" + i + ") " + ssfJsonHandler.PhysicsHeaders[i].PhysicsName;
                     Console.WriteLine("Physics: " + (i + 1) + "/" + ssfJsonHandler.PhysicsHeaders.Count + " " + ssfJsonHandler.PhysicsHeaders[i].PhysicsName);
-                    var NewPhysicsHeader = new SSFHandler.PhysicsHeader();
-                    NewPhysicsHeader.PhysicsDatas = new List<SSFHandler.PhysicsData>();
+                    var NewPhysicsHeader = new SFHandler.PhysicsHeader();
+                    NewPhysicsHeader.PhysicsDatas = new List<SFHandler.PhysicsData>();
 
                     for (int a = 0; a < ssfJsonHandler.PhysicsHeaders[i].PhysicsDatas.Count; a++)
                     {
-                        var NewPhysicsData = new SSFHandler.PhysicsData();
+                        var NewPhysicsData = new SFHandler.PhysicsData();
 
                         NewPhysicsData.OccupancyMaskEncoding = ssfJsonHandler.PhysicsHeaders[i].PhysicsDatas[a].OccupancyMaskEncoding;
 
@@ -2651,11 +2654,11 @@ namespace SSXLibrary
                         NewPhysicsData.InverseInertiaM32 = ssfJsonHandler.PhysicsHeaders[i].PhysicsDatas[a].InverseInertiaM32;
                         NewPhysicsData.InverseInertiaM33 = ssfJsonHandler.PhysicsHeaders[i].PhysicsDatas[a].InverseInertiaM33;
 
-                        NewPhysicsData.OccupancyLevels = new List<SSFHandler.OccupancyLevel>();
+                        NewPhysicsData.OccupancyLevels = new List<SFHandler.OccupancyLevel>();
 
                         for (int b = 0; b < ssfJsonHandler.PhysicsHeaders[i].PhysicsDatas[a].OccupancyLevels.Count; b++)
                         {
-                            var NewPhysicsUStruct = new SSFHandler.OccupancyLevel();
+                            var NewPhysicsUStruct = new SFHandler.OccupancyLevel();
 
                             NewPhysicsUStruct.SphereRadius = ssfJsonHandler.PhysicsHeaders[i].PhysicsDatas[a].OccupancyLevels[b].SphereRadius;
                             NewPhysicsUStruct.ChildOffset = ssfJsonHandler.PhysicsHeaders[i].PhysicsDatas[a].OccupancyLevels[b].ChildOffset;
@@ -2674,14 +2677,14 @@ namespace SSXLibrary
 
 
                 //Effects
-                ssfHandler.EffectHeaders = new List<SSFHandler.EffectHeaderStruct>();
+                ssfHandler.EffectHeaders = new List<SFHandler.EffectHeaderStruct>();
                 for (int i = 0; i < ssfJsonHandler.EffectHeaders.Count; i++)
                 {
                     //ErrorManager.ErrorMessage = "Error with Effect Headers (" + i + ") " + ssfJsonHandler.EffectHeaders[i].EffectName;
                     Console.WriteLine("Effect Headers: " + (i + 1) + "/" + ssfJsonHandler.EffectHeaders.Count + " " + ssfJsonHandler.EffectHeaders[i].EffectName);
-                    var NewEffectHeader = new SSFHandler.EffectHeaderStruct();
+                    var NewEffectHeader = new SFHandler.EffectHeaderStruct();
 
-                    NewEffectHeader.Effects = new List<SSFHandler.Effect>();
+                    NewEffectHeader.Effects = new List<SFHandler.Effect>();
 
                     for (int a = 0; a < ssfJsonHandler.EffectHeaders[i].Effects.Count; a++)
                     {
@@ -2693,15 +2696,15 @@ namespace SSXLibrary
 
 
                 //Function
-                ssfHandler.Functions = new List<SSFHandler.Function>();
+                ssfHandler.Functions = new List<SFHandler.Function>();
                 for (int i = 0; i < ssfJsonHandler.Functions.Count; i++)
                 {
                     //ErrorManager.ErrorMessage = "Error with Function (" + i + ") " + ssfJsonHandler.Functions[i].FunctionName;
                     Console.WriteLine("Effect Functions: " + (i + 1) + "/" + ssfJsonHandler.Functions.Count + " " + ssfJsonHandler.Functions[i].FunctionName);
 
-                    var NewEffectHeader = new SSFHandler.Function();
+                    var NewEffectHeader = new SFHandler.Function();
                     NewEffectHeader.FunctionName = ssfJsonHandler.Functions[i].FunctionName;
-                    NewEffectHeader.Effects = new List<SSFHandler.Effect>();
+                    NewEffectHeader.Effects = new List<SFHandler.Effect>();
 
                     for (int a = 0; a < ssfJsonHandler.Functions[i].Effects.Count; a++)
                     {

@@ -9,12 +9,6 @@ using System.Numerics;
 
 namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
 {
-    public enum ConsoleVersion
-    {
-        PS2,
-        Xbox,
-        GC
-    }
     public class BDHandler
     {
         public ConsoleVersion consoleVersion = ConsoleVersion.PS2;

@@ -2,6 +2,12 @@
 {
     //Known values for Tricky level file fields, ported from OpenSlope's research.
     //The fields that hold them stay int so the binary and JSON layouts are unchanged; cast to compare.
+    public enum ConsoleVersion
+    {
+        PS2,
+        Xbox,
+        GC
+    }
 
     #region SSF
     //SSFHandler.Effect.MainType

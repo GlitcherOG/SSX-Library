@@ -1,12 +1,15 @@
-﻿using SSXLibrary.Internal.Utilities;
+﻿using SSXLibrary.FileHandlers.LevelFiles.Tricky.PS2;
+using SSXLibrary.Internal.Utilities;
 using SSXLibrary.Internal.Utilities.StreamExtensions;
 using System.Globalization;
 using System.Numerics;
 
-namespace SSXLibrary.FileHandlers.LevelFiles.Tricky.PS2
+namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
 {
-    public class SSFHandler
+    public class SFHandler
     {
+        public ConsoleVersion consoleVersion = ConsoleVersion.PS2;
+
         public int U1 = 1966592;
         public int U2 = 1053952;
         public float U3 = 0.006f;
@@ -43,6 +46,16 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky.PS2
                 U1 = StreamUtil.ReadUInt32(stream);
                 U2 = StreamUtil.ReadUInt32(stream);
                 U3 = StreamUtil.ReadFloat(stream);
+
+                if (U2 == 1053952)
+                {
+                    consoleVersion = ConsoleVersion.PS2;
+                }
+                else if (U2 == 1972224)
+                {
+                    consoleVersion = ConsoleVersion.Xbox;
+                }
+
                 EffectSlotsCount = StreamUtil.ReadUInt32(stream);
                 EffectSlotsOffset = StreamUtil.ReadUInt32(stream);
                 PhysicsCount = StreamUtil.ReadUInt32(stream);
@@ -175,7 +188,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky.PS2
                         TempModel.Vertices = new List<Vector4>();
                         TempModel.FaceNormals = new List<Vector4>();
 
-                        for (int b = 0; b < TempModel.FaceCount*3; b++)
+                        for (int b = 0; b < TempModel.FaceCount * 3; b++)
                         {
                             TempModel.Index.Add(StreamUtil.ReadUInt32(stream));
                         }
@@ -237,7 +250,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky.PS2
                     {
                         var NewEffect = LoadEffectsData(stream);
 
-                        if(NewEffect==null)
+                        if (NewEffect == null)
                         {
                             break;
                         }
@@ -269,9 +282,6 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky.PS2
                     Functions[i] = Function;
                 }
 
-
-
-                //Appears to do nothing
                 ObjectProperties = new List<ObjectPropertiesStruct>();
                 stream.Position = ObjectPropertiesOffset;
                 for (int i = 0; i < ObjectPropertiesCount; i++)
@@ -304,7 +314,6 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky.PS2
                     ObjectProperties.Add(TempUstruct5);
                 }
 
-                //Breaks Collison, Animation, Material Visablity
                 InstanceState = new List<int>();
                 stream.Position = InstanceOffset;
                 for (int i = 0; i < InstanceCount; i++)
@@ -319,11 +328,11 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky.PS2
                     var TempUstruct6 = new Spline();
                     TempUstruct6.U1 = StreamUtil.ReadInt16(stream);
                     TempUstruct6.RailFlags = StreamUtil.ReadInt16(stream);
-                    TempUstruct6.SplineStyle = StreamUtil.ReadUInt32(stream); 
+                    TempUstruct6.SplineStyle = StreamUtil.ReadUInt32(stream);
                     Splines.Add(TempUstruct6);
                 }
 
-                }
+            }
         }
 
         public Effect? LoadEffectsData(Stream stream)

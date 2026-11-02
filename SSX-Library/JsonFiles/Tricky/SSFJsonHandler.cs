@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using SSXLibrary.Internal.Utilities;
-using SSXLibrary.FileHandlers.LevelFiles.Tricky.PS2;
+using SSXLibrary.FileHandlers.LevelFiles.Tricky;
 
 namespace SSXLibrary.JsonFiles.Tricky
 {
@@ -48,7 +48,7 @@ namespace SSXLibrary.JsonFiles.Tricky
             }
         }
 
-        public static Effect EffectToJSON(SSFHandler.Effect TempEffect)
+        public static Effect EffectToJSON(SFHandler.Effect TempEffect)
         {
             var NewEffect = new SSFJsonHandler.Effect();
             NewEffect.MainType = TempEffect.MainType;
@@ -374,18 +374,18 @@ namespace SSXLibrary.JsonFiles.Tricky
             return NewEffect;
         }
 
-        public static SSFHandler.Effect JSONToEffect(Effect TempEffect)
+        public static SFHandler.Effect JSONToEffect(Effect TempEffect)
         {
-            var NewEffect = new SSFHandler.Effect();
+            var NewEffect = new SFHandler.Effect();
             NewEffect.MainType = TempEffect.MainType;
 
             if (NewEffect.MainType == 0)
             {
-                var NewSubType = new SSFHandler.Type0();
+                var NewSubType = new SFHandler.Type0();
                 NewSubType.SubType = TempEffect.type0.Value.SubType;
                 if (NewSubType.SubType == 0)
                 {
-                    var NewSubSubType = new SSFHandler.RollerEffect();
+                    var NewSubSubType = new SFHandler.RollerEffect();
                     NewSubSubType.Mass = TempEffect.type0.Value.Roller.Value.Mass;
                     NewSubSubType.U1 = TempEffect.type0.Value.Roller.Value.U1;
                     NewSubSubType.U2 = TempEffect.type0.Value.Roller.Value.U2;
@@ -402,14 +402,14 @@ namespace SSXLibrary.JsonFiles.Tricky
                 }
                 else if (NewSubType.SubType == 6)
                 {
-                    var NewSubSubType = new SSFHandler.CounterEffect();
+                    var NewSubSubType = new SFHandler.CounterEffect();
                     NewSubSubType.Count = TempEffect.type0.Value.Counter.Value.Count;
                     NewSubSubType.U1 = TempEffect.type0.Value.Counter.Value.U1;
                     NewSubType.Counter = NewSubSubType;
                 }
                 else if (NewSubType.SubType == 7)
                 {
-                    var NewSubSubType = new SSFHandler.BoostEffect();
+                    var NewSubSubType = new SFHandler.BoostEffect();
                     NewSubSubType.Mode = TempEffect.type0.Value.Boost.Value.Mode;
                     NewSubSubType.Window = TempEffect.type0.Value.Boost.Value.Window;
                     NewSubSubType.ApproachRate = TempEffect.type0.Value.Boost.Value.ApproachRate;
@@ -419,7 +419,7 @@ namespace SSXLibrary.JsonFiles.Tricky
                 }
                 else if (NewSubType.SubType == 10)
                 {
-                    var NewSubSubType = new SSFHandler.UVScrolling();
+                    var NewSubSubType = new SFHandler.UVScrolling();
                     NewSubSubType.Mode = TempEffect.type0.Value.UVScroll.Value.Mode;
                     NewSubSubType.Speed = ArrayConv.ArrayToVector2(TempEffect.type0.Value.UVScroll.Value.Speed);
                     NewSubSubType.ActiveDuration = TempEffect.type0.Value.UVScroll.Value.ActiveDuration;
@@ -429,7 +429,7 @@ namespace SSXLibrary.JsonFiles.Tricky
                 }
                 else if (NewSubType.SubType == 11)
                 {
-                    var NewSubSubType = new SSFHandler.TextureFlipEffect();
+                    var NewSubSubType = new SFHandler.TextureFlipEffect();
                     NewSubSubType.StartFrame = TempEffect.type0.Value.TextureFlip.Value.StartFrame;
                     NewSubSubType.Direction = TempEffect.type0.Value.TextureFlip.Value.Direction;
                     NewSubSubType.Speed = TempEffect.type0.Value.TextureFlip.Value.Speed;
@@ -439,14 +439,14 @@ namespace SSXLibrary.JsonFiles.Tricky
                 }
                 else if (NewSubType.SubType == 12)
                 {
-                    var NewSubSubType = new SSFHandler.FenceFlex();
+                    var NewSubSubType = new SFHandler.FenceFlex();
                     NewSubSubType.U0 = TempEffect.type0.Value.Fence.Value.U0;
                     NewSubSubType.FlexAmmount = TempEffect.type0.Value.Fence.Value.FlexAmmount;
                     NewSubType.Fence = NewSubSubType;
                 }
                 else if (NewSubType.SubType == 13)
                 {
-                    var NewSubSubType = new SSFHandler.FlagEffect();
+                    var NewSubSubType = new SFHandler.FlagEffect();
                     NewSubSubType.Variant = TempEffect.type0.Value.Flag.Value.Variant;
                     NewSubSubType.Amplitude = TempEffect.type0.Value.Flag.Value.Amplitude;
                     NewSubSubType.Wavelength = TempEffect.type0.Value.Flag.Value.Wavelength;
@@ -455,14 +455,14 @@ namespace SSXLibrary.JsonFiles.Tricky
                 }
                 else if (NewSubType.SubType == 14)
                 {
-                    var NewSubSubType = new SSFHandler.CrackedEffect();
+                    var NewSubSubType = new SFHandler.CrackedEffect();
                     NewSubSubType.CrackLifetime = TempEffect.type0.Value.Cracked.Value.CrackLifetime;
                     NewSubSubType.Strength = TempEffect.type0.Value.Cracked.Value.Strength;
                     NewSubType.Cracked = NewSubSubType;
                 }
                 else if (NewSubType.SubType == 15)
                 {
-                    var NewSubSubType = new SSFHandler.LapBoostEffect();
+                    var NewSubSubType = new SFHandler.LapBoostEffect();
                     NewSubSubType.ApproachRate = TempEffect.type0.Value.LapBoost.Value.ApproachRate;
                     NewSubSubType.TargetSpeed = TempEffect.type0.Value.LapBoost.Value.TargetSpeed;
                     NewSubSubType.Axis = ArrayConv.ArrayToVector3(TempEffect.type0.Value.LapBoost.Value.Axis);
@@ -470,7 +470,7 @@ namespace SSXLibrary.JsonFiles.Tricky
                 }
                 else if (NewSubType.SubType == 17)
                 {
-                    var NewSubSubType = new SSFHandler.CrowdBox();
+                    var NewSubSubType = new SFHandler.CrowdBox();
                     NewSubSubType.U0 = TempEffect.type0.Value.CrowdEffect.Value.U0;
                     NewSubSubType.Rows = TempEffect.type0.Value.CrowdEffect.Value.Rows;
                     NewSubSubType.Columns = TempEffect.type0.Value.CrowdEffect.Value.Columns;
@@ -478,7 +478,7 @@ namespace SSXLibrary.JsonFiles.Tricky
                 }
                 else if (NewSubType.SubType == 18)
                 {
-                    var NewSubSubType = new SSFHandler.ZBoostEffect();
+                    var NewSubSubType = new SFHandler.ZBoostEffect();
                     NewSubSubType.ApproachRate = TempEffect.type0.Value.ZBoost.Value.ApproachRate;
                     NewSubSubType.TargetSpeed = TempEffect.type0.Value.ZBoost.Value.TargetSpeed;
                     NewSubSubType.Axis = ArrayConv.ArrayToVector3(TempEffect.type0.Value.ZBoost.Value.Axis);
@@ -488,7 +488,7 @@ namespace SSXLibrary.JsonFiles.Tricky
                 }
                 else if (NewSubType.SubType == 20)
                 {
-                    var NewSubSubType = new SSFHandler.MeshAnimEffect();
+                    var NewSubSubType = new SFHandler.MeshAnimEffect();
                     NewSubSubType.U0 = TempEffect.type0.Value.MeshAnim.Value.U0;
                     NewSubSubType.FrameStep = TempEffect.type0.Value.MeshAnim.Value.FrameStep;
                     NewSubSubType.Duration = TempEffect.type0.Value.MeshAnim.Value.Duration;
@@ -503,7 +503,7 @@ namespace SSXLibrary.JsonFiles.Tricky
                 }
                 else if (NewSubType.SubType == 24)
                 {
-                    var NewSubSubType = new SSFHandler.TubeEndBoostEffect();
+                    var NewSubSubType = new SFHandler.TubeEndBoostEffect();
                     NewSubSubType.Mode = TempEffect.type0.Value.TubeEndBoost.Value.Mode;
                     NewSubSubType.Window = TempEffect.type0.Value.TubeEndBoost.Value.Window;
                     NewSubSubType.ApproachRate = TempEffect.type0.Value.TubeEndBoost.Value.ApproachRate;
@@ -519,7 +519,7 @@ namespace SSXLibrary.JsonFiles.Tricky
                 }
                 else if (NewSubType.SubType == 256)
                 {
-                    var NewSubSubType = new SSFHandler.AnimObjectEffect();
+                    var NewSubSubType = new SFHandler.AnimObjectEffect();
                     NewSubSubType.LoopMode = TempEffect.type0.Value.AnimObject.Value.LoopMode;
                     NewSubSubType.WindowStart = TempEffect.type0.Value.AnimObject.Value.WindowStart;
                     NewSubSubType.WindowEnd = TempEffect.type0.Value.AnimObject.Value.WindowEnd;
@@ -532,7 +532,7 @@ namespace SSXLibrary.JsonFiles.Tricky
                 }
                 else if (NewSubType.SubType == 257)
                 {
-                    var NewSubSubType = new SSFHandler.AnimDeltaEffect();
+                    var NewSubSubType = new SFHandler.AnimDeltaEffect();
                     NewSubSubType.LoopMode = TempEffect.type0.Value.AnimDelta.Value.LoopMode;
                     NewSubSubType.WindowStart = TempEffect.type0.Value.AnimDelta.Value.WindowStart;
                     NewSubSubType.WindowEnd = TempEffect.type0.Value.AnimDelta.Value.WindowEnd;
@@ -545,7 +545,7 @@ namespace SSXLibrary.JsonFiles.Tricky
                 }
                 else if (NewSubType.SubType == 258)
                 {
-                    var NewSubSubType = new SSFHandler.AnimComboEffect();
+                    var NewSubSubType = new SFHandler.AnimComboEffect();
                     NewSubSubType.LoopMode = TempEffect.type0.Value.AnimCombo.Value.LoopMode;
                     NewSubSubType.WindowStart = TempEffect.type0.Value.AnimCombo.Value.WindowStart;
                     NewSubSubType.WindowEnd = TempEffect.type0.Value.AnimCombo.Value.WindowEnd;
@@ -569,7 +569,7 @@ namespace SSXLibrary.JsonFiles.Tricky
             }
             else if (NewEffect.MainType == 2)
             {
-                var NewSubType = new SSFHandler.Type2();
+                var NewSubType = new SFHandler.Type2();
                 NewSubType.SubType = TempEffect.type2.Value.SubType;
 
                 if (NewSubType.SubType == 0)
@@ -578,7 +578,7 @@ namespace SSXLibrary.JsonFiles.Tricky
                 }
                 else if (NewSubType.SubType == 1)
                 {
-                    var NewSubSubType = new SSFHandler.SplinePathAnimation();
+                    var NewSubSubType = new SFHandler.SplinePathAnimation();
                     NewSubSubType.SplineIndex = TempEffect.type2.Value.SplineAnimation.Value.SplineIndex;
                     NewSubSubType.EndMode = TempEffect.type2.Value.SplineAnimation.Value.EndMode;
                     NewSubSubType.OrientationMode = TempEffect.type2.Value.SplineAnimation.Value.OrientationMode;
@@ -603,7 +603,7 @@ namespace SSXLibrary.JsonFiles.Tricky
             }
             else if (NewEffect.MainType == 3)
             {
-                var NewSubType = new SSFHandler.Type3();
+                var NewSubType = new SFHandler.Type3();
 
                 NewSubType.Command = TempEffect.type3.Value.Command;
                 NewSubType.Parameter = TempEffect.type3.Value.Parameter;
@@ -616,7 +616,7 @@ namespace SSXLibrary.JsonFiles.Tricky
             }
             else if (NewEffect.MainType == 5)
             {
-                var NewSubType = new SSFHandler.Type5();
+                var NewSubType = new SFHandler.Type5();
 
                 NewSubType.Mode = TempEffect.type5.Value.Mode;
                 NewSubType.Compare = TempEffect.type5.Value.Compare;
@@ -626,7 +626,7 @@ namespace SSXLibrary.JsonFiles.Tricky
             }
             else if (NewEffect.MainType == 7)
             {
-                var NewInstance = new SSFHandler.InstanceEffect();
+                var NewInstance = new SFHandler.InstanceEffect();
 
                 NewInstance.InstanceIndex = TempEffect.Instance.Value.InstanceIndex;
                 NewInstance.EffectIndex = TempEffect.Instance.Value.EffectIndex;
@@ -639,7 +639,7 @@ namespace SSXLibrary.JsonFiles.Tricky
             }
             else if (NewEffect.MainType == 9)
             {
-                var NewSubType = new SSFHandler.Type9();
+                var NewSubType = new SFHandler.Type9();
 
                 NewSubType.Command = TempEffect.type9.Value.Command;
                 NewSubType.Parameter = TempEffect.type9.Value.Parameter;
@@ -672,7 +672,7 @@ namespace SSXLibrary.JsonFiles.Tricky
             }
             else if (NewEffect.MainType == 25)
             {
-                var NewSpline = new SSFHandler.SplineEffect();
+                var NewSpline = new SFHandler.SplineEffect();
 
                 NewSpline.SplineIndex = TempEffect.Spline.Value.SplineIndex;
                 NewSpline.Effect = TempEffect.Spline.Value.Effect;
@@ -681,7 +681,7 @@ namespace SSXLibrary.JsonFiles.Tricky
             }
             else if (NewEffect.MainType == 12)
             {
-                var NewHUDEffect = new SSFHandler.HUDTextEffect();
+                var NewHUDEffect = new SFHandler.HUDTextEffect();
 
                 NewHUDEffect.HudText = TempEffect.hudTextEffect.Value.HudText;
                 //A document that names no colour gets white, which is what the banner draws anyway.
@@ -699,7 +699,7 @@ namespace SSXLibrary.JsonFiles.Tricky
             return NewEffect;
         }
 
-        static EmitterEffect EmitterToJSON(SSFHandler.EmitterEffect TempEmitter)
+        static EmitterEffect EmitterToJSON(SFHandler.EmitterEffect TempEmitter)
         {
             var NewEmitter = new EmitterEffect();
             NewEmitter.ParticleCount = TempEmitter.ParticleCount;
@@ -728,9 +728,9 @@ namespace SSXLibrary.JsonFiles.Tricky
             return NewEmitter;
         }
 
-        static SSFHandler.EmitterEffect JSONToEmitter(EmitterEffect TempEmitter)
+        static SFHandler.EmitterEffect JSONToEmitter(EmitterEffect TempEmitter)
         {
-            var NewEmitter = new SSFHandler.EmitterEffect();
+            var NewEmitter = new SFHandler.EmitterEffect();
             NewEmitter.ParticleCount = TempEmitter.ParticleCount;
             NewEmitter.TrailCopies = TempEmitter.TrailCopies;
             NewEmitter.EmissionWindow = TempEmitter.EmissionWindow;
