@@ -79,7 +79,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
 
         public void LoadPBD(string LoadPath)
         {
-            using (Stream stream = File.Open(LoadPath, FileMode.Open))
+            using (Stream stream = File.Open(LoadPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
             {
                 MagicBytes = StreamUtil.ReadBytes(stream, 4);
 
@@ -765,7 +765,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
                                 }
                             }
                             TempMeshData = objTriPBDHandler.GenerateFaces(TempMeshData);
-                            TempMeshOffset.FullMesh = TempMeshData;
+                            TempMeshOffset.PS2Mesh = TempMeshData;
                             TempMeshOffset.MeshID = MeshID;
                             TempMeshOffset.MeshPath = MeshID.ToString() + ".obj";
                             TempObjects.objectData.MeshOffsets[b] = TempMeshOffset;
@@ -1097,7 +1097,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
                 TempHeader.MaterialBlockID = StreamUtil.ReadUInt32(stream);
                 TempHeader.Unknown3 = StreamUtil.ReadUInt32(stream); //Does change sometimes
                 TempHeader.AnimTime = StreamUtil.ReadFloat(stream);
-                stream.Position += 4;
+                TempHeader.Unknown31 = StreamUtil.ReadUInt32(stream);
                 TempHeader.Scale = StreamUtil.ReadVector3(stream);
                 //Xbox Differes from here
                 TempHeader.TotalMeshCount = StreamUtil.ReadUInt32(stream);
@@ -1142,6 +1142,8 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
 
                         meshHeader.TotalOffsetsLength = StreamUtil.ReadUInt32(stream);
 
+                        long MeshOffsetStart = stream.Position;
+
                         meshHeader.MeshOffsetPositions = new List<int>();
                         for (int c = 0; c < meshHeader.MeshCount; c++)
                         {
@@ -1151,14 +1153,30 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
                         meshHeader.MeshOffsets = new List<MeshOffsets>();
                         for (int b = 0; b < meshHeader.MeshCount; b++)
                         {
+                            stream.Position = MeshOffsetStart + 4 * b + meshHeader.MeshOffsetPositions[b];
+
+                            long BlockStart = stream.Position;
+
                             var context = new MeshOffsets();
                             context.EntryLength = StreamUtil.ReadUInt32(stream);
                             context.MaterialBlockPos = StreamUtil.ReadUInt32(stream);
-                            context.MeshDataLength = StreamUtil.ReadUInt32(stream);
-                            context.StartPos = StreamUtil.ReadUInt32(stream);
-                            context.Length1 = StreamUtil.ReadUInt32(stream);
-                            context.Length2 = StreamUtil.ReadUInt32(stream);
-                            context.Length3 = StreamUtil.ReadUInt32(stream);
+
+                            context.IndexOffset = StreamUtil.ReadUInt32(stream);
+                            context.StripCount = StreamUtil.ReadInt16(stream);
+                            context.Strips = new List<int>();
+                            for (int j = 0; j < context.StripCount; j++)
+                            {
+                                context.Strips.Add(StreamUtil.ReadUInt16(stream));
+                            }
+
+                            stream.Position = BlockStart + 4 + context.IndexOffset;
+                            context.Indices = new List<int>();
+
+                            int IndexCount = context.Strips.Sum();
+                            for (int c = 0; c < IndexCount; c++)
+                            {
+                                context.Indices.Add(StreamUtil.ReadUInt16(stream));
+                            }
                             meshHeader.MeshOffsets.Add(context);
                         }
                         TempPrefab.objectData = meshHeader;
@@ -2184,7 +2202,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
                             List<Vector3> Normals = new List<Vector3>();
                             List<Vector2> UV = new List<Vector2>();
                             outputString += "o Mesh" + i.ToString() + "\n";
-                            var Data = modelData[a].ModelObjects[ax].objectData.MeshOffsets[i].FullMesh;
+                            var Data = modelData[a].ModelObjects[ax].objectData.MeshOffsets[i].PS2Mesh;
                             for (int b = 0; b < Data.meshFaces.Count; b++)
                             {
                                 var Face = Data.meshFaces[b];
@@ -2300,7 +2318,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
                         var mesh = new MeshBuilder<VertexPositionNormal, VertexTexture1>(ax.ToString());
                         for (int i = 0; i < modelData[a].ModelObjects[ax].objectData.MeshOffsets.Count; i++)
                         {
-                            var TempMesh = modelData[a].ModelObjects[ax].objectData.MeshOffsets[i].FullMesh;
+                            var TempMesh = modelData[a].ModelObjects[ax].objectData.MeshOffsets[i].PS2Mesh;
                             for (int b = 0; b < TempMesh.meshFaces.Count; b++)
                             {
                                 //Add Mesh to Object
@@ -2370,32 +2388,32 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
                             if (File.Exists(FolderPath + "\\" + TempMeshOffset.MeshPath))
                             {
                                 ModelObject modelObject = objTriPBDHandler.LoadFile(FolderPath + "\\" + TempMeshOffset.MeshPath);
-                                TempMeshOffset.FullMesh = objTriPBDHandler.GenerateTristripDataOneNew(modelObject.Meshs[0]);
+                                TempMeshOffset.PS2Mesh = objTriPBDHandler.GenerateTristripDataOneNew(modelObject.Meshs[0]);
                             }
                             else
                             {
                                 //MessageBox.Show("Error File " + TempMeshOffset.MeshPath + " Doesnt Exist");
                             }
 
-                            if (!TempMeshOffset.FullMesh.Equals(null))
+                            if (!TempMeshOffset.PS2Mesh.Equals(null))
                             {
-                                if (TempMeshOffset.FullMesh.meshChunk!=null)
+                                if (TempMeshOffset.PS2Mesh.meshChunk!=null)
                                 {
-                                    for (int i = 0; i < TempMeshOffset.FullMesh.meshChunk.Count; i++)
+                                    for (int i = 0; i < TempMeshOffset.PS2Mesh.meshChunk.Count; i++)
                                     {
-                                        for (int a = 0; a < TempMeshOffset.FullMesh.meshChunk[i].vertices.Count; a++)
+                                        for (int a = 0; a < TempMeshOffset.PS2Mesh.meshChunk[i].vertices.Count; a++)
                                         {
-                                            verticeList.Add(TempMeshOffset.FullMesh.meshChunk[i].vertices[a]);
+                                            verticeList.Add(TempMeshOffset.PS2Mesh.meshChunk[i].vertices[a]);
                                             if (!Set)
                                             {
-                                                LowestXYZ = TempMeshOffset.FullMesh.meshChunk[i].vertices[a];
-                                                HighestXYZ = TempMeshOffset.FullMesh.meshChunk[i].vertices[a];
+                                                LowestXYZ = TempMeshOffset.PS2Mesh.meshChunk[i].vertices[a];
+                                                HighestXYZ = TempMeshOffset.PS2Mesh.meshChunk[i].vertices[a];
                                                 Set = true;
                                             }
                                             else
                                             {
-                                                LowestXYZ = Vector3.Min(LowestXYZ, TempMeshOffset.FullMesh.meshChunk[i].vertices[a]);
-                                                HighestXYZ = Vector3.Max(HighestXYZ, TempMeshOffset.FullMesh.meshChunk[i].vertices[a]);
+                                                LowestXYZ = Vector3.Min(LowestXYZ, TempMeshOffset.PS2Mesh.meshChunk[i].vertices[a]);
+                                                HighestXYZ = Vector3.Max(HighestXYZ, TempMeshOffset.PS2Mesh.meshChunk[i].vertices[a]);
                                             }
                                         }
                                     }
@@ -2484,9 +2502,9 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
                             TempMeshOffset.Length2 = 0;
                             TempMeshOffset.Length3 = 0;
                             TempMeshOffset.MeshDataLength = 0;
-                            if (!TempMeshOffset.FullMesh.Equals(null))
+                            if (!TempMeshOffset.PS2Mesh.Equals(null))
                             {
-                                var MeshData = TempMeshOffset.FullMesh;
+                                var MeshData = TempMeshOffset.PS2Mesh;
 
 
                                 TempMeshOffset.StartPos = (int)memoryStream.Position;
@@ -2795,16 +2813,16 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
                     var TempModelObjects = TempPrefab.ModelObjects[a];
                     if (TempModelObjects.objectData.MeshOffsets != null)
                     {
-                        TempModelObjects.objectData.HighestXYZ = TempModelObjects.objectData.MeshOffsets[0].FullMesh.meshChunk[0].vertices[0];
-                        TempModelObjects.objectData.LowestXYZ = TempModelObjects.objectData.MeshOffsets[0].FullMesh.meshChunk[0].vertices[0];
+                        TempModelObjects.objectData.HighestXYZ = TempModelObjects.objectData.MeshOffsets[0].PS2Mesh.meshChunk[0].vertices[0];
+                        TempModelObjects.objectData.LowestXYZ = TempModelObjects.objectData.MeshOffsets[0].PS2Mesh.meshChunk[0].vertices[0];
                         for (int b = 0; b < TempModelObjects.objectData.MeshOffsets.Count; b++)
                         {
-                            for (int c = 0; c < TempModelObjects.objectData.MeshOffsets[b].FullMesh.meshChunk.Count; c++)
+                            for (int c = 0; c < TempModelObjects.objectData.MeshOffsets[b].PS2Mesh.meshChunk.Count; c++)
                             {
-                                for (int d = 0; d < TempModelObjects.objectData.MeshOffsets[b].FullMesh.meshChunk[c].vertices.Count; d++)
+                                for (int d = 0; d < TempModelObjects.objectData.MeshOffsets[b].PS2Mesh.meshChunk[c].vertices.Count; d++)
                                 {
-                                    TempModelObjects.objectData.LowestXYZ = Vector3.Min(TempModelObjects.objectData.LowestXYZ, TempModelObjects.objectData.MeshOffsets[b].FullMesh.meshChunk[c].vertices[d]);
-                                    TempModelObjects.objectData.HighestXYZ = Vector3.Max(TempModelObjects.objectData.HighestXYZ, TempModelObjects.objectData.MeshOffsets[b].FullMesh.meshChunk[c].vertices[d]);
+                                    TempModelObjects.objectData.LowestXYZ = Vector3.Min(TempModelObjects.objectData.LowestXYZ, TempModelObjects.objectData.MeshOffsets[b].PS2Mesh.meshChunk[c].vertices[d]);
+                                    TempModelObjects.objectData.HighestXYZ = Vector3.Max(TempModelObjects.objectData.HighestXYZ, TempModelObjects.objectData.MeshOffsets[b].PS2Mesh.meshChunk[c].vertices[d]);
                                 }
                             }
                         }
@@ -2827,14 +2845,14 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
                 {
                     if (TempPrefabData.ModelObjects[a].objectData.MeshOffsets != null)
                     {
-                        var Vertice = TempPrefabData.ModelObjects[a].objectData.MeshOffsets[0].FullMesh.meshChunk[0].vertices[0];
+                        var Vertice = TempPrefabData.ModelObjects[a].objectData.MeshOffsets[0].PS2Mesh.meshChunk[0].vertices[0];
 
                         if (TempPrefabData.ModelObjects[a].IncludeMatrix)
                         {
                             Vertice = Vector3.Transform(Vertice, TempPrefabData.ModelObjects[a].matrix4X4);
                         }
 
-                        Vertice = Vector3.Transform(TempPrefabData.ModelObjects[a].objectData.MeshOffsets[0].FullMesh.meshChunk[0].vertices[0], TempInstance.matrix4X4);
+                        Vertice = Vector3.Transform(TempPrefabData.ModelObjects[a].objectData.MeshOffsets[0].PS2Mesh.meshChunk[0].vertices[0], TempInstance.matrix4X4);
 
                         LowestXYZ = Vertice;
                         HighestXYZ = Vertice;
@@ -2846,11 +2864,11 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
                     {
                         for (int b = 0; b < TempPrefabData.ModelObjects[a].objectData.MeshOffsets.Count; b++)
                         {
-                            for (int c = 0; c < TempPrefabData.ModelObjects[a].objectData.MeshOffsets[b].FullMesh.meshChunk.Count; c++)
+                            for (int c = 0; c < TempPrefabData.ModelObjects[a].objectData.MeshOffsets[b].PS2Mesh.meshChunk.Count; c++)
                             {
-                                for (int d = 0; d < TempPrefabData.ModelObjects[a].objectData.MeshOffsets[b].FullMesh.meshChunk[c].vertices.Count; d++)
+                                for (int d = 0; d < TempPrefabData.ModelObjects[a].objectData.MeshOffsets[b].PS2Mesh.meshChunk[c].vertices.Count; d++)
                                 {
-                                    var Vertice = TempPrefabData.ModelObjects[a].objectData.MeshOffsets[b].FullMesh.meshChunk[c].vertices[d];
+                                    var Vertice = TempPrefabData.ModelObjects[a].objectData.MeshOffsets[b].PS2Mesh.meshChunk[c].vertices[d];
 
                                     if (TempPrefabData.ModelObjects[a].IncludeMatrix)
                                     {
@@ -3119,6 +3137,8 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
         public int MaterialBlockID;
         public int Unknown3;
         public float AnimTime;
+
+        public int Unknown31; //Xbox
         public Vector3 Scale; // Not Scale
         public int TotalMeshCount;
         public int VertexCount;
@@ -3170,13 +3190,22 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
 
         public int EntryLength;
         public int MaterialBlockPos;
+
+        //PS2
         public int MeshDataLength;
         public int StartPos;
         public int Length1;
         public int Length2;
         public int Length3;
 
-        public Mesh FullMesh;
+        public PS2.Mesh PS2Mesh;
+
+        //Xbox
+        public int IndexOffset;
+        public int StripCount;
+        public List<int> Strips;
+        public int IndexCount;
+        public List <int> Indices;
     }
 
     public struct ObjectAnimation

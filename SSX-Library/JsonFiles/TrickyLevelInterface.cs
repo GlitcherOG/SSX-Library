@@ -1122,7 +1122,14 @@ namespace SSXLibrary
             Console.WriteLine("Extracting Collision Models...");
             ssfHandler.SaveModels(ExportPath + "/Collision/");
             Console.WriteLine("Extracting Models...");
-            pbdHandler.ExportModelsPS2(ExportPath + "/Meshes/");
+            if (consoleVersion == ConsoleVersion.PS2)
+            {
+                pbdHandler.ExportModelsPS2(ExportPath + "/Meshes/");
+            }
+            else if (consoleVersion == ConsoleVersion.Xbox)
+            {
+
+            }
 
             for (int i = 0; i < TextureHandler.ShapeImages.Count; i++)
             {
@@ -1298,7 +1305,14 @@ namespace SSXLibrary
                 }
                 SkyPrefabJsonHandler.CreateJson(ExportPath + "/Skybox/Models.json", InlineExporting);
                 Console.WriteLine("Begining Skybox Model Extraction");
-                skypbdHandler.ExportModelsPS2(ExportPath + "/Skybox/Meshes/");
+                if (consoleVersion == ConsoleVersion.PS2)
+                {
+                    skypbdHandler.ExportModelsPS2(ExportPath + "/Skybox/Meshes/");
+                }
+                else if (consoleVersion == ConsoleVersion.Xbox)
+                {
+
+                }
 
                 for (int i = 0; i < SkyboxHandler.ShapeImages.Count; i++)
                 {
