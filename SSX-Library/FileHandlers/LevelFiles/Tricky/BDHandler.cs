@@ -1443,11 +1443,12 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
             return ModelData;
         }
 
-        public void Save(string path)
+        public void Save(string path, ConsoleVersion version)
         {
-            if(consoleVersion == ConsoleVersion.PS2)
+            consoleVersion = version;
+            if (consoleVersion == ConsoleVersion.PS2)
             {
-                SavePS2(path);
+                SavePS2(path+".pbd");
             }
         }
 
@@ -1456,7 +1457,6 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
             MemoryStream stream = new MemoryStream();
             //Skip writing header info
             stream.Position += 4 * 34;
-
 
             StreamUtil.AlignBy16(stream);
 
@@ -2363,7 +2363,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
             }
         }
 
-        public void ImportMeshesPS2(string FolderPath)
+        public void ImportMeshes(string FolderPath)
         {
             MemoryStream memoryStream = new MemoryStream();
 
@@ -2389,6 +2389,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
                             {
                                 ModelObject modelObject = objTriPBDHandler.LoadFile(FolderPath + "\\" + TempMeshOffset.MeshPath);
                                 TempMeshOffset.PS2Mesh = objTriPBDHandler.GenerateTristripDataOneNew(modelObject.Meshs[0]);
+                                //Do Xbox Here
                             }
                             else
                             {
@@ -2419,6 +2420,8 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
                                     }
                                 }
                             }
+
+                            //Xbox Here
 
 
                             TempObject.objectData.MeshOffsets[bz] = TempMeshOffset;

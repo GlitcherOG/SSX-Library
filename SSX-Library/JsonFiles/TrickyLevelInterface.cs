@@ -13,7 +13,7 @@ namespace SSXLibrary
         //Exporting Options
         public bool InlineExporting;
 
-        //Importing Options
+        //Standard Importing Options
         public bool PBDGenerate = true;
         public bool SSHGenerate = true;
         public bool LSSHGenerate = true;
@@ -25,6 +25,9 @@ namespace SSXLibrary
         public bool SSFGenerate = true;
         public bool AIPGenerate = true;
         public bool SOPGenerate = true;
+
+        //Xbox Options
+        public bool BumpGenerate = true;
 
         public bool Unilightmap;
 
@@ -49,14 +52,7 @@ namespace SSXLibrary
         public MaterialJsonHandler SkyMaterialJson = new MaterialJsonHandler();
         public ModelJsonHandler SkyPrefabJsonHandler = new ModelJsonHandler();
 
-        public ConsoleVersion consoleVersion = ConsoleVersion.PS2;
-
-        public enum ConsoleVersion
-        {
-            PS2,
-            Xbox,
-            GC
-        }
+        ConsoleVersion consoleVersion;
 
         public void ExtractTrickyLevelFiles(string LoadPath, string ExportPath)
         {
@@ -1393,13 +1389,14 @@ namespace SSXLibrary
             trickyConfig.CreateJson(ExportPath + "/ConfigTricky.ssx");
         }
 
-        public void BuildTrickyLevelFiles(string LoadPath, string ExportPath)
+        public void BuildTrickyLevelFiles(string LoadPath, string ExportPath, ConsoleVersion consoleVersion)
         {
             List<string> ImageFiles = new List<string>();
+            List<string> BumpImageFiles = new List<string>();
 
             ExportPath = ExportPath.Substring(0, ExportPath.Length - 4);
 
-            #region Rebuild PBD
+            #region Rebuild BD
             SSXTrickyConfig trickyConfig = SSXTrickyConfig.Load(LoadPath + "/ConfigTricky.ssx");
 
             MapHandler mapHandler = new MapHandler();
@@ -1534,7 +1531,6 @@ namespace SSXLibrary
                     patch.U4 = 4;
 
                     //U5?
-
 
                     patch.U11 = 337;
                     patch.U13 = 156;
@@ -2342,7 +2338,7 @@ namespace SSXLibrary
             {
                 //ErrorManager.ErrorMessage = "Error with Importing Meshes";
                 Console.WriteLine("Importing Meshes");
-                pbdHandler.ImportMeshesPS2(LoadPath + "\\Meshes");
+                pbdHandler.ImportMeshes(LoadPath + "\\Meshes");
                 //ErrorManager.ErrorMessage = "Error Generating PDB BBoxes";
                 Console.WriteLine("Generating PDB BBoxes");
                 pbdHandler.RegenerateLowestAndHighest();
@@ -2350,16 +2346,12 @@ namespace SSXLibrary
 
             if (PBDGenerate)
             {
-                // Header texture count (0x34) sizes the .ssh index space; without it every TextureAssigment
-                // is out of range and terrain renders untextured. The build never set it otherwise. When
-                // reusing the original ssh (seeded), match its page count exactly, not the appended list.
-
                 //Not a used value
                 //pbdHandler.NumTextures = ImageFiles.Count;
 
                 //ErrorManager.ErrorMessage = "Error Saving PDB File";
                 Console.WriteLine("Saving PDB File");
-                pbdHandler.Save(ExportPath + ".pbd");
+                pbdHandler.Save(ExportPath, consoleVersion);
             }
 
             if (LTGGenerate)
@@ -2597,15 +2589,49 @@ namespace SSXLibrary
                 for (int i = 0; i < ImageFiles.Count; i++)
                 {
                     Console.WriteLine("Textures: " + (i + 1) + "/" + ImageFiles.Count);
-                    TextureHandler.AddImage(OldShapeHandler.MatrixType.EightBit, i.ToString().PadLeft(4, '0'), LoadPath + "/Textures/" + ImageFiles[i]);
-                    TextureHandler.DarkenImage(i);
-                    var temp = TextureHandler.ShapeImages[i];
-                    temp.AlphaFix = true;
-                    TextureHandler.ShapeImages[i] = temp;
+                    if (consoleVersion == ConsoleVersion.PS2)
+                    {
+                        //PS2 Might need scaling Check
+                        TextureHandler.AddImage(OldShapeHandler.MatrixType.EightBit, i.ToString().PadLeft(4, '0'), LoadPath + "/Textures/" + ImageFiles[i]);
+                        TextureHandler.DarkenImage(i);
+                        var temp = TextureHandler.ShapeImages[i];
+                        temp.AlphaFix = true;
+                        TextureHandler.ShapeImages[i] = temp;
+                    }
+                    if(consoleVersion == ConsoleVersion.Xbox)
+                    {
+                        //Double Check BC1
+                        TextureHandler.AddImage(OldShapeHandler.MatrixType.BC1, i.ToString().PadLeft(4, '0'), LoadPath + "/Textures/" + ImageFiles[i]);
+                    }
                 }
                 //ErrorManager.ErrorMessage = "Error with Saving SSH Texture File";
                 Console.WriteLine("Saving Texture File (May take some time if textures havent been processed before hand)");
-                TextureHandler.SaveShape(ExportPath + ".ssh");
+                if (consoleVersion == ConsoleVersion.PS2)
+                {
+                    TextureHandler.SaveShape(ExportPath + ".ssh");
+                }
+                else if (consoleVersion == ConsoleVersion.Xbox)
+                {
+                    TextureHandler.SaveShape(ExportPath + ".xsh");
+                }
+            }
+
+            //Bump Map
+            if (BumpGenerate && consoleVersion == ConsoleVersion.Xbox)
+            {
+                //Build Textures
+                OldShapeHandler TextureHandler = new OldShapeHandler();
+                TextureHandler.Format = "G278";
+
+                for (int i = 0; i < BumpImageFiles.Count; i++)
+                {
+                    Console.WriteLine("Bump Textures: " + (i + 1) + "/" + BumpImageFiles.Count);
+                    //Double Check BC1
+                    TextureHandler.AddImage(OldShapeHandler.MatrixType.BC1, i.ToString().PadLeft(4, '0'), LoadPath + "/Bump/" + BumpImageFiles[i]);
+                }
+                //ErrorManager.ErrorMessage = "Error with Saving SSH Texture File";
+                Console.WriteLine("Saving Texture File (May take some time if textures havent been processed before hand)");
+                TextureHandler.SaveShape(ExportPath + ".xsh");
             }
 
             if (SSFGenerate)
@@ -2734,7 +2760,14 @@ namespace SSXLibrary
                 ssfHandler.LoadModels(LoadPath + "/Collision/");
                 //ErrorManager.ErrorMessage = "Error with Saving SSF File";
                 Console.WriteLine("Saving SSF File");
-                ssfHandler.Save(ExportPath + ".ssf");
+                if (consoleVersion == ConsoleVersion.PS2)
+                {
+                    ssfHandler.Save(ExportPath + ".ssf");
+                }
+                if (consoleVersion == ConsoleVersion.Xbox)
+                {
+                    ssfHandler.Save(ExportPath + ".xsf");
+                }
             }
 
 
@@ -2928,9 +2961,9 @@ namespace SSXLibrary
                 if (SkyPBDGenerate)
                 {
                     Console.WriteLine("Importing Skybox Models");
-                    skyboxpbdHander.ImportMeshesPS2(LoadPath + "/Skybox/Meshes");
+                    skyboxpbdHander.ImportMeshes(LoadPath + "/Skybox/Meshes");
                     Console.WriteLine("Saving Skybox PDB");
-                    skyboxpbdHander.Save(ExportPath + "_sky.pbd");
+                    skyboxpbdHander.Save(ExportPath + "_sky", consoleVersion);
                 }
 
                 if (SkySSHGenerate)
@@ -2942,14 +2975,30 @@ namespace SSXLibrary
                     for (int i = 0; i < SkyboxImageFiles.Count; i++)
                     {
                         Console.WriteLine("Skybox Textures: " + (i + 1) + "/" + SkyboxImageFiles.Count);
-                        SkyboxHandler.AddImage(OldShapeHandler.MatrixType.EightBit, i.ToString().PadLeft(4, '0'), LoadPath + "/Skybox/Textures/" + SkyboxImageFiles[i]);
-                        SkyboxHandler.DarkenImage(i);
-                        var temp = SkyboxHandler.ShapeImages[i];
-                        temp.AlphaFix = true;
-                        SkyboxHandler.ShapeImages[i] = temp;
+                        if (consoleVersion == ConsoleVersion.PS2)
+                        {
+                            //Add test to scale the image
+                            SkyboxHandler.AddImage(OldShapeHandler.MatrixType.EightBit, i.ToString().PadLeft(4, '0'), LoadPath + "/Skybox/Textures/" + SkyboxImageFiles[i]);
+                            SkyboxHandler.DarkenImage(i);
+                            var temp = SkyboxHandler.ShapeImages[i];
+                            temp.AlphaFix = true;
+                            SkyboxHandler.ShapeImages[i] = temp;
+                        }
+                        if(consoleVersion == ConsoleVersion.Xbox)
+                        {
+                            //Double Check the matrix
+                            SkyboxHandler.AddImage(OldShapeHandler.MatrixType.BC1, i.ToString().PadLeft(4, '0'), LoadPath + "/Skybox/Textures/" + SkyboxImageFiles[i]);
+                        }
                     }
 
-                    SkyboxHandler.SaveShape(ExportPath + "_sky.ssh");
+                    if (consoleVersion == ConsoleVersion.PS2)
+                    {
+                        SkyboxHandler.SaveShape(ExportPath + "_sky.ssh");
+                    }
+                    if(consoleVersion == ConsoleVersion.Xbox)
+                    {
+                        SkyboxHandler.SaveShape(ExportPath + "_sky.xsh");
+                    }
                 }
             }
             #endregion
@@ -2966,8 +3015,17 @@ namespace SSXLibrary
                     for (int i = 0; i < LightmapFiles.Length; i++)
                     {
                         Console.WriteLine("Lightmap Textures: " + (i + 1) + "/" + LightmapFiles.Length);
-                        LightmapHandler.AddImage(OldShapeHandler.MatrixType.FullColor, i.ToString().PadLeft(4, '0'), LightmapFiles[i]);
-                        LightmapHandler.DarkenImage(i);
+                        if (consoleVersion == ConsoleVersion.PS2)
+                        {
+                            //Will need converter to go from standard to tricky
+                            LightmapHandler.AddImage(OldShapeHandler.MatrixType.FullColor, i.ToString().PadLeft(4, '0'), LightmapFiles[i]);
+                            LightmapHandler.DarkenImage(i);
+                        }
+                        if(consoleVersion == ConsoleVersion.Xbox)
+                        {
+                            //Double Check
+                            LightmapHandler.AddImage(OldShapeHandler.MatrixType.FullColor, i.ToString().PadLeft(4, '0'), LightmapFiles[i]);
+                        }
                     }
                 }
                 else
@@ -2976,7 +3034,14 @@ namespace SSXLibrary
                     //LightmapHandler = LightmapGenerator.GenerateUnlitLightmap(pbdHandler);
                 }
                 //ErrorManager.ErrorMessage = "Error with Saving SSH Lightmap";
-                LightmapHandler.SaveShape(ExportPath + "_L.ssh");
+                if (consoleVersion == ConsoleVersion.PS2)
+                {
+                    LightmapHandler.SaveShape(ExportPath + "_L.ssh");
+                }
+                if(consoleVersion == ConsoleVersion.Xbox)
+                {
+                    LightmapHandler.SaveShape(ExportPath + "_L.xsh");
+                }
             }
         }
 
