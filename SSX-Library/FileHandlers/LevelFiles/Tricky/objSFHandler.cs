@@ -1,4 +1,5 @@
 ﻿using SharpGLTF.Schema2;
+using SSXLibrary.FileHandlers.LevelFiles.Tricky.PS2;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -8,9 +9,9 @@ using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SSXLibrary.FileHandlers.LevelFiles.Tricky.PS2
+namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
 {
-    public class objSSFHandler
+    public class objSFHandler
     {
 
         public static SFHandler.CollisonModel LoadModel(SFHandler.CollisonModel Model, string FolderPath)

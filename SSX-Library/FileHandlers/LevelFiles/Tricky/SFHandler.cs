@@ -1,5 +1,4 @@
-﻿using SSXLibrary.FileHandlers.LevelFiles.Tricky.PS2;
-using SSXLibrary.Internal.Utilities;
+﻿using SSXLibrary.Internal.Utilities;
 using SSXLibrary.Internal.Utilities.StreamExtensions;
 using System.Globalization;
 using System.Numerics;
@@ -1438,7 +1437,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
                 {
                     var Model = TempPath.Models[a];
 
-                    TempPath.Models[a] = objSSFHandler.LoadModel(Model, Path);
+                    TempPath.Models[a] = objSFHandler.LoadModel(Model, Path);
                 }
 
                 CollisonModelPointers[i] = TempPath;
