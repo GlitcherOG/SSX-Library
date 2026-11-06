@@ -4,7 +4,7 @@ using System.Text;
 
 namespace SSXLibrary.FileHandlers.LevelFiles.Tricky.Xbox
 {
-    internal class objTriXBDHandler
+    public class objTriXBDHandler
     {
     }
 }

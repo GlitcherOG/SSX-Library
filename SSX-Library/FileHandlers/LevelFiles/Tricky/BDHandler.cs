@@ -15,6 +15,10 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
         public byte[] MagicBytes;
         public int NumPlayerStarts;
         public int NumPatches;
+
+        public int NumUnknown1; //Xbox
+        public int NumUnknown2; //Xbox
+
         public int NumInstances;
 
         public int NumParticleInstances;
@@ -30,11 +34,13 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
         public int NumParticleModel;
         public int NumTextures;
         public int NumCameras;
+        public int NumUnknown3; // Xbox
         public int LightMapSize;
 
         public int PlayerStartOffset;
         public int PatchOffset;
         public int PatchOffsetPoints; //Xbox
+        public int UnknownOffset; //Xbox
         public int InstanceOffset;
         public int ParticleInstancesOffset;
 
@@ -783,44 +789,45 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
 
         public void LoadXbox(Stream stream)
         {
-            NumPlayerStarts = StreamUtil.ReadUInt32(stream); //NA
-            NumPatches = StreamUtil.ReadUInt32(stream); //NA
-            stream.Position += 4 * 2;
-            NumInstances = StreamUtil.ReadUInt32(stream); //Done
+            NumPlayerStarts = StreamUtil.ReadUInt32(stream); 
+            NumPatches = StreamUtil.ReadUInt32(stream); 
+            NumUnknown1 = StreamUtil.ReadUInt32(stream);
+            NumUnknown2 = StreamUtil.ReadUInt32(stream);
+            NumInstances = StreamUtil.ReadUInt32(stream);
             NumParticleInstances = StreamUtil.ReadUInt32(stream);
             NumMaterials = StreamUtil.ReadUInt32(stream);
             NumMaterialBlocks = StreamUtil.ReadUInt32(stream);
             NumLights = StreamUtil.ReadUInt32(stream);
-            NumSplines = StreamUtil.ReadUInt32(stream); //Done
-            NumSplineSegments = StreamUtil.ReadUInt32(stream); //Done
+            NumSplines = StreamUtil.ReadUInt32(stream);
+            NumSplineSegments = StreamUtil.ReadUInt32(stream);
             NumTextureFlipbooks = StreamUtil.ReadUInt32(stream);
             NumModels = StreamUtil.ReadUInt32(stream);
             NumParticleModel = StreamUtil.ReadUInt32(stream);
-            NumTextures = StreamUtil.ReadUInt32(stream); //Done
+            NumTextures = StreamUtil.ReadUInt32(stream);
             NumCameras = StreamUtil.ReadUInt32(stream); //Used in SSXFE MAP
-            stream.Position += 4;
-            LightMapSize = StreamUtil.ReadUInt32(stream); //Always blank?
+            NumUnknown3 = StreamUtil.ReadUInt32(stream);
+            LightMapSize = StreamUtil.ReadUInt32(stream);
 
-            PlayerStartOffset = StreamUtil.ReadUInt32(stream); //NA
+            PlayerStartOffset = StreamUtil.ReadUInt32(stream);
             PatchOffset = StreamUtil.ReadUInt32(stream);
             PatchOffsetPoints = StreamUtil.ReadUInt32(stream);
-            stream.Position += 4;
+            UnknownOffset = StreamUtil.ReadUInt32(stream);
             InstanceOffset = StreamUtil.ReadUInt32(stream);
             ParticleInstancesOffset = StreamUtil.ReadUInt32(stream);
             MaterialOffset = StreamUtil.ReadUInt32(stream);
             MaterialBlocksOffset = StreamUtil.ReadUInt32(stream);
             LightsOffset = StreamUtil.ReadUInt32(stream);
-            SplineOffset = StreamUtil.ReadUInt32(stream); //Done
-            SplineSegmentOffset = StreamUtil.ReadUInt32(stream); //Done
+            SplineOffset = StreamUtil.ReadUInt32(stream);
+            SplineSegmentOffset = StreamUtil.ReadUInt32(stream);
             TextureFlipbookOffset = StreamUtil.ReadUInt32(stream);
-            ModelPointerOffset = StreamUtil.ReadUInt32(stream); //Done
-            ModelsOffset = StreamUtil.ReadUInt32(stream); //Done
-            ParticleModelPointerOffset = StreamUtil.ReadUInt32(stream); //Done
+            ModelPointerOffset = StreamUtil.ReadUInt32(stream);
+            ModelsOffset = StreamUtil.ReadUInt32(stream); //Needs Work
+            ParticleModelPointerOffset = StreamUtil.ReadUInt32(stream);
             ParticleModelsOffset = StreamUtil.ReadUInt32(stream);
-            CameraPointerOffset = StreamUtil.ReadUInt32(stream); //Done
-            CamerasOffset = StreamUtil.ReadUInt32(stream); //sort of loading
-            HashOffset = StreamUtil.ReadUInt32(stream); //sort of loading
-            MeshDataOffset = StreamUtil.ReadUInt32(stream); //Loading
+            CameraPointerOffset = StreamUtil.ReadUInt32(stream);
+            CamerasOffset = StreamUtil.ReadUInt32(stream);
+            HashOffset = StreamUtil.ReadUInt32(stream); 
+            MeshDataOffset = StreamUtil.ReadUInt32(stream); //Needs Work
 
             //New Data
             stream.Position = PatchOffset;
@@ -1362,6 +1369,8 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
                     hashData.CameraHash.Add(NewHash);
                 }
             }
+            stream.Position = MeshDataOffset;
+            MeshData = StreamUtil.ReadBytes(stream, (int)(stream.Length - MeshDataOffset));
         }
 
         public MeshChunk ReadMeshPS2(Stream stream, Vector3 Scale)
