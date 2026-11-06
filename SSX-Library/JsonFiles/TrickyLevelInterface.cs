@@ -1392,7 +1392,7 @@ namespace SSXLibrary
         public void BuildTrickyLevelFiles(string LoadPath, string ExportPath, ConsoleVersion consoleVersion)
         {
             List<string> ImageFiles = new List<string>();
-            List<string> BumpImageFiles = new List<string>();
+            List<string> BumpImageFiles = new List<string>(); //For Xbox, Need to add
 
             ExportPath = ExportPath.Substring(0, ExportPath.Length - 4);
 
