@@ -1330,7 +1330,6 @@ namespace SSXLibrary
                     for (int i = 0; i < LightmapHandler.ShapeImages.Count; i++)
                     {
                         Console.WriteLine("Lightmap Textures: " + (i + 1) + "/" + LightmapHandler.ShapeImages.Count);
-                        //LightmapHandler.BrightenImage(i);
                         LightmapHandler.ExtractSingleImage(ExportPath + "\\Lightmaps\\" + i.ToString().PadLeft(4, '0') + ".png", i);
                     }
                 }
@@ -1340,7 +1339,6 @@ namespace SSXLibrary
                     for (int i = 0; i < LightmapHandler.ShapeImages.Count; i++)
                     {
                         Console.WriteLine("Lightmap Textures: " + (i + 1) + "/" + LightmapHandler.ShapeImages.Count);
-                        //LightmapHandler.BrightenImage(i);
                         LightmapHandler.ExtractSingleImage(ExportPath + "\\Lightmaps\\" + i.ToString().PadLeft(4, '0') + ".png", i);
                     }
                 }
@@ -1354,7 +1352,6 @@ namespace SSXLibrary
                     for (int i = 0; i < LightmapHandler.ShapeImages.Count; i++)
                     {
                         Console.WriteLine("Lightmap Textures: " + (i + 1) + "/" + LightmapHandler.ShapeImages.Count);
-                        //LightmapHandler.BrightenImage(i);
                         LightmapHandler.ExtractSingleImage(ExportPath + "\\Lightmaps\\" + i.ToString().PadLeft(4, '0') + ".png", i);
                     }
                 }
@@ -1364,7 +1361,6 @@ namespace SSXLibrary
                     for (int i = 0; i < LightmapHandler.ShapeImages.Count; i++)
                     {
                         Console.WriteLine("Lightmap Textures: " + (i + 1) + "/" + LightmapHandler.ShapeImages.Count);
-                        //LightmapHandler.BrightenImage(i);
                         LightmapHandler.ExtractSingleImage(ExportPath + "\\Lightmaps\\" + i.ToString().PadLeft(4, '0') + ".png", i);
                     }
                 }
@@ -1521,6 +1517,16 @@ namespace SSXLibrary
                         patch.TextureAssigment = ImageFiles.Count - 1;
                     }
 
+                    if (BumpImageFiles.Contains(ImportPatch.BumpPath))
+                    {
+                        patch.TextureAssigment = BumpImageFiles.IndexOf(ImportPatch.BumpPath);
+                    }
+                    else
+                    {
+                        BumpImageFiles.Add(ImportPatch.BumpPath);
+                        patch.BumpAssigment = BumpImageFiles.Count - 1;
+                    }
+
                     patch.LightmapID = ImportPatch.LightmapID;
 
                     //Xbox Data
@@ -1531,6 +1537,7 @@ namespace SSXLibrary
                     patch.U4 = 4;
 
                     //U5?
+                    //LTG Group
 
                     patch.U11 = 337;
                     patch.U13 = 156;
@@ -2344,16 +2351,6 @@ namespace SSXLibrary
                 pbdHandler.RegenerateLowestAndHighest();
             }
 
-            if (PBDGenerate)
-            {
-                //Not a used value
-                //pbdHandler.NumTextures = ImageFiles.Count;
-
-                //ErrorManager.ErrorMessage = "Error Saving PDB File";
-                Console.WriteLine("Saving PDB File");
-                pbdHandler.Save(ExportPath, consoleVersion);
-            }
-
             if (LTGGenerate)
             {
                 LTGHandler ltgHandler = new LTGHandler();
@@ -2384,6 +2381,18 @@ namespace SSXLibrary
                 //ErrorManager.ErrorMessage = "Error Saving LTG";
                 Console.WriteLine("Saving LTG File");
                 ltgHandler.SaveLTGFile(ExportPath + ".ltg");
+            }
+
+            if (PBDGenerate)
+            {
+                //Not a used value
+                //pbdHandler.NumTextures = ImageFiles.Count;
+
+                //Port Back LTG Group
+
+                //ErrorManager.ErrorMessage = "Error Saving PDB File";
+                Console.WriteLine("Saving PDB File");
+                pbdHandler.Save(ExportPath, consoleVersion);
             }
 
             if (AIPGenerate)
@@ -2627,7 +2636,7 @@ namespace SSXLibrary
                 {
                     Console.WriteLine("Bump Textures: " + (i + 1) + "/" + BumpImageFiles.Count);
                     //Double Check BC1
-                    TextureHandler.AddImage(OldShapeHandler.MatrixType.BC1, i.ToString().PadLeft(4, '0'), LoadPath + "/Bump/" + BumpImageFiles[i]);
+                    TextureHandler.AddImage(OldShapeHandler.MatrixType.BGRA, i.ToString().PadLeft(4, '0'), LoadPath + "/Bump/" + BumpImageFiles[i]);
                 }
                 //ErrorManager.ErrorMessage = "Error with Saving SSH Texture File";
                 Console.WriteLine("Saving Texture File (May take some time if textures havent been processed before hand)");
@@ -3019,7 +3028,6 @@ namespace SSXLibrary
                         {
                             //Will need converter to go from standard to tricky
                             LightmapHandler.AddImage(OldShapeHandler.MatrixType.FullColor, i.ToString().PadLeft(4, '0'), LightmapFiles[i]);
-                            LightmapHandler.DarkenImage(i);
                         }
                         if(consoleVersion == ConsoleVersion.Xbox)
                         {
