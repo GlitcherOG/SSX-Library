@@ -1,3 +1,6 @@
+// WARNING: Claude (AI) was used to write this lightmap converter. It was given ideas from our own WIP code,
+// which we had issues getting working correctly due to floating point image math.
+
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using SSXLibrary.JsonFiles.Tricky;
