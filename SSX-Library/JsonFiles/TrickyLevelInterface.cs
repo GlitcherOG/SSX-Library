@@ -553,7 +553,7 @@ namespace SSXLibrary
                             var TempMeshHeader = new ModelJsonHandler.MeshHeader();
 
                             TempMeshHeader.MeshPath = pbdHandler.modelData[i].ModelObjects[a].objectData.MeshOffsets[b].MeshID + ".obj";
-                            //TempMeshHeader.MaterialID = pbdHandler.materialBlocks[pbdHandler.modelData[i].MaterialBlockID].ints[pbdHandler.modelData[i].ModelObjects[a].objectData.MeshOffsets[b].MaterialBlockPos];
+                            TempMeshHeader.MaterialID = pbdHandler.materialBlocks[pbdHandler.modelData[i].MaterialBlockID].ints[pbdHandler.modelData[i].ModelObjects[a].objectData.MeshOffsets[b].MaterialBlockPos];
 
                             TempPrefabObject.MeshData.Add(TempMeshHeader);
                         }
@@ -1238,7 +1238,7 @@ namespace SSXLibrary
                                 var TempMeshHeader = new ModelJsonHandler.MeshHeader();
 
                                 TempMeshHeader.MeshPath = skypbdHandler.modelData[i].ModelObjects[a].objectData.MeshOffsets[b].MeshID + ".obj";
-                                //TempMeshHeader.MaterialID = skypbdHandler.materialBlocks[skypbdHandler.modelData[i].MaterialBlockID].ints[skypbdHandler.modelData[i].ModelObjects[a].objectData.MeshOffsets[b].MaterialBlockPos];
+                                TempMeshHeader.MaterialID = skypbdHandler.materialBlocks[skypbdHandler.modelData[i].MaterialBlockID].ints[skypbdHandler.modelData[i].ModelObjects[a].objectData.MeshOffsets[b].MaterialBlockPos];
 
                                 TempPrefabObject.MeshData.Add(TempMeshHeader);
                             }
@@ -1323,46 +1323,41 @@ namespace SSXLibrary
 
             if (consoleVersion == ConsoleVersion.PS2)
             {
+                Directory.CreateDirectory(ExportPath + "\\Temp\\");
+
                 if (File.Exists(LoadPath + "_L.ssh"))
                 {
                     LightmapHandler.LoadShape(LoadPath + "_L.ssh", true);
-
-                    for (int i = 0; i < LightmapHandler.ShapeImages.Count; i++)
-                    {
-                        Console.WriteLine("Lightmap Textures: " + (i + 1) + "/" + LightmapHandler.ShapeImages.Count);
-                        LightmapHandler.ExtractSingleImage(ExportPath + "\\Lightmaps\\" + i.ToString().PadLeft(4, '0') + ".png", i);
-                    }
                 }
                 else
                 {
                     LightmapHandler.LoadShape(LoadPath.Substring(0, LoadPath.Length - 1) + "_L.ssh", true);
-                    for (int i = 0; i < LightmapHandler.ShapeImages.Count; i++)
-                    {
-                        Console.WriteLine("Lightmap Textures: " + (i + 1) + "/" + LightmapHandler.ShapeImages.Count);
-                        LightmapHandler.ExtractSingleImage(ExportPath + "\\Lightmaps\\" + i.ToString().PadLeft(4, '0') + ".png", i);
-                    }
                 }
+
+                for (int i = 0; i < LightmapHandler.ShapeImages.Count; i++)
+                {
+                    Console.WriteLine("Lightmap Textures: " + (i + 1) + "/" + LightmapHandler.ShapeImages.Count);
+                    LightmapHandler.ExtractSingleImage(ExportPath + "\\Temp\\" + i.ToString().PadLeft(4, '0') + ".png", i);
+                }
+
+                TrickyLightmapConverter.ConvertToStandard(patchPoints, ExportPath + "\\Temp\\", ExportPath + "\\Textures\\", ExportPath + "\\Lightmaps\\");
+
+                Directory.Delete(ExportPath + "\\Temp\\", true);
             }
             else if (consoleVersion == ConsoleVersion.Xbox)
             {
                 if (File.Exists(LoadPath + "_L.xsh"))
                 {
                     LightmapHandler.LoadShape(LoadPath + "_L.xsh", true);
-
-                    for (int i = 0; i < LightmapHandler.ShapeImages.Count; i++)
-                    {
-                        Console.WriteLine("Lightmap Textures: " + (i + 1) + "/" + LightmapHandler.ShapeImages.Count);
-                        LightmapHandler.ExtractSingleImage(ExportPath + "\\Lightmaps\\" + i.ToString().PadLeft(4, '0') + ".png", i);
-                    }
                 }
                 else
                 {
                     LightmapHandler.LoadShape(LoadPath.Substring(0, LoadPath.Length - 1) + "_L.xsh", true);
-                    for (int i = 0; i < LightmapHandler.ShapeImages.Count; i++)
-                    {
-                        Console.WriteLine("Lightmap Textures: " + (i + 1) + "/" + LightmapHandler.ShapeImages.Count);
-                        LightmapHandler.ExtractSingleImage(ExportPath + "\\Lightmaps\\" + i.ToString().PadLeft(4, '0') + ".png", i);
-                    }
+                }
+                for (int i = 0; i < LightmapHandler.ShapeImages.Count; i++)
+                {
+                    Console.WriteLine("Lightmap Textures: " + (i + 1) + "/" + LightmapHandler.ShapeImages.Count);
+                    LightmapHandler.ExtractSingleImage(ExportPath + "\\Lightmaps\\" + i.ToString().PadLeft(4, '0') + ".png", i);
                 }
             }
 
@@ -1519,7 +1514,7 @@ namespace SSXLibrary
 
                     if (BumpImageFiles.Contains(ImportPatch.BumpPath))
                     {
-                        patch.TextureAssigment = BumpImageFiles.IndexOf(ImportPatch.BumpPath);
+                        patch.BumpAssigment = BumpImageFiles.IndexOf(ImportPatch.BumpPath);
                     }
                     else
                     {
@@ -1541,6 +1536,8 @@ namespace SSXLibrary
 
                     patch.U11 = 337;
                     patch.U13 = 156;
+
+                    //Generate Render Points
 
                     pbdHandler.Patches.Add(patch);
 
@@ -3020,7 +3017,22 @@ namespace SSXLibrary
                 {
                     LightmapHandler.Format = "G278";
 
-                    string[] LightmapFiles = Directory.GetFiles(LoadPath + "/Lightmaps", "*.png");
+                    string[] LightmapFiles = new string[1];
+                    
+                    if(consoleVersion == ConsoleVersion.PS2)
+                    {
+                        Directory.CreateDirectory(LoadPath + "/Temp");
+
+                        TrickyLightmapConverter.ConvertToTricky(patchPoints, LoadPath + "/Lightmaps", LoadPath + "/Textures", LoadPath + "/Temp");
+
+                        LightmapFiles = Directory.GetFiles(LoadPath + "/Temp", "*.png");
+
+                    }
+                    if(consoleVersion == ConsoleVersion.Xbox)
+                    {
+                        LightmapFiles = Directory.GetFiles(LoadPath + "/Lightmaps", "*.png");
+                    }
+                    
                     for (int i = 0; i < LightmapFiles.Length; i++)
                     {
                         Console.WriteLine("Lightmap Textures: " + (i + 1) + "/" + LightmapFiles.Length);
@@ -3034,6 +3046,11 @@ namespace SSXLibrary
                             //Double Check
                             LightmapHandler.AddImage(OldShapeHandler.MatrixType.FullColor, i.ToString().PadLeft(4, '0'), LightmapFiles[i]);
                         }
+                    }
+
+                    if(consoleVersion == ConsoleVersion.PS2)
+                    {
+                        Directory.Delete(LoadPath + "/Temp", true);
                     }
                 }
                 else
