@@ -1124,7 +1124,7 @@ namespace SSXLibrary
             }
             else if (consoleVersion == ConsoleVersion.Xbox)
             {
-
+                pbdHandler.ExportModelsXbox(ExportPath + "/Meshes/");
             }
 
             for (int i = 0; i < TextureHandler.ShapeImages.Count; i++)
@@ -1307,7 +1307,7 @@ namespace SSXLibrary
                 }
                 else if (consoleVersion == ConsoleVersion.Xbox)
                 {
-
+                    skypbdHandler.ExportModelsXbox(ExportPath + "/Skybox/Meshes/");
                 }
 
                 for (int i = 0; i < SkyboxHandler.ShapeImages.Count; i++)
@@ -3108,7 +3108,7 @@ namespace SSXLibrary
         /// report those instead of throwing.</summary>
         private static string? ShapeNameOrNull(OldShapeHandler bank, int id, string context)
         {
-            if (id >= 0 && id < bank.ShapeImages.Count) return bank.ShapeImages[id].Shortname;
+            if (id >= 0 && id < bank.ShapeImages.Count) return id.ToString().PadLeft(4, '0');
             Console.WriteLine($"WARN: {context} references texture {id} but the ssh has {bank.ShapeImages.Count} pages - TexturePath left unset.");
             return null;
         }
