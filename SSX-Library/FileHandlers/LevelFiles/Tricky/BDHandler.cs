@@ -37,7 +37,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
         public int NumCameras;
         public int NumUnknown3; // Xbox
 
-        //Xbox Value Here
+        public int NumNormals; //Xbox
 
         public int LightMapSize;
 
@@ -66,7 +66,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
         public int HashOffset;
         public int MeshDataOffset;
 
-        //Xbox Value Here
+        public int NormalsOffset; //Xbox
 
         public List<Patch> Patches = new List<Patch>();
 
@@ -87,6 +87,8 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
         public List<int> CameraPointers = new List<int>();
         public List<CameraInstance> Cameras = new List<CameraInstance>();
         public HashData hashData = new HashData();
+
+        public List<Vector3> normals = new List<Vector3>();
 
         public byte[] MeshData;
 
@@ -810,7 +812,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
             NumTextures = StreamUtil.ReadUInt32(stream);
             NumCameras = StreamUtil.ReadUInt32(stream); //Used in SSXFE MAP
             NumUnknown3 = StreamUtil.ReadUInt32(stream);
-            LightMapSize = StreamUtil.ReadUInt32(stream);
+            NumNormals = StreamUtil.ReadUInt32(stream);
 
             PlayerStartOffset = StreamUtil.ReadUInt32(stream);
             PatchOffset = StreamUtil.ReadUInt32(stream);
@@ -825,13 +827,13 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
             SplineSegmentOffset = StreamUtil.ReadUInt32(stream);
             TextureFlipbookOffset = StreamUtil.ReadUInt32(stream);
             ModelPointerOffset = StreamUtil.ReadUInt32(stream);
-            ModelsOffset = StreamUtil.ReadUInt32(stream); //Needs Work
+            ModelsOffset = StreamUtil.ReadUInt32(stream);
             ParticleModelPointerOffset = StreamUtil.ReadUInt32(stream);
             ParticleModelsOffset = StreamUtil.ReadUInt32(stream);
             CameraPointerOffset = StreamUtil.ReadUInt32(stream);
             CamerasOffset = StreamUtil.ReadUInt32(stream);
-            HashOffset = StreamUtil.ReadUInt32(stream); 
-            MeshDataOffset = StreamUtil.ReadUInt32(stream); //Needs Work
+            HashOffset = StreamUtil.ReadUInt32(stream);
+            NormalsOffset = StreamUtil.ReadUInt32(stream);
 
             //New Data
             stream.Position = PatchOffset;
@@ -1349,6 +1351,84 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
                 particleModels.Add(TempParticleModel);
             }
 
+            //Camera Pointers
+            stream.Position = CameraPointerOffset;
+            CameraPointers = new List<int>();
+            for (int i = 0; i < NumCameras; i++)
+            {
+                CameraPointers.Add(StreamUtil.ReadUInt32(stream));
+            }
+
+            //Camera Data
+            Cameras = new List<CameraInstance>();
+            for (int i = 0; i < NumCameras; i++)
+            {
+                stream.Position = CamerasOffset + CameraPointers[i];
+                CameraInstance TempCamera = new CameraInstance();
+
+                TempCamera.ByteSize = StreamUtil.ReadUInt32(stream);
+                TempCamera.Translation = StreamUtil.ReadVector3(stream);
+                TempCamera.Rotation = StreamUtil.ReadVector3(stream);
+                TempCamera.Type = StreamUtil.ReadUInt32(stream);
+                TempCamera.FocalLength = StreamUtil.ReadFloat(stream);
+                TempCamera.AspectRatio = StreamUtil.ReadFloat(stream);
+                TempCamera.Aperture = StreamUtil.ReadVector2(stream);
+                TempCamera.ClipPlane = StreamUtil.ReadVector2(stream);
+                TempCamera.IntrestPoint = StreamUtil.ReadVector3(stream);
+                TempCamera.UpVector = StreamUtil.ReadVector3(stream);
+                TempCamera.AnimTime = StreamUtil.ReadFloat(stream);
+                TempCamera.AnimationOffset = StreamUtil.ReadUInt32(stream);
+
+                TempCamera.AnimationInitial = new CameraAnimationInitial();
+
+                stream.Position = CamerasOffset + CameraPointers[i] + TempCamera.AnimationOffset; // Dont Really need to do this but i will
+
+                TempCamera.AnimationInitial.InitialPosition = StreamUtil.ReadVector3(stream);
+                TempCamera.AnimationInitial.InitalRotation = StreamUtil.ReadVector3(stream);
+
+                TempCamera.AnimationInitial.U0 = StreamUtil.ReadFloat(stream, true);
+
+                TempCamera.AnimationInitial.AnimationHeaderCount = StreamUtil.ReadUInt32(stream);
+                TempCamera.AnimationInitial.AnimationHeaderOffset = StreamUtil.ReadUInt32(stream);
+
+                stream.Position = CamerasOffset + CameraPointers[i] + TempCamera.AnimationOffset + TempCamera.AnimationInitial.AnimationHeaderOffset; // Dont Really need to do this but i will
+
+                TempCamera.AnimationInitial.AnimationHeaderPointers = new List<int>();
+
+                for (int a = 0; a < TempCamera.AnimationInitial.AnimationHeaderCount; a++)
+                {
+                    TempCamera.AnimationInitial.AnimationHeaderPointers.Add(StreamUtil.ReadUInt32(stream));
+                }
+
+                TempCamera.AnimationInitial.AnimationHeaders = new List<CameraAnimationHeader>();
+
+                //Really dont need to do this but im gonna
+                for (int a = 0; a < TempCamera.AnimationInitial.AnimationHeaderPointers.Count; a++)
+                {
+                    stream.Position = CamerasOffset + CameraPointers[i] + TempCamera.AnimationOffset + TempCamera.AnimationInitial.AnimationHeaderPointers[a];
+                    var TempAnimationHeader = new CameraAnimationHeader();
+
+                    TempAnimationHeader.Count = StreamUtil.ReadUInt32(stream);
+                    TempAnimationHeader.Action = StreamUtil.ReadUInt32(stream);
+                    TempAnimationHeader.AnimationDatas = new List<CameraAnimationData>();
+
+                    for (int b = 0; b < TempAnimationHeader.Count; b++)
+                    {
+                        var NewAnimData = new CameraAnimationData();
+
+                        NewAnimData.Translation = StreamUtil.ReadVector3(stream);
+                        NewAnimData.Rotation = StreamUtil.ReadVector3(stream);
+
+                        TempAnimationHeader.AnimationDatas.Add(NewAnimData);
+                    }
+
+                    TempCamera.AnimationInitial.AnimationHeaders.Add(TempAnimationHeader);
+                }
+
+
+                Cameras.Add(TempCamera);
+            }
+
             if (HashOffset != 0)
             {
                 stream.Position = HashOffset;
@@ -1398,8 +1478,12 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
                     hashData.CameraHash.Add(NewHash);
                 }
             }
-            //stream.Position = MeshDataOffset;
-            //MeshData = StreamUtil.ReadBytes(stream, (int)(stream.Length - MeshDataOffset));
+
+            normals = new List<Vector3>();
+            for (int i = 0; i < NumNormals; i++)
+            {
+                normals.Add(StreamUtil.ReadVector3(stream));
+            }
         }
 
         public MeshChunk ReadMeshPS2(Stream stream, Vector3 Scale)
