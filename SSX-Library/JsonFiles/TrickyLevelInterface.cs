@@ -1409,6 +1409,7 @@ namespace SSXLibrary
                 patchPoints = new PatchesJsonHandler();
                 patchPoints = PatchesJsonHandler.Load(LoadPath + "/Patches.json");
                 pbdHandler.Patches = new List<Patch>();
+                pbdHandler.patchPointDatas = new List<PatchPointData>();
                 mapHandler.Patchs = new List<LinkerItem>();
                 for (int i = 0; i < patchPoints.Patches.Count; i++)
                 {
@@ -1533,13 +1534,12 @@ namespace SSXLibrary
                     patch.U3 = 4;
                     patch.U4 = 4;
 
-                    //U5?
-                    //LTG Group
-
                     patch.U11 = 337;
                     patch.U13 = 156;
 
-                    //Generate Normal and Tangent Tables
+                    //Using NURBS Script
+                    //Generate Patch Point Index Table
+                    //Generate Normal and Tangent Indexes from new table
 
                     pbdHandler.Patches.Add(patch);
 
@@ -2346,7 +2346,7 @@ namespace SSXLibrary
                 Console.WriteLine("Importing Meshes");
                 pbdHandler.ImportMeshes(LoadPath + "\\Meshes");
                 //ErrorManager.ErrorMessage = "Error Generating PDB BBoxes";
-                Console.WriteLine("Generating PDB BBoxes");
+                Console.WriteLine("Generating BD BBoxes");
                 pbdHandler.RegenerateLowestAndHighest();
             }
 
@@ -3054,20 +3054,21 @@ namespace SSXLibrary
                     {
                         Directory.Delete(LoadPath + "/Temp", true);
                     }
+
+                    //ErrorManager.ErrorMessage = "Error with Saving SSH Lightmap";
+                    if (consoleVersion == ConsoleVersion.PS2)
+                    {
+                        LightmapHandler.SaveShape(ExportPath + "_L.ssh");
+                    }
+                    if (consoleVersion == ConsoleVersion.Xbox)
+                    {
+                        LightmapHandler.SaveShape(ExportPath + "_L.xsh");
+                    }
                 }
                 else
                 {
                     //pbdHandler = LightmapGenerator.GenerateNewLightmapPoints(pbdHandler);
                     //LightmapHandler = LightmapGenerator.GenerateUnlitLightmap(pbdHandler);
-                }
-                //ErrorManager.ErrorMessage = "Error with Saving SSH Lightmap";
-                if (consoleVersion == ConsoleVersion.PS2)
-                {
-                    LightmapHandler.SaveShape(ExportPath + "_L.ssh");
-                }
-                if(consoleVersion == ConsoleVersion.Xbox)
-                {
-                    LightmapHandler.SaveShape(ExportPath + "_L.xsh");
                 }
             }
         }
