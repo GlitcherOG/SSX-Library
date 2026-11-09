@@ -884,9 +884,9 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
                 patch.Point3 = stream.ReadVector4();
                 patch.Point4 = stream.ReadVector4();
 
-                patch.TextureAssigment = stream.ReadUInt16();
-                patch.BumpAssigment = stream.ReadUInt16();
-                patch.LightmapID = stream.ReadUInt16();
+                patch.TextureAssigment = StreamUtil.ReadInt16(stream);
+                patch.BumpAssigment = StreamUtil.ReadInt16(stream);
+                patch.LightmapID = StreamUtil.ReadInt16(stream);
                 patch.UnusedResourceId2 = stream.ReadUInt16();
 
                 patch.NormalIndex = new ushort[64];

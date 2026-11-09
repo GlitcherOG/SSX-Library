@@ -170,9 +170,14 @@ namespace SSXLibrary
                     patch.TrickOnlyPatch = true;
                 }
 
-                patch.TexturePath =  pbdHandler.Patches[i].TextureAssigment.ToString().PadLeft(4, '0') + ".png";
-                
-                patch.BumpPath = pbdHandler.Patches[i].BumpAssigment.ToString().PadLeft(4, '0') + ".png";
+                string? patchTex = ShapeNameOrNull(TextureHandler, pbdHandler.Patches[i].TextureAssigment, $"patch {i} ({patchName})");
+                if (patchTex != null) patch.TexturePath = patchTex + ".png";
+
+                if (pbdHandler.Patches[i].BumpAssigment != -1)
+                {
+                    string? patchBump = ShapeNameOrNull(BumpHandler, pbdHandler.Patches[i].BumpAssigment, $"patch {i} ({patchName}) bump");
+                    if (patchBump != null) patch.BumpPath = patchBump + ".png";
+                }
 
                 patch.LightmapID = pbdHandler.Patches[i].LightmapID;
 
@@ -1515,7 +1520,11 @@ namespace SSXLibrary
                         patch.TextureAssigment = ImageFiles.Count - 1;
                     }
 
-                    if (BumpImageFiles.Contains(ImportPatch.BumpPath))
+                    if (string.IsNullOrEmpty(ImportPatch.BumpPath))
+                    {
+                        patch.BumpAssigment = -1;
+                    }
+                    else if (BumpImageFiles.Contains(ImportPatch.BumpPath))
                     {
                         patch.BumpAssigment = BumpImageFiles.IndexOf(ImportPatch.BumpPath);
                     }
@@ -2777,7 +2786,6 @@ namespace SSXLibrary
                     ssfHandler.Save(ExportPath + ".xsf");
                 }
             }
-
 
             #region Skybox Rebuild
             BDHandler skyboxpbdHander = new BDHandler();
