@@ -1403,6 +1403,8 @@ namespace SSXLibrary
 
             if (MAPGenerate || PBDGenerate || LTGGenerate || ADLGenerate || SSFGenerate)
             {
+                pbdHandler.GeneratePatchNormalTable();
+
                 //Rebuild Patches
                 patchPoints = new PatchesJsonHandler();
                 patchPoints = PatchesJsonHandler.Load(LoadPath + "/Patches.json");
@@ -1537,7 +1539,7 @@ namespace SSXLibrary
                     patch.U11 = 337;
                     patch.U13 = 156;
 
-                    //Generate Render Points
+                    //Generate Normal and Tangent Tables
 
                     pbdHandler.Patches.Add(patch);
 

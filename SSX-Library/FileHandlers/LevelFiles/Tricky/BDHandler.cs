@@ -889,11 +889,16 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
                 patch.LightmapID = stream.ReadUInt16();
                 patch.UnusedResourceId2 = stream.ReadUInt16();
 
-                patch.PatchPointIndex = new ushort[128];
-
-                for (int j = 0; j < 128; j++)
+                patch.NormalIndex = new ushort[64];
+                for (int j = 0; j < 64; j++)
                 {
-                    patch.PatchPointIndex[j] = stream.ReadUInt16();
+                    patch.NormalIndex[j] = stream.ReadUInt16();
+                }
+
+                patch.TangentIndex = new ushort[64];
+                for (int j = 0; j < 64; j++)
+                {
+                    patch.TangentIndex[j] = stream.ReadUInt16();
                 }
 
                 patch.U11 = stream.ReadUInt16();
@@ -3128,6 +3133,49 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
             int scaled = (int)(Math.Clamp(value, -1f, 1f) * 32768f);
             return Math.Clamp(scaled, short.MinValue, short.MaxValue);
         }
+
+        //Xbox patch normal table. Octahedron (z up) subdivided 5 times, each new point pushed onto the sphere.
+        //4 * 4^5 + 2 = 4098 directions. Done in double so every machine generates the same table.
+        //Claude Made
+        //its the same in all levels and wanted it to generate on the fly rather than storing it
+        public void GeneratePatchNormalTable(int Subdivisions = 5)
+        {
+            var points = new List<(double X, double Y, double Z)> { (1, 0, 0), (-1, 0, 0), (0, 1, 0), (0, -1, 0), (0, 0, 1), (0, 0, -1) };
+            var faces = new List<(int A, int B, int C)> { (0, 2, 4), (2, 1, 4), (1, 3, 4), (3, 0, 4), (2, 0, 5), (1, 2, 5), (3, 1, 5), (0, 3, 5) };
+
+            for (int s = 0; s < Subdivisions; s++)
+            {
+                var midpoints = new Dictionary<(int, int), int>();
+                int Midpoint(int a, int b)
+                {
+                    var key = a < b ? (a, b) : (b, a);
+                    if (!midpoints.TryGetValue(key, out int index))
+                    {
+                        var p = points[a];
+                        var q = points[b];
+                        double x = p.X + q.X, y = p.Y + q.Y, z = p.Z + q.Z;
+                        double length = Math.Sqrt(x * x + y * y + z * z);
+                        index = points.Count;
+                        points.Add((x / length, y / length, z / length));
+                        midpoints[key] = index;
+                    }
+                    return index;
+                }
+
+                var newFaces = new List<(int, int, int)>();
+                foreach (var (a, b, c) in faces)
+                {
+                    int ab = Midpoint(a, b), bc = Midpoint(b, c), ca = Midpoint(c, a);
+                    newFaces.Add((a, ab, ca));
+                    newFaces.Add((b, bc, ab));
+                    newFaces.Add((c, ca, bc));
+                    newFaces.Add((ab, bc, ca));
+                }
+                faces = newFaces;
+            }
+
+            normals = points.Select(p => new Vector3((float)p.X, (float)p.Y, (float)p.Z)).ToList();
+        }
     }
 
 
@@ -3203,7 +3251,8 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
         public uint U3;
         public uint U4;
         public uint LTGGroup;
-        public ushort[] PatchPointIndex; //130
+        public ushort[] NormalIndex; //130
+        public ushort[] TangentIndex;
         public uint U11;
         public uint U13;
 
