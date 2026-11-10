@@ -878,27 +878,15 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
                             TempMainBox.splineIndex.Add(i);
                         }
                     }
-                    //Lights
+                    //Lights - per-cell light lists ship empty on the original disc, only the crossing lists carry lights
                     TempMainBox.lightIndex = new List<int>();
-                    for (int i = 0; i < pbdHandler.lights.Count; i++)
-                    {
-                        if (AABB.IntersectsPoint(pbdHandler.lights[i].Position, TempMainBox.WorldBounds1, TempMainBox.WorldBounds2) && !LightBools[i] && pbdHandler.lights[i].spriteRes != 0)
-                        {
-                            TempMainBox.Modified = true;
-                            LightBools[i] = true;
-                            TempMainBox.lightIndex.Add(i);
-                        }
-                    }
 
-                    //Find out What Light Corssing
+                    //Find out What Light Corssing. No duplicates, a Type-3 (ambient) light is added once
                     TempMainBox.lightCrossingIndex = new List<int>();
                     for (int i = 0; i < pbdHandler.lights.Count; i++)
                     {
-                        if (AABB.IntersectsAABB(TempMainBox.WorldBounds1, TempMainBox.WorldBounds2, pbdHandler.lights[i].LowestXYZ, pbdHandler.lights[i].HighestXYZ))
-                        {
-                            TempMainBox.lightCrossingIndex.Add(i);
-                        }
-                        if (pbdHandler.lights[i].Type == 3)
+                        if (AABB.IntersectingSquares(TempMainBox.WorldBounds1, TempMainBox.WorldBounds2, pbdHandler.lights[i].LowestXYZ, pbdHandler.lights[i].HighestXYZ)
+                            || pbdHandler.lights[i].Type == 3)
                         {
                             TempMainBox.lightCrossingIndex.Add(i);
                         }
@@ -998,15 +986,12 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
                                 }
                             }
 
-                            //Generate LightCrossing List
+                            //Generate LightCrossing List - no duplicates, a Type-3 (ambient) light is added once
                             TempNodeBox.LightCrossingIndex = new List<int>();
                             for (int i = 0; i < TempMainBox.lightCrossingIndex.Count; i++)
                             {
-                                if (AABB.IntersectsAABB(TempNodeBox.WorldBounds1, TempNodeBox.WorldBounds2, pbdHandler.lights[TempMainBox.lightCrossingIndex[i]].LowestXYZ, pbdHandler.lights[TempMainBox.lightCrossingIndex[i]].HighestXYZ))
-                                {
-                                    TempNodeBox.LightCrossingIndex.Add(TempMainBox.lightCrossingIndex[i]);
-                                }
-                                if (pbdHandler.lights[TempMainBox.lightCrossingIndex[i]].Type == 3)
+                                if (AABB.IntersectingSquares(TempNodeBox.WorldBounds1, TempNodeBox.WorldBounds2, pbdHandler.lights[TempMainBox.lightCrossingIndex[i]].LowestXYZ, pbdHandler.lights[TempMainBox.lightCrossingIndex[i]].HighestXYZ)
+                                    || pbdHandler.lights[TempMainBox.lightCrossingIndex[i]].Type == 3)
                                 {
                                     TempNodeBox.LightCrossingIndex.Add(TempMainBox.lightCrossingIndex[i]);
                                 }

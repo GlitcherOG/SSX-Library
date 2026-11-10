@@ -2,6 +2,7 @@
 using SharpGLTF.Geometry.VertexTypes;
 using SharpGLTF.Materials;
 using SSXLibrary.FileHandlers.LevelFiles.Tricky.PS2;
+using SSXLibrary.FileHandlers.LevelFiles.Tricky.Xbox;
 using SSXLibrary.Internal.Utilities;
 using SSXLibrary.Internal.Utilities.StreamExtensions;
 using System.Globalization;
@@ -16,8 +17,8 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
         public int NumPlayerStarts;
         public int NumPatches;
 
-        public int NumUnknown1; //Xbox
-        public int NumUnknown2; //Xbox
+        public int NumPatchPoints; //Xbox
+        public int NumVertexData; //Xbox
 
         public int NumInstances;
 
@@ -35,12 +36,15 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
         public int NumTextures;
         public int NumCameras;
         public int NumUnknown3; // Xbox
+
+        public int NumNormals; //Xbox
+
         public int LightMapSize;
 
         public int PlayerStartOffset;
         public int PatchOffset;
         public int PatchOffsetPoints; //Xbox
-        public int UnknownOffset; //Xbox
+        public int VertexOffset; //Xbox
         public int InstanceOffset;
         public int ParticleInstancesOffset;
 
@@ -62,9 +66,12 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
         public int HashOffset;
         public int MeshDataOffset;
 
+        public int NormalsOffset; //Xbox
+
         public List<Patch> Patches = new List<Patch>();
 
-        public List<PatchPointData> patchPointDatas = new List<PatchPointData>();
+        public List<PatchPointData> patchPointDatas = new List<PatchPointData>(); //Xbox
+        public VertexData vertexData = new VertexData();
         public List<Spline> splines = new List<Spline>();
         public List<SplinesSegments> splinesSegments = new List<SplinesSegments>();
         public List<TextureFlipbook> textureFlipbooks = new List<TextureFlipbook>();
@@ -80,6 +87,8 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
         public List<int> CameraPointers = new List<int>();
         public List<CameraInstance> Cameras = new List<CameraInstance>();
         public HashData hashData = new HashData();
+
+        public List<Vector3> normals = new List<Vector3>();
 
         public byte[] MeshData;
 
@@ -753,7 +762,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
                         for (int b = 0; b < TempObjects.objectData.MeshOffsets.Count; b++)
                         {
                             var TempMeshOffset = TempObjects.objectData.MeshOffsets[b];
-                            var TempMeshData = new Mesh();
+                            var TempMeshData = new PS2.Mesh();
                             TempMeshData.meshChunk = new List<MeshChunk>();
                             stream.Position = TempObjects.objectData.MeshOffsets[b].StartPos + MeshDataOffset;
                             while (true)
@@ -782,17 +791,14 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
                 }
                 modelData[i] = TempPrefabData;
             }
-
-            stream.Position = MeshDataOffset;
-            MeshData = StreamUtil.ReadBytes(stream, (int)(stream.Length - MeshDataOffset));
         }
 
         public void LoadXbox(Stream stream)
         {
             NumPlayerStarts = StreamUtil.ReadUInt32(stream); 
             NumPatches = StreamUtil.ReadUInt32(stream); 
-            NumUnknown1 = StreamUtil.ReadUInt32(stream);
-            NumUnknown2 = StreamUtil.ReadUInt32(stream);
+            NumPatchPoints = StreamUtil.ReadUInt32(stream);
+            NumVertexData = StreamUtil.ReadUInt32(stream);
             NumInstances = StreamUtil.ReadUInt32(stream);
             NumParticleInstances = StreamUtil.ReadUInt32(stream);
             NumMaterials = StreamUtil.ReadUInt32(stream);
@@ -806,12 +812,12 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
             NumTextures = StreamUtil.ReadUInt32(stream);
             NumCameras = StreamUtil.ReadUInt32(stream); //Used in SSXFE MAP
             NumUnknown3 = StreamUtil.ReadUInt32(stream);
-            LightMapSize = StreamUtil.ReadUInt32(stream);
+            NumNormals = StreamUtil.ReadUInt32(stream);
 
             PlayerStartOffset = StreamUtil.ReadUInt32(stream);
             PatchOffset = StreamUtil.ReadUInt32(stream);
             PatchOffsetPoints = StreamUtil.ReadUInt32(stream);
-            UnknownOffset = StreamUtil.ReadUInt32(stream);
+            VertexOffset = StreamUtil.ReadUInt32(stream);
             InstanceOffset = StreamUtil.ReadUInt32(stream);
             ParticleInstancesOffset = StreamUtil.ReadUInt32(stream);
             MaterialOffset = StreamUtil.ReadUInt32(stream);
@@ -821,13 +827,13 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
             SplineSegmentOffset = StreamUtil.ReadUInt32(stream);
             TextureFlipbookOffset = StreamUtil.ReadUInt32(stream);
             ModelPointerOffset = StreamUtil.ReadUInt32(stream);
-            ModelsOffset = StreamUtil.ReadUInt32(stream); //Needs Work
+            ModelsOffset = StreamUtil.ReadUInt32(stream);
             ParticleModelPointerOffset = StreamUtil.ReadUInt32(stream);
             ParticleModelsOffset = StreamUtil.ReadUInt32(stream);
             CameraPointerOffset = StreamUtil.ReadUInt32(stream);
             CamerasOffset = StreamUtil.ReadUInt32(stream);
-            HashOffset = StreamUtil.ReadUInt32(stream); 
-            MeshDataOffset = StreamUtil.ReadUInt32(stream); //Needs Work
+            HashOffset = StreamUtil.ReadUInt32(stream);
+            NormalsOffset = StreamUtil.ReadUInt32(stream);
 
             //New Data
             stream.Position = PatchOffset;
@@ -878,16 +884,21 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
                 patch.Point3 = stream.ReadVector4();
                 patch.Point4 = stream.ReadVector4();
 
-                patch.TextureAssigment = stream.ReadUInt16();
-                patch.BumpAssigment = stream.ReadUInt16();
-                patch.LightmapID = stream.ReadUInt16();
+                patch.TextureAssigment = StreamUtil.ReadInt16(stream);
+                patch.BumpAssigment = StreamUtil.ReadInt16(stream);
+                patch.LightmapID = StreamUtil.ReadInt16(stream);
                 patch.UnusedResourceId2 = stream.ReadUInt16();
 
-                patch.PatchPointIndex = new ushort[128];
-
-                for (int j = 0; j < 128; j++)
+                patch.NormalIndex = new ushort[64];
+                for (int j = 0; j < 64; j++)
                 {
-                    patch.PatchPointIndex[j] = stream.ReadUInt16();
+                    patch.NormalIndex[j] = stream.ReadUInt16();
+                }
+
+                patch.TangentIndex = new ushort[64];
+                for (int j = 0; j < 64; j++)
+                {
+                    patch.TangentIndex[j] = stream.ReadUInt16();
                 }
 
                 patch.U11 = stream.ReadUInt16();
@@ -909,6 +920,24 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
                 NewPatchData.UV = StreamUtil.ReadVector2(stream);
 
                 patchPointDatas.Add(NewPatchData);
+            }
+
+            stream.Position = VertexOffset;
+            vertexData = new VertexData();
+            vertexData.VertexCount = StreamUtil.ReadUInt32(stream);
+            vertexData.U0 = StreamUtil.ReadInt32(stream);
+            vertexData.U1 = StreamUtil.ReadInt32(stream);
+
+            vertexData.pointDatas = new List<PointData>();
+            for (int i = 0; i < vertexData.VertexCount; i++)
+            {
+                var pointData = new PointData();
+
+                pointData.vector3s = StreamUtil.ReadVector3(stream);
+                pointData.normals = StreamUtil.ReadVector3(stream);
+                pointData.uvs = StreamUtil.ReadVector2(stream);
+
+                vertexData.pointDatas.Add(pointData);
             }
 
             stream.Position = InstanceOffset;
@@ -1092,6 +1121,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
             }
 
             //Not Reading Correctly
+            int MeshID = 0;
             stream.Position = ModelsOffset;
             modelData = new List<Models>();
             for (int i = 0; i < ModelPointers.Count; i++)
@@ -1184,6 +1214,12 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
                             {
                                 context.Indices.Add(StreamUtil.ReadUInt16(stream));
                             }
+
+                            context.XboxMesh = objTriXBDHandler.GenerateFaces(context.Strips, context.Indices, vertexData);
+                            context.MeshID = MeshID;
+                            context.MeshPath = MeshID.ToString() + ".obj";
+                            MeshID++;
+
                             meshHeader.MeshOffsets.Add(context);
                         }
                         TempPrefab.objectData = meshHeader;
@@ -1320,6 +1356,84 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
                 particleModels.Add(TempParticleModel);
             }
 
+            //Camera Pointers
+            stream.Position = CameraPointerOffset;
+            CameraPointers = new List<int>();
+            for (int i = 0; i < NumCameras; i++)
+            {
+                CameraPointers.Add(StreamUtil.ReadUInt32(stream));
+            }
+
+            //Camera Data
+            Cameras = new List<CameraInstance>();
+            for (int i = 0; i < NumCameras; i++)
+            {
+                stream.Position = CamerasOffset + CameraPointers[i];
+                CameraInstance TempCamera = new CameraInstance();
+
+                TempCamera.ByteSize = StreamUtil.ReadUInt32(stream);
+                TempCamera.Translation = StreamUtil.ReadVector3(stream);
+                TempCamera.Rotation = StreamUtil.ReadVector3(stream);
+                TempCamera.Type = StreamUtil.ReadUInt32(stream);
+                TempCamera.FocalLength = StreamUtil.ReadFloat(stream);
+                TempCamera.AspectRatio = StreamUtil.ReadFloat(stream);
+                TempCamera.Aperture = StreamUtil.ReadVector2(stream);
+                TempCamera.ClipPlane = StreamUtil.ReadVector2(stream);
+                TempCamera.IntrestPoint = StreamUtil.ReadVector3(stream);
+                TempCamera.UpVector = StreamUtil.ReadVector3(stream);
+                TempCamera.AnimTime = StreamUtil.ReadFloat(stream);
+                TempCamera.AnimationOffset = StreamUtil.ReadUInt32(stream);
+
+                TempCamera.AnimationInitial = new CameraAnimationInitial();
+
+                stream.Position = CamerasOffset + CameraPointers[i] + TempCamera.AnimationOffset; // Dont Really need to do this but i will
+
+                TempCamera.AnimationInitial.InitialPosition = StreamUtil.ReadVector3(stream);
+                TempCamera.AnimationInitial.InitalRotation = StreamUtil.ReadVector3(stream);
+
+                TempCamera.AnimationInitial.U0 = StreamUtil.ReadFloat(stream, true);
+
+                TempCamera.AnimationInitial.AnimationHeaderCount = StreamUtil.ReadUInt32(stream);
+                TempCamera.AnimationInitial.AnimationHeaderOffset = StreamUtil.ReadUInt32(stream);
+
+                stream.Position = CamerasOffset + CameraPointers[i] + TempCamera.AnimationOffset + TempCamera.AnimationInitial.AnimationHeaderOffset; // Dont Really need to do this but i will
+
+                TempCamera.AnimationInitial.AnimationHeaderPointers = new List<int>();
+
+                for (int a = 0; a < TempCamera.AnimationInitial.AnimationHeaderCount; a++)
+                {
+                    TempCamera.AnimationInitial.AnimationHeaderPointers.Add(StreamUtil.ReadUInt32(stream));
+                }
+
+                TempCamera.AnimationInitial.AnimationHeaders = new List<CameraAnimationHeader>();
+
+                //Really dont need to do this but im gonna
+                for (int a = 0; a < TempCamera.AnimationInitial.AnimationHeaderPointers.Count; a++)
+                {
+                    stream.Position = CamerasOffset + CameraPointers[i] + TempCamera.AnimationOffset + TempCamera.AnimationInitial.AnimationHeaderPointers[a];
+                    var TempAnimationHeader = new CameraAnimationHeader();
+
+                    TempAnimationHeader.Count = StreamUtil.ReadUInt32(stream);
+                    TempAnimationHeader.Action = StreamUtil.ReadUInt32(stream);
+                    TempAnimationHeader.AnimationDatas = new List<CameraAnimationData>();
+
+                    for (int b = 0; b < TempAnimationHeader.Count; b++)
+                    {
+                        var NewAnimData = new CameraAnimationData();
+
+                        NewAnimData.Translation = StreamUtil.ReadVector3(stream);
+                        NewAnimData.Rotation = StreamUtil.ReadVector3(stream);
+
+                        TempAnimationHeader.AnimationDatas.Add(NewAnimData);
+                    }
+
+                    TempCamera.AnimationInitial.AnimationHeaders.Add(TempAnimationHeader);
+                }
+
+
+                Cameras.Add(TempCamera);
+            }
+
             if (HashOffset != 0)
             {
                 stream.Position = HashOffset;
@@ -1369,8 +1483,12 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
                     hashData.CameraHash.Add(NewHash);
                 }
             }
-            stream.Position = MeshDataOffset;
-            MeshData = StreamUtil.ReadBytes(stream, (int)(stream.Length - MeshDataOffset));
+
+            normals = new List<Vector3>();
+            for (int i = 0; i < NumNormals; i++)
+            {
+                normals.Add(StreamUtil.ReadVector3(stream));
+            }
         }
 
         public MeshChunk ReadMeshPS2(Stream stream, Vector3 Scale)
@@ -2282,7 +2400,112 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
                             }
                             for (int z = 0; z < UV.Count; z++)
                             {
-                                output += "vt " + UV[z].X.ToString(CultureInfo.InvariantCulture.NumberFormat) + " " + (1-UV[z].Y).ToString(CultureInfo.InvariantCulture.NumberFormat) + "\n";
+                                output += "vt " + UV[z].X.ToString(CultureInfo.InvariantCulture.NumberFormat) + " " + (1 - UV[z].Y).ToString(CultureInfo.InvariantCulture.NumberFormat) + "\n";
+                            }
+                            for (int z = 0; z < Normals.Count; z++)
+                            {
+                                output += "vn " + Normals[z].X.ToString(CultureInfo.InvariantCulture.NumberFormat) + " " + Normals[z].Y.ToString(CultureInfo.InvariantCulture.NumberFormat) + " " + Normals[z].Z.ToString(CultureInfo.InvariantCulture.NumberFormat) + "\n";
+                            }
+                            output += outputString;
+                            // One file per MeshID, overwritten: each block restarts its v/vt/vn indices at 1,
+                            // so a second block in the same file only re-draws the first block's triangles.
+                            File.WriteAllText(path + "/" + modelData[a].ModelObjects[ax].objectData.MeshOffsets[i].MeshID.ToString() + ".obj", output);
+                        }
+                    }
+                }
+            }
+        }
+
+        public void ExportModelsXbox(string path)
+        {
+            //glstHandler.SavePDBModelglTF(path, this);
+            for (int a = 0; a < modelData.Count; a++)
+            {
+                for (int ax = 0; ax < modelData[a].ModelObjects.Count; ax++)
+                {
+                    if (modelData[a].ModelObjects[ax].objectData.MeshOffsets != null)
+                    {
+                        for (int i = 0; i < modelData[a].ModelObjects[ax].objectData.MeshOffsets.Count; i++)
+                        {
+                            string outputString = "";
+                            string output = "# Exported From SSX Using SSX Multitool Modder by GlitcherOG \n";
+
+                            List<Vector3> vertices = new List<Vector3>();
+                            List<Vector3> Normals = new List<Vector3>();
+                            List<Vector2> UV = new List<Vector2>();
+                            outputString += "o Mesh" + i.ToString() + "\n";
+                            var Data = modelData[a].ModelObjects[ax].objectData.MeshOffsets[i].XboxMesh;
+                            for (int b = 0; b < Data.meshFaces.Count; b++)
+                            {
+                                var Face = Data.meshFaces[b];
+
+                                //Vertices
+                                if (!vertices.Contains(Face.V1))
+                                {
+                                    vertices.Add(Face.V1);
+                                }
+                                int VPos1 = vertices.IndexOf(Face.V1) + 1;
+
+                                if (!vertices.Contains(Face.V2))
+                                {
+                                    vertices.Add(Face.V2);
+                                }
+                                int VPos2 = vertices.IndexOf(Face.V2) + 1;
+
+                                if (!vertices.Contains(Face.V3))
+                                {
+                                    vertices.Add(Face.V3);
+                                }
+                                int VPos3 = vertices.IndexOf(Face.V3) + 1;
+
+                                //UVs
+                                if (!UV.Contains(Face.UV1))
+                                {
+                                    UV.Add(Face.UV1);
+                                }
+                                int UPos1 = UV.IndexOf(Face.UV1) + 1;
+
+                                if (!UV.Contains(Face.UV2))
+                                {
+                                    UV.Add(Face.UV2);
+                                }
+                                int UPos2 = UV.IndexOf(Face.UV2) + 1;
+
+                                if (!UV.Contains(Face.UV3))
+                                {
+                                    UV.Add(Face.UV3);
+                                }
+                                int UPos3 = UV.IndexOf(Face.UV3) + 1;
+
+                                //Normals
+                                if (!Normals.Contains(Face.Normal1))
+                                {
+                                    Normals.Add(Face.Normal1);
+                                }
+                                int NPos1 = Normals.IndexOf(Face.Normal1) + 1;
+
+                                if (!Normals.Contains(Face.Normal2))
+                                {
+                                    Normals.Add(Face.Normal2);
+                                }
+                                int NPos2 = Normals.IndexOf(Face.Normal2) + 1;
+
+                                if (!Normals.Contains(Face.Normal3))
+                                {
+                                    Normals.Add(Face.Normal3);
+                                }
+                                int NPos3 = Normals.IndexOf(Face.Normal3) + 1;
+
+                                outputString += "f " + VPos1.ToString() + "/" + UPos1.ToString() + "/" + NPos1.ToString() + " " + VPos2.ToString() + "/" + UPos2.ToString() + "/" + NPos2.ToString() + " " + VPos3.ToString() + "/" + UPos3.ToString() + "/" + NPos3.ToString() + "\n";
+                            }
+
+                            for (int z = 0; z < vertices.Count; z++)
+                            {
+                                output += "v " + vertices[z].X.ToString(CultureInfo.InvariantCulture.NumberFormat) + " " + vertices[z].Y.ToString(CultureInfo.InvariantCulture.NumberFormat) + " " + vertices[z].Z.ToString(CultureInfo.InvariantCulture.NumberFormat) + "\n";
+                            }
+                            for (int z = 0; z < UV.Count; z++)
+                            {
+                                output += "vt " + UV[z].X.ToString(CultureInfo.InvariantCulture.NumberFormat) + " " + (1 - UV[z].Y).ToString(CultureInfo.InvariantCulture.NumberFormat) + "\n";
                             }
                             for (int z = 0; z < Normals.Count; z++)
                             {
@@ -2910,6 +3133,49 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
             int scaled = (int)(Math.Clamp(value, -1f, 1f) * 32768f);
             return Math.Clamp(scaled, short.MinValue, short.MaxValue);
         }
+
+        //Xbox patch normal table. Octahedron (z up) subdivided 5 times, each new point pushed onto the sphere.
+        //4 * 4^5 + 2 = 4098 directions. Done in double so every machine generates the same table.
+        //Claude Made
+        //its the same in all levels and wanted it to generate on the fly rather than storing it
+        public void GeneratePatchNormalTable(int Subdivisions = 5)
+        {
+            var points = new List<(double X, double Y, double Z)> { (1, 0, 0), (-1, 0, 0), (0, 1, 0), (0, -1, 0), (0, 0, 1), (0, 0, -1) };
+            var faces = new List<(int A, int B, int C)> { (0, 2, 4), (2, 1, 4), (1, 3, 4), (3, 0, 4), (2, 0, 5), (1, 2, 5), (3, 1, 5), (0, 3, 5) };
+
+            for (int s = 0; s < Subdivisions; s++)
+            {
+                var midpoints = new Dictionary<(int, int), int>();
+                int Midpoint(int a, int b)
+                {
+                    var key = a < b ? (a, b) : (b, a);
+                    if (!midpoints.TryGetValue(key, out int index))
+                    {
+                        var p = points[a];
+                        var q = points[b];
+                        double x = p.X + q.X, y = p.Y + q.Y, z = p.Z + q.Z;
+                        double length = Math.Sqrt(x * x + y * y + z * z);
+                        index = points.Count;
+                        points.Add((x / length, y / length, z / length));
+                        midpoints[key] = index;
+                    }
+                    return index;
+                }
+
+                var newFaces = new List<(int, int, int)>();
+                foreach (var (a, b, c) in faces)
+                {
+                    int ab = Midpoint(a, b), bc = Midpoint(b, c), ca = Midpoint(c, a);
+                    newFaces.Add((a, ab, ca));
+                    newFaces.Add((b, bc, ab));
+                    newFaces.Add((c, ca, bc));
+                    newFaces.Add((ab, bc, ca));
+                }
+                faces = newFaces;
+            }
+
+            normals = points.Select(p => new Vector3((float)p.X, (float)p.Y, (float)p.Z)).ToList();
+        }
     }
 
 
@@ -2985,7 +3251,8 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
         public uint U3;
         public uint U4;
         public uint LTGGroup;
-        public ushort[] PatchPointIndex; //130
+        public ushort[] NormalIndex; //130
+        public ushort[] TangentIndex;
         public uint U11;
         public uint U13;
 
@@ -3000,6 +3267,22 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
         public Vector2 UV;
     }
 
+    public struct VertexData
+    {
+        public int VertexCount;
+        public int U0;
+        public int U1;
+
+        public List<PointData> pointDatas;
+    }
+
+    public struct PointData
+    {
+        public Vector3 vector3s;
+        public Vector3 normals;
+        public Vector2 uvs;
+    }
+
     public struct Instance
     {
         public Matrix4x4 matrix4X4;
@@ -3007,7 +3290,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
         public Vector4 LightVector1;
         public Vector4 LightVector2;
         public Vector4 LightVector3;
-        public Vector4 AmbentLightVector; //Not really this but labled this for the moment
+        public Vector4 AmbentLightVector; 
 
         public Vector4 LightColour1;
         public Vector4 LightColour2;
@@ -3218,6 +3501,8 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
         public List<int> Strips;
         public int IndexCount;
         public List <int> Indices;
+
+        public Xbox.Mesh XboxMesh;
     }
 
     public struct ObjectAnimation
