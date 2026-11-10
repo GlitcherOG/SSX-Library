@@ -305,6 +305,10 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
                             && pcx >= TempMainBox.WorldBounds1.X && pcx < TempMainBox.WorldBounds2.X
                             && pcy >= TempMainBox.WorldBounds1.Y && pcy < TempMainBox.WorldBounds2.Y)
                         {
+                            var patch = pbdHandler.Patches[i];
+                            patch.LTGGroup = (uint)(y * pointerCount + x);
+                            pbdHandler.Patches[i] = patch;
+
                             TempMainBox.Modified = true;
                             Patchbools[i] = true;
                             TempMainBox.patchIndex.Add(i);
@@ -847,6 +851,9 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
 
                         if (AABB.IntersectsPoint(MidPoint, TempMainBox.WorldBounds1, TempMainBox.WorldBounds2) && !Patchbools[i])
                         {
+                            var patch = pbdHandler.Patches[i];
+                            patch.LTGGroup = (uint)(y * pointerCount + x);
+                            pbdHandler.Patches[i] = patch;
                             TempMainBox.Modified = true;
                             Patchbools[i] = true;
                             TempMainBox.patchIndex.Add(i);

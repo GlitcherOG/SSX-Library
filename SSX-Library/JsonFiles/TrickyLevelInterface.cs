@@ -2406,7 +2406,7 @@ namespace SSXLibrary
             if (PBDGenerate)
             {
                 //Not a used value
-                //pbdHandler.NumTextures = ImageFiles.Count;
+                pbdHandler.NumTextures = ImageFiles.Count;
 
                 //Port Back LTG Group
 
