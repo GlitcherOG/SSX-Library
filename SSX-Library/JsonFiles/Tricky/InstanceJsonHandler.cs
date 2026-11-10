@@ -72,6 +72,12 @@ namespace SSXLibrary.JsonFiles.Tricky
             public int UnknownInt31;
             public int UnknownInt32;
 
+            //Xbox
+            public int LightIndex;
+            public float LightStrength;
+            public int UnknownInt35;
+            public int UnknownInt36;
+
             public int LTGState; //TrickyLTGState
 
             public int Hash;

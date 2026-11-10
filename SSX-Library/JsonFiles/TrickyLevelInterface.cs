@@ -228,6 +228,12 @@ namespace SSXLibrary
                 instanceJson.UnknownInt31 = pbdHandler.Instances[i].UnknownInt31;
                 instanceJson.UnknownInt32 = pbdHandler.Instances[i].UnknownInt32;
 
+                //Xbox
+                instanceJson.LightIndex = pbdHandler.Instances[i].LightIndex;
+                instanceJson.LightStrength = pbdHandler.Instances[i].LightStrength;
+                instanceJson.UnknownInt35 = pbdHandler.Instances[i].UnknownInt35;
+                instanceJson.UnknownInt36 = pbdHandler.Instances[i].UnknownInt36;
+
                 //LTG
                 instanceJson.LTGState = ltgHandler.FindIfInstaneState(i);
 
@@ -1560,7 +1566,7 @@ namespace SSXLibrary
                     mapHandler.Patchs.Add(linkerItem);
                 }
 
-                ////Rebuild Splines
+                //Rebuild Splines
                 splineJsonHandler = new SplineJsonHandler();
                 splineJsonHandler = SplineJsonHandler.Load(LoadPath + "/Splines.json");
                 pbdHandler.splines = new List<Spline>();
@@ -1715,6 +1721,12 @@ namespace SSXLibrary
                     NewInstance.UnknownInt30 = Oldinstance.UnknownInt30;
                     NewInstance.UnknownInt31 = Oldinstance.UnknownInt31;
                     NewInstance.UnknownInt32 = Oldinstance.UnknownInt32;
+
+                    //Xbox
+                    NewInstance.LightIndex = Oldinstance.LightIndex;
+                    NewInstance.LightStrength = Oldinstance.LightStrength;
+                    NewInstance.UnknownInt35 = Oldinstance.UnknownInt35;
+                    NewInstance.UnknownInt36 = Oldinstance.UnknownInt36;
 
                     NewInstance.LTGState = Oldinstance.LTGState;
                     pbdHandler.Instances.Add(NewInstance);
