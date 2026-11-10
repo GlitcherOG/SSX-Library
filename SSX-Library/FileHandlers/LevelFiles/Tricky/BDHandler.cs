@@ -962,8 +962,8 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
                 TempInstance.UnknownInt31 = StreamUtil.ReadUInt32(stream);
                 TempInstance.UnknownInt32 = StreamUtil.ReadUInt32(stream);
 
-                TempInstance.UnknownInt33 = StreamUtil.ReadUInt32(stream);
-                TempInstance.UnknownInt34 = StreamUtil.ReadFloat(stream);
+                TempInstance.LightIndex = StreamUtil.ReadUInt32(stream);
+                TempInstance.LightStrength = StreamUtil.ReadFloat(stream);
                 TempInstance.UnknownInt35 = StreamUtil.ReadUInt32(stream);
                 TempInstance.UnknownInt36 = StreamUtil.ReadUInt32(stream);
 
@@ -1132,11 +1132,10 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
                 TempHeader.ObjectCount = StreamUtil.ReadUInt32(stream);
                 TempHeader.ObjectOffset = StreamUtil.ReadUInt32(stream);
                 TempHeader.MaterialBlockID = StreamUtil.ReadUInt32(stream);
+                TempHeader.Unknown31 = StreamUtil.ReadUInt32(stream); //Xbox only, always 0
                 TempHeader.Unknown3 = StreamUtil.ReadUInt32(stream); //Does change sometimes
                 TempHeader.AnimTime = StreamUtil.ReadFloat(stream);
-                TempHeader.Unknown31 = StreamUtil.ReadUInt32(stream);
                 TempHeader.Scale = StreamUtil.ReadVector3(stream);
-                //Xbox Differes from here
                 TempHeader.TotalMeshCount = StreamUtil.ReadUInt32(stream);
                 TempHeader.VertexCount = StreamUtil.ReadUInt32(stream);
                 TempHeader.TriStripCount = StreamUtil.ReadUInt32(stream);
@@ -3313,8 +3312,8 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
         public int UnknownInt32;
 
         //Xbox
-        public int UnknownInt33;
-        public float UnknownInt34;
+        public int LightIndex; //Index into lights, -1 for none
+        public float LightStrength; //0-1, looks like that light's strength on the instance (unconfirmed)
         public int UnknownInt35;
         public int UnknownInt36;
 
@@ -3433,7 +3432,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
         public int Unknown3;
         public float AnimTime;
 
-        public int Unknown31; //Xbox
+        public int Unknown31; //Xbox, always 0, sits before Unknown3
         public Vector3 Scale; // Not Scale
         public int TotalMeshCount;
         public int VertexCount;
