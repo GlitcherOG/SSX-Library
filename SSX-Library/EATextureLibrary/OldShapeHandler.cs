@@ -483,7 +483,7 @@ namespace SSXLibrary.EATextureLibrary
             {
                 Console.WriteLine("Over 256 Colour Limit " + shapeImage.Shortname);
                 // Keep transparency when limiting indexed textures; the RGB-only reducer drops alpha.
-                shapeImage.Image.Mutate(x => x.Quantize(new WuQuantizer(new QuantizerOptions { MaxColors = 256 })));
+                shapeImage.Image.Mutate(x => x.Quantize(new WuQuantizer(new QuantizerOptions { MaxColors = 256, TransparencyThreshold = 0 })));
             }
             shapeImage.colorsTable = ImageUtil.GetBitmapColorsFast(shapeImage.Image).ToList();
 
