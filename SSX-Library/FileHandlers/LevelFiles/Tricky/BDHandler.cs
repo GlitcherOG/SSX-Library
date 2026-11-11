@@ -1576,6 +1576,10 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
             {
                 SavePS2(path+".pbd");
             }
+            if (consoleVersion == ConsoleVersion.Xbox)
+            {
+                SaveXbox(path + ".xbd");
+            }
         }
 
         public void SavePS2(string path)
@@ -2314,9 +2318,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
         {
             MemoryStream stream = new MemoryStream();
             //Skip writing header info
-            stream.Position += 80;
-
-            StreamUtil.AlignBy16(stream);
+            stream.Position += 160;
 
             //Patches
             PatchOffset = (int)stream.Position;
@@ -2364,7 +2366,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
                 StreamUtil.WriteVector4(stream, TempPatch.Point4);
 
                 StreamUtil.WriteInt16(stream, TempPatch.TextureAssigment);
-                StreamUtil.WriteInt16(stream, TempPatch.TextureAssigment);
+                StreamUtil.WriteInt16(stream, TempPatch.BumpAssigment);
                 StreamUtil.WriteInt16(stream, TempPatch.LightmapID);
                 StreamUtil.WriteInt16(stream, TempPatch.UnusedResourceId2);
 
@@ -2382,7 +2384,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
 
                 StreamUtil.WriteInt16(stream, TempPatch.PatchVisablity);
 
-                StreamUtil.WriteInt16(stream, (int)TempPatch.U13);
+                StreamUtil.WriteInt32(stream, (int)TempPatch.U13);
             }
 
             PatchOffsetPoints = (int)stream.Position;
@@ -2569,205 +2571,219 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
             int Size;
             int TempPos;
             ModelsOffset = (int)stream.Position;
-            //for (int i = 0; i < modelData.Count; i++)
-            //{
-            //    var TempPrefab = modelData[i];
+            for (int i = 0; i < modelData.Count; i++)
+            {
+                var TempPrefab = modelData[i];
 
-            //    int StartPos = (int)stream.Position;
-            //    ModelPointers.Add((int)stream.Position - ModelsOffset);
-            //    stream.Position += 4;
-            //    StreamUtil.WriteInt32(stream, TempPrefab.ModelObjects.Count);
-            //    StreamUtil.WriteInt32(stream, 56);
-            //    StreamUtil.WriteInt32(stream, TempPrefab.MaterialBlockID);
-            //    StreamUtil.WriteInt32(stream, TempPrefab.Unknown3);
-            //    StreamUtil.WriteFloat32(stream, TempPrefab.AnimTime);
-            //    StreamUtil.WriteVector3(stream, TempPrefab.Scale);
-            //    StreamUtil.WriteInt32(stream, TempPrefab.TotalMeshCount);
-            //    StreamUtil.WriteInt32(stream, TempPrefab.VertexCount);
-            //    StreamUtil.WriteInt32(stream, TempPrefab.TriStripCount);
-            //    StreamUtil.WriteInt32(stream, TempPrefab.Unknown4);
-            //    StreamUtil.WriteInt32(stream, TempPrefab.NonTriCount);
+                int StartPos = (int)stream.Position;
+                ModelPointers.Add((int)stream.Position - ModelsOffset);
+                stream.Position += 4;
+                StreamUtil.WriteInt32(stream, TempPrefab.ModelObjects.Count);
+                StreamUtil.WriteInt32(stream, 60);
+                StreamUtil.WriteInt32(stream, TempPrefab.MaterialBlockID);
+                StreamUtil.WriteInt32(stream, TempPrefab.Unknown31);
+                StreamUtil.WriteInt32(stream, TempPrefab.Unknown3);
+                StreamUtil.WriteFloat32(stream, TempPrefab.AnimTime);
+                StreamUtil.WriteVector3(stream, TempPrefab.Scale);
+                StreamUtil.WriteInt32(stream, TempPrefab.TotalMeshCount);
+                StreamUtil.WriteInt32(stream, TempPrefab.VertexCount);
+                StreamUtil.WriteInt32(stream, TempPrefab.TriStripCount);
+                StreamUtil.WriteInt32(stream, TempPrefab.Unknown4);
+                StreamUtil.WriteInt32(stream, TempPrefab.NonTriCount);
 
-            //    //Skip Over Objects and Come back to them
-            //    int TempObjectPos = (int)stream.Position;
-            //    stream.Position += 4 * 6 * TempPrefab.ModelObjects.Count;
+                //Skip Over Objects and Come back to them
+                int TempObjectPos = (int)stream.Position;
+                stream.Position += 4 * 6 * TempPrefab.ModelObjects.Count;
 
-            //    //Write Matrix4x4
-            //    for (int a = 0; a < TempPrefab.ModelObjects.Count; a++)
-            //    {
-            //        var TempObject = TempPrefab.ModelObjects[a];
-            //        TempObject.Matrix4x4Offset = -1;
-            //        if (TempObject.IncludeMatrix)
-            //        {
-            //            StreamUtil.AlignBy16(stream);
-            //            TempObject.Matrix4x4Offset = (int)stream.Position;
-            //            StreamUtil.WriteMatrix4x4(stream, TempObject.matrix4X4);
-            //        }
-            //        TempPrefab.ModelObjects[a] = TempObject;
-            //    }
-            //    //Write Object Data
-            //    for (int a = 0; a < TempPrefab.ModelObjects.Count; a++)
-            //    {
-            //        var TempObject = TempPrefab.ModelObjects[a];
-            //        TempObject.ObjectHighOffset = 0;
-            //        TempObject.ObjectMediumOffset = 0;
-            //        TempObject.ObjectLowOffset = 0;
-            //        if (!TempObject.objectData.Equals(null) && !TempObject.objectData.Equals(new ObjectData()))
-            //        {
-            //            TempObject.ObjectHighOffset = (int)stream.Position;
-            //            TempObject.ObjectMediumOffset = (int)stream.Position;
-            //            TempObject.ObjectLowOffset = (int)stream.Position;
-            //            int StartObjectPrefab = (int)stream.Position;
-            //            stream.Position += 4;
-            //            StreamUtil.WriteVector3(stream, TempObject.objectData.LowestXYZ);
-            //            StreamUtil.WriteVector3(stream, TempObject.objectData.HighestXYZ);
+                //Write Matrix4x4
+                for (int a = 0; a < TempPrefab.ModelObjects.Count; a++)
+                {
+                    var TempObject = TempPrefab.ModelObjects[a];
+                    TempObject.Matrix4x4Offset = -1;
+                    if (TempObject.IncludeMatrix)
+                    {
+                        StreamUtil.AlignBy16(stream);
+                        TempObject.Matrix4x4Offset = (int)stream.Position;
+                        StreamUtil.WriteMatrix4x4(stream, TempObject.matrix4X4);
+                    }
+                    TempPrefab.ModelObjects[a] = TempObject;
+                }
+                //Write Object Data
+                for (int a = 0; a < TempPrefab.ModelObjects.Count; a++)
+                {
+                    var TempObject = TempPrefab.ModelObjects[a];
+                    TempObject.ObjectHighOffset = 0;
+                    TempObject.ObjectMediumOffset = 0;
+                    TempObject.ObjectLowOffset = 0;
+                    if (!TempObject.objectData.Equals(null) && !TempObject.objectData.Equals(new ObjectData()))
+                    {
+                        TempObject.ObjectHighOffset = (int)stream.Position;
+                        TempObject.ObjectMediumOffset = (int)stream.Position;
+                        TempObject.ObjectLowOffset = (int)stream.Position;
+                        int StartObjectPrefab = (int)stream.Position;
+                        stream.Position += 4;
+                        StreamUtil.WriteVector3(stream, TempObject.objectData.LowestXYZ);
+                        StreamUtil.WriteVector3(stream, TempObject.objectData.HighestXYZ);
 
-            //            StreamUtil.WriteInt32(stream, TempObject.objectData.Flags);
-            //            StreamUtil.WriteInt32(stream, TempObject.objectData.MeshOffsets.Count);
-            //            StreamUtil.WriteInt32(stream, TempObject.objectData.FaceCount);
+                        StreamUtil.WriteInt32(stream, TempObject.objectData.Flags);
+                        StreamUtil.WriteInt32(stream, TempObject.objectData.MeshOffsets.Count);
+                        StreamUtil.WriteInt32(stream, TempObject.objectData.FaceCount);
 
-            //            //Go back and Write Total Context Offset
-            //            StreamUtil.WriteInt32(stream, 44);
+                        //Go back and Write Total Context Offset
+                        StreamUtil.WriteInt32(stream, 44);
 
-            //            //Go back and Write Mesh Offset
-            //            int StartMeshOffsets = (int)stream.Position;
-            //            stream.Position += 4 * TempObject.objectData.MeshOffsets.Count;
+                        //Go back and Write Mesh Offset
+                        int StartMeshOffsets = (int)stream.Position;
+                        stream.Position += 4 * TempObject.objectData.MeshOffsets.Count;
 
-            //            List<int> MeshOffsets = new List<int>();
+                        List<int> MeshOffsets = new List<int>();
 
-            //            for (int b = 0; b < TempObject.objectData.MeshOffsets.Count; b++)
-            //            {
-            //                MeshOffsets.Add((int)stream.Position);
-            //                StreamUtil.WriteInt32(stream, 4 * 7);
-            //                StreamUtil.WriteInt32(stream, TempObject.objectData.MeshOffsets[b].MaterialBlockPos);
-            //                StreamUtil.WriteInt32(stream, TempObject.objectData.MeshOffsets[b].MeshDataLength);
-            //                StreamUtil.WriteInt32(stream, TempObject.objectData.MeshOffsets[b].StartPos);
-            //                StreamUtil.WriteInt32(stream, TempObject.objectData.MeshOffsets[b].Length1);
-            //                StreamUtil.WriteInt32(stream, TempObject.objectData.MeshOffsets[b].Length2);
-            //                StreamUtil.WriteInt32(stream, TempObject.objectData.MeshOffsets[b].Length3);
-            //            }
+                        for (int b = 0; b < TempObject.objectData.MeshOffsets.Count; b++)
+                        {
+                            MeshOffsets.Add((int)stream.Position);
+                            long TotalOffset = stream.Position;
+                            stream.Position += 4;
+                            StreamUtil.WriteInt32(stream, TempObject.objectData.MeshOffsets[b].MaterialBlockPos);
 
-            //            TempPos = (int)stream.Position;
-            //            stream.Position = StartMeshOffsets;
-            //            for (int b = 0; b < MeshOffsets.Count; b++)
-            //            {
-            //                StreamUtil.WriteInt32(stream, MeshOffsets[b] - (int)stream.Position);
-            //            }
-            //            stream.Position = TempPos;
+                            StreamUtil.WriteInt32(stream, 4 + 4 + 2 + 2 * TempObject.objectData.MeshOffsets[b].Strips.Count);
+                            StreamUtil.WriteInt16(stream, TempObject.objectData.MeshOffsets[b].Strips.Count);
+                            for (int j = 0; j < TempObject.objectData.MeshOffsets[b].Strips.Count; j++)
+                            {
+                                StreamUtil.WriteInt16(stream, TempObject.objectData.MeshOffsets[b].Strips[j]);
+                            }
 
-            //            TempPos = (int)stream.Position;
-            //            Size = (int)stream.Position - StartObjectPrefab;
-            //            stream.Position = StartObjectPrefab;
-            //            StreamUtil.WriteInt32(stream, Size);
-            //            stream.Position = TempPos;
-            //        }
+                            for (int j = 0; j < TempObject.objectData.MeshOffsets[b].Indices.Count; j++)
+                            {
+                                StreamUtil.WriteInt16(stream, TempObject.objectData.MeshOffsets[b].Indices[j]);
+                            }
 
-            //        TempPrefab.ModelObjects[a] = TempObject;
-            //    }
+                            long Temp1Pos = stream.Position;
+                            stream.Position = TotalOffset;
+                            StreamUtil.WriteInt32(stream, (int)(Temp1Pos - TotalOffset));
+                            stream.Position = Temp1Pos;
+                        }
 
-            //    //Write AnimData
-            //    for (int a = 0; a < TempPrefab.ModelObjects.Count; a++)
-            //    {
-            //        var TempObject = TempPrefab.ModelObjects[a];
-            //        TempObject.AnimOffset = 0;
-            //        if (TempObject.IncludeAnimation)
-            //        {
-            //            TempObject.AnimOffset = (int)stream.Position;
+                        TempPos = (int)stream.Position;
+                        stream.Position = StartMeshOffsets;
+                        for (int b = 0; b < MeshOffsets.Count; b++)
+                        {
+                            StreamUtil.WriteInt32(stream, MeshOffsets[b] - (int)stream.Position);
+                        }
+                        stream.Position = TempPos;
 
-            //            var TempAnim = TempObject.objectAnimation;
+                        TempPos = (int)stream.Position;
+                        Size = (int)stream.Position - StartObjectPrefab;
+                        stream.Position = StartObjectPrefab;
+                        StreamUtil.WriteInt32(stream, Size);
+                        stream.Position = TempPos;
+                    }
 
-            //            StreamUtil.WriteVector3(stream, TempAnim.BasePosition);
-            //            StreamUtil.WriteVector3(stream, TempAnim.BaseRotation);
+                    TempPrefab.ModelObjects[a] = TempObject;
+                }
 
-            //            StreamUtil.WriteInt32(stream, TempAnim.AnimationAction);
+                //Write AnimData
+                for (int a = 0; a < TempPrefab.ModelObjects.Count; a++)
+                {
+                    var TempObject = TempPrefab.ModelObjects[a];
+                    TempObject.AnimOffset = 0;
+                    if (TempObject.IncludeAnimation)
+                    {
+                        TempObject.AnimOffset = (int)stream.Position;
 
-            //            StreamUtil.WriteInt32(stream, TempAnim.animationEntries.Count);
-            //            StreamUtil.WriteInt32(stream, (int)(stream.Position - TempObject.AnimOffset + 4));
+                        var TempAnim = TempObject.objectAnimation;
 
-            //            //Leave Space For Offsets
+                        StreamUtil.WriteVector3(stream, TempAnim.BasePosition);
+                        StreamUtil.WriteVector3(stream, TempAnim.BaseRotation);
 
-            //            List<int> Offsets = new List<int>();
-            //            int OffsetPos = (int)stream.Position;
-            //            stream.Position += 4 * TempAnim.animationEntries.Count;
+                        StreamUtil.WriteInt32(stream, TempAnim.AnimationAction);
 
-            //            for (int b = 0; b < TempAnim.animationEntries.Count; b++)
-            //            {
-            //                Offsets.Add((int)(stream.Position - TempObject.AnimOffset));
-            //                StreamUtil.WriteInt32(stream, TempAnim.animationEntries[b].animationMaths.Count);
-            //                StreamUtil.WriteInt32(stream, 8);
+                        StreamUtil.WriteInt32(stream, TempAnim.animationEntries.Count);
+                        StreamUtil.WriteInt32(stream, (int)(stream.Position - TempObject.AnimOffset + 4));
 
-            //                for (int c = 0; c < TempAnim.animationEntries[b].animationMaths.Count; c++)
-            //                {
-            //                    StreamUtil.WriteFloat32(stream, TempAnim.animationEntries[b].animationMaths[c].Coefficient1);
-            //                    StreamUtil.WriteFloat32(stream, TempAnim.animationEntries[b].animationMaths[c].Coefficient2);
-            //                    StreamUtil.WriteFloat32(stream, TempAnim.animationEntries[b].animationMaths[c].Coefficient3);
-            //                    StreamUtil.WriteFloat32(stream, TempAnim.animationEntries[b].animationMaths[c].Coefficient4);
-            //                    StreamUtil.WriteFloat32(stream, TempAnim.animationEntries[b].animationMaths[c].StartTime);
-            //                    StreamUtil.WriteFloat32(stream, TempAnim.animationEntries[b].animationMaths[c].EndTime);
-            //                }
-            //            }
+                        //Leave Space For Offsets
 
+                        List<int> Offsets = new List<int>();
+                        int OffsetPos = (int)stream.Position;
+                        stream.Position += 4 * TempAnim.animationEntries.Count;
 
-            //            //Write Offsets
-            //            int EndAnimPos = (int)stream.Position;
-            //            stream.Position = OffsetPos;
-            //            for (int b = 0; b < Offsets.Count; b++)
-            //            {
-            //                StreamUtil.WriteInt32(stream, Offsets[b]);
-            //            }
-            //            stream.Position = EndAnimPos;
+                        for (int b = 0; b < TempAnim.animationEntries.Count; b++)
+                        {
+                            Offsets.Add((int)(stream.Position - TempObject.AnimOffset));
+                            StreamUtil.WriteInt32(stream, TempAnim.animationEntries[b].animationMaths.Count);
+                            StreamUtil.WriteInt32(stream, 8);
 
-            //        }
-            //        TempPrefab.ModelObjects[a] = TempObject;
-            //    }
-
-            //    //Go back and write ObjectOffsets
-            //    TempPos = (int)stream.Position;
-            //    stream.Position = TempObjectPos;
-            //    for (int a = 0; a < TempPrefab.ModelObjects.Count; a++)
-            //    {
-            //        int StartPosObject = (int)stream.Position;
-            //        StreamUtil.WriteInt32(stream, TempPrefab.ModelObjects[a].ParentID);
-            //        if (TempPrefab.ModelObjects[a].ObjectHighOffset != 0)
-            //        {
-            //            StreamUtil.WriteInt32(stream, TempPrefab.ModelObjects[a].ObjectHighOffset - StartPosObject);
-            //            StreamUtil.WriteInt32(stream, TempPrefab.ModelObjects[a].ObjectMediumOffset - StartPosObject);
-            //            StreamUtil.WriteInt32(stream, TempPrefab.ModelObjects[a].ObjectLowOffset - StartPosObject);
-            //        }
-            //        else
-            //        {
-            //            StreamUtil.WriteInt32(stream, TempPrefab.ModelObjects[a].ObjectHighOffset);
-            //            StreamUtil.WriteInt32(stream, TempPrefab.ModelObjects[a].ObjectMediumOffset);
-            //            StreamUtil.WriteInt32(stream, TempPrefab.ModelObjects[a].ObjectLowOffset);
-            //        }
-            //        if (TempPrefab.ModelObjects[a].AnimOffset != 0)
-            //        {
-            //            StreamUtil.WriteInt32(stream, TempPrefab.ModelObjects[a].AnimOffset - StartPosObject);
-            //        }
-            //        else
-            //        {
-            //            StreamUtil.WriteInt32(stream, TempPrefab.ModelObjects[a].AnimOffset);
-            //        }
-            //        if (TempPrefab.ModelObjects[a].Matrix4x4Offset != -1)
-            //        {
-            //            StreamUtil.WriteInt32(stream, TempPrefab.ModelObjects[a].Matrix4x4Offset - StartPosObject);
-            //        }
-            //        else
-            //        {
-            //            StreamUtil.WriteInt32(stream, TempPrefab.ModelObjects[a].Matrix4x4Offset);
-            //        }
-            //    }
-            //    stream.Position = TempPos;
+                            for (int c = 0; c < TempAnim.animationEntries[b].animationMaths.Count; c++)
+                            {
+                                StreamUtil.WriteFloat32(stream, TempAnim.animationEntries[b].animationMaths[c].Coefficient1);
+                                StreamUtil.WriteFloat32(stream, TempAnim.animationEntries[b].animationMaths[c].Coefficient2);
+                                StreamUtil.WriteFloat32(stream, TempAnim.animationEntries[b].animationMaths[c].Coefficient3);
+                                StreamUtil.WriteFloat32(stream, TempAnim.animationEntries[b].animationMaths[c].Coefficient4);
+                                StreamUtil.WriteFloat32(stream, TempAnim.animationEntries[b].animationMaths[c].StartTime);
+                                StreamUtil.WriteFloat32(stream, TempAnim.animationEntries[b].animationMaths[c].EndTime);
+                            }
+                        }
 
 
-            //    StreamUtil.AlignBy16(stream);
-            //    TempPos = (int)stream.Position;
-            //    Size = (int)stream.Position - StartPos;
-            //    stream.Position = StartPos;
-            //    StreamUtil.WriteInt32(stream, Size);
-            //    stream.Position = TempPos;
+                        //Write Offsets
+                        int EndAnimPos = (int)stream.Position;
+                        stream.Position = OffsetPos;
+                        for (int b = 0; b < Offsets.Count; b++)
+                        {
+                            StreamUtil.WriteInt32(stream, Offsets[b]);
+                        }
+                        stream.Position = EndAnimPos;
 
-            //}
+                    }
+                    TempPrefab.ModelObjects[a] = TempObject;
+                }
+
+                //Go back and write ObjectOffsets
+                TempPos = (int)stream.Position;
+                stream.Position = TempObjectPos;
+                for (int a = 0; a < TempPrefab.ModelObjects.Count; a++)
+                {
+                    int StartPosObject = (int)stream.Position;
+                    StreamUtil.WriteInt32(stream, TempPrefab.ModelObjects[a].ParentID);
+                    if (TempPrefab.ModelObjects[a].ObjectHighOffset != 0)
+                    {
+                        StreamUtil.WriteInt32(stream, TempPrefab.ModelObjects[a].ObjectHighOffset - StartPosObject);
+                        StreamUtil.WriteInt32(stream, TempPrefab.ModelObjects[a].ObjectMediumOffset - StartPosObject);
+                        StreamUtil.WriteInt32(stream, TempPrefab.ModelObjects[a].ObjectLowOffset - StartPosObject);
+                    }
+                    else
+                    {
+                        StreamUtil.WriteInt32(stream, TempPrefab.ModelObjects[a].ObjectHighOffset);
+                        StreamUtil.WriteInt32(stream, TempPrefab.ModelObjects[a].ObjectMediumOffset);
+                        StreamUtil.WriteInt32(stream, TempPrefab.ModelObjects[a].ObjectLowOffset);
+                    }
+                    if (TempPrefab.ModelObjects[a].AnimOffset != 0)
+                    {
+                        StreamUtil.WriteInt32(stream, TempPrefab.ModelObjects[a].AnimOffset - StartPosObject);
+                    }
+                    else
+                    {
+                        StreamUtil.WriteInt32(stream, TempPrefab.ModelObjects[a].AnimOffset);
+                    }
+                    if (TempPrefab.ModelObjects[a].Matrix4x4Offset != -1)
+                    {
+                        StreamUtil.WriteInt32(stream, TempPrefab.ModelObjects[a].Matrix4x4Offset - StartPosObject);
+                    }
+                    else
+                    {
+                        StreamUtil.WriteInt32(stream, TempPrefab.ModelObjects[a].Matrix4x4Offset);
+                    }
+                }
+                stream.Position = TempPos;
+
+
+                StreamUtil.AlignBy16(stream);
+                TempPos = (int)stream.Position;
+                Size = (int)stream.Position - StartPos;
+                stream.Position = StartPos;
+                StreamUtil.WriteInt32(stream, Size);
+                stream.Position = TempPos;
+
+            }
 
 
             int TempPosition = (int)stream.Position;
@@ -2793,13 +2809,11 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
                 long StartBytePos = stream.Position;
                 stream.Position += 4;
                 StreamUtil.WriteInt32(stream, particleModels[i].ParticleObjectHeaders.Count);
-                StreamUtil.WriteInt32(stream, 32); //Particle HeaderOFfset
+                StreamUtil.WriteInt32(stream, 24);
 
                 StreamUtil.WriteInt32(stream, particleModels[i].U1);
                 StreamUtil.WriteInt32(stream, particleModels[i].U2);
                 StreamUtil.WriteInt32(stream, particleModels[i].U3);
-                StreamUtil.WriteInt32(stream, particleModels[i].U4);
-                StreamUtil.WriteInt32(stream, particleModels[i].U5);
                 long ParticleHeaderOffsetStart = stream.Position;
                 stream.Position += 4 * 4 * particleModels[i].ParticleObjectHeaders.Count;
 
@@ -2997,50 +3011,59 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
 
                 stream.Position = TempPos1;
             }
-            StreamUtil.AlignBy16(stream);
 
-            ////Write MeshData
-            //MeshDataOffset = (int)stream.Position;
-            //StreamUtil.WriteBytes(stream, MeshData);
-
+            //Patch normal table, straight after the hash data
+            NormalsOffset = (int)stream.Position;
+            for (int i = 0; i < normals.Count; i++)
+            {
+                StreamUtil.WriteVector3(stream, normals[i]);
+            }
 
             ////Go back and write Positions and shit
-            //stream.Position = 0;
-            //StreamUtil.WriteBytes(stream, new byte[4] { 0x00, 0x15, 0x1B, 0x01 });
-            //StreamUtil.WriteInt32(stream, 0);
-            //StreamUtil.WriteInt32(stream, Patches.Count);
-            //StreamUtil.WriteInt32(stream, Instances.Count);
-            //StreamUtil.WriteInt32(stream, particleInstances.Count);
-            //StreamUtil.WriteInt32(stream, materials.Count);
-            //StreamUtil.WriteInt32(stream, materialBlocks.Count);
-            //StreamUtil.WriteInt32(stream, lights.Count);
-            //StreamUtil.WriteInt32(stream, splines.Count);
-            //StreamUtil.WriteInt32(stream, splinesSegments.Count);
-            //StreamUtil.WriteInt32(stream, textureFlipbooks.Count);
-            //StreamUtil.WriteInt32(stream, modelData.Count);
-            //StreamUtil.WriteInt32(stream, particleModels.Count);
-            //StreamUtil.WriteInt32(stream, NumTextures);
-            //StreamUtil.WriteInt32(stream, Cameras.Count);
-            //StreamUtil.WriteInt32(stream, 0); //Lightmap size 
+            //Keep trailing padding, moving Position alone doesn't grow a MemoryStream
+            stream.SetLength(stream.Position);
 
-            //StreamUtil.WriteInt32(stream, 0);
-            //StreamUtil.WriteInt32(stream, PatchOffset);
-            //StreamUtil.WriteInt32(stream, InstanceOffset);
-            //StreamUtil.WriteInt32(stream, ParticleInstancesOffset);
-            //StreamUtil.WriteInt32(stream, MaterialOffset);
-            //StreamUtil.WriteInt32(stream, MaterialBlocksOffset);
-            //StreamUtil.WriteInt32(stream, LightsOffset);
-            //StreamUtil.WriteInt32(stream, SplineOffset);
-            //StreamUtil.WriteInt32(stream, SplineSegmentOffset);
-            //StreamUtil.WriteInt32(stream, TextureFlipbookOffset);
-            //StreamUtil.WriteInt32(stream, ModelPointerOffset);
-            //StreamUtil.WriteInt32(stream, ModelsOffset);
-            //StreamUtil.WriteInt32(stream, ParticleModelPointerOffset);
-            //StreamUtil.WriteInt32(stream, ParticleModelsOffset);
-            //StreamUtil.WriteInt32(stream, CameraPointerOffset);
-            //StreamUtil.WriteInt32(stream, CamerasOffset);
-            //StreamUtil.WriteInt32(stream, HashOffset);
-            //StreamUtil.WriteInt32(stream, MeshDataOffset);
+            stream.Position = 0;
+            StreamUtil.WriteBytes(stream, new byte[4] { 0x00, 0x18, 0x1E, 0x02 });
+            StreamUtil.WriteInt32(stream, 0);
+            StreamUtil.WriteInt32(stream, Patches.Count);
+            StreamUtil.WriteInt32(stream, Patches.Count != 0 ? 1 : 0);
+            StreamUtil.WriteInt32(stream, 1);
+            StreamUtil.WriteInt32(stream, Instances.Count);
+            StreamUtil.WriteInt32(stream, particleInstances.Count);
+            StreamUtil.WriteInt32(stream, materials.Count);
+            StreamUtil.WriteInt32(stream, materialBlocks.Count);
+            StreamUtil.WriteInt32(stream, lights.Count);
+            StreamUtil.WriteInt32(stream, splines.Count);
+            StreamUtil.WriteInt32(stream, splinesSegments.Count);
+            StreamUtil.WriteInt32(stream, textureFlipbooks.Count);
+            StreamUtil.WriteInt32(stream, modelData.Count);
+            StreamUtil.WriteInt32(stream, particleModels.Count);
+            StreamUtil.WriteInt32(stream, NumTextures);
+            StreamUtil.WriteInt32(stream, Cameras.Count);
+            StreamUtil.WriteInt32(stream, 0);
+            StreamUtil.WriteInt32(stream, NormalsOffset != 0 ? normals.Count : 0);
+
+            StreamUtil.WriteInt32(stream, 0);
+            StreamUtil.WriteInt32(stream, PatchOffset);
+            StreamUtil.WriteInt32(stream, PatchOffsetPoints);
+            StreamUtil.WriteInt32(stream, VertexOffset);
+            StreamUtil.WriteInt32(stream, InstanceOffset);
+            StreamUtil.WriteInt32(stream, ParticleInstancesOffset);
+            StreamUtil.WriteInt32(stream, MaterialOffset);
+            StreamUtil.WriteInt32(stream, MaterialBlocksOffset);
+            StreamUtil.WriteInt32(stream, LightsOffset);
+            StreamUtil.WriteInt32(stream, SplineOffset);
+            StreamUtil.WriteInt32(stream, SplineSegmentOffset);
+            StreamUtil.WriteInt32(stream, TextureFlipbookOffset);
+            StreamUtil.WriteInt32(stream, ModelPointerOffset);
+            StreamUtil.WriteInt32(stream, ModelsOffset);
+            StreamUtil.WriteInt32(stream, ParticleModelPointerOffset);
+            StreamUtil.WriteInt32(stream, ParticleModelsOffset);
+            StreamUtil.WriteInt32(stream, CameraPointerOffset);
+            StreamUtil.WriteInt32(stream, CamerasOffset);
+            StreamUtil.WriteInt32(stream, HashOffset);
+            StreamUtil.WriteInt32(stream, NormalsOffset);
 
 
             if (File.Exists(path))
