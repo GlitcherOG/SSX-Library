@@ -2310,6 +2310,750 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
             file.Close();
         }
 
+        public void SaveXbox(string path)
+        {
+            MemoryStream stream = new MemoryStream();
+            //Skip writing header info
+            stream.Position += 80;
+
+            StreamUtil.AlignBy16(stream);
+
+            //Patches
+            PatchOffset = (int)stream.Position;
+            for (int i = 0; i < Patches.Count; i++)
+            {
+                var TempPatch = Patches[i];
+                StreamUtil.WriteVector4(stream, TempPatch.LightMapPoint);
+
+                StreamUtil.WriteVector4(stream, TempPatch.UVPoint1);
+                StreamUtil.WriteVector4(stream, TempPatch.UVPoint2);
+                StreamUtil.WriteVector4(stream, TempPatch.UVPoint3);
+                StreamUtil.WriteVector4(stream, TempPatch.UVPoint4);
+
+                StreamUtil.WriteVector4(stream, TempPatch.R4C4);
+                StreamUtil.WriteVector4(stream, TempPatch.R4C3);
+                StreamUtil.WriteVector4(stream, TempPatch.R4C2);
+                StreamUtil.WriteVector4(stream, TempPatch.R4C1);
+                StreamUtil.WriteVector4(stream, TempPatch.R3C4);
+                StreamUtil.WriteVector4(stream, TempPatch.R3C3);
+                StreamUtil.WriteVector4(stream, TempPatch.R3C2);
+                StreamUtil.WriteVector4(stream, TempPatch.R3C1);
+                StreamUtil.WriteVector4(stream, TempPatch.R2C4);
+                StreamUtil.WriteVector4(stream, TempPatch.R2C3);
+                StreamUtil.WriteVector4(stream, TempPatch.R2C2);
+                StreamUtil.WriteVector4(stream, TempPatch.R2C1);
+                StreamUtil.WriteVector4(stream, TempPatch.R1C4);
+                StreamUtil.WriteVector4(stream, TempPatch.R1C3);
+                StreamUtil.WriteVector4(stream, TempPatch.R1C2);
+                StreamUtil.WriteVector4(stream, TempPatch.R1C1);
+
+                StreamUtil.WriteVector3(stream, TempPatch.LowestXYZ);
+                StreamUtil.WriteVector3(stream, TempPatch.HighestXYZ);
+
+                StreamUtil.WriteInt32(stream, TempPatch.SurfaceType);
+                StreamUtil.WriteInt32(stream, (int)TempPatch.U1);
+                StreamUtil.WriteInt32(stream, (int)TempPatch.U2);
+                StreamUtil.WriteInt32(stream, (int)TempPatch.U3);
+                StreamUtil.WriteInt32(stream, (int)TempPatch.U4);
+                StreamUtil.WriteInt32(stream, (int)TempPatch.LTGGroup);
+
+
+                StreamUtil.WriteVector4(stream, TempPatch.Point1);
+                StreamUtil.WriteVector4(stream, TempPatch.Point2);
+                StreamUtil.WriteVector4(stream, TempPatch.Point3);
+                StreamUtil.WriteVector4(stream, TempPatch.Point4);
+
+                StreamUtil.WriteInt16(stream, TempPatch.TextureAssigment);
+                StreamUtil.WriteInt16(stream, TempPatch.TextureAssigment);
+                StreamUtil.WriteInt16(stream, TempPatch.LightmapID);
+                StreamUtil.WriteInt16(stream, TempPatch.UnusedResourceId2);
+
+                for (int j = 0; j < TempPatch.NormalIndex.Length; j++)
+                {
+                    StreamUtil.WriteInt16(stream, TempPatch.NormalIndex[j]);
+                }
+
+                for (int j = 0; j < TempPatch.TangentIndex.Length; j++)
+                {
+                    StreamUtil.WriteInt16(stream, TempPatch.TangentIndex[j]);
+                }
+
+                StreamUtil.WriteInt16(stream, (int)TempPatch.U11);
+
+                StreamUtil.WriteInt16(stream, TempPatch.PatchVisablity);
+
+                StreamUtil.WriteInt16(stream, (int)TempPatch.U13);
+            }
+
+            PatchOffsetPoints = (int)stream.Position;
+            for (int i = 0; i < patchPointDatas.Count; i++)
+            {
+                StreamUtil.WriteVector3(stream, patchPointDatas[i].Vector3);
+                StreamUtil.WriteVector2(stream, patchPointDatas[i].UV);
+            }
+
+            VertexOffset = (int)stream.Position;
+            StreamUtil.WriteInt32(stream, vertexData.pointDatas.Count);
+            StreamUtil.WriteInt32(stream, vertexData.U0);
+            StreamUtil.WriteInt32(stream, vertexData.U1);
+            for (int i = 0; i < vertexData.pointDatas.Count; i++)
+            {
+                StreamUtil.WriteVector3(stream, vertexData.pointDatas[i].vector3s);
+                StreamUtil.WriteVector3(stream, vertexData.pointDatas[i].normals);
+                StreamUtil.WriteVector2(stream, vertexData.pointDatas[i].uvs);
+            }
+
+            //Instances
+            InstanceOffset = (int)stream.Position;
+            for (int i = 0; i < Instances.Count; i++)
+            {
+                var TempInstance = Instances[i];
+                StreamUtil.WriteMatrix4x4(stream, TempInstance.matrix4X4);
+
+                StreamUtil.WriteInt32(stream, TempInstance.ModelID);
+                StreamUtil.WriteInt32(stream, TempInstance.PrevInstance);
+                StreamUtil.WriteInt32(stream, TempInstance.NextInstance);
+
+                StreamUtil.WriteVector3(stream, TempInstance.LowestXYZ);
+                StreamUtil.WriteVector3(stream, TempInstance.HighestXYZ);
+
+                StreamUtil.WriteInt32(stream, TempInstance.UnknownInt26);
+                StreamUtil.WriteInt32(stream, TempInstance.UnknownInt27);
+                StreamUtil.WriteInt32(stream, TempInstance.UnknownInt28);
+                StreamUtil.WriteInt32(stream, TempInstance.ModelID2); //SSF Index?
+                StreamUtil.WriteInt32(stream, TempInstance.UnknownInt30);
+                StreamUtil.WriteInt32(stream, TempInstance.UnknownInt31);
+                StreamUtil.WriteInt32(stream, TempInstance.UnknownInt32);
+
+                StreamUtil.WriteInt32(stream, TempInstance.LightIndex);
+                StreamUtil.WriteFloat32(stream, TempInstance.LightStrength);
+                StreamUtil.WriteInt32(stream, TempInstance.UnknownInt35);
+                StreamUtil.WriteInt32(stream, TempInstance.UnknownInt36);
+            }
+
+            //Particle Instances
+            ParticleInstancesOffset = (int)stream.Position;
+            for (int i = 0; i < particleInstances.Count; i++)
+            {
+                var TempParticle = particleInstances[i];
+                StreamUtil.WriteMatrix4x4(stream, TempParticle.matrix4X4);
+                StreamUtil.WriteInt32(stream, TempParticle.ParticleModelIndex);
+                StreamUtil.WriteVector3(stream, TempParticle.LowestXYZ);
+                StreamUtil.WriteVector3(stream, TempParticle.HighestXYZ);
+                StreamUtil.WriteInt32(stream, TempParticle.UnknownInt8);
+                StreamUtil.WriteInt32(stream, TempParticle.UnknownInt9);
+                StreamUtil.WriteInt32(stream, TempParticle.UnknownInt10);
+                StreamUtil.WriteInt32(stream, TempParticle.UnknownInt11);
+                StreamUtil.WriteInt32(stream, TempParticle.UnknownInt12);
+            }
+
+            MaterialOffset = (int)stream.Position;
+            for (int i = 0; i < materials.Count; i++)
+            {
+                var TempMaterial = materials[i];
+                StreamUtil.WriteInt16(stream, TempMaterial.TextureID);
+                StreamUtil.WriteInt16(stream, TempMaterial.UnknownInt2);
+                StreamUtil.WriteInt32(stream, TempMaterial.UnknownInt3);
+
+                StreamUtil.WriteFloat32(stream, TempMaterial.UnknownFloat1);
+                StreamUtil.WriteFloat32(stream, TempMaterial.UnknownFloat2);
+                StreamUtil.WriteFloat32(stream, TempMaterial.UnknownFloat3);
+                StreamUtil.WriteFloat32(stream, TempMaterial.UnknownFloat4);
+
+                StreamUtil.WriteInt32(stream, TempMaterial.UnknownInt8);
+
+                StreamUtil.WriteFloat32(stream, TempMaterial.UnknownFloat5);
+                StreamUtil.WriteFloat32(stream, TempMaterial.UnknownFloat6);
+                StreamUtil.WriteFloat32(stream, TempMaterial.UnknownFloat7);
+                StreamUtil.WriteFloat32(stream, TempMaterial.UnknownFloat8);
+
+                StreamUtil.WriteInt32(stream, TempMaterial.UnknownInt13);
+                StreamUtil.WriteInt32(stream, TempMaterial.UnknownInt14);
+                StreamUtil.WriteInt32(stream, TempMaterial.UnknownInt15);
+                StreamUtil.WriteInt32(stream, TempMaterial.UnknownInt16);
+                StreamUtil.WriteInt32(stream, TempMaterial.UnknownInt17);
+                StreamUtil.WriteInt32(stream, TempMaterial.AppearanceFlags);
+
+                StreamUtil.WriteInt16(stream, TempMaterial.TextureFlipbookID);
+                StreamUtil.WriteInt16(stream, TempMaterial.UnknownInt20);
+            }
+
+            MaterialBlocksOffset = (int)stream.Position;
+            for (int i = 0; i < materialBlocks.Count; i++)
+            {
+                var TempMaterialBlock = materialBlocks[i];
+                StreamUtil.WriteInt32(stream, TempMaterialBlock.ints.Count);
+                for (int a = 0; a < TempMaterialBlock.ints.Count; a++)
+                {
+                    StreamUtil.WriteInt32(stream, TempMaterialBlock.ints[a]);
+                }
+            }
+
+            LightsOffset = (int)stream.Position;
+            for (int i = 0; i < lights.Count; i++)
+            {
+                var TempLights = lights[i];
+                StreamUtil.WriteInt32(stream, TempLights.Type);
+                StreamUtil.WriteInt32(stream, TempLights.spriteRes);
+                StreamUtil.WriteFloat32(stream, TempLights.Brightness);
+                StreamUtil.WriteInt32(stream, TempLights.UnknownInt1);
+                StreamUtil.WriteVector3(stream, TempLights.Colour);
+                StreamUtil.WriteVector3(stream, TempLights.Direction);
+                StreamUtil.WriteVector3(stream, TempLights.Position);
+                StreamUtil.WriteVector3(stream, TempLights.LowestXYZ);
+                StreamUtil.WriteVector3(stream, TempLights.HighestXYZ);
+                StreamUtil.WriteFloat32(stream, TempLights.OuterConeCosine);
+                StreamUtil.WriteInt32(stream, TempLights.UnknownInt2);
+                StreamUtil.WriteFloat32(stream, TempLights.UnknownFloat3);
+                StreamUtil.WriteInt32(stream, TempLights.UnknownInt3);
+            }
+
+            ////Spline
+            SplineOffset = (int)stream.Position;
+            for (int i = 0; i < splines.Count; i++)
+            {
+                var spline = splines[i];
+                StreamUtil.WriteVector3(stream, spline.LowestXYZ);
+                StreamUtil.WriteVector3(stream, spline.HighestXYZ);
+                StreamUtil.WriteInt32(stream, spline.Unknown1);
+                StreamUtil.WriteInt32(stream, spline.SplineSegmentCount);
+                StreamUtil.WriteInt32(stream, spline.SplineSegmentPosition);
+                StreamUtil.WriteInt32(stream, spline.Unknown2);
+            }
+            StreamUtil.AlignBy16(stream);
+
+            //Spline Segments
+            SplineSegmentOffset = (int)stream.Position;
+            for (int i = 0; i < splinesSegments.Count; i++)
+            {
+                var SplineSegment = splinesSegments[i];
+                StreamUtil.WriteVector4(stream, SplineSegment.Point4);
+                StreamUtil.WriteVector4(stream, SplineSegment.Point3);
+                StreamUtil.WriteVector4(stream, SplineSegment.Point2);
+                StreamUtil.WriteVector4(stream, SplineSegment.ControlPoint);
+
+                StreamUtil.WriteFloat32(stream, SplineSegment.Coefficient1);
+                StreamUtil.WriteFloat32(stream, SplineSegment.Coefficient2);
+                StreamUtil.WriteFloat32(stream, SplineSegment.Coefficient3);
+                StreamUtil.WriteFloat32(stream, SplineSegment.Coefficient4);
+
+                StreamUtil.WriteInt32(stream, SplineSegment.PreviousSegment);
+                StreamUtil.WriteInt32(stream, SplineSegment.NextSegment);
+                StreamUtil.WriteInt32(stream, SplineSegment.SplineParent);
+
+                StreamUtil.WriteVector3(stream, SplineSegment.LowestXYZ);
+                StreamUtil.WriteVector3(stream, SplineSegment.HighestXYZ);
+
+                StreamUtil.WriteFloat32(stream, SplineSegment.SegmentDisatnce);
+                StreamUtil.WriteFloat32(stream, SplineSegment.PreviousSegmentsDistance);
+                StreamUtil.WriteInt32(stream, SplineSegment.Unknown32);
+            }
+
+            //Texture Flipbooks
+            TextureFlipbookOffset = (int)stream.Position;
+            for (int i = 0; i < textureFlipbooks.Count; i++)
+            {
+                StreamUtil.WriteInt32(stream, textureFlipbooks[i].ImagePositions.Count);
+                for (int a = 0; a < textureFlipbooks[i].ImagePositions.Count; a++)
+                {
+                    StreamUtil.WriteInt32(stream, textureFlipbooks[i].ImagePositions[a]);
+                }
+            }
+
+            //Set Space Aside for model pointers
+            ModelPointerOffset = (int)stream.Position;
+            ModelPointers = new List<int>();
+            stream.Position += 4 * modelData.Count;
+            StreamUtil.AlignBy16(stream);
+
+            int Size;
+            int TempPos;
+            ModelsOffset = (int)stream.Position;
+            //for (int i = 0; i < modelData.Count; i++)
+            //{
+            //    var TempPrefab = modelData[i];
+
+            //    int StartPos = (int)stream.Position;
+            //    ModelPointers.Add((int)stream.Position - ModelsOffset);
+            //    stream.Position += 4;
+            //    StreamUtil.WriteInt32(stream, TempPrefab.ModelObjects.Count);
+            //    StreamUtil.WriteInt32(stream, 56);
+            //    StreamUtil.WriteInt32(stream, TempPrefab.MaterialBlockID);
+            //    StreamUtil.WriteInt32(stream, TempPrefab.Unknown3);
+            //    StreamUtil.WriteFloat32(stream, TempPrefab.AnimTime);
+            //    StreamUtil.WriteVector3(stream, TempPrefab.Scale);
+            //    StreamUtil.WriteInt32(stream, TempPrefab.TotalMeshCount);
+            //    StreamUtil.WriteInt32(stream, TempPrefab.VertexCount);
+            //    StreamUtil.WriteInt32(stream, TempPrefab.TriStripCount);
+            //    StreamUtil.WriteInt32(stream, TempPrefab.Unknown4);
+            //    StreamUtil.WriteInt32(stream, TempPrefab.NonTriCount);
+
+            //    //Skip Over Objects and Come back to them
+            //    int TempObjectPos = (int)stream.Position;
+            //    stream.Position += 4 * 6 * TempPrefab.ModelObjects.Count;
+
+            //    //Write Matrix4x4
+            //    for (int a = 0; a < TempPrefab.ModelObjects.Count; a++)
+            //    {
+            //        var TempObject = TempPrefab.ModelObjects[a];
+            //        TempObject.Matrix4x4Offset = -1;
+            //        if (TempObject.IncludeMatrix)
+            //        {
+            //            StreamUtil.AlignBy16(stream);
+            //            TempObject.Matrix4x4Offset = (int)stream.Position;
+            //            StreamUtil.WriteMatrix4x4(stream, TempObject.matrix4X4);
+            //        }
+            //        TempPrefab.ModelObjects[a] = TempObject;
+            //    }
+            //    //Write Object Data
+            //    for (int a = 0; a < TempPrefab.ModelObjects.Count; a++)
+            //    {
+            //        var TempObject = TempPrefab.ModelObjects[a];
+            //        TempObject.ObjectHighOffset = 0;
+            //        TempObject.ObjectMediumOffset = 0;
+            //        TempObject.ObjectLowOffset = 0;
+            //        if (!TempObject.objectData.Equals(null) && !TempObject.objectData.Equals(new ObjectData()))
+            //        {
+            //            TempObject.ObjectHighOffset = (int)stream.Position;
+            //            TempObject.ObjectMediumOffset = (int)stream.Position;
+            //            TempObject.ObjectLowOffset = (int)stream.Position;
+            //            int StartObjectPrefab = (int)stream.Position;
+            //            stream.Position += 4;
+            //            StreamUtil.WriteVector3(stream, TempObject.objectData.LowestXYZ);
+            //            StreamUtil.WriteVector3(stream, TempObject.objectData.HighestXYZ);
+
+            //            StreamUtil.WriteInt32(stream, TempObject.objectData.Flags);
+            //            StreamUtil.WriteInt32(stream, TempObject.objectData.MeshOffsets.Count);
+            //            StreamUtil.WriteInt32(stream, TempObject.objectData.FaceCount);
+
+            //            //Go back and Write Total Context Offset
+            //            StreamUtil.WriteInt32(stream, 44);
+
+            //            //Go back and Write Mesh Offset
+            //            int StartMeshOffsets = (int)stream.Position;
+            //            stream.Position += 4 * TempObject.objectData.MeshOffsets.Count;
+
+            //            List<int> MeshOffsets = new List<int>();
+
+            //            for (int b = 0; b < TempObject.objectData.MeshOffsets.Count; b++)
+            //            {
+            //                MeshOffsets.Add((int)stream.Position);
+            //                StreamUtil.WriteInt32(stream, 4 * 7);
+            //                StreamUtil.WriteInt32(stream, TempObject.objectData.MeshOffsets[b].MaterialBlockPos);
+            //                StreamUtil.WriteInt32(stream, TempObject.objectData.MeshOffsets[b].MeshDataLength);
+            //                StreamUtil.WriteInt32(stream, TempObject.objectData.MeshOffsets[b].StartPos);
+            //                StreamUtil.WriteInt32(stream, TempObject.objectData.MeshOffsets[b].Length1);
+            //                StreamUtil.WriteInt32(stream, TempObject.objectData.MeshOffsets[b].Length2);
+            //                StreamUtil.WriteInt32(stream, TempObject.objectData.MeshOffsets[b].Length3);
+            //            }
+
+            //            TempPos = (int)stream.Position;
+            //            stream.Position = StartMeshOffsets;
+            //            for (int b = 0; b < MeshOffsets.Count; b++)
+            //            {
+            //                StreamUtil.WriteInt32(stream, MeshOffsets[b] - (int)stream.Position);
+            //            }
+            //            stream.Position = TempPos;
+
+            //            TempPos = (int)stream.Position;
+            //            Size = (int)stream.Position - StartObjectPrefab;
+            //            stream.Position = StartObjectPrefab;
+            //            StreamUtil.WriteInt32(stream, Size);
+            //            stream.Position = TempPos;
+            //        }
+
+            //        TempPrefab.ModelObjects[a] = TempObject;
+            //    }
+
+            //    //Write AnimData
+            //    for (int a = 0; a < TempPrefab.ModelObjects.Count; a++)
+            //    {
+            //        var TempObject = TempPrefab.ModelObjects[a];
+            //        TempObject.AnimOffset = 0;
+            //        if (TempObject.IncludeAnimation)
+            //        {
+            //            TempObject.AnimOffset = (int)stream.Position;
+
+            //            var TempAnim = TempObject.objectAnimation;
+
+            //            StreamUtil.WriteVector3(stream, TempAnim.BasePosition);
+            //            StreamUtil.WriteVector3(stream, TempAnim.BaseRotation);
+
+            //            StreamUtil.WriteInt32(stream, TempAnim.AnimationAction);
+
+            //            StreamUtil.WriteInt32(stream, TempAnim.animationEntries.Count);
+            //            StreamUtil.WriteInt32(stream, (int)(stream.Position - TempObject.AnimOffset + 4));
+
+            //            //Leave Space For Offsets
+
+            //            List<int> Offsets = new List<int>();
+            //            int OffsetPos = (int)stream.Position;
+            //            stream.Position += 4 * TempAnim.animationEntries.Count;
+
+            //            for (int b = 0; b < TempAnim.animationEntries.Count; b++)
+            //            {
+            //                Offsets.Add((int)(stream.Position - TempObject.AnimOffset));
+            //                StreamUtil.WriteInt32(stream, TempAnim.animationEntries[b].animationMaths.Count);
+            //                StreamUtil.WriteInt32(stream, 8);
+
+            //                for (int c = 0; c < TempAnim.animationEntries[b].animationMaths.Count; c++)
+            //                {
+            //                    StreamUtil.WriteFloat32(stream, TempAnim.animationEntries[b].animationMaths[c].Coefficient1);
+            //                    StreamUtil.WriteFloat32(stream, TempAnim.animationEntries[b].animationMaths[c].Coefficient2);
+            //                    StreamUtil.WriteFloat32(stream, TempAnim.animationEntries[b].animationMaths[c].Coefficient3);
+            //                    StreamUtil.WriteFloat32(stream, TempAnim.animationEntries[b].animationMaths[c].Coefficient4);
+            //                    StreamUtil.WriteFloat32(stream, TempAnim.animationEntries[b].animationMaths[c].StartTime);
+            //                    StreamUtil.WriteFloat32(stream, TempAnim.animationEntries[b].animationMaths[c].EndTime);
+            //                }
+            //            }
+
+
+            //            //Write Offsets
+            //            int EndAnimPos = (int)stream.Position;
+            //            stream.Position = OffsetPos;
+            //            for (int b = 0; b < Offsets.Count; b++)
+            //            {
+            //                StreamUtil.WriteInt32(stream, Offsets[b]);
+            //            }
+            //            stream.Position = EndAnimPos;
+
+            //        }
+            //        TempPrefab.ModelObjects[a] = TempObject;
+            //    }
+
+            //    //Go back and write ObjectOffsets
+            //    TempPos = (int)stream.Position;
+            //    stream.Position = TempObjectPos;
+            //    for (int a = 0; a < TempPrefab.ModelObjects.Count; a++)
+            //    {
+            //        int StartPosObject = (int)stream.Position;
+            //        StreamUtil.WriteInt32(stream, TempPrefab.ModelObjects[a].ParentID);
+            //        if (TempPrefab.ModelObjects[a].ObjectHighOffset != 0)
+            //        {
+            //            StreamUtil.WriteInt32(stream, TempPrefab.ModelObjects[a].ObjectHighOffset - StartPosObject);
+            //            StreamUtil.WriteInt32(stream, TempPrefab.ModelObjects[a].ObjectMediumOffset - StartPosObject);
+            //            StreamUtil.WriteInt32(stream, TempPrefab.ModelObjects[a].ObjectLowOffset - StartPosObject);
+            //        }
+            //        else
+            //        {
+            //            StreamUtil.WriteInt32(stream, TempPrefab.ModelObjects[a].ObjectHighOffset);
+            //            StreamUtil.WriteInt32(stream, TempPrefab.ModelObjects[a].ObjectMediumOffset);
+            //            StreamUtil.WriteInt32(stream, TempPrefab.ModelObjects[a].ObjectLowOffset);
+            //        }
+            //        if (TempPrefab.ModelObjects[a].AnimOffset != 0)
+            //        {
+            //            StreamUtil.WriteInt32(stream, TempPrefab.ModelObjects[a].AnimOffset - StartPosObject);
+            //        }
+            //        else
+            //        {
+            //            StreamUtil.WriteInt32(stream, TempPrefab.ModelObjects[a].AnimOffset);
+            //        }
+            //        if (TempPrefab.ModelObjects[a].Matrix4x4Offset != -1)
+            //        {
+            //            StreamUtil.WriteInt32(stream, TempPrefab.ModelObjects[a].Matrix4x4Offset - StartPosObject);
+            //        }
+            //        else
+            //        {
+            //            StreamUtil.WriteInt32(stream, TempPrefab.ModelObjects[a].Matrix4x4Offset);
+            //        }
+            //    }
+            //    stream.Position = TempPos;
+
+
+            //    StreamUtil.AlignBy16(stream);
+            //    TempPos = (int)stream.Position;
+            //    Size = (int)stream.Position - StartPos;
+            //    stream.Position = StartPos;
+            //    StreamUtil.WriteInt32(stream, Size);
+            //    stream.Position = TempPos;
+
+            //}
+
+
+            int TempPosition = (int)stream.Position;
+            stream.Position = ModelPointerOffset;
+            for (int i = 0; i < ModelPointers.Count; i++)
+            {
+                StreamUtil.WriteInt32(stream, ModelPointers[i]);
+            }
+            stream.Position = TempPosition;
+
+            //Make Space For Particle Pointer
+            ParticleModelPointerOffset = (int)stream.Position;
+            stream.Position += 4 * particleModels.Count;
+            ParticleModelPointers = new List<int>();
+            StreamUtil.AlignBy16(stream);
+            long EndingPos = 0;
+            //Write Particle Data
+            ParticleModelsOffset = (int)stream.Position;
+            for (int i = 0; i < particleModels.Count; i++)
+            {
+                ParticleModelPointers.Add((int)stream.Position - ParticleModelsOffset);
+
+                long StartBytePos = stream.Position;
+                stream.Position += 4;
+                StreamUtil.WriteInt32(stream, particleModels[i].ParticleObjectHeaders.Count);
+                StreamUtil.WriteInt32(stream, 32); //Particle HeaderOFfset
+
+                StreamUtil.WriteInt32(stream, particleModels[i].U1);
+                StreamUtil.WriteInt32(stream, particleModels[i].U2);
+                StreamUtil.WriteInt32(stream, particleModels[i].U3);
+                StreamUtil.WriteInt32(stream, particleModels[i].U4);
+                StreamUtil.WriteInt32(stream, particleModels[i].U5);
+                long ParticleHeaderOffsetStart = stream.Position;
+                stream.Position += 4 * 4 * particleModels[i].ParticleObjectHeaders.Count;
+
+
+                //Write Objects + Animation
+                for (int a = 0; a < particleModels[i].ParticleObjectHeaders.Count; a++)
+                {
+                    var Temp = particleModels[i];
+                    var Temp2 = Temp.ParticleObjectHeaders[a];
+                    Temp2.ObjectOffset = (int)(stream.Position - ParticleHeaderOffsetStart);
+                    Temp.ParticleObjectHeaders[a] = Temp2;
+                    particleModels[i] = Temp;
+
+                    long ObjectByteStart = stream.Position;
+                    stream.Position += 4;
+
+                    StreamUtil.WriteVector3(stream, particleModels[i].ParticleObjectHeaders[a].ParticleObject.LowestXYZ);
+                    StreamUtil.WriteVector3(stream, particleModels[i].ParticleObjectHeaders[a].ParticleObject.HighestXYZ);
+                    StreamUtil.WriteInt32(stream, particleModels[i].ParticleObjectHeaders[a].ParticleObject.U1);
+                    StreamUtil.WriteInt32(stream, particleModels[i].ParticleObjectHeaders[a].ParticleObject.animationFrames.Count);
+                    StreamUtil.WriteInt32(stream, 40); //Animation Frame Offset
+
+                    for (int b = 0; b < particleModels[i].ParticleObjectHeaders[a].ParticleObject.animationFrames.Count; b++)
+                    {
+                        StreamUtil.WriteVector3(stream, particleModels[i].ParticleObjectHeaders[a].ParticleObject.animationFrames[b].Position);
+                        StreamUtil.WriteVector3(stream, particleModels[i].ParticleObjectHeaders[a].ParticleObject.animationFrames[b].Rotation);
+                        StreamUtil.WriteFloat32(stream, particleModels[i].ParticleObjectHeaders[a].ParticleObject.animationFrames[b].Radius);
+                    }
+                    EndingPos = stream.Position;
+
+                    stream.Position = ObjectByteStart;
+                    StreamUtil.WriteInt32(stream, (int)(EndingPos - ObjectByteStart));
+                    stream.Position = EndingPos;
+                }
+                StreamUtil.AlignBy16(stream);
+                EndingPos = stream.Position;
+
+                stream.Position = StartBytePos;
+                StreamUtil.WriteInt32(stream, (int)(EndingPos - StartBytePos));
+                stream.Position = EndingPos;
+
+                //Write ObjectHeaders
+                stream.Position = ParticleHeaderOffsetStart;
+                for (int a = 0; a < particleModels[i].ParticleObjectHeaders.Count; a++)
+                {
+                    StreamUtil.WriteInt32(stream, particleModels[i].ParticleObjectHeaders[a].U1);
+                    StreamUtil.WriteInt32(stream, particleModels[i].ParticleObjectHeaders[a].ObjectOffset);
+                    StreamUtil.WriteInt32(stream, particleModels[i].ParticleObjectHeaders[a].U3);
+                    StreamUtil.WriteInt32(stream, particleModels[i].ParticleObjectHeaders[a].U4);
+                }
+                stream.Position = EndingPos;
+            }
+
+            //Write ParticlePointer
+            TempPosition = (int)stream.Position;
+            stream.Position = ParticleModelPointerOffset;
+            for (int i = 0; i < ParticleModelPointers.Count; i++)
+            {
+                StreamUtil.WriteInt32(stream, ParticleModelPointers[i]);
+            }
+            stream.Position = TempPosition;
+
+            //Make space for Camera Pointer
+            if (Cameras.Count != 0)
+            {
+                CameraPointerOffset = (int)stream.Position;
+                stream.Position += 4 * Cameras.Count;
+                //StreamUtil.AlignBy16(stream);
+                CameraPointers = new List<int>();
+
+                //Write Camera
+                CamerasOffset = (int)stream.Position;
+                for (int i = 0; i < Cameras.Count; i++)
+                {
+                    var CameraTemp = Cameras[i];
+                    CameraPointers.Add((int)stream.Position - CamerasOffset);
+
+                    long StartBytePos = stream.Position;
+                    stream.Position += 4;
+
+                    StreamUtil.WriteVector3(stream, CameraTemp.Translation);
+                    StreamUtil.WriteVector3(stream, CameraTemp.Rotation);
+                    StreamUtil.WriteInt32(stream, CameraTemp.Type);
+                    StreamUtil.WriteFloat32(stream, CameraTemp.FocalLength);
+                    StreamUtil.WriteFloat32(stream, CameraTemp.AspectRatio);
+                    StreamUtil.WriteVector2(stream, CameraTemp.Aperture);
+                    StreamUtil.WriteVector2(stream, CameraTemp.ClipPlane);
+                    StreamUtil.WriteVector3(stream, CameraTemp.IntrestPoint);
+                    StreamUtil.WriteVector3(stream, CameraTemp.UpVector);
+                    StreamUtil.WriteFloat32(stream, CameraTemp.AnimTime);
+                    StreamUtil.WriteInt32(stream, 88);
+
+
+                    StreamUtil.WriteVector3(stream, CameraTemp.AnimationInitial.InitialPosition);
+                    StreamUtil.WriteVector3(stream, CameraTemp.AnimationInitial.InitalRotation);
+                    StreamUtil.WriteFloat32(stream, CameraTemp.AnimationInitial.U0, true);
+
+                    long PointerBytePos = stream.Position;
+
+                    stream.Position += 4 * (2 + CameraTemp.AnimationInitial.AnimationHeaders.Count);
+                    CameraTemp.AnimationInitial.AnimationHeaderPointers = new List<int>();
+
+                    for (int a = 0; a < CameraTemp.AnimationInitial.AnimationHeaders.Count; a++)
+                    {
+                        CameraTemp.AnimationInitial.AnimationHeaderPointers.Add((int)(stream.Position - StartBytePos - 88));
+                        StreamUtil.WriteInt32(stream, CameraTemp.AnimationInitial.AnimationHeaders[a].AnimationDatas.Count);
+                        StreamUtil.WriteInt32(stream, CameraTemp.AnimationInitial.AnimationHeaders[a].Action);
+
+                        for (int b = 0; b < CameraTemp.AnimationInitial.AnimationHeaders[a].AnimationDatas.Count; b++)
+                        {
+                            StreamUtil.WriteVector3(stream, CameraTemp.AnimationInitial.AnimationHeaders[a].AnimationDatas[b].Translation);
+                            StreamUtil.WriteVector3(stream, CameraTemp.AnimationInitial.AnimationHeaders[a].AnimationDatas[b].Rotation);
+                        }
+
+                    }
+
+                    long EndPos = stream.Position;
+
+
+                    stream.Position = PointerBytePos;
+                    StreamUtil.WriteInt32(stream, CameraTemp.AnimationInitial.AnimationHeaderPointers.Count);
+                    StreamUtil.WriteInt32(stream, 36);
+
+                    for (int a = 0; a < CameraTemp.AnimationInitial.AnimationHeaderPointers.Count; a++)
+                    {
+                        StreamUtil.WriteInt32(stream, CameraTemp.AnimationInitial.AnimationHeaderPointers[a]);
+                    }
+
+                    stream.Position = StartBytePos;
+
+                    StreamUtil.WriteInt32(stream, (int)(EndPos - StartBytePos));
+
+                    stream.Position = EndPos;
+                }
+
+                //Write Camera Pointer
+                TempPosition = (int)stream.Position;
+                stream.Position = CameraPointerOffset;
+                for (int i = 0; i < CameraPointers.Count; i++)
+                {
+                    StreamUtil.WriteInt32(stream, CameraPointers[i]);
+                }
+                stream.Position = TempPosition;
+            }
+            else
+            {
+                CameraPointerOffset = 0;
+                CamerasOffset = 0;
+            }
+
+
+            //Write Hash Data
+            if (hashData.CameraHash != null && hashData.InstanceHash != null && hashData.LightsHash != null)
+            {
+                HashOffset = (int)stream.Position;
+                stream.Position += 4 + 6 * 2 * 4;
+
+                hashData.OffsetU1 = (int)stream.Position - HashOffset;
+                hashData.OffsetInstances = (int)stream.Position - HashOffset;
+                for (int i = 0; i < hashData.InstanceHash.Count; i++)
+                {
+                    StreamUtil.WriteInt32(stream, hashData.InstanceHash[i].Hash);
+                    StreamUtil.WriteInt32(stream, hashData.InstanceHash[i].ObjectUID);
+                }
+                hashData.OffsetU2 = (int)stream.Position - HashOffset;
+                hashData.OffsetLights = (int)stream.Position - HashOffset;
+                for (int i = 0; i < hashData.LightsHash.Count; i++)
+                {
+                    StreamUtil.WriteInt32(stream, hashData.LightsHash[i].Hash);
+                    StreamUtil.WriteInt32(stream, hashData.LightsHash[i].ObjectUID);
+                }
+                hashData.OffsetU4 = (int)stream.Position - HashOffset;
+                hashData.OffsetCamera = (int)stream.Position - HashOffset;
+                for (int i = 0; i < hashData.CameraHash.Count; i++)
+                {
+                    StreamUtil.WriteInt32(stream, hashData.CameraHash[i].Hash);
+                    StreamUtil.WriteInt32(stream, hashData.CameraHash[i].ObjectUID);
+                }
+                long TempPos1 = stream.Position;
+                stream.Position = HashOffset;
+                int TempData = (int)(TempPos1 - stream.Position);
+                StreamUtil.WriteInt32(stream, TempData);
+                StreamUtil.WriteInt32(stream, hashData.CountU1);
+                StreamUtil.WriteInt32(stream, hashData.OffsetU1);
+                StreamUtil.WriteInt32(stream, hashData.InstanceHash.Count);
+                StreamUtil.WriteInt32(stream, hashData.OffsetInstances);
+                StreamUtil.WriteInt32(stream, hashData.CountU2);
+                StreamUtil.WriteInt32(stream, hashData.OffsetU2);
+                StreamUtil.WriteInt32(stream, hashData.LightsHash.Count);
+                StreamUtil.WriteInt32(stream, hashData.OffsetLights);
+                StreamUtil.WriteInt32(stream, hashData.CountU4);
+                StreamUtil.WriteInt32(stream, hashData.OffsetU4);
+                StreamUtil.WriteInt32(stream, hashData.CameraHash.Count);
+                StreamUtil.WriteInt32(stream, hashData.OffsetCamera);
+
+                stream.Position = TempPos1;
+            }
+            StreamUtil.AlignBy16(stream);
+
+            ////Write MeshData
+            //MeshDataOffset = (int)stream.Position;
+            //StreamUtil.WriteBytes(stream, MeshData);
+
+
+            ////Go back and write Positions and shit
+            //stream.Position = 0;
+            //StreamUtil.WriteBytes(stream, new byte[4] { 0x00, 0x15, 0x1B, 0x01 });
+            //StreamUtil.WriteInt32(stream, 0);
+            //StreamUtil.WriteInt32(stream, Patches.Count);
+            //StreamUtil.WriteInt32(stream, Instances.Count);
+            //StreamUtil.WriteInt32(stream, particleInstances.Count);
+            //StreamUtil.WriteInt32(stream, materials.Count);
+            //StreamUtil.WriteInt32(stream, materialBlocks.Count);
+            //StreamUtil.WriteInt32(stream, lights.Count);
+            //StreamUtil.WriteInt32(stream, splines.Count);
+            //StreamUtil.WriteInt32(stream, splinesSegments.Count);
+            //StreamUtil.WriteInt32(stream, textureFlipbooks.Count);
+            //StreamUtil.WriteInt32(stream, modelData.Count);
+            //StreamUtil.WriteInt32(stream, particleModels.Count);
+            //StreamUtil.WriteInt32(stream, NumTextures);
+            //StreamUtil.WriteInt32(stream, Cameras.Count);
+            //StreamUtil.WriteInt32(stream, 0); //Lightmap size 
+
+            //StreamUtil.WriteInt32(stream, 0);
+            //StreamUtil.WriteInt32(stream, PatchOffset);
+            //StreamUtil.WriteInt32(stream, InstanceOffset);
+            //StreamUtil.WriteInt32(stream, ParticleInstancesOffset);
+            //StreamUtil.WriteInt32(stream, MaterialOffset);
+            //StreamUtil.WriteInt32(stream, MaterialBlocksOffset);
+            //StreamUtil.WriteInt32(stream, LightsOffset);
+            //StreamUtil.WriteInt32(stream, SplineOffset);
+            //StreamUtil.WriteInt32(stream, SplineSegmentOffset);
+            //StreamUtil.WriteInt32(stream, TextureFlipbookOffset);
+            //StreamUtil.WriteInt32(stream, ModelPointerOffset);
+            //StreamUtil.WriteInt32(stream, ModelsOffset);
+            //StreamUtil.WriteInt32(stream, ParticleModelPointerOffset);
+            //StreamUtil.WriteInt32(stream, ParticleModelsOffset);
+            //StreamUtil.WriteInt32(stream, CameraPointerOffset);
+            //StreamUtil.WriteInt32(stream, CamerasOffset);
+            //StreamUtil.WriteInt32(stream, HashOffset);
+            //StreamUtil.WriteInt32(stream, MeshDataOffset);
+
+
+            if (File.Exists(path))
+            {
+                File.Delete(path);
+            }
+            var file = File.Create(path);
+            stream.Position = 0;
+            stream.CopyTo(file);
+            stream.Dispose();
+            file.Close();
+        }
+
         public void ExportModelsPS2(string path)
         {
             //glstHandler.SavePDBModelglTF(path, this);
