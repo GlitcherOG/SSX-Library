@@ -1,13 +1,10 @@
 using SSX_Library.Internal.Utilities.StreamExtensions;
 using System;
-using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Numerics;
 using System.Text;
-using System.Xml.Linq;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace SSXLibrary.FileHandlers.Models.SSX2012
 {
@@ -54,12 +51,10 @@ namespace SSXLibrary.FileHandlers.Models.SSX2012
     // and the unknowns. Keep this reader's behaviour in lockstep with it; if they
     // ever disagree, the Python side is the ground truth until proven otherwise.
     //
-    // Unlike the other handlers here this one parses out of a byte[] rather than
-    // walking a Stream. That is not a style preference: the format is a pointer
-    // graph over the whole file, objects are reached by absolute offset in an
-    // order unrelated to their layout, and several records are read twice from
-    // different directions. Seeking a Stream around to do that would be slower and
-    // much easier to get wrong.
+    // The file is read into Data and parsed through a MemoryStream over it with the
+    // library's stream readers. The format is a pointer graph over the whole file,
+    // objects are reached by absolute offset in an order unrelated to their layout,
+    // so every record seeks to its offset rather than reading front to back.
     public class PobHandler
     {
         public const uint Magic = 0xB8EF44FE;
@@ -152,26 +147,36 @@ namespace SSXLibrary.FileHandlers.Models.SSX2012
         // Pass `length` whenever the stream carries anything past the end of this
         // file. Without it the size is taken to EOF and the trailing bytes are
         // reported by Check() as a mismatch against the header's own size field.
-        public void Load(Stream stream)
+        public void Load(Stream stream, long? length = null)
         {
             Reader.SetDefaultReadMode(SSX_Library.ByteOrder.LittleEndian);
 
+            long size = length ?? (stream.Length - stream.Position);
+            if (size < 20)
+            {
+                throw new InvalidDataException("too short for a .pob header");
+            }
+            byte[] data = stream.ReadBytes((int)size);
+
+            // Pointers are file offsets, so parse from a stream over this file's
+            // bytes alone, which also makes them relative to where the .pob started
+            using var s = new MemoryStream(data, false);
 
             // Everything below parses into locals and is committed to the instance
             // in one go at the end. Load() is public and re-callable on a live
             // handler, so a throw part way through must leave it on its previous
             // file rather than half one file and half another.
-            uint magic = stream.ReadUInt32();
+            uint magic = s.ReadUInt32();
             if (magic != Magic)
             {
                 throw new InvalidDataException($"bad magic 0x{magic:X8}");
             }
 
-            int version = (int)stream.ReadUInt32();
-            int declaredSize = (int)stream.ReadUInt32();
-            int alignment = (int)stream.ReadUInt32();
-            int sectionCount = (int)stream.ReadUInt32();
-            if (sectionCount < 1 || 20 + 4L * sectionCount > stream.Length)
+            int version = (int)s.ReadUInt32();
+            int declaredSize = (int)s.ReadUInt32();
+            int alignment = (int)s.ReadUInt32();
+            int sectionCount = (int)s.ReadUInt32();
+            if (sectionCount < 1 || 20 + 4L * sectionCount > data.Length)
             {
                 throw new InvalidDataException($"section count {sectionCount} does not fit the file");
             }
@@ -179,44 +184,45 @@ namespace SSXLibrary.FileHandlers.Models.SSX2012
             var sections = new List<int>(sectionCount);
             for (int i = 0; i < sectionCount; i++)
             {
-                sections.Add((int)stream.ReadUInt32());
+                sections.Add((int)s.ReadUInt32());
             }
 
             int toc = sections[0];
-            stream.Position = toc;
+            s.Position = toc;
 
-            int tocC0 = (int)stream.ReadUInt32();
-            int typeCount = (int)stream.ReadUInt32();
-            int objectCount = (int)stream.ReadUInt32();
-            int stringBytes = (int)stream.ReadUInt32();
-            int typeTable = (int)stream.ReadUInt32();
-            int objectTable = (int)stream.ReadUInt32();
-            int stringTable = (int)stream.ReadUInt32();
+            int tocC0 = (int)s.ReadUInt32();
+            int typeCount = (int)s.ReadUInt32();
+            int objectCount = (int)s.ReadUInt32();
+            int stringBytes = (int)s.ReadUInt32();
+            int typeTable = (int)s.ReadUInt32();
+            int objectTable = (int)s.ReadUInt32();
+            int stringTable = (int)s.ReadUInt32();
 
             var types = new List<TypeDescStruct>(typeCount);
-            stream.Position = toc + typeTable;
+            s.Position = toc + typeTable;
             for (int i = 0; i < typeCount; i++)
             {
                 types.Add(new TypeDescStruct
                 {
-                    TypeId = (int)stream.ReadUInt32(),
-                    Count = (int)stream.ReadUInt32(),
-                    Offset = (int)stream.ReadUInt32(),
+                    TypeId = (int)s.ReadUInt32(),
+                    Count = (int)s.ReadUInt32(),
+                    Offset = (int)s.ReadUInt32(),
                 });
             }
 
             var objects = new List<ObjectEntryStruct>(objectCount);
-            stream.Position= toc+objectTable;
+            s.Position= toc+objectTable;
             for (int i = 0; i < objectCount; i++)
             {
                 var objectEntry = new ObjectEntryStruct();
 
-                objectEntry.Offset = (int)stream.ReadUInt32();
+                objectEntry.Offset = (int)s.ReadUInt32();
+                int nameOffset = (int)s.ReadUInt32();
 
-                long CurrentPos = stream.Position;
-                stream.Position = toc + stream.ReadUInt32();
-                objectEntry.Name = stream.ReadAsciiNullTerminated();
-                stream.Position = CurrentPos;
+                long CurrentPos = s.Position;
+                s.Position = toc + nameOffset;
+                objectEntry.Name = s.ReadAsciiNullTerminated();
+                s.Position = CurrentPos;
 
                 objects.Add(objectEntry);
             }
@@ -225,18 +231,22 @@ namespace SSXLibrary.FileHandlers.Models.SSX2012
             // corpus (see the reference's docstring) and are the only stable way
             // in, since the type table's order is not.
             int rootOffset = RequireObject(objects, "rwcAggregateNode1");
-            VolumeStruct root = ReadVolume(data, rootOffset);
+            VolumeStruct root = ReadVolume(s, rootOffset);
 
             int arrayOffset = RequireObject(objects, "rwcAggregateNode1_SimpleMappedArray");
-            Vector3 arrayMin = Vec3(data, arrayOffset);
-            Vector3 arrayMax = Vec3(data, arrayOffset + 0x10);
-            int volumeCount = I32(data, arrayOffset + 0x24);
-            int volumeArrayOffset = arrayOffset + I32(data, arrayOffset + 0x30);
+            s.Position = arrayOffset;
+            Vector3 arrayMin = s.ReadVector3();
+            s.Position = arrayOffset + 0x10;
+            Vector3 arrayMax = s.ReadVector3();
+            s.Position = arrayOffset + 0x24;
+            int volumeCount = s.ReadInt32();
+            s.Position = arrayOffset + 0x30;
+            int volumeArrayOffset = arrayOffset + s.ReadInt32();
 
             var volumes = new List<VolumeStruct>(Math.Max(volumeCount, 0));
             for (int i = 0; i < volumeCount; i++)
             {
-                volumes.Add(ReadVolume(data, volumeArrayOffset + VolumeStruct.Size * i));
+                volumes.Add(ReadVolume(s, volumeArrayOffset + VolumeStruct.Size * i));
             }
 
             var meshes = new List<ClusteredMeshStruct>();
@@ -244,7 +254,7 @@ namespace SSXLibrary.FileHandlers.Models.SSX2012
             {
                 if (entry.Name.Contains("ClusteredMesh", StringComparison.Ordinal))
                 {
-                    meshes.Add(ReadClusteredMesh(data, entry.Offset, entry.Name));
+                    meshes.Add(ReadClusteredMesh(s, entry.Offset, entry.Name));
                 }
             }
 
@@ -252,10 +262,20 @@ namespace SSXLibrary.FileHandlers.Models.SSX2012
             int bitTableOffset = RequireObject(objects, "Assembly BitTable");
             int assemblyOffset = RequireObject(objects, "Assembly");
 
+            s.Position = definitionOffset + 0x44;
+            Vector3 inverseInertia = s.ReadVector3();
+            s.Position = definitionOffset + 0x50;
+            float definitionU50 = s.ReadFloat();
+            float definitionU54 = s.ReadFloat();
+            float definitionMass = s.ReadFloat();
+            s.Position = definitionOffset + 0xB0;
+            Vector3 definitionUB0 = s.ReadVector3();
+
             var inertiaFrame = new Vector3[4];
             for (int i = 0; i < 4; i++)
             {
-                inertiaFrame[i] = Vec3(data, definitionOffset + 0x70 + 16 * i);
+                s.Position = definitionOffset + 0x70 + 16 * i;
+                inertiaFrame[i] = s.ReadVector3();
             }
 
             Data = data;
@@ -287,104 +307,117 @@ namespace SSXLibrary.FileHandlers.Models.SSX2012
             DefinitionOffset = definitionOffset;
             BitTableOffset = bitTableOffset;
             AssemblyOffset = assemblyOffset;
-            InverseInertia = Vec3(data, definitionOffset + 0x44);
-            DefinitionU50 = F32(data, definitionOffset + 0x50);
-            DefinitionU54 = F32(data, definitionOffset + 0x54);
-            DefinitionMass = F32(data, definitionOffset + 0x58);
+            InverseInertia = inverseInertia;
+            DefinitionU50 = definitionU50;
+            DefinitionU54 = definitionU54;
+            DefinitionMass = definitionMass;
             InertiaFrame = inertiaFrame;
-            DefinitionU_B0 = Vec3(data, definitionOffset + 0xB0);
+            DefinitionU_B0 = definitionUB0;
         }
 
         // -- record readers ---------------------------------------------------
 
         private static VolumeStruct ReadVolume(Stream d, int off)
         {
-            d.Position = off;
             var v = new VolumeStruct
             {
                 Offset = off,
                 Rows = new Vector3[4],
-                VolumeType = I32(d, off + 0x40),
-                Fatness = F32(d, off + 0x50),
-                GroupId = I32(d, off + 0x54),
-                SurfaceId = I32(d, off + 0x58),
-                Flags = I32(d, off + 0x5C),
             };
+            d.Position = off;
             for (int i = 0; i < 4; i++)
             {
-                v.Rows[i] = Vec3(d, off + 16 * i);
+                v.Rows[i] = d.ReadVector3();
+                d.Position += 4;
             }
+            d.Position = off + 0x40;
+            v.VolumeType = d.ReadInt32();
+            d.Position = off + 0x50;
+            v.Fatness = d.ReadFloat();
+            v.GroupId = d.ReadInt32();
+            v.SurfaceId = d.ReadInt32();
+            v.Flags = d.ReadInt32();
 
             // +0x44 is a union: an aggregate pointer for type 6, the first of two
             // primitive parameters for type 5. Reading both would put 0xDDDDDDDD
             // in one of them, so only the live arm is decoded.
+            d.Position = off + 0x44;
             if (v.VolumeType == VolumeAggregate)
             {
-                v.Aggregate = I32(d, off + 0x44);
+                v.Aggregate = d.ReadInt32();
             }
             else if (v.VolumeType == VolumePrimitive2)
             {
-                v.HalfHeight = F32(d, off + 0x44);
-                v.Radius = F32(d, off + 0x48);
+                v.HalfHeight = d.ReadFloat();
+                v.Radius = d.ReadFloat();
             }
             return v;
         }
 
-        private static ClusteredMeshStruct ReadClusteredMesh(byte[] d, int off, string name)
+        private static ClusteredMeshStruct ReadClusteredMesh(Stream d, int off, string name)
         {
             var m = new ClusteredMeshStruct
             {
                 Offset = off,
                 Name = name,
-                // The EXACT float bbox. The quantised cluster vertices can exceed
-                // it by up to one granularity (0.04) and never more -- measured
-                // max 0.0399 -- so Check() tests them against bbox +/- granularity.
-                BboxMin = Vec3(d, off),
-                BboxMax = Vec3(d, off + 0x10),
-                TagBits = I32(d, off + 0x24),
-                UnitCount = I32(d, off + 0x28),
-                KdTreeOffset = I32(d, off + 0x30),
-                ClusterTableOffset = I32(d, off + 0x34),
-                Granularity = F32(d, off + 0x38),
-                ClusterFlags = U16(d, off + 0x3C),
-                GroupIdSize = d[off + 0x3E],
-                SurfaceIdSize = d[off + 0x3F],
-                ClusterCount = I32(d, off + 0x40),
-                Size = I32(d, off + 0x50),
-                U58 = d[off + 0x58],
-                ClusterBits = I32(d, off + 0x5C),
             };
+            // The EXACT float bbox. The quantised cluster vertices can exceed
+            // it by up to one granularity (0.04) and never more -- measured
+            // max 0.0399 -- so Check() tests them against bbox +/- granularity.
+            d.Position = off;
+            m.BboxMin = d.ReadVector3();
+            d.Position = off + 0x10;
+            m.BboxMax = d.ReadVector3();
+            d.Position = off + 0x24;
+            m.TagBits = d.ReadInt32();
+            m.UnitCount = d.ReadInt32();
+            d.Position = off + 0x30;
+            m.KdTreeOffset = d.ReadInt32();
+            m.ClusterTableOffset = d.ReadInt32();
+            m.Granularity = d.ReadFloat();
+            m.ClusterFlags = d.ReadUInt16();
+            m.GroupIdSize = (byte)d.ReadByte();
+            m.SurfaceIdSize = (byte)d.ReadByte();
+            m.ClusterCount = d.ReadInt32();
+            d.Position = off + 0x50;
+            m.Size = d.ReadInt32();
+            d.Position = off + 0x58;
+            m.U58 = (byte)d.ReadByte();
+            d.Position = off + 0x5C;
+            m.ClusterBits = d.ReadInt32();
 
-            int k = off + 0x60;
-            m.KdNodesOffset = U32(d, k);
-            m.KdBranchCount = I32(d, k + 4);
-            m.KdEntryCount = I32(d, k + 8);
-            m.KdBboxMin = Vec3(d, k + 0x10);
-            m.KdBboxMax = Vec3(d, k + 0x20);
+            m.KdNodesOffset = d.ReadUInt32();
+            m.KdBranchCount = d.ReadInt32();
+            m.KdEntryCount = d.ReadInt32();
+            d.Position = off + 0x60 + 0x10;
+            m.KdBboxMin = d.ReadVector3();
+            d.Position = off + 0x60 + 0x20;
+            m.KdBboxMax = d.ReadVector3();
 
             m.BranchNodes = new List<BranchNodeStruct>(Math.Max(m.KdBranchCount, 0));
+            d.Position = off + 0xA0;
             for (int i = 0; i < m.KdBranchCount; i++)
             {
-                int o = off + 0xA0 + 32 * i;
                 m.BranchNodes.Add(new BranchNodeStruct
                 {
-                    Parent = I32(d, o),
-                    Axis = I32(d, o + 4),
-                    Content0 = U32(d, o + 8),
-                    Index0 = U32(d, o + 12),
-                    Content1 = U32(d, o + 16),
-                    Index1 = U32(d, o + 20),
-                    Extent0 = F32(d, o + 24),
-                    Extent1 = F32(d, o + 28),
+                    Parent = d.ReadInt32(),
+                    Axis = d.ReadInt32(),
+                    Content0 = d.ReadUInt32(),
+                    Index0 = d.ReadUInt32(),
+                    Content1 = d.ReadUInt32(),
+                    Index1 = d.ReadUInt32(),
+                    Extent0 = d.ReadFloat(),
+                    Extent1 = d.ReadFloat(),
                 });
             }
 
             int ct = off + m.ClusterTableOffset;
             m.ClusterTable = ct;
             m.ClusterOffsets = new List<int>(Math.Max(m.ClusterCount, 0));
+            d.Position = ct;
             for (int i = 0; i < m.ClusterCount; i++)
             {
-                m.ClusterOffsets.Add(I32(d, ct + 4 * i));
+                m.ClusterOffsets.Add(d.ReadInt32());
             }
 
             m.Clusters = new List<ClusterStruct>(m.ClusterOffsets.Count);
@@ -396,19 +429,20 @@ namespace SSXLibrary.FileHandlers.Models.SSX2012
             return m;
         }
 
-        private static ClusterStruct ReadCluster(byte[] d, int off, float granularity)
+        private static ClusterStruct ReadCluster(Stream d, int off, float granularity)
         {
+            d.Position = off;
             var c = new ClusterStruct
             {
                 Offset = off,
-                UnitCount = U16(d, off),
-                UnitDataSize = U16(d, off + 0x02),
-                UnitDataStart = U16(d, off + 0x04),
-                NormalStart = U16(d, off + 0x06),
-                TotalSize = U16(d, off + 0x08),
-                VertexCount = d[off + 0x0A],
-                NormalCount = d[off + 0x0B],
-                Compression = d[off + 0x0C],
+                UnitCount = d.ReadUInt16(),
+                UnitDataSize = d.ReadUInt16(),
+                UnitDataStart = d.ReadUInt16(),
+                NormalStart = d.ReadUInt16(),
+                TotalSize = d.ReadUInt16(),
+                VertexCount = (byte)d.ReadByte(),
+                NormalCount = (byte)d.ReadByte(),
+                Compression = (byte)d.ReadByte(),
             };
             if (c.Compression != 1)
             {
@@ -416,21 +450,21 @@ namespace SSXLibrary.FileHandlers.Models.SSX2012
                     $"cluster @0x{off:x}: compression mode {c.Compression} not seen on the disc");
             }
 
-            int ox = I32(d, off + 0x10);
-            int oy = I32(d, off + 0x14);
-            int oz = I32(d, off + 0x18);
+            d.Position = off + 0x10;
+            int ox = d.ReadInt32();
+            int oy = d.ReadInt32();
+            int oz = d.ReadInt32();
             c.Origin = new QuantisedVertex { X = ox, Y = oy, Z = oz };
 
             c.QuantisedVertices = new List<QuantisedVertex>(c.VertexCount);
             c.Vertices = new List<Vector3>(c.VertexCount);
             for (int i = 0; i < c.VertexCount; i++)
             {
-                int o = off + 0x1C + 6 * i;
                 var q = new QuantisedVertex
                 {
-                    X = ox + U16(d, o),
-                    Y = oy + U16(d, o + 2),
-                    Z = oz + U16(d, o + 4),
+                    X = ox + d.ReadUInt16(),
+                    Y = oy + d.ReadUInt16(),
+                    Z = oz + d.ReadUInt16(),
                 };
                 c.QuantisedVertices.Add(q);
                 // double, then narrowed: the reference multiplies in double, and
@@ -447,10 +481,11 @@ namespace SSXLibrary.FileHandlers.Models.SSX2012
             // vertices are followed by 0xDD padding when they do not fill it.
             c.UnitOffset = off + 16 + 16 * c.UnitDataStart;
             c.Units = new List<UnitStruct>(c.UnitCount);
-            int q2 = c.UnitOffset;
+            d.Position = c.UnitOffset;
             for (int i = 0; i < c.UnitCount; i++)
             {
-                byte t = d[q2];
+                int unitStart = (int)d.Position;
+                byte t = (byte)d.ReadByte();
                 int sides = SidesOf(t);
                 if (sides == 0)
                 {
@@ -459,26 +494,19 @@ namespace SSXLibrary.FileHandlers.Models.SSX2012
 
                 var u = new UnitStruct
                 {
-                    ByteOffset = q2 - c.UnitOffset,
+                    ByteOffset = unitStart - c.UnitOffset,
                     TypeByte = t,
-                    Indices = new byte[sides],
+                    Indices = d.ReadBytes(sides),
                 };
-                Array.Copy(d, q2 + 1, u.Indices, 0, sides);
-                q2 += 1 + sides;
 
                 // Bit 0x20 is set on every unit on the disc, so the per-edge byte
                 // array is always present in practice -- but it is a flag, so it
                 // is read as one.
-                u.EdgeBytes = (t & 0x20) != 0 ? new byte[sides] : Array.Empty<byte>();
-                if (u.EdgeBytes.Length > 0)
-                {
-                    Array.Copy(d, q2, u.EdgeBytes, 0, sides);
-                }
-                q2 += u.EdgeBytes.Length;
+                u.EdgeBytes = (t & 0x20) != 0 ? d.ReadBytes(sides) : Array.Empty<byte>();
 
                 c.Units.Add(u);
             }
-            c.UnitBytes = q2 - c.UnitOffset;
+            c.UnitBytes = (int)d.Position - c.UnitOffset;
             return c;
         }
 
@@ -818,34 +846,39 @@ namespace SSXLibrary.FileHandlers.Models.SSX2012
             }
 
             // the trailing records
-            Want(U32(d, BitTableOffset) == 1 && U32(d, BitTableOffset + 4) == 1
-                 && U32(d, BitTableOffset + 8) == 1 && U32(d, BitTableOffset + 12) == 0,
+            Reader.SetDefaultReadMode(SSX_Library.ByteOrder.LittleEndian);
+            using var ds = new MemoryStream(d, false);
+            uint U32At(int offset) { ds.Position = offset; return ds.ReadUInt32(); }
+            int I32At(int offset) { ds.Position = offset; return ds.ReadInt32(); }
+            Want(U32At(BitTableOffset) == 1 && U32At(BitTableOffset + 4) == 1
+                 && U32At(BitTableOffset + 8) == 1 && U32At(BitTableOffset + 12) == 0,
                  "Assembly BitTable is not (1,1,1,0)");
-            Want(U32(d, AssemblyOffset + 0x18) == 0xDEADBEEF, "Assembly sentinel is not 0xDEADBEEF");
-            Want(I32(d, AssemblyOffset + 0x0C) == 144 && I32(d, AssemblyOffset + 0x10) == 144,
+            Want(U32At(AssemblyOffset + 0x18) == 0xDEADBEEF, "Assembly sentinel is not 0xDEADBEEF");
+            Want(I32At(AssemblyOffset + 0x0C) == 144 && I32At(AssemblyOffset + 0x10) == 144,
                  "Assembly self-size != 144");
             // +0x08 and Assembly Definition +0x00 are CONSTANTS, not pointers. They
             // coincide with the TOC offset on the 233 files whose TOC sits at 0x30,
             // and the 22 two-mesh files refute reading them as pointers: those put
             // the TOC at 0x40 and these stay 48/64.
-            Want(I32(d, AssemblyOffset + 0x08) == 48, "Assembly +0x08 != 48");
-            Want(I32(d, AssemblyOffset + 0x04) == DefinitionOffset,
+            Want(I32At(AssemblyOffset + 0x08) == 48, "Assembly +0x08 != 48");
+            Want(I32At(AssemblyOffset + 0x04) == DefinitionOffset,
                  "Assembly does not point at the Assembly Definition");
-            Want(I32(d, AssemblyOffset) == BitTableOffset, "Assembly does not point at the BitTable");
-            Want(I32(d, AssemblyOffset + 0x70) == Root.Offset,
+            Want(I32At(AssemblyOffset) == BitTableOffset, "Assembly does not point at the BitTable");
+            Want(I32At(AssemblyOffset + 0x70) == Root.Offset,
                  "Assembly +0x70 does not point at the root volume");
-            Want(I32(d, AssemblyOffset + 0x78) == DefinitionOffset + 0x44,
+            Want(I32At(AssemblyOffset + 0x78) == DefinitionOffset + 0x44,
                  "Assembly +0x78 does not point at the inverse inertia");
-            Want(I32(d, AssemblyOffset + 0x80) == DefinitionOffset + 0xB0,
+            Want(I32At(AssemblyOffset + 0x80) == DefinitionOffset + 0xB0,
                  "Assembly +0x80 does not point at Assembly Definition +0xb0");
-            Want(I32(d, DefinitionOffset) == 64, "Assembly Definition +0x00 != 64");
-            Vector3 mat = Vec3(d, DefinitionOffset + 0xB0);
+            Want(I32At(DefinitionOffset) == 64, "Assembly Definition +0x00 != 64");
+            ds.Position = DefinitionOffset + 0xB0;
+            Vector3 mat = ds.ReadVector3();
             Want(Math.Abs(mat.X - 0.2f) < 1e-6 && Math.Abs(mat.Y - 0.2f) < 1e-6
                  && Math.Abs(mat.Z - 0.1f) < 1e-6, "Assembly Definition +0xb0 != (0.2, 0.2, 0.1)");
-            Want(U32(d, DefinitionOffset + 0x54) == 0x749DC5AE, "Assembly Definition +0x54 != 1e32");
-            Want(I32(d, DefinitionOffset + 0x40) == Root.Offset,
+            Want(U32At(DefinitionOffset + 0x54) == 0x749DC5AE, "Assembly Definition +0x54 != 1e32");
+            Want(I32At(DefinitionOffset + 0x40) == Root.Offset,
                  "Assembly Definition does not point at the root volume");
-            Want(I32(d, DefinitionOffset + 0x28) == BitTableOffset,
+            Want(I32At(DefinitionOffset + 0x28) == BitTableOffset,
                  "Assembly Definition does not point at the BitTable");
             Want(InverseInertia.X > 0 && InverseInertia.Y > 0 && InverseInertia.Z > 0,
                  FormattableString.Invariant(
@@ -990,7 +1023,7 @@ namespace SSXLibrary.FileHandlers.Models.SSX2012
                 maxUnitDataSize = Math.Max(maxUnitDataSize, c.UnitDataSize);
                 Want(c.TotalSize == 16 + 16 * c.UnitDataStart + c.UnitDataSize,
                      $"{m.Name} cluster {ci} totalSize {c.TotalSize} != 16+{16 * c.UnitDataStart}+{c.UnitDataSize}");
-                Want(Align16(c.VertexBytes) == 16 * c.UnitDataStart,
+                Want((c.VertexBytes + 15) / 16 * 16 == 16 * c.UnitDataStart,
                      $"{m.Name} cluster {ci} vertex block {c.VertexBytes} does not fill {16 * c.UnitDataStart} bytes");
                 Want(c.NormalCount == 0 && c.NormalStart == c.UnitDataStart,
                      $"{m.Name} cluster {ci} declares normals");
@@ -1247,31 +1280,6 @@ namespace SSXLibrary.FileHandlers.Models.SSX2012
                   .Append(p.Y.ToString("F6", CultureInfo.InvariantCulture)).Append(' ')
                   .Append(p.Z.ToString("F6", CultureInfo.InvariantCulture)).Append('\n');
         }
-
-        // -- primitive reads --------------------------------------------------
-
-        // Explicit little-endian rather than BitConverter, which is host-order:
-        // correct on x64 and ARM64 today, silently wrong on a big-endian host.
-        //private static uint U32(byte[] d, int o) => BinaryPrimitives.ReadUInt32LittleEndian(d.AsSpan(o, 4));
-
-        //private static int I32(byte[] d, int o) => BinaryPrimitives.ReadInt32LittleEndian(d.AsSpan(o, 4));
-
-        //private static int U16(byte[] d, int o) => BinaryPrimitives.ReadUInt16LittleEndian(d.AsSpan(o, 2));
-
-        //private static float F32(byte[] d, int o) => BitConverter.UInt32BitsToSingle(U32(d, o));
-
-        //private static Vector3 Vec3(byte[] d, int o) => new Vector3(F32(d, o), F32(d, o + 4), F32(d, o + 8));
-
-        //private static string CString(byte[] d, int o)
-        //{
-        //    int e = o;
-        //    while (e < d.Length && d[e] != 0) { e++; }
-        //    return Encoding.ASCII.GetString(d, o, e - o);
-        //}
-
-        //// -- small helpers ----------------------------------------------------
-
-        //private static int Align16(int x) => (x + 15) / 16 * 16;
 
         // Python's int.bit_length(): 0 for 0, else the position of the high bit.
         private static int BitLength(int x)
