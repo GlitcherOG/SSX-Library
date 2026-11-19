@@ -3042,7 +3042,7 @@ namespace SSXLibrary.FileHandlers.LevelFiles.Tricky
             StreamUtil.WriteInt32(stream, NumTextures);
             StreamUtil.WriteInt32(stream, Cameras.Count);
             StreamUtil.WriteInt32(stream, 0);
-            StreamUtil.WriteInt32(stream, NormalsOffset != 0 ? normals.Count : 0);
+            StreamUtil.WriteInt32(stream, normals.Count);
 
             StreamUtil.WriteInt32(stream, 0);
             StreamUtil.WriteInt32(stream, PatchOffset);
